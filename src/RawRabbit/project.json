@@ -1,0 +1,23 @@
+﻿{
+	"version": "1.0.0-*",
+
+	"dependencies": {
+		"RabbitMQ.Client": "3.5.6"
+	},
+
+	"commands": {
+	},
+
+	"frameworks": {
+		"dnx451": { }
+	},
+
+	"publishExclude": [
+		"**.xproj",
+		"**.user",
+		"**.vspscc"
+	],
+
+	"exclude": [
+	]
+}
