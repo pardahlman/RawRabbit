@@ -8,11 +8,11 @@ namespace RawRabbit.Core.Context
 		private readonly Func<Task<string>> _asyncSessionFunk;
 		private readonly Func<string> _sessionFunc;
 
-		//public DefaultContextProvider(Func<Task<string> asyncSessionFunk, Func<string> sessionFunc )
-		//{
-		//	_asyncSessionFunk = asyncSessionFunk;
-		//	_sessionFunc = sessionFunc;
-		//}
+		public DefaultContextProvider(Func<Task<string>> asyncSessionFunk, Func<string> sessionFunc)
+		{
+			_asyncSessionFunk = asyncSessionFunk;
+			_sessionFunc = sessionFunc;
+		}
 
 		public string GetSessionId()
 		{

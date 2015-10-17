@@ -18,7 +18,20 @@ namespace RawRabbit.IntegrationTests
 			{
 				messageHandlerCalled = true;
 				return Task.FromResult(true);
-			});
+			}, configuration =>
+				configuration
+					.WithExchange(exchange =>
+						exchange
+							.WithName("my_exchange")
+							.WithAutoDelete()
+							.WithType("direct")
+						)
+					.WithQueue(queue =>
+						queue
+							.WithName("my_queue")
+							.WithRoutingKey("hello")
+					)
+			);
 
 			/* Test */
 			await sender.PublishAsync(new BasicMessage());
