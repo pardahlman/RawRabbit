@@ -9,7 +9,7 @@ namespace RawRabbit.Core.Client
 {
 	public interface IBusClient
 	{
-		Task SubscribeAsync<T>(Func<T, MessageInformation, Task> subscribeMethod, Action<ISubscriptionConfigurationBuilder> configuration = null)
+		IDisposable SubscribeAsync<T>(Func<T, MessageInformation, Task> subscribeMethod, Action<ISubscriptionConfigurationBuilder> configuration = null)
 			where T : MessageBase;
 
 		Task PublishAsync<T>(T message, Action<IPublishConfigurationBuilder> configuration = null)

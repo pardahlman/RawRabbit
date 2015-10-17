@@ -15,9 +15,27 @@
 			return this;
 		}
 
-		public IQueueConfigurationBuilder WithRoutingKey(string routingKey)
+		public IQueueConfigurationBuilder WithAutoDelete(bool autoDelete = true)
 		{
-			Configuration.RoutingKey = routingKey;
+			Configuration.AutoDelete = autoDelete;
+			return this;
+		}
+
+		public IQueueConfigurationBuilder WithDurability(bool durable = true)
+		{
+			Configuration.Durable = durable;
+			return this;
+		}
+
+		public IQueueConfigurationBuilder WithExclusivity(bool exclusive = true)
+		{
+			Configuration.Exclusive = exclusive;
+			return this;
+		}
+
+		public IQueueConfigurationBuilder WithArgument(string key, object value)
+		{
+			Configuration.Arguments.Add(key, value);
 			return this;
 		}
 	}

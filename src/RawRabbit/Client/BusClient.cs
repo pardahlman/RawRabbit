@@ -15,7 +15,6 @@ namespace RawRabbit.Client
 		private readonly IRawPublisher _publisher;
 
 		public BusClient(
-			RawRabbitConfiguration configuration,
 			IConfigurationEvaluator configEval,
 			IRawSubscriber subscriber,
 			IRawPublisher publisher)
@@ -25,10 +24,11 @@ namespace RawRabbit.Client
 			_publisher = publisher;
 		}
 
-		public Task SubscribeAsync<T>(Func<T, MessageInformation, Task> subscribeMethod, Action<ISubscriptionConfigurationBuilder> configuration = null) where T : MessageBase
+		public IDisposable SubscribeAsync<T>(Func<T, MessageInformation, Task> subscribeMethod, Action<ISubscriptionConfigurationBuilder> configuration = null) where T : MessageBase
 		{
 			var config = _configEval.GetConfiguration<T>(configuration);
-			return _subscriber.SubscribeAsync(subscribeMethod, config);
+			_subscriber.SubscribeAsync(subscribeMethod, config);
+			return null;
 		}
 
 		public Task PublishAsync<T>(T message, Action<IPublishConfigurationBuilder> configuration = null) where T : MessageBase

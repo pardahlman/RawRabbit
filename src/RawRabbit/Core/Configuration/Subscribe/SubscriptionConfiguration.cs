@@ -5,13 +5,18 @@ namespace RawRabbit.Core.Configuration.Subscribe
 {
 	public class SubscriptionConfiguration
 	{
-		public ExchangeConfiguration ExchangeConfiguration { get; set; }
-		public QueueConfiguration QueueConfiguration { get; set; }
+		public ExchangeConfiguration Exchange { get; set; }
+		public QueueConfiguration Queue { get; set; }
+		public string RoutingKey { get; set; }
+		public bool NoAck { get; set; }
+		public ushort PrefetchCount { get; set; }
 
 		public static SubscriptionConfiguration Default => new SubscriptionConfiguration
 		{
-			QueueConfiguration = QueueConfiguration.Default,
-			ExchangeConfiguration = ExchangeConfiguration.Default
+			Queue = QueueConfiguration.Default,
+			Exchange = ExchangeConfiguration.Default
 		};
+
+		
 	}
 }

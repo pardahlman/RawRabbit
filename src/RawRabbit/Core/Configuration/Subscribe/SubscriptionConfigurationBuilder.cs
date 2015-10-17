@@ -8,18 +8,43 @@ namespace RawRabbit.Core.Configuration.Subscribe
 	{
 		public SubscriptionConfiguration Configuration => new SubscriptionConfiguration
 		{
-			QueueConfiguration = _queueBuilder.Configuration,
-			ExchangeConfiguration = _exchangeBuilder.Configuration
+			Queue = _queueBuilder.Configuration,
+			Exchange = _exchangeBuilder.Configuration,
+			RoutingKey = _routingKey ?? _queueBuilder.Configuration.QueueName,
+			NoAck = _noAck,
+			PrefetchCount = _prefetchCount == 0 ? (ushort)50 : _prefetchCount
 		};
 
 		private readonly ExchangeConfigurationBuilder _exchangeBuilder;
 		private readonly QueueConfigurationBuilder _queueBuilder;
+		private string _routingKey;
+		private ushort _prefetchCount;
+		private bool _noAck;
 
 		public SubscriptionConfigurationBuilder()
 		{
 			_exchangeBuilder = new ExchangeConfigurationBuilder();
 			_queueBuilder = new QueueConfigurationBuilder();
 		}
+
+		public ISubscriptionConfigurationBuilder WithRoutingKey(string routingKey)
+		{
+			_routingKey = routingKey;
+			return this;
+		}
+
+		public ISubscriptionConfigurationBuilder WithPrefetchCount(ushort prefetchCount)
+		{
+			_prefetchCount = prefetchCount;
+			return this;
+		}
+
+		public ISubscriptionConfigurationBuilder WithNoAck(bool noAck = true)
+		{
+			_noAck = noAck;
+			return this;
+		}
+
 		public ISubscriptionConfigurationBuilder WithExchange(Action<IExchangeConfigurationBuilder> exchange)
 		{
 			exchange(_exchangeBuilder);

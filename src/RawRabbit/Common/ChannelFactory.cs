@@ -12,8 +12,8 @@ namespace RawRabbit.Common
 	{
 		private readonly IConnection _connection;
 		private IModel _channel;
-
-		public ChannelFactory(IConnection connection)
+	
+			public ChannelFactory(IConnection connection)
 		{
 			_connection = connection;
 		}
