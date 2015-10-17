@@ -1,0 +1,22 @@
+﻿{
+  "version": "1.0.0-*",
+
+	"dependencies": {
+			"RawRabbit": "",
+		"xunit": "2.1.0",
+		"xunit.runner.dnx": "2.1.0-beta5a-build188"
+	},
+
+  "commands": {
+  },
+
+  "frameworks": {
+    "dnx451": { }
+  },
+
+  "publishExclude": [
+  ],
+
+  "exclude": [
+  ]
+}
