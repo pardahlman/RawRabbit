@@ -6,9 +6,9 @@ using Xunit;
 
 namespace RawRabbit.IntegrationTests.RabbitMqTutorial
 {
-	public class PublishSubscribeAsyncTests : IntegrationTestBase
+	public class HelloWorldTest : IntegrationTestBase
 	{
-		public PublishSubscribeAsyncTests()
+		public HelloWorldTest()
 		{
 			TestChannel.QueueDelete("hello");
 		}
