@@ -2,7 +2,7 @@
 using RawRabbit.Common.Serialization;
 using RawRabbit.Core.Configuration.Publish;
 
-namespace RawRabbit.Common
+namespace RawRabbit.Common.Operations
 {
 	public interface IPublisher
 	{

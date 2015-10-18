@@ -2,7 +2,7 @@
 using RawRabbit.Core.Configuration.Exchange;
 using RawRabbit.Core.Configuration.Queue;
 
-namespace RawRabbit.Common
+namespace RawRabbit.Common.Operations
 {
 	public abstract class OperatorBase
 	{

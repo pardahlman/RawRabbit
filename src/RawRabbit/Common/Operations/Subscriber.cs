@@ -6,7 +6,7 @@ using RawRabbit.Core.Configuration.Exchange;
 using RawRabbit.Core.Configuration.Subscribe;
 using RawRabbit.Core.Message;
 
-namespace RawRabbit.Common
+namespace RawRabbit.Common.Operations
 {
 	public interface ISubscriber
 	{
@@ -46,12 +46,15 @@ namespace RawRabbit.Common
 				consumer.Received += (model, ea) =>
 				{
 					Task.Factory
-						.StartNew(() => _serializer.Deserialize<T>(ea.Body))
+						.StartNew(() =>
+							{
+								return _serializer.Deserialize<T>(ea.Body);
+							})
 						.ContinueWith(t =>
 							{
 								var subscribeTask = Task.Factory.StartNew(() => subscribeMethod(t.Result, null));
 								var ackTask = BasicAckAsync(ea.DeliveryTag);
-								Task.WhenAll(subscribeTask, ackTask);
+								return Task.WhenAll(subscribeTask, ackTask);
 							});
 				};
 
@@ -69,10 +72,10 @@ namespace RawRabbit.Common
 				_channelFactory
 					.GetChannel()
 					.BasicAck(
-					deliveryTag: deliveryTag,
-					multiple: false
-				)
-			);
+						deliveryTag: deliveryTag,
+						multiple: false
+					)
+				);
 		}
 
 		private Task BindQueueAsync(SubscriptionConfiguration config)
