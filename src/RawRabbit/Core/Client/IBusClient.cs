@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using RawRabbit.Core.Configuration.Publish;
+using RawRabbit.Core.Configuration.Respond;
 using RawRabbit.Core.Configuration.Subscribe;
 using RawRabbit.Core.Message;
 
@@ -13,5 +14,11 @@ namespace RawRabbit.Core.Client
 
 		Task PublishAsync<T>(T message, Action<IPublishConfigurationBuilder> configuration = null)
 			where T : MessageBase;
+
+		Task RespondAsync<TRequest, TResponse>(
+			Func<TRequest, MessageInformation, TResponse> onMessage,
+			Action<IResponderConfigurationBuilder> configuration = null)
+				where TRequest : MessageBase
+				where TResponse : MessageBase;
 	}
 }

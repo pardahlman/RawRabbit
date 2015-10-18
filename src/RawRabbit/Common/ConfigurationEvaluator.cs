@@ -1,6 +1,7 @@
 ﻿using System;
 using RawRabbit.Common.Conventions;
 using RawRabbit.Core.Configuration.Publish;
+using RawRabbit.Core.Configuration.Respond;
 using RawRabbit.Core.Configuration.Subscribe;
 using RawRabbit.Core.Message;
 
@@ -10,6 +11,7 @@ namespace RawRabbit.Common
 	{
 		SubscriptionConfiguration GetConfiguration<T>(Action<ISubscriptionConfigurationBuilder> configuration = null) where T : MessageBase;
 		PublishConfiguration GetConfiguration<T>(Action<IPublishConfigurationBuilder> configuration) where T : MessageBase;
+		ResponderConfiguration GetConfiguration<T>(Action<IResponderConfigurationBuilder> configuration) where T : MessageBase;
 	}
 
 	public class ConfigurationEvaluator : IConfigurationEvaluator
@@ -39,6 +41,16 @@ namespace RawRabbit.Common
 			var defaultExchange = _exchangeConventions.CreateDefaultConfiguration<T>();
 
 			var builder = new PublishConfigurationBuilder(defaultQueue, defaultExchange);
+			configuration?.Invoke(builder);
+			return builder.Configuration;
+		}
+
+		public ResponderConfiguration GetConfiguration<T>(Action<IResponderConfigurationBuilder> configuration) where T : MessageBase
+		{
+			var defaultQueue = _queueConventions.CreateQueueConfiguration<T>();
+			var defaultExchange = _exchangeConventions.CreateDefaultConfiguration<T>();
+			
+			var builder = new ResponderConfigurationBuilder(defaultQueue, defaultExchange);
 			configuration?.Invoke(builder);
 			return builder.Configuration;
 		}

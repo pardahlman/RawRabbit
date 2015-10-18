@@ -17,7 +17,8 @@ namespace RawRabbit.Client
 			return new BusClient(
 				new ConfigurationEvaluator(new QueueConventions(), new ExchangeConventions()),
 				new Subscriber(channelFactory, serializer),
-				new Publisher(channelFactory, serializer)
+				new Publisher(channelFactory, serializer),
+				new Responder()
 			);
 		}
 	}
