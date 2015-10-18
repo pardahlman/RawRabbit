@@ -13,7 +13,7 @@ namespace RawRabbit.IntegrationTests.RabbitMqTutorial
 			TestChannel.QueueDelete("hello");
 		}
 
-		public override void Dispose()
+		public override void Dispose() 
 		{
 			TestChannel.QueueDelete("hello");
 			base.Dispose();

@@ -1,4 +1,5 @@
 ﻿using System;
+using RawRabbit.Core.Configuration.Exchange;
 using RawRabbit.Core.Configuration.Queue;
 
 namespace RawRabbit.Core.Configuration.Subscribe
