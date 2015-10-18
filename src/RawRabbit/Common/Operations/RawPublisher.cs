@@ -52,9 +52,7 @@ namespace RawRabbit.Common
 			{
 				return Task.FromResult(new byte[0]);
 			}
-			return Task.Factory.StartNew(() =>
-				_serializer.Serialize(message)
-			);
+			return Task.Factory.StartNew(() => _serializer.Serialize(message));
 		}
 	}
 }
