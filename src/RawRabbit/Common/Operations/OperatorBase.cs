@@ -1,10 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using RawRabbit.Core.Configuration.Exchange;
 using RawRabbit.Core.Configuration.Queue;
 
 namespace RawRabbit.Common.Operations
 {
-	public abstract class OperatorBase
+	public abstract class OperatorBase : IDisposable
 	{
 		private readonly IChannelFactory _channelFactory;
 
@@ -42,6 +43,11 @@ namespace RawRabbit.Common.Operations
 						arguments: config.Arguments
 					)
 				);
+		}
+
+		public virtual void Dispose()
+		{
+			_channelFactory?.Dispose();
 		}
 	}
 }
