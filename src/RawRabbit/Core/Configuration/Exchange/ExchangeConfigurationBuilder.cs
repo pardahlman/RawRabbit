@@ -38,5 +38,11 @@
 			Configuration.Arguments.Add(name, value);
 			return this;
 		}
+
+		public IExchangeConfigurationBuilder AssumeInitialized(bool asumption = true)
+		{
+			Configuration.AssumeInitialized = asumption;
+			return this;
+		}
 	}
 }

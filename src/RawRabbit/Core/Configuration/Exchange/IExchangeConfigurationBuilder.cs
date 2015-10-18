@@ -7,5 +7,6 @@
 		IExchangeConfigurationBuilder AsDurable(bool durable = true);
 		IExchangeConfigurationBuilder WithAutoDelete(bool autoDelete= true);
 		IExchangeConfigurationBuilder WithArgument(string name, string value);
+		IExchangeConfigurationBuilder AssumeInitialized(bool asumption = true);
 	}
 }

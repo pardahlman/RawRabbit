@@ -9,6 +9,7 @@ namespace RawRabbit.Core.Configuration.Exchange
 		public bool Durable { get; set; }
 		public bool AutoDelete { get; set; }
 		public Dictionary<string,string> Arguments { get; set; }
+		public bool AssumeInitialized { get; set; }
 
 		public ExchangeConfiguration()
 		{
@@ -20,5 +21,6 @@ namespace RawRabbit.Core.Configuration.Exchange
 			ExchangeName = "",
 			ExchangeType = RabbitMQ.Client.ExchangeType.Direct
 		};
+
 	}
 }

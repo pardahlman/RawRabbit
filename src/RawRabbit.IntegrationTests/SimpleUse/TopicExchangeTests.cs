@@ -49,11 +49,11 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			}, cfg => cfg
 				.WithQueue(q => q.WithName("second.topic.queue"))
 				.WithRoutingKey("*.topic.queue")
-				.WithExchange(e => e.WithType(ExchangeType.Topic)));
+				.WithExchange(e => e.AssumeInitialized()));
 
 			/* Test */
 			await publisher.PublishAsync(new BasicMessage(), cfg => cfg
-				.WithExchange(exchange => exchange.WithType(ExchangeType.Topic))
+				.WithExchange(exchange => exchange.AssumeInitialized())
 				.WithRoutingKey("this.topic.queue"));
 			Task.WaitAll(firstMsgTcs.Task, secondMsgTcs.Task);
 

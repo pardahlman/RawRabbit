@@ -16,7 +16,7 @@ namespace RawRabbit.Common.Operations
 		
 		protected Task DeclareExchangeAsync(ExchangeConfiguration config)
 		{
-			if (config.IsDefaultExchange())
+			if (config.IsDefaultExchange() || config.AssumeInitialized)
 			{
 				return Task.FromResult(true);
 			}
