@@ -2,6 +2,7 @@
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RawRabbit.Common.Serialization;
 using RawRabbit.Core.Configuration.Exchange;
@@ -15,12 +16,13 @@ namespace RawRabbit.Common
 		Task SubscribeAsync<T>(Func<T, MessageInformation, Task> subscribeMethod, SubscriptionConfiguration config) where T : MessageBase;
 	}
 
-	public class RawSubscriber : IRawSubscriber
+	public class RawSubscriber : RawOperatorBase, IRawSubscriber
 	{
 		private readonly IChannelFactory _channelFactory;
 		private readonly IMessageSerializer _serializer;
 
 		public RawSubscriber(IChannelFactory channelFactory, IMessageSerializer serializer)
+			: base(channelFactory)
 		{
 			_channelFactory = channelFactory;
 			_serializer = serializer;
@@ -28,55 +30,84 @@ namespace RawRabbit.Common
 
 		public Task SubscribeAsync<T>(Func<T, MessageInformation, Task> subscribeMethod, SubscriptionConfiguration config) where T : MessageBase
 		{
-			var channel = _channelFactory.GetChannel();
-
-			channel.QueueDeclare(
-				queue: config.Queue.QueueName,
-				durable: config.Queue.Durable,
-				exclusive: config.Queue.Exclusive,
-				autoDelete: config.Queue.AutoDelete,
-				arguments: config.Queue.Arguments
-			);
+			var queueTask = DeclareQueueAsync(config.Queue);
+			var exchangeTask = DeclareExchangeAsync(config.Exchange);
+			var basicQosTask = ConfigureQosAsync(config);
 			
-			channel.BasicQos(
-				prefetchSize: 0, //TODO : what is this?
-				prefetchCount: config.PrefetchCount,
-				global: false // https://www.rabbitmq.com/consumer-prefetch.html
-			);
+			return Task
+				.WhenAll(queueTask, exchangeTask, basicQosTask)
+				.ContinueWith(t => BindQueueAsync(config))
+				.ContinueWith(t => SubscribeAsync<T>(config, subscribeMethod));
+		}
 
-			if (!config.Exchange.IsDefaultExchange())
+		private Task SubscribeAsync<T>(SubscriptionConfiguration config, Func<T, MessageInformation, Task> subscribeMethod)
+		{
+			return Task.Factory.StartNew(() =>
 			{
-				channel.ExchangeDeclare(
-					exchange: config.Exchange.ExchangeName,
-					type: config.Exchange.ExchangeType
-				);
+				var channel = _channelFactory.GetChannel();
+				var consumer = new EventingBasicConsumer(channel);
+				consumer.Received += (model, ea) =>
+				{
+					Task.Factory
+						.StartNew(() => _serializer.Deserialize<T>(ea.Body))
+						.ContinueWith(t =>
+							{
+								var subscribeTask = Task.Factory.StartNew(() => subscribeMethod(t.Result, null));
+								var ackTask = BasicAckAsync(ea.DeliveryTag);
+								Task.WhenAll(subscribeTask, ackTask);
+							});
+				};
 
-				channel.QueueBind(
+				channel.BasicConsume(
 					queue: config.Queue.QueueName,
-					exchange: config.Exchange.ExchangeName,
-					routingKey: config.RoutingKey
+					noAck: config.NoAck,
+					consumer: consumer
 				);
-			}
+			});
+		}
 
-			var consumer = new EventingBasicConsumer(channel);
-			consumer.Received += (model, ea) =>
-			{
-				var message = _serializer.Deserialize<T>(ea.Body);
-				subscribeMethod(message, null);
-
-				channel.BasicAck(
-					deliveryTag: ea.DeliveryTag,
-					multiple: false)
-				;
-			};
-
-			channel.BasicConsume(
-				queue: config.Queue.QueueName,
-				noAck: config.NoAck,
-				consumer: consumer
+		private Task BasicAckAsync(ulong deliveryTag)
+		{
+			return Task.Factory.StartNew(() =>
+				_channelFactory
+					.GetChannel()
+					.BasicAck(
+					deliveryTag: deliveryTag,
+					multiple: false
+				)
 			);
+		}
 
-			return Task.FromResult(true);
+		private Task BindQueueAsync(SubscriptionConfiguration config)
+		{
+			if (config.Exchange.IsDefaultExchange())
+			{
+				return Task.FromResult(true);
+			}
+			return Task.Factory.StartNew(() =>
+			{
+				_channelFactory
+					.GetChannel()
+					.QueueBind(
+						queue: config.Queue.QueueName,
+						exchange: config.Exchange.ExchangeName,
+						routingKey: config.RoutingKey
+				);
+			});
+		}
+
+		private Task ConfigureQosAsync(SubscriptionConfiguration config)
+		{
+			return Task.Factory.StartNew(() =>
+			{
+				_channelFactory
+					.GetChannel()
+					.BasicQos(
+						prefetchSize: 0, //TODO : what is this?
+						prefetchCount: config.PrefetchCount,
+						global: false // https://www.rabbitmq.com/consumer-prefetch.html
+				);
+			});
 		}
 	}
 }

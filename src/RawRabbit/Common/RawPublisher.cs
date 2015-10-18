@@ -1,9 +1,5 @@
-﻿using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-using RabbitMQ.Client;
+﻿using System.Threading.Tasks;
 using RawRabbit.Common.Serialization;
-using RawRabbit.Core.Configuration.Exchange;
 using RawRabbit.Core.Configuration.Publish;
 
 namespace RawRabbit.Common
@@ -13,12 +9,13 @@ namespace RawRabbit.Common
 		Task PublishAsync<T>(T message, PublishConfiguration config);
 	}
 
-	public class RawPublisher : IRawPublisher
+	public class RawPublisher : RawOperatorBase, IRawPublisher
 	{
 		private readonly IChannelFactory _channelFactory;
 		private readonly IMessageSerializer _serializer;
 
 		public RawPublisher(IChannelFactory channelFactory, IMessageSerializer serializer)
+			: base(channelFactory)
 		{
 			_channelFactory = channelFactory;
 			_serializer = serializer;
@@ -26,32 +23,38 @@ namespace RawRabbit.Common
 
 		public Task PublishAsync<T>(T message, PublishConfiguration config)
 		{
-			var channel = _channelFactory.GetChannel();
+			var queueTask = DeclareQueueAsync(config.Queue);
+			var exchangeTask = DeclareExchangeAsync(config.Exchange);
+			var messageTask = CreateMessageAsync(message);
 
-			channel.QueueDeclare(
-				queue:config.Queue.QueueName,
-				durable:config.Queue.Durable,
-				exclusive:config.Queue.Exclusive,
-				autoDelete:config.Queue.AutoDelete,
-				arguments: config.Queue.Arguments
-			);
+			return Task
+				.WhenAll(queueTask, exchangeTask, messageTask)
+				.ContinueWith(t => PublishAsync(messageTask.Result, config));
+		}
 
-			if (!config.Exchange.IsDefaultExchange())
+		private Task PublishAsync(byte[] body, PublishConfiguration config)
+		{
+			return Task.Factory.StartNew(() =>
 			{
-				channel.ExchangeDeclare(
+				var channel = _channelFactory.GetChannel();
+				channel.BasicPublish(
 					exchange: config.Exchange.ExchangeName,
-					type: config.Exchange.ExchangeType
+					routingKey: config.RoutingKey,
+					basicProperties: channel.CreateBasicProperties(), //TODO: move this to config
+					body: body
 				);
+			});
+		}
+
+		private Task<byte[]> CreateMessageAsync<T>(T message)
+		{
+			if (message == null)
+			{
+				return Task.FromResult(new byte[0]);
 			}
-
-			channel.BasicPublish(
-				exchange: config.Exchange.ExchangeName,
-				routingKey: config.RoutingKey,
-				basicProperties: channel.CreateBasicProperties(), //TODO: move this to config
-				body: _serializer.Serialize(message)
+			return Task.Factory.StartNew(() =>
+				_serializer.Serialize(message)
 			);
-
-			return Task.FromResult(true);
 		}
 	}
 }

@@ -24,11 +24,10 @@ namespace RawRabbit.Client
 			_publisher = publisher;
 		}
 
-		public IDisposable SubscribeAsync<T>(Func<T, MessageInformation, Task> subscribeMethod, Action<ISubscriptionConfigurationBuilder> configuration = null) where T : MessageBase
+		public Task SubscribeAsync<T>(Func<T, MessageInformation, Task> subscribeMethod, Action<ISubscriptionConfigurationBuilder> configuration = null) where T : MessageBase
 		{
 			var config = _configEval.GetConfiguration<T>(configuration);
-			_subscriber.SubscribeAsync(subscribeMethod, config);
-			return null;
+			return _subscriber.SubscribeAsync(subscribeMethod, config);
 		}
 
 		public Task PublishAsync<T>(T message, Action<IPublishConfigurationBuilder> configuration = null) where T : MessageBase

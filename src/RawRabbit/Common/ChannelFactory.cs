@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using RabbitMQ.Client;
 
 namespace RawRabbit.Common
@@ -10,22 +11,24 @@ namespace RawRabbit.Common
 
 	public class ChannelFactory : IChannelFactory
 	{
+		private readonly ThreadLocal<IModel> _threadChannal; 
 		private readonly IConnection _connection;
-		private IModel _channel;
 	
 			public ChannelFactory(IConnection connection)
 		{
 			_connection = connection;
+			_threadChannal = new ThreadLocal<IModel>(connection.CreateModel);
 		}
 
 		public IModel GetChannel()
 		{
-			return _channel ?? (_channel = _connection.CreateModel());
+			return _threadChannal.Value;
 		}
 
 		public void Dispose()
 		{
 			_connection?.Dispose();
+			_threadChannal?.Dispose();
 		}
 	}
 }
