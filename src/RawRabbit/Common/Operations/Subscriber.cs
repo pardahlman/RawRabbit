@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RawRabbit.Common.Serialization;
 using RawRabbit.Core.Configuration.Exchange;
@@ -11,17 +8,17 @@ using RawRabbit.Core.Message;
 
 namespace RawRabbit.Common
 {
-	public interface IRawSubscriber
+	public interface ISubscriber
 	{
 		Task SubscribeAsync<T>(Func<T, MessageInformation, Task> subscribeMethod, SubscriptionConfiguration config) where T : MessageBase;
 	}
 
-	public class RawSubscriber : RawOperatorBase, IRawSubscriber
+	public class Subscriber : OperatorBase, ISubscriber
 	{
 		private readonly IChannelFactory _channelFactory;
 		private readonly IMessageSerializer _serializer;
 
-		public RawSubscriber(IChannelFactory channelFactory, IMessageSerializer serializer)
+		public Subscriber(IChannelFactory channelFactory, IMessageSerializer serializer)
 			: base(channelFactory)
 		{
 			_channelFactory = channelFactory;

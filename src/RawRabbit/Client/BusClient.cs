@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using RawRabbit.Common;
+using RawRabbit.Common.Operations;
 using RawRabbit.Core.Client;
 using RawRabbit.Core.Configuration.Publish;
 using RawRabbit.Core.Configuration.Subscribe;
@@ -11,13 +12,13 @@ namespace RawRabbit.Client
 	public class BusClient : IBusClient
 	{
 		private readonly IConfigurationEvaluator _configEval;
-		private readonly IRawSubscriber _subscriber;
-		private readonly IRawPublisher _publisher;
+		private readonly ISubscriber _subscriber;
+		private readonly IPublisher _publisher;
 
 		public BusClient(
 			IConfigurationEvaluator configEval,
-			IRawSubscriber subscriber,
-			IRawPublisher publisher)
+			ISubscriber subscriber,
+			IPublisher publisher)
 		{
 			_configEval = configEval;
 			_subscriber = subscriber;

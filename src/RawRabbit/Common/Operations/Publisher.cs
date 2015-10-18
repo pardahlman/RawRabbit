@@ -4,17 +4,17 @@ using RawRabbit.Core.Configuration.Publish;
 
 namespace RawRabbit.Common
 {
-	public interface IRawPublisher
+	public interface IPublisher
 	{
 		Task PublishAsync<T>(T message, PublishConfiguration config);
 	}
 
-	public class RawPublisher : RawOperatorBase, IRawPublisher
+	public class Publisher : OperatorBase, IPublisher
 	{
 		private readonly IChannelFactory _channelFactory;
 		private readonly IMessageSerializer _serializer;
 
-		public RawPublisher(IChannelFactory channelFactory, IMessageSerializer serializer)
+		public Publisher(IChannelFactory channelFactory, IMessageSerializer serializer)
 			: base(channelFactory)
 		{
 			_channelFactory = channelFactory;

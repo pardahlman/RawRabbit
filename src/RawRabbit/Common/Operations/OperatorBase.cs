@@ -1,16 +1,14 @@
 ﻿using System.Threading.Tasks;
-using RabbitMQ.Client;
-using RawRabbit.Common.Serialization;
 using RawRabbit.Core.Configuration.Exchange;
 using RawRabbit.Core.Configuration.Queue;
 
 namespace RawRabbit.Common
 {
-	public abstract class RawOperatorBase
+	public abstract class OperatorBase
 	{
 		private readonly IChannelFactory _channelFactory;
 
-		protected RawOperatorBase(IChannelFactory channelFactory)
+		protected OperatorBase(IChannelFactory channelFactory)
 		{
 			_channelFactory = channelFactory;
 		}
