@@ -14,7 +14,7 @@ namespace RawRabbit.Common.Conventions
 		{
 			return new QueueConfiguration
 			{
-				QueueName = typeof (T).Name.ToLower(),
+				QueueName = typeof (T).Name.ToLower(), //TODO: add something here to make each client unique
 				AutoDelete = false,
 				Durable = true,
 				Exclusive = false

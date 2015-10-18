@@ -46,6 +46,9 @@ namespace RawRabbit.IntegrationTests.RabbitMqTutorial
 				builder => builder
 					.WithQueue(queue =>
 						queue.WithName("hello")
+						.WithDurability(false)
+						.WithExclusivity(false)
+						.WithAutoDelete(false)
 					)
 			);
 			await recieved.Task;

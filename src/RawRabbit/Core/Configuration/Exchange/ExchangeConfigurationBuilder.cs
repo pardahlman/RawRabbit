@@ -15,9 +15,9 @@
 			return this;
 		}
 
-		public IExchangeConfigurationBuilder WithType(string exchangeType)
+		public IExchangeConfigurationBuilder WithType(ExchangeType exchangeType)
 		{
-			Configuration.ExchangeType = exchangeType;
+			Configuration.ExchangeType = exchangeType.ToString().ToLower();
 			return this;
 		}
 

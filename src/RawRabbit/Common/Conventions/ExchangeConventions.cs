@@ -16,7 +16,7 @@ namespace RawRabbit.Common.Conventions
 			return new ExchangeConfiguration
 			{
 				ExchangeName = typeof (T).Namespace.ToLower(),
-				ExchangeType = ExchangeType.Direct,
+				ExchangeType = RabbitMQ.Client.ExchangeType.Direct,
 				Durable = true,
 				AutoDelete = false
 			};
