@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
+using RawRabbit.Common.Serialization;
 using RawRabbit.Core.Configuration.Exchange;
 using RawRabbit.Core.Configuration.Publish;
 
@@ -15,17 +16,17 @@ namespace RawRabbit.Common
 	public class RawPublisher : IRawPublisher
 	{
 		private readonly IChannelFactory _channelFactory;
+		private readonly IMessageSerializer _serializer;
 
-		public RawPublisher(IChannelFactory channelFactory)
+		public RawPublisher(IChannelFactory channelFactory, IMessageSerializer serializer)
 		{
 			_channelFactory = channelFactory;
+			_serializer = serializer;
 		}
 
 		public Task PublishAsync<T>(T message, PublishConfiguration config)
 		{
 			var channel = _channelFactory.GetChannel();
-			var msgStr = JsonConvert.SerializeObject(message);
-			var msgBytes = Encoding.UTF8.GetBytes(msgStr);
 
 			channel.QueueDeclare(
 				queue:config.Queue.QueueName,
@@ -47,7 +48,7 @@ namespace RawRabbit.Common
 				exchange: config.Exchange.ExchangeName,
 				routingKey: config.RoutingKey,
 				basicProperties: channel.CreateBasicProperties(), //TODO: move this to config
-				body: msgBytes
+				body: _serializer.Serialize(message)
 			);
 
 			return Task.FromResult(true);

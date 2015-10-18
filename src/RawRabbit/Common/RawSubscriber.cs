@@ -3,6 +3,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using RabbitMQ.Client.Events;
+using RawRabbit.Common.Serialization;
 using RawRabbit.Core.Configuration.Exchange;
 using RawRabbit.Core.Configuration.Subscribe;
 using RawRabbit.Core.Message;
@@ -17,10 +18,12 @@ namespace RawRabbit.Common
 	public class RawSubscriber : IRawSubscriber
 	{
 		private readonly IChannelFactory _channelFactory;
+		private readonly IMessageSerializer _serializer;
 
-		public RawSubscriber(IChannelFactory channelFactory)
+		public RawSubscriber(IChannelFactory channelFactory, IMessageSerializer serializer)
 		{
 			_channelFactory = channelFactory;
+			_serializer = serializer;
 		}
 
 		public Task SubscribeAsync<T>(Func<T, MessageInformation, Task> subscribeMethod, SubscriptionConfiguration config) where T : MessageBase
@@ -58,9 +61,7 @@ namespace RawRabbit.Common
 			var consumer = new EventingBasicConsumer(channel);
 			consumer.Received += (model, ea) =>
 			{
-				var body = ea.Body;
-				var msgString = Encoding.UTF8.GetString(body);
-				var message = JsonConvert.DeserializeObject<T>(msgString);
+				var message = _serializer.Deserialize<T>(ea.Body);
 				subscribeMethod(message, null);
 
 				channel.BasicAck(

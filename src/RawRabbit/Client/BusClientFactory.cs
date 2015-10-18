@@ -1,5 +1,6 @@
 ﻿using RabbitMQ.Client;
 using RawRabbit.Common;
+using RawRabbit.Common.Serialization;
 
 namespace RawRabbit.Client
 {
@@ -10,11 +11,11 @@ namespace RawRabbit.Client
 			config = config ?? RawRabbitConfiguration.Default;
 			var connection = new ConnectionFactory {HostName = config.Hostname}.CreateConnection();
 			var channelFactory = new ChannelFactory(connection);
-			
+			var serializer = new JsonMessageSerializer();
 			return new BusClient(
 				new ConfigurationEvaluator(),
-				new RawSubscriber(channelFactory),
-				new RawPublisher(channelFactory)
+				new RawSubscriber(channelFactory, serializer),
+				new RawPublisher(channelFactory, serializer)
 			);
 		}
 	}
