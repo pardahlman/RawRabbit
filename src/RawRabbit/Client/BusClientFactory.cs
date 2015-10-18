@@ -1,5 +1,6 @@
 ﻿using RabbitMQ.Client;
 using RawRabbit.Common;
+using RawRabbit.Common.Conventions;
 using RawRabbit.Common.Serialization;
 
 namespace RawRabbit.Client
@@ -13,7 +14,7 @@ namespace RawRabbit.Client
 			var channelFactory = new ChannelFactory(connection);
 			var serializer = new JsonMessageSerializer();
 			return new BusClient(
-				new ConfigurationEvaluator(),
+				new ConfigurationEvaluator(new QueueConventions(), new ExchangeConventions()),
 				new RawSubscriber(channelFactory, serializer),
 				new RawPublisher(channelFactory, serializer)
 			);

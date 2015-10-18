@@ -4,9 +4,9 @@
 	{
 		public QueueConfiguration Configuration { get;}
 
-		public QueueConfigurationBuilder()
+		public QueueConfigurationBuilder(QueueConfiguration initialQueue = null)
 		{
-			Configuration = QueueConfiguration.Default;
+			Configuration = initialQueue ?? QueueConfiguration.Default;
 		}
 
 		public IQueueConfigurationBuilder WithName(string queueName)

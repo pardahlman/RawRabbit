@@ -4,9 +4,9 @@
 	{
 		public ExchangeConfiguration Configuration { get; }
 
-		public ExchangeConfigurationBuilder()
+		public ExchangeConfigurationBuilder(ExchangeConfiguration initialExchange = null)
 		{
-			Configuration = ExchangeConfiguration.Default;
+			Configuration = initialExchange ?? ExchangeConfiguration.Default;
 		}
 
 		public IExchangeConfigurationBuilder WithName(string exchangeName)
