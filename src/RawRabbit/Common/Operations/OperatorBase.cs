@@ -45,6 +45,18 @@ namespace RawRabbit.Common.Operations
 				);
 		}
 
+		protected Task BasicAckAsync(ulong deliveryTag)
+		{
+			return Task.Factory.StartNew(() =>
+				_channelFactory
+					.GetChannel()
+					.BasicAck(
+						deliveryTag: deliveryTag,
+						multiple: false
+					)
+				);
+		}
+
 		public virtual void Dispose()
 		{
 			_channelFactory?.Dispose();

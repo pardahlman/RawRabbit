@@ -15,10 +15,8 @@ namespace RawRabbit.Core.Client
 		Task PublishAsync<T>(T message, Action<IPublishConfigurationBuilder> configuration = null)
 			where T : MessageBase;
 
-		Task RespondAsync<TRequest, TResponse>(
-			Func<TRequest, MessageInformation, TResponse> onMessage,
-			Action<IResponderConfigurationBuilder> configuration = null)
-				where TRequest : MessageBase
-				where TResponse : MessageBase;
+		Task RespondAsync<TRequest, TResponse>(Func<TRequest, MessageInformation, Task<TResponse>> onMessage, Action<IResponderConfigurationBuilder> configuration = null)
+			where TRequest : MessageBase
+			where TResponse : MessageBase;
 	}
 }

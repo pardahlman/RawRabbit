@@ -41,7 +41,7 @@ namespace RawRabbit.Client
 			return _publisher.PublishAsync(message, config);
 		}
 
-		public Task RespondAsync<TRequest, TResponse>(Func<TRequest, MessageInformation, TResponse> onMessage, Action<IResponderConfigurationBuilder> configuration = null) where TRequest : MessageBase where TResponse : MessageBase
+		public Task RespondAsync<TRequest, TResponse>(Func<TRequest, MessageInformation, Task<TResponse>> onMessage, Action<IResponderConfigurationBuilder> configuration = null) where TRequest : MessageBase where TResponse : MessageBase
 		{
 			var config = _configEval.GetConfiguration<TRequest>(configuration);
 			return _responder.RespondAsync(onMessage, config);

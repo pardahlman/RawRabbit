@@ -66,18 +66,6 @@ namespace RawRabbit.Common.Operations
 			});
 		}
 
-		private Task BasicAckAsync(ulong deliveryTag)
-		{
-			return Task.Factory.StartNew(() =>
-				_channelFactory
-					.GetChannel()
-					.BasicAck(
-						deliveryTag: deliveryTag,
-						multiple: false
-					)
-				);
-		}
-
 		private Task BindQueueAsync(SubscriptionConfiguration config)
 		{
 			if (config.Exchange.IsDefaultExchange())
