@@ -18,7 +18,8 @@ namespace RawRabbit.Client
 				new ConfigurationEvaluator(new QueueConventions(), new ExchangeConventions()),
 				new Subscriber(channelFactory, serializer),
 				new Publisher(channelFactory, serializer),
-				new Responder(channelFactory, serializer)
+				new Responder(channelFactory, serializer),
+				new Requester(channelFactory, serializer)
 			);
 		}
 	}
