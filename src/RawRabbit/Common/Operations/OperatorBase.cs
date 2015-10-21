@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
+using RawRabbit.Common.Serialization;
 using RawRabbit.Core.Configuration.Exchange;
 using RawRabbit.Core.Configuration.Queue;
 
@@ -9,10 +10,13 @@ namespace RawRabbit.Common.Operations
 	public abstract class OperatorBase : IDisposable
 	{
 		protected readonly IChannelFactory ChannelFactory;
+		protected readonly IMessageSerializer Serializer;
 
-		protected OperatorBase(IChannelFactory channelFactory)
+
+		protected OperatorBase(IChannelFactory channelFactory, IMessageSerializer serializer)
 		{
 			ChannelFactory = channelFactory;
+			Serializer = serializer;
 		}
 		
 		protected Task DeclareExchangeAsync(ExchangeConfiguration config)
@@ -45,6 +49,12 @@ namespace RawRabbit.Common.Operations
 					)
 				);
 		}
+
+		protected Task<byte[]> CreateMessageAsync<T>(T message)
+		{
+			return Task.Factory.StartNew(() => Serializer.Serialize(message));
+		}
+
 
 		protected void BasicAck(IModel channel, ulong deliveryTag)
 		{

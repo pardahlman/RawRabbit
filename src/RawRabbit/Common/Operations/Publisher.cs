@@ -9,15 +9,12 @@ namespace RawRabbit.Common.Operations
 		Task PublishAsync<T>(T message, PublishConfiguration config);
 	}
 
-	public class Publisher : SenderBase, IPublisher
+	public class Publisher : OperatorBase , IPublisher
 	{
-		private readonly IChannelFactory _channelFactory;
 
 		public Publisher(IChannelFactory channelFactory, IMessageSerializer serializer)
 			: base(channelFactory, serializer)
-		{
-			_channelFactory = channelFactory;
-		}
+		{ }
 
 		public Task PublishAsync<T>(T message, PublishConfiguration config)
 		{
@@ -35,7 +32,7 @@ namespace RawRabbit.Common.Operations
 		{
 			return Task.Factory.StartNew(() =>
 			{
-				var channel = _channelFactory.GetChannel();
+				var channel = ChannelFactory.GetChannel();
 				channel.BasicPublish(
 					exchange: config.Exchange.ExchangeName,
 					routingKey: config.RoutingKey,

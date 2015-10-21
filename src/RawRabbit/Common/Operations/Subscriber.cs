@@ -17,14 +17,9 @@ namespace RawRabbit.Common.Operations
 
 	public class Subscriber : OperatorBase, ISubscriber
 	{
-		private readonly IChannelFactory _channelFactory;
-		private readonly IMessageSerializer _serializer;
-
 		public Subscriber(IChannelFactory channelFactory, IMessageSerializer serializer)
-			: base(channelFactory)
+			: base(channelFactory, serializer)
 		{
-			_channelFactory = channelFactory;
-			_serializer = serializer;
 		}
 
 		public Task SubscribeAsync<T>(Func<T, MessageInformation, Task> subscribeMethod, SubscriptionConfiguration config) where T : MessageBase
@@ -42,13 +37,13 @@ namespace RawRabbit.Common.Operations
 		{
 			return Task.Factory.StartNew(() =>
 			{
-				var channel = _channelFactory.GetChannel();
+				var channel = ChannelFactory.GetChannel();
 				ConfigureQosAsync(channel, config.PrefetchCount);
 				var consumer = new EventingBasicConsumer(channel);
 				consumer.Received += (model, ea) =>
 				{
 					Task.Factory
-						.StartNew(() => _serializer.Deserialize<T>(ea.Body))
+						.StartNew(() => Serializer.Deserialize<T>(ea.Body))
 						.ContinueWith(serializeTask =>
 							{
 								return Task.Factory
@@ -74,7 +69,7 @@ namespace RawRabbit.Common.Operations
 			}
 			return Task.Factory.StartNew(() =>
 			{
-				_channelFactory
+				ChannelFactory
 					.GetChannel()
 					.QueueBind(
 						queue: config.Queue.QueueName,

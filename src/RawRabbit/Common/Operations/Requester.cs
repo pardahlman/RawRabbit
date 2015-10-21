@@ -15,7 +15,7 @@ namespace RawRabbit.Common.Operations
 			where TResponse : MessageBase;
 	}
 
-	public class Requester : SenderBase, IRequester
+	public class Requester : OperatorBase, IRequester
 	{
 		public Requester(IChannelFactory channelFactory, IMessageSerializer serializer) : base(channelFactory, serializer)
 		{ }
