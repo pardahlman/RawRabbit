@@ -64,7 +64,6 @@ namespace RawRabbit.Common
 			var defaultConfig = new RequestConfiguration
 			{
 				ReplyQueue = _queueConventions.CreateResponseQueueConfiguration<TRequest>(),
-				Queue = _queueConventions.CreateQueueConfiguration<TRequest>(),
 				Exchange = _exchangeConventions.CreateDefaultConfiguration<TRequest>(),
 				RoutingKey = _queueConventions.CreateQueueConfiguration<TResponse>().QueueName
 			};
