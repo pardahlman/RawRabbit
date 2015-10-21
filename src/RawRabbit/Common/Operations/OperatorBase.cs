@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using RabbitMQ.Client;
 using RawRabbit.Core.Configuration.Exchange;
 using RawRabbit.Core.Configuration.Queue;
 
@@ -7,11 +8,11 @@ namespace RawRabbit.Common.Operations
 {
 	public abstract class OperatorBase : IDisposable
 	{
-		private readonly IChannelFactory _channelFactory;
+		protected readonly IChannelFactory ChannelFactory;
 
 		protected OperatorBase(IChannelFactory channelFactory)
 		{
-			_channelFactory = channelFactory;
+			ChannelFactory = channelFactory;
 		}
 		
 		protected Task DeclareExchangeAsync(ExchangeConfiguration config)
@@ -21,7 +22,7 @@ namespace RawRabbit.Common.Operations
 				return Task.FromResult(true);
 			}
 			return Task.Factory.StartNew(() =>
-				_channelFactory
+				ChannelFactory
 					.GetChannel()
 					.ExchangeDeclare(
 						exchange: config.ExchangeName,
@@ -33,7 +34,7 @@ namespace RawRabbit.Common.Operations
 		protected Task DeclareQueueAsync(QueueConfiguration config)
 		{
 			return Task.Factory.StartNew(() =>
-				_channelFactory
+				ChannelFactory
 					.GetChannel()
 					.QueueDeclare(
 						queue: config.QueueName,
@@ -45,21 +46,22 @@ namespace RawRabbit.Common.Operations
 				);
 		}
 
-		protected Task BasicAckAsync(ulong deliveryTag)
+		protected void BasicAck(IModel channel, ulong deliveryTag)
 		{
-			return Task.Factory.StartNew(() =>
-				_channelFactory
-					.GetChannel()
-					.BasicAck(
-						deliveryTag: deliveryTag,
-						multiple: false
-					)
+			/*
+				Acknowledgement needs to be called on the same channel that
+				delivered the message. This is the reason we're not using 
+				the ChannelFactory in this instance.
+			*/
+			channel.BasicAck(
+					deliveryTag: deliveryTag,
+					multiple: false
 				);
 		}
 
 		public virtual void Dispose()
 		{
-			_channelFactory?.Dispose();
+			ChannelFactory?.Dispose();
 		}
 	}
 }

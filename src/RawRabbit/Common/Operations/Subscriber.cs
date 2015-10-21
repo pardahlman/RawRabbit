@@ -46,16 +46,14 @@ namespace RawRabbit.Common.Operations
 				consumer.Received += (model, ea) =>
 				{
 					Task.Factory
-						.StartNew(() =>
+						.StartNew(() => _serializer.Deserialize<T>(ea.Body))
+						.ContinueWith(serializeTask =>
 							{
-								return _serializer.Deserialize<T>(ea.Body);
-							})
-						.ContinueWith(t =>
-							{
-								var subscribeTask = Task.Factory.StartNew(() => subscribeMethod(t.Result, null));
-								var ackTask = BasicAckAsync(ea.DeliveryTag);
-								return Task.WhenAll(subscribeTask, ackTask);
-							});
+								return Task.Factory
+									.StartNew(() => subscribeMethod(serializeTask.Result, null))
+									.ContinueWith(subscribeTask => BasicAck(channel, ea.DeliveryTag));
+							}
+						);
 				};
 
 				channel.BasicConsume(

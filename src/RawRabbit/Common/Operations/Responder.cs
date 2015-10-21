@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RawRabbit.Common.Serialization;
+using RawRabbit.Core.Configuration.Exchange;
 using RawRabbit.Core.Configuration.Respond;
 using RawRabbit.Core.Message;
 
@@ -37,31 +38,39 @@ namespace RawRabbit.Common.Operations
 
 			return Task
 				.WhenAll(queueTask, exchangeTask, basicQosTask)
-				.ContinueWith(t => ConfigureRespondAsync(onMessage, configuration));
+				.ContinueWith(t => BindQueue(configuration))
+				.ContinueWith(t => ConfigureRespond(onMessage, configuration));
 		}
 
-		private Task ConfigureRespondAsync<TRequest, TResponse>(Func<TRequest, MessageInformation, Task<TResponse>> onMessage, ResponderConfiguration cfg)
+		private void BindQueue(ResponderConfiguration config)
 		{
-			return Task.Factory.StartNew(() =>
+			if (config.Exchange.IsDefaultExchange())
 			{
-				var channel = _channelFactory.GetChannel();
-				var consumer = new EventingBasicConsumer(channel);
-				channel.BasicConsume(cfg.Queue.QueueName, false, consumer);
-				
-				consumer.Received += (sender, args) =>
-				{
-					Task.Factory
-						.StartNew(() => _serializer.Deserialize<TRequest>(args.Body))
-						.ContinueWith(t => onMessage(t.Result, null)
-							.ContinueWith(responseTask =>
-							{
-								var ackTask = BasicAckAsync(args.DeliveryTag);
-								var respondTask = SendRespondAsync(responseTask.Result, args);
-								return Task.WhenAll(ackTask, respondTask);
-							})
-						);
-				};
-			});
+				return;
+			}
+			ChannelFactory
+				.GetChannel()
+				.QueueBind(
+					queue: config.Queue.QueueName,
+					exchange: config.Exchange.ExchangeName,
+					routingKey: config.RoutingKey
+				);
+		}
+
+		private void ConfigureRespond<TRequest, TResponse>(Func<TRequest, MessageInformation, Task<TResponse>> onMessage, ResponderConfiguration cfg)
+		{
+			var channel = ChannelFactory.GetChannel();
+			var consumer = new EventingBasicConsumer(channel);
+			channel.BasicConsume(cfg.Queue.QueueName, false, consumer);
+
+			consumer.Received += (sender, args) =>
+			{
+				Task.Factory
+					.StartNew(() => _serializer.Deserialize<TRequest>(args.Body))
+					.ContinueWith(t => onMessage(t.Result, null)).Unwrap()
+					.ContinueWith(payloadTask => SendRespondAsync(payloadTask.Result, args))
+					.ContinueWith(t => BasicAck(channel, args.DeliveryTag));
+			};
 		}
 
 		private Task SendRespondAsync<TResponse>(TResponse result, BasicDeliverEventArgs requestPayload)
@@ -75,8 +84,8 @@ namespace RawRabbit.Common.Operations
 				{
 					var channel = _channelFactory.GetChannel();
 					channel.BasicPublish(
-						exchange:requestPayload.Exchange,
-						routingKey: propsTask.Result.ReplyTo,
+						exchange: requestPayload.Exchange,
+						routingKey: requestPayload.BasicProperties.ReplyTo,
 						basicProperties: propsTask.Result,
 						body: serializeTask.Result
 					);
@@ -107,6 +116,5 @@ namespace RawRabbit.Common.Operations
 				);
 			});
 		}
-
 	}
 }

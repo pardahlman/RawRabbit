@@ -22,6 +22,11 @@ namespace RawRabbit.Common
 
 		public IModel GetChannel()
 		{
+			if (_threadChannal.Value.IsOpen)
+			{
+				return _threadChannal.Value;
+			}
+			_threadChannal.Value = _connection.CreateModel();
 			return _threadChannal.Value;
 		}
 

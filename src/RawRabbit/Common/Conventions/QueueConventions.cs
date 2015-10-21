@@ -1,4 +1,5 @@
-﻿using RawRabbit.Core.Configuration.Queue;
+﻿using System;
+using RawRabbit.Core.Configuration.Queue;
 using RawRabbit.Core.Message;
 
 namespace RawRabbit.Common.Conventions
@@ -6,6 +7,7 @@ namespace RawRabbit.Common.Conventions
 	public interface IQueueConventions
 	{
 		QueueConfiguration CreateQueueConfiguration<T>() where T: MessageBase;
+		QueueConfiguration CreateResponseQueueConfiguration<T>() where T : MessageBase;
 	}
 
 	public class QueueConventions : IQueueConventions
@@ -18,6 +20,17 @@ namespace RawRabbit.Common.Conventions
 				AutoDelete = false,
 				Durable = true,
 				Exclusive = false
+			};
+		}
+
+		public QueueConfiguration CreateResponseQueueConfiguration<T>() where T : MessageBase
+		{
+			return new QueueConfiguration
+			{
+				QueueName = "default_rpc_response." + Guid.NewGuid(),
+				Exclusive = true,
+				AutoDelete = true,
+				Durable = false
 			};
 		}
 	}

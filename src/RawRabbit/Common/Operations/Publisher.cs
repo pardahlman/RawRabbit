@@ -9,16 +9,14 @@ namespace RawRabbit.Common.Operations
 		Task PublishAsync<T>(T message, PublishConfiguration config);
 	}
 
-	public class Publisher : OperatorBase, IPublisher
+	public class Publisher : SenderBase, IPublisher
 	{
 		private readonly IChannelFactory _channelFactory;
-		private readonly IMessageSerializer _serializer;
 
 		public Publisher(IChannelFactory channelFactory, IMessageSerializer serializer)
-			: base(channelFactory)
+			: base(channelFactory, serializer)
 		{
 			_channelFactory = channelFactory;
-			_serializer = serializer;
 		}
 
 		public Task PublishAsync<T>(T message, PublishConfiguration config)
@@ -29,7 +27,8 @@ namespace RawRabbit.Common.Operations
 
 			return Task
 				.WhenAll(queueTask, exchangeTask, messageTask)
-				.ContinueWith(t => PublishAsync(messageTask.Result, config));
+				.ContinueWith(t => PublishAsync(messageTask.Result, config))
+				.Unwrap();
 		}
 
 		private Task PublishAsync(byte[] body, PublishConfiguration config)
@@ -46,13 +45,6 @@ namespace RawRabbit.Common.Operations
 			});
 		}
 
-		private Task<byte[]> CreateMessageAsync<T>(T message)
-		{
-			if (message == null)
-			{
-				return Task.FromResult(new byte[0]);
-			}
-			return Task.Factory.StartNew(() => _serializer.Serialize(message));
-		}
+
 	}
 }

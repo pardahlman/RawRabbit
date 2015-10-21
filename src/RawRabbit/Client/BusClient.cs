@@ -46,14 +46,14 @@ namespace RawRabbit.Client
 
 		public Task RespondAsync<TRequest, TResponse>(Func<TRequest, MessageInformation, Task<TResponse>> onMessage, Action<IResponderConfigurationBuilder> configuration = null) where TRequest : MessageBase where TResponse : MessageBase
 		{
-			var config = _configEval.GetConfiguration<TRequest>(configuration);
+			var config = _configEval.GetConfiguration<TRequest, TResponse>(configuration);
 			return _responder.RespondAsync(onMessage, config);
 		}
 
-		public Task RequestAsync<TRequest, TResponse>(Func<TRequest, MessageInformation, Task<TResponse>> onMessage, Action<IRequestConfigurationBuilder> configuration = null) where TRequest : MessageBase where TResponse : MessageBase
+		public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest message, Action<IRequestConfigurationBuilder> configuration = null) where TRequest : MessageBase where TResponse : MessageBase
 		{
-			var config = _configEval.GetConfiguration<TResponse>(configuration);
-			return _request.RequestAsync<TRequest, TResponse>(onMessage, config);
+			var config = _configEval.GetConfiguration<TRequest, TResponse>(configuration);
+			return _request.RequestAsync<TRequest, TResponse>(message, config);
 		}
 	}
 }

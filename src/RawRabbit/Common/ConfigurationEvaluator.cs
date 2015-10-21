@@ -12,8 +12,8 @@ namespace RawRabbit.Common
 	{
 		SubscriptionConfiguration GetConfiguration<T>(Action<ISubscriptionConfigurationBuilder> configuration = null) where T : MessageBase;
 		PublishConfiguration GetConfiguration<T>(Action<IPublishConfigurationBuilder> configuration) where T : MessageBase;
-		ResponderConfiguration GetConfiguration<T>(Action<IResponderConfigurationBuilder> configuration) where T : MessageBase;
-		RequestConfiguration GetConfiguration<T>(Action<IRequestConfigurationBuilder> configuration) where T : MessageBase;
+		ResponderConfiguration GetConfiguration<TRequest, TResponse>(Action<IResponderConfigurationBuilder> configuration) where TRequest : MessageBase where TResponse : MessageBase;
+		RequestConfiguration GetConfiguration<TRequest, TResponse>(Action<IRequestConfigurationBuilder> configuration) where TRequest : MessageBase where TResponse : MessageBase;
 	}
 
 	public class ConfigurationEvaluator : IConfigurationEvaluator
@@ -47,22 +47,29 @@ namespace RawRabbit.Common
 			return builder.Configuration;
 		}
 
-		public ResponderConfiguration GetConfiguration<T>(Action<IResponderConfigurationBuilder> configuration) where T : MessageBase
+		public ResponderConfiguration GetConfiguration<TRequest, TResponse>(Action<IResponderConfigurationBuilder> configuration) where TRequest : MessageBase where TResponse: MessageBase
 		{
-			var defaultQueue = _queueConventions.CreateQueueConfiguration<T>();
-			var defaultExchange = _exchangeConventions.CreateDefaultConfiguration<T>();
+			var defaultQueue = _queueConventions.CreateQueueConfiguration<TResponse>();
+			var defaultExchange = _exchangeConventions.CreateDefaultConfiguration<TRequest>();
 			
 			var builder = new ResponderConfigurationBuilder(defaultQueue, defaultExchange);
 			configuration?.Invoke(builder);
 			return builder.Configuration;
 		}
 
-		public RequestConfiguration GetConfiguration<T>(Action<IRequestConfigurationBuilder> configuration) where T : MessageBase
+		public RequestConfiguration GetConfiguration<TRequest, TResponse>(Action<IRequestConfigurationBuilder> configuration)
+			where TRequest : MessageBase
+			where TResponse : MessageBase
 		{
-			var defaultQueue = _queueConventions.CreateQueueConfiguration<T>();
-			var defaultExchange = _exchangeConventions.CreateDefaultConfiguration<T>();
+			var defaultConfig = new RequestConfiguration
+			{
+				ReplyQueue = _queueConventions.CreateResponseQueueConfiguration<TRequest>(),
+				Queue = _queueConventions.CreateQueueConfiguration<TRequest>(),
+				Exchange = _exchangeConventions.CreateDefaultConfiguration<TRequest>(),
+				RoutingKey = _queueConventions.CreateQueueConfiguration<TResponse>().QueueName
+			};
 
-			var builder = new RequestConfigurationBuilder(defaultQueue, defaultExchange);
+			var builder = new RequestConfigurationBuilder(defaultConfig);
 			configuration?.Invoke(builder);
 			return builder.Configuration;
 		}

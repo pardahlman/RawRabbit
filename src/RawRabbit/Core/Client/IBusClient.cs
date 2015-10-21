@@ -20,7 +20,7 @@ namespace RawRabbit.Core.Client
 			where TRequest : MessageBase
 			where TResponse : MessageBase;
 
-		Task RequestAsync<TRequest, TResponse>(Func<TRequest, MessageInformation, Task<TResponse>> onMessage, Action<IRequestConfigurationBuilder> configuration = null)
+		Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest message, Action<IRequestConfigurationBuilder> configuration = null)
 			where TRequest : MessageBase
 			where TResponse : MessageBase;
 	}
