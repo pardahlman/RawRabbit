@@ -38,7 +38,7 @@ namespace RawRabbit.Client
 			return _subscriber.SubscribeAsync(subscribeMethod, config);
 		}
 
-		public Task PublishAsync<T>(T message, Action<IPublishConfigurationBuilder> configuration = null) where T : MessageBase
+		public Task PublishAsync<T>(T message = null, Action<IPublishConfigurationBuilder> configuration = null) where T : MessageBase
 		{
 			var config = _configEval.GetConfiguration<T>(configuration);
 			return _publisher.PublishAsync(message, config);
@@ -50,7 +50,7 @@ namespace RawRabbit.Client
 			return _responder.RespondAsync(onMessage, config);
 		}
 
-		public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest message, Action<IRequestConfigurationBuilder> configuration = null) where TRequest : MessageBase where TResponse : MessageBase
+		public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest message = null, Action<IRequestConfigurationBuilder> configuration = null) where TRequest : MessageBase where TResponse : MessageBase 
 		{
 			var config = _configEval.GetConfiguration<TRequest, TResponse>(configuration);
 			return _request.RequestAsync<TRequest, TResponse>(message, config);

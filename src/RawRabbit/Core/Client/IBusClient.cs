@@ -13,14 +13,14 @@ namespace RawRabbit.Core.Client
 		Task SubscribeAsync<T>(Func<T, MessageInformation, Task> subscribeMethod, Action<ISubscriptionConfigurationBuilder> configuration = null)
 			where T : MessageBase;
 
-		Task PublishAsync<T>(T message, Action<IPublishConfigurationBuilder> configuration = null)
+		Task PublishAsync<T>(T message = null, Action<IPublishConfigurationBuilder> configuration = null)
 			where T : MessageBase;
 
 		Task RespondAsync<TRequest, TResponse>(Func<TRequest, MessageInformation, Task<TResponse>> onMessage, Action<IResponderConfigurationBuilder> configuration = null)
 			where TRequest : MessageBase
 			where TResponse : MessageBase;
 
-		Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest message, Action<IRequestConfigurationBuilder> configuration = null)
+		Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest message = null, Action<IRequestConfigurationBuilder> configuration = null)
 			where TRequest : MessageBase
 			where TResponse : MessageBase;
 	}

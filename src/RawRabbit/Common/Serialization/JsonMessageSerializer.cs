@@ -21,6 +21,10 @@ namespace RawRabbit.Common.Serialization
 
 		public byte[] Serialize<T>(T obj)
 		{
+			if (obj == null)
+			{
+				return Encoding.UTF8.GetBytes(string.Empty);
+			}
 			string msgStr;
 			using (var sw = new StringWriter())
 			{

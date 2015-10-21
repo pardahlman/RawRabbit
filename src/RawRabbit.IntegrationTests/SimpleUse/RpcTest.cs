@@ -21,7 +21,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			await responder.RespondAsync<BasicRequest, BasicResponse>((req, i) => Task.FromResult(response));
 			
 			/* Test */
-			var recieved = await requester.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest());
+			var recieved = await requester.RequestAsync<BasicRequest, BasicResponse>();
 
 			/* Assert */
 			Assert.Equal(recieved.Prop, response.Prop);

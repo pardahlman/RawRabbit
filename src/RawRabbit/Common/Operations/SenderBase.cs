@@ -14,10 +14,6 @@ namespace RawRabbit.Common.Operations
 
 		protected Task<byte[]> CreateMessageAsync<T>(T message)
 		{
-			if (message == null)
-			{
-				return Task.FromResult(new byte[0]);
-			}
 			return Task.Factory.StartNew(() => Serializer.Serialize(message));
 		}
 
