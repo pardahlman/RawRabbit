@@ -16,7 +16,5 @@ namespace RawRabbit.Core.Configuration.Subscribe
 			Queue = QueueConfiguration.Default,
 			Exchange = ExchangeConfiguration.Default
 		};
-
-		
 	}
 }

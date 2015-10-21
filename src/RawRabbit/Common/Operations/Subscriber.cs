@@ -1,10 +1,7 @@
 ﻿using System;
-using System.CodeDom;
 using System.Threading.Tasks;
-using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RawRabbit.Common.Serialization;
-using RawRabbit.Core.Configuration.Exchange;
 using RawRabbit.Core.Configuration.Subscribe;
 using RawRabbit.Core.Message;
 
@@ -29,7 +26,7 @@ namespace RawRabbit.Common.Operations
 			
 			return Task
 				.WhenAll(queueTask, exchangeTask)
-				.ContinueWith(t => BindQueueAsync(config))
+				.ContinueWith(t => BindQueue(config.Queue, config.Exchange))
 				.ContinueWith(t => SubscribeAsync<T>(config, subscribeMethod));
 		}
 
@@ -57,24 +54,6 @@ namespace RawRabbit.Common.Operations
 					queue: config.Queue.QueueName,
 					noAck: config.NoAck,
 					consumer: consumer
-				);
-			});
-		}
-
-		private Task BindQueueAsync(SubscriptionConfiguration config)
-		{
-			if (config.Exchange.IsDefaultExchange())
-			{
-				return Task.FromResult(true);
-			}
-			return Task.Factory.StartNew(() =>
-			{
-				ChannelFactory
-					.GetChannel()
-					.QueueBind(
-						queue: config.Queue.QueueName,
-						exchange: config.Exchange.ExchangeName,
-						routingKey: config.RoutingKey
 				);
 			});
 		}

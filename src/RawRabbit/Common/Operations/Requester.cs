@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RawRabbit.Common.Serialization;
-using RawRabbit.Core.Configuration.Exchange;
 using RawRabbit.Core.Configuration.Request;
 using RawRabbit.Core.Message;
 
@@ -29,24 +28,9 @@ namespace RawRabbit.Common.Operations
 
 			return Task
 				.WhenAll(replyQueueTask, exchangeTask)
-				.ContinueWith(t => BindQueue(config))
+				.ContinueWith(t => BindQueue(config.ReplyQueue, config.Exchange))
 				.ContinueWith(t => SendRequestAsync<TRequest, TResponse>(message, config))
 				.Unwrap();
-		}
-
-		private void BindQueue(RequestConfiguration config)
-		{
-			if (config.Exchange.IsDefaultExchange())
-			{
-				return;
-			}
-			ChannelFactory
-				.GetChannel()
-				.QueueBind(
-					queue: config.ReplyQueue.QueueName,
-					exchange: config.Exchange.ExchangeName,
-					routingKey: config.ReplyQueue.QueueName
-				);
 		}
 
 		private Task<TResponse> SendRequestAsync<TRequest, TResponse>(TRequest message, RequestConfiguration config)

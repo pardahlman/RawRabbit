@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RawRabbit.Common.Serialization;
-using RawRabbit.Core.Configuration.Exchange;
 using RawRabbit.Core.Configuration.Respond;
 using RawRabbit.Core.Message;
 
@@ -32,23 +31,8 @@ namespace RawRabbit.Common.Operations
 
 			return Task
 				.WhenAll(queueTask, exchangeTask)
-				.ContinueWith(t => BindQueue(configuration))
+				.ContinueWith(t => BindQueue(configuration.Queue, configuration.Exchange))
 				.ContinueWith(t => ConfigureRespond(onMessage, configuration));
-		}
-
-		private void BindQueue(ResponderConfiguration config)
-		{
-			if (config.Exchange.IsDefaultExchange())
-			{
-				return;
-			}
-			ChannelFactory
-				.GetChannel()
-				.QueueBind(
-					queue: config.Queue.QueueName,
-					exchange: config.Exchange.ExchangeName,
-					routingKey: config.RoutingKey
-				);
 		}
 
 		private void ConfigureRespond<TRequest, TResponse>(Func<TRequest, MessageInformation, Task<TResponse>> onMessage, ResponderConfiguration cfg)

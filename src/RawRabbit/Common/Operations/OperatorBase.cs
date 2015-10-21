@@ -50,6 +50,26 @@ namespace RawRabbit.Common.Operations
 				);
 		}
 
+		protected void BindQueue(QueueConfiguration queue, ExchangeConfiguration exchange)
+		{
+			if (exchange.IsDefaultExchange())
+			{
+				/*
+					"The default exchange is implicitly bound to every queue,
+					with a routing key equal to the queue name. It it not possible
+					to explicitly bind to, or unbind from the default exchange."
+				*/
+				return;
+			}
+			ChannelFactory
+				.GetChannel()
+				.QueueBind(
+					queue: queue.QueueName,
+					exchange: exchange.ExchangeName,
+					routingKey: queue.QueueName
+				);
+		}
+
 		protected Task<byte[]> CreateMessageAsync<T>(T message)
 		{
 			return Task.Factory.StartNew(() => Serializer.Serialize(message));
