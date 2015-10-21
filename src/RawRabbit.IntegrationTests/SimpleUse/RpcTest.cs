@@ -46,17 +46,44 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			});
 
 			/* Test */
-			var first = await requester.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest {Number = 1});
-			var second = await requester.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest { Number = 2 });
-			var third = await requester.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest { Number = 3 });
+			var first = requester.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest {Number = 1});
+			var second = requester.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest { Number = 2 });
+			var third = requester.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest { Number = 3 });
+			Task.WaitAll(first, second, third);
 
 			/* Assert */
-			Assert.Contains(first.Payload, payloads);
-			Assert.Contains(second.Payload, payloads);
-			Assert.Contains(third.Payload, payloads);
-			Assert.NotEqual(first.Payload, second.Payload);
-			Assert.NotEqual(second.Payload, third.Payload);
-			Assert.NotEqual(first.Payload, third.Payload);
+			Assert.Contains(first.Result.Payload, payloads);
+			Assert.Contains(second.Result.Payload, payloads);
+			Assert.Contains(third.Result.Payload, payloads);
+			Assert.NotEqual(first.Result.Payload, second.Result.Payload);
+			Assert.NotEqual(second.Result.Payload, third.Result.Payload);
+			Assert.NotEqual(first.Result.Payload, third.Result.Payload);
+		}
+
+		[Fact]
+		public async void Should_Successfully_Perform_Nested_Requests()
+		{
+			/* Setup */
+			var payload = Guid.NewGuid();
+
+			var requester = BusClientFactory.CreateDefault();
+			var firstResponder = BusClientFactory.CreateDefault();
+			var secondResponder = BusClientFactory.CreateDefault();
+
+			await firstResponder.RespondAsync<FirstRequest, FirstResponse>(async (req, i) =>
+			{
+				var secondResp = await firstResponder.RequestAsync<SecondRequest, SecondResponse>(new SecondRequest());
+				return new FirstResponse {Infered = secondResp.Source};
+			});
+			await secondResponder.RespondAsync<SecondRequest, SecondResponse>((req, i) =>
+				Task.FromResult(new SecondResponse {Source = payload})
+			);
+
+			/* Test */
+			var response = await requester.RequestAsync<FirstRequest, FirstResponse>(new FirstRequest());
+			
+			/* Assert */
+			Assert.Equal(response.Infered, payload);
 		}
 	}
 }
