@@ -59,6 +59,20 @@ namespace RawRabbit.Common.Operations
 				);
 		}
 
+		protected void ConfigureQosAsync(IModel channel, ushort prefetchCount)
+		{
+			/*
+				QoS is per consumer on channel. If ChannelFactory is used,
+				we might get a new channel than the one the consumer is
+				we are configuring.
+			*/
+			channel.BasicQos(
+					prefetchSize: 0, //TODO : what is this?
+					prefetchCount: prefetchCount,
+					global: false // https://www.rabbitmq.com/consumer-prefetch.html
+				);
+		}
+
 		public virtual void Dispose()
 		{
 			ChannelFactory?.Dispose();

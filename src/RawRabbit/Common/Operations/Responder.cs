@@ -34,10 +34,9 @@ namespace RawRabbit.Common.Operations
 		{
 			var queueTask = DeclareQueueAsync(configuration.Queue);
 			var exchangeTask = DeclareExchangeAsync(configuration.Exchange);
-			var basicQosTask = ConfigureQosAsync(configuration);
 
 			return Task
-				.WhenAll(queueTask, exchangeTask, basicQosTask)
+				.WhenAll(queueTask, exchangeTask)
 				.ContinueWith(t => BindQueue(configuration))
 				.ContinueWith(t => ConfigureRespond(onMessage, configuration));
 		}
@@ -60,6 +59,7 @@ namespace RawRabbit.Common.Operations
 		private void ConfigureRespond<TRequest, TResponse>(Func<TRequest, MessageInformation, Task<TResponse>> onMessage, ResponderConfiguration cfg)
 		{
 			var channel = ChannelFactory.GetChannel();
+			ConfigureQosAsync(channel, cfg.PrefetchCount);
 			var consumer = new EventingBasicConsumer(channel);
 			channel.BasicConsume(cfg.Queue.QueueName, false, consumer);
 
@@ -100,20 +100,6 @@ namespace RawRabbit.Common.Operations
 				var replyProps = channel.CreateBasicProperties();
 				replyProps.CorrelationId = requestPayload.BasicProperties.CorrelationId;
 				return replyProps;
-			});
-		}
-
-		private Task ConfigureQosAsync(ResponderConfiguration config)
-		{
-			return Task.Factory.StartNew(() =>
-			{
-				_channelFactory
-					.GetChannel()
-					.BasicQos(
-						prefetchSize: 0, //TODO : what is this?
-						prefetchCount: config.PrefetchCount,
-						global: false // https://www.rabbitmq.com/consumer-prefetch.html
-				);
 			});
 		}
 	}

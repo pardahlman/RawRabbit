@@ -1,5 +1,7 @@
 ﻿using System;
+using System.CodeDom;
 using System.Threading.Tasks;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RawRabbit.Common.Serialization;
 using RawRabbit.Core.Configuration.Exchange;
@@ -29,10 +31,9 @@ namespace RawRabbit.Common.Operations
 		{
 			var queueTask = DeclareQueueAsync(config.Queue);
 			var exchangeTask = DeclareExchangeAsync(config.Exchange);
-			var basicQosTask = ConfigureQosAsync(config);
 			
 			return Task
-				.WhenAll(queueTask, exchangeTask, basicQosTask)
+				.WhenAll(queueTask, exchangeTask)
 				.ContinueWith(t => BindQueueAsync(config))
 				.ContinueWith(t => SubscribeAsync<T>(config, subscribeMethod));
 		}
@@ -42,6 +43,7 @@ namespace RawRabbit.Common.Operations
 			return Task.Factory.StartNew(() =>
 			{
 				var channel = _channelFactory.GetChannel();
+				ConfigureQosAsync(channel, config.PrefetchCount);
 				var consumer = new EventingBasicConsumer(channel);
 				consumer.Received += (model, ea) =>
 				{
@@ -78,20 +80,6 @@ namespace RawRabbit.Common.Operations
 						queue: config.Queue.QueueName,
 						exchange: config.Exchange.ExchangeName,
 						routingKey: config.RoutingKey
-				);
-			});
-		}
-
-		private Task ConfigureQosAsync(SubscriptionConfiguration config)
-		{
-			return Task.Factory.StartNew(() =>
-			{
-				_channelFactory
-					.GetChannel()
-					.BasicQos(
-						prefetchSize: 0, //TODO : what is this?
-						prefetchCount: config.PrefetchCount,
-						global: false // https://www.rabbitmq.com/consumer-prefetch.html
 				);
 			});
 		}
