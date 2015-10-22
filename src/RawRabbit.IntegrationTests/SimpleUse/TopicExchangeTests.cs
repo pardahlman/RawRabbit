@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
-using RawRabbit.Client;
-using RawRabbit.Core.Configuration.Exchange;
+using RawRabbit.Common;
+using RawRabbit.Configuration.Exchange;
 using RawRabbit.IntegrationTests.TestMessages;
 using Xunit;
 

@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
-using RawRabbit.Client;
 using RawRabbit.Common;
-using RawRabbit.Common.Conventions;
-using RawRabbit.Common.Operations;
-using RawRabbit.Common.Serialization;
-using RawRabbit.Core.Context;
-using RawRabbit.Core.Message;
+using RawRabbit.Context;
+using RawRabbit.Conventions;
 using RawRabbit.IntegrationTests.TestMessages;
+using RawRabbit.Operations;
+using RawRabbit.Serialization;
 using Xunit;
 
 namespace RawRabbit.IntegrationTests.SimpleUse

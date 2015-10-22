@@ -14,7 +14,7 @@ namespace RawRabbit.Common
 		private readonly ThreadLocal<IModel> _threadChannal; 
 		private readonly IConnection _connection;
 	
-			public ChannelFactory(IConnection connection)
+		public ChannelFactory(IConnection connection)
 		{
 			_connection = connection;
 			_threadChannal = new ThreadLocal<IModel>(connection.CreateModel);

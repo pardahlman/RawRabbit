@@ -1,10 +1,9 @@
 ﻿using System;
-using RawRabbit.Common.Conventions;
-using RawRabbit.Core.Configuration.Publish;
-using RawRabbit.Core.Configuration.Request;
-using RawRabbit.Core.Configuration.Respond;
-using RawRabbit.Core.Configuration.Subscribe;
-using RawRabbit.Core.Message;
+using RawRabbit.Configuration.Publish;
+using RawRabbit.Configuration.Request;
+using RawRabbit.Configuration.Respond;
+using RawRabbit.Configuration.Subscribe;
+using RawRabbit.Conventions;
 
 namespace RawRabbit.Common
 {

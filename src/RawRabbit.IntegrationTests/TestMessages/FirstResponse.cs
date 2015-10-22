@@ -1,5 +1,4 @@
 ﻿using System;
-using RawRabbit.Core.Message;
 
 namespace RawRabbit.IntegrationTests.TestMessages
 {

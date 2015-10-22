@@ -1,6 +1,4 @@
-﻿using RawRabbit.Core.Message;
-
-namespace RawRabbit.IntegrationTests.TestMessages
+﻿namespace RawRabbit.IntegrationTests.TestMessages
 {
 	public class SimpleMessage : MessageBase
 	{

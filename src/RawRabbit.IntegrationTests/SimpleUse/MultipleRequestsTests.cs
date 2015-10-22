@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using RawRabbit.Client;
+using RawRabbit.Common;
 using RawRabbit.IntegrationTests.TestMessages;
 using Xunit;
 
