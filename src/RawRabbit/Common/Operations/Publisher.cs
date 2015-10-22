@@ -41,7 +41,5 @@ namespace RawRabbit.Common.Operations
 				);
 			});
 		}
-
-
 	}
 }

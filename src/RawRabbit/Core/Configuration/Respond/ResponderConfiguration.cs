@@ -1,13 +1,8 @@
-﻿using RawRabbit.Core.Configuration.Exchange;
-using RawRabbit.Core.Configuration.Queue;
+﻿using RawRabbit.Core.Configuration.Operation;
 
 namespace RawRabbit.Core.Configuration.Respond
 {
-	public class ResponderConfiguration
+	public class ResponderConfiguration : ReciverConfigurationBase
 	{
-		public QueueConfiguration Queue { get; set; }
-		public ExchangeConfiguration Exchange { get; set; }
-		public ushort PrefetchCount { get; set; }
-		public string RoutingKey { get; set; }
 	}
 }

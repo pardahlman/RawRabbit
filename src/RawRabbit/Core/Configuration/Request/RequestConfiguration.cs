@@ -1,18 +1,18 @@
-﻿using RawRabbit.Core.Configuration.Exchange;
+﻿using RawRabbit.Core.Configuration.Operation;
 using RawRabbit.Core.Configuration.Queue;
 
 namespace RawRabbit.Core.Configuration.Request
 {
-	public class RequestConfiguration
+	public class RequestConfiguration : ConfigurationBase
 	{
-		public QueueConfiguration ReplyQueue { get; set; }
-		public ExchangeConfiguration Exchange { get; set; }
-		public string RoutingKey { get; set; }
-
-		public RequestConfiguration()
+		/*
+			ReplyQueue is a proxy property for Queue, which makes
+			it easier to follow the flow in Requester
+		*/ 
+		public QueueConfiguration ReplyQueue
 		{
-			ReplyQueue = new QueueConfiguration();
-			Exchange = new ExchangeConfiguration();
+			get { return Queue; }
+			set { Queue = value; }
 		}
 	}
 }

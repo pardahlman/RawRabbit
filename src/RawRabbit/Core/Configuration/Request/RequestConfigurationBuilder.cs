@@ -46,12 +46,6 @@ namespace RawRabbit.Core.Configuration.Request
 			return this;
 		}
 
-		public IRequestConfigurationBuilder WithReplyQueue(string replyTo)
-		{
-			WithReplyQueue(q => q.WithName(replyTo));
-			return this;
-		}
-
 		public IRequestConfigurationBuilder WithReplyQueue(Action<IQueueConfigurationBuilder> replyTo)
 		{
 			replyTo(_replyQueue);
