@@ -3,15 +3,15 @@
 
   "dependencies": {
     "RabbitMQ.Client": "3.5.6",
-    "Newtonsoft.Json": "7.0.1",
-    "xunit": "2.1.0"
+    "Newtonsoft.Json": "7.0.1"
   },
 
 	"commands": {
 	},
 
 	"frameworks": {
-		"dnx451": { }
+		"dnx451": { },
+		"net451": { }
 	},
 
 	"publishExclude": [
