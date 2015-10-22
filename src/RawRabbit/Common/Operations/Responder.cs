@@ -44,8 +44,8 @@ namespace RawRabbit.Common.Operations
 
 			consumer.Received += (sender, args) =>
 			{
-				Task.Factory
-					.StartNew(() => Serializer.Deserialize<TRequest>(args.Body))
+				Task
+					.Run(() => Serializer.Deserialize<TRequest>(args.Body))
 					.ContinueWith(t => onMessage(t.Result, null)).Unwrap()
 					.ContinueWith(payloadTask => SendRespondAsync(payloadTask.Result, args))
 					.ContinueWith(t => BasicAck(channel, args.DeliveryTag));
@@ -55,8 +55,8 @@ namespace RawRabbit.Common.Operations
 		private Task SendRespondAsync<TResponse>(TResponse result, BasicDeliverEventArgs requestPayload)
 		{
 			var propsTask = CreateReplyPropsAsync(requestPayload);
-			var serializeTask = Task.Factory.StartNew(() => Serializer.Serialize(result));
-
+			var serializeTask = Task.Run(() => Serializer.Serialize(result));
+			
 			return Task
 				.WhenAll(propsTask, serializeTask)
 				.ContinueWith(task =>
@@ -73,7 +73,7 @@ namespace RawRabbit.Common.Operations
 
 		private Task<IBasicProperties> CreateReplyPropsAsync(BasicDeliverEventArgs requestPayload)
 		{
-			return Task.Factory.StartNew(() =>
+			return Task.Run(() =>
 			{
 				var channel = ChannelFactory.GetChannel();
 				var replyProps = channel.CreateBasicProperties();

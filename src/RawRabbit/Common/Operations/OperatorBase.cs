@@ -25,7 +25,7 @@ namespace RawRabbit.Common.Operations
 			{
 				return Task.FromResult(true);
 			}
-			return Task.Factory.StartNew(() =>
+			return Task.Run(() =>
 				ChannelFactory
 					.GetChannel()
 					.ExchangeDeclare(
@@ -37,7 +37,7 @@ namespace RawRabbit.Common.Operations
 
 		protected Task DeclareQueueAsync(QueueConfiguration config)
 		{
-			return Task.Factory.StartNew(() =>
+			return Task.Run(() =>
 				ChannelFactory
 					.GetChannel()
 					.QueueDeclare(
@@ -72,7 +72,7 @@ namespace RawRabbit.Common.Operations
 
 		protected Task<byte[]> CreateMessageAsync<T>(T message)
 		{
-			return Task.Factory.StartNew(() => Serializer.Serialize(message));
+			return Task.Run(() => Serializer.Serialize(message));
 		}
 
 

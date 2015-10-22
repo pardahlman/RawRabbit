@@ -71,17 +71,21 @@ namespace RawRabbit.Common.Operations
 								*/
 							continue;
 						}
-						return Task.Factory
-								.StartNew(() => Serializer.Deserialize<TResponse>(args.Body))
-								.ContinueWith(t => responseTcs.SetResult(t.Result));
+						return Task
+								.Run(() => Serializer.Deserialize<TResponse>(args.Body))
+								.ContinueWith(t =>
+								{
+									channel.BasicCancel(consumer.ConsumerTag);
+									responseTcs.SetResult(t.Result);
+								});
 					}
-				}, TaskContinuationOptions.LongRunning);
+				}, TaskContinuationOptions.None);
 			return responseTcs.Task;
 		}
 
 		private Task<IBasicProperties> GetRequestPropsAsync(string queueName)
 		{
-			return Task.Factory.StartNew(() =>
+			return Task.Run(() =>
 			{
 				var channel = ChannelFactory.GetChannel();
 				var props = channel.CreateBasicProperties();

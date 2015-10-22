@@ -30,7 +30,7 @@ namespace RawRabbit.Common.Operations
 
 		private Task PublishAsync(byte[] body, PublishConfiguration config)
 		{
-			return Task.Factory.StartNew(() =>
+			return Task.Run(() =>
 			{
 				var channel = ChannelFactory.GetChannel();
 				channel.BasicPublish(

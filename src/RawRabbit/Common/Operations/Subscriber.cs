@@ -32,19 +32,19 @@ namespace RawRabbit.Common.Operations
 
 		private Task SubscribeAsync<T>(SubscriptionConfiguration config, Func<T, MessageInformation, Task> subscribeMethod)
 		{
-			return Task.Factory.StartNew(() =>
+			return Task.Run(() =>
 			{
 				var channel = ChannelFactory.GetChannel();
 				ConfigureQosAsync(channel, config.PrefetchCount);
 				var consumer = new EventingBasicConsumer(channel);
 				consumer.Received += (model, ea) =>
 				{
-					Task.Factory
-						.StartNew(() => Serializer.Deserialize<T>(ea.Body))
+					Task
+						.Run(() => Serializer.Deserialize<T>(ea.Body))
 						.ContinueWith(serializeTask =>
 							{
-								return Task.Factory
-									.StartNew(() => subscribeMethod(serializeTask.Result, null))
+								return Task
+									.Run(() => subscribeMethod(serializeTask.Result, null))
 									.ContinueWith(subscribeTask => BasicAck(channel, ea.DeliveryTag));
 							}
 						);
