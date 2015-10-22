@@ -1,6 +1,6 @@
 ﻿namespace RawRabbit.IntegrationTests.TestMessages
 {
-	public class FirstRequest : MessageBase
+	public class FirstRequest
 	{
 
 	}

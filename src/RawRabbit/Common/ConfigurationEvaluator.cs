@@ -9,10 +9,10 @@ namespace RawRabbit.Common
 {
 	public interface IConfigurationEvaluator
 	{
-		SubscriptionConfiguration GetConfiguration<T>(Action<ISubscriptionConfigurationBuilder> configuration = null) where T : MessageBase;
-		PublishConfiguration GetConfiguration<T>(Action<IPublishConfigurationBuilder> configuration) where T : MessageBase;
-		ResponderConfiguration GetConfiguration<TRequest, TResponse>(Action<IResponderConfigurationBuilder> configuration) where TRequest : MessageBase where TResponse : MessageBase;
-		RequestConfiguration GetConfiguration<TRequest, TResponse>(Action<IRequestConfigurationBuilder> configuration) where TRequest : MessageBase where TResponse : MessageBase;
+		SubscriptionConfiguration GetConfiguration<T>(Action<ISubscriptionConfigurationBuilder> configuration = null);
+		PublishConfiguration GetConfiguration<T>(Action<IPublishConfigurationBuilder> configuration);
+		ResponderConfiguration GetConfiguration<TRequest, TResponse>(Action<IResponderConfigurationBuilder> configuration);
+		RequestConfiguration GetConfiguration<TRequest, TResponse>(Action<IRequestConfigurationBuilder> configuration);
 	}
 
 	public class ConfigurationEvaluator : IConfigurationEvaluator
@@ -26,7 +26,7 @@ namespace RawRabbit.Common
 			_exchangeConventions = exchangeConventions;
 		}
 
-		public SubscriptionConfiguration GetConfiguration<T>(Action<ISubscriptionConfigurationBuilder> configuration = null) where T : MessageBase
+		public SubscriptionConfiguration GetConfiguration<T>(Action<ISubscriptionConfigurationBuilder> configuration = null)
 		{
 			var defaultQueue = _queueConventions.CreateQueueConfiguration<T>();
 			var defaultExchange = _exchangeConventions.CreateDefaultConfiguration<T>();
@@ -36,7 +36,7 @@ namespace RawRabbit.Common
 			return builder.Configuration;
 		}
 
-		public PublishConfiguration GetConfiguration<T>(Action<IPublishConfigurationBuilder> configuration) where T : MessageBase
+		public PublishConfiguration GetConfiguration<T>(Action<IPublishConfigurationBuilder> configuration)
 		{
 			var defaultQueue = _queueConventions.CreateQueueConfiguration<T>();
 			var defaultExchange = _exchangeConventions.CreateDefaultConfiguration<T>();
@@ -46,7 +46,7 @@ namespace RawRabbit.Common
 			return builder.Configuration;
 		}
 
-		public ResponderConfiguration GetConfiguration<TRequest, TResponse>(Action<IResponderConfigurationBuilder> configuration) where TRequest : MessageBase where TResponse: MessageBase
+		public ResponderConfiguration GetConfiguration<TRequest, TResponse>(Action<IResponderConfigurationBuilder> configuration)
 		{
 			var defaultQueue = _queueConventions.CreateQueueConfiguration<TResponse>();
 			var defaultExchange = _exchangeConventions.CreateDefaultConfiguration<TRequest>();
@@ -57,8 +57,6 @@ namespace RawRabbit.Common
 		}
 
 		public RequestConfiguration GetConfiguration<TRequest, TResponse>(Action<IRequestConfigurationBuilder> configuration)
-			where TRequest : MessageBase
-			where TResponse : MessageBase
 		{
 			var defaultConfig = new RequestConfiguration
 			{

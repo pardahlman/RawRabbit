@@ -11,9 +11,7 @@ namespace RawRabbit.Operations
 {
 	public interface IRequester
 	{
-		Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest message, Guid globalMessageId, RequestConfiguration config)
-			where TRequest : MessageBase
-			where TResponse : MessageBase;
+		Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest message, Guid globalMessageId, RequestConfiguration config);
 	}
 
 	public class Requester<TMessageContext> : OperatorBase, IRequester where TMessageContext : MessageContext
@@ -26,8 +24,6 @@ namespace RawRabbit.Operations
 		}
 
 		public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest message, Guid globalMessageId, RequestConfiguration config)
-			where TRequest : MessageBase
-			where TResponse : MessageBase
 		{
 			var replyQueueTask = DeclareQueueAsync(config.ReplyQueue);
 			var exchangeTask = DeclareExchangeAsync(config.Exchange);

@@ -10,7 +10,7 @@ namespace RawRabbit.Operations
 {
 	public interface ISubscriber<out TMessageContext> where TMessageContext : MessageContext
 	{
-		Task SubscribeAsync<T>(Func<T, TMessageContext, Task> subscribeMethod, SubscriptionConfiguration config) where T : MessageBase;
+		Task SubscribeAsync<T>(Func<T, TMessageContext, Task> subscribeMethod, SubscriptionConfiguration config);
 	}
 
 	public class Subscriber<TMessageContext> : OperatorBase, ISubscriber<TMessageContext> where TMessageContext : MessageContext
@@ -23,7 +23,7 @@ namespace RawRabbit.Operations
 			_contextProvider = contextProvider;
 		}
 
-		public Task SubscribeAsync<T>(Func<T, TMessageContext, Task> subscribeMethod, SubscriptionConfiguration config) where T : MessageBase
+		public Task SubscribeAsync<T>(Func<T, TMessageContext, Task> subscribeMethod, SubscriptionConfiguration config)
 		{
 			var queueTask = DeclareQueueAsync(config.Queue);
 			var exchangeTask = DeclareExchangeAsync(config.Exchange);

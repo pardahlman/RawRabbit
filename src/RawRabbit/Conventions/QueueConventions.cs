@@ -5,13 +5,13 @@ namespace RawRabbit.Conventions
 {
 	public interface IQueueConventions
 	{
-		QueueConfiguration CreateQueueConfiguration<T>() where T: MessageBase;
-		QueueConfiguration CreateResponseQueueConfiguration<T>() where T : MessageBase;
+		QueueConfiguration CreateQueueConfiguration<T>();
+		QueueConfiguration CreateResponseQueueConfiguration<T>();
 	}
 
 	public class QueueConventions : IQueueConventions
 	{
-		public QueueConfiguration CreateQueueConfiguration<T>() where T: MessageBase
+		public QueueConfiguration CreateQueueConfiguration<T>()
 		{
 			return new QueueConfiguration
 			{
@@ -22,7 +22,7 @@ namespace RawRabbit.Conventions
 			};
 		}
 
-		public QueueConfiguration CreateResponseQueueConfiguration<T>() where T : MessageBase
+		public QueueConfiguration CreateResponseQueueConfiguration<T>()
 		{
 			return new QueueConfiguration
 			{

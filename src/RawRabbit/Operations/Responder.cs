@@ -11,9 +11,7 @@ namespace RawRabbit.Operations
 {
 	public interface IResponder<out TMessageContext> where TMessageContext : MessageContext
 	{
-		Task RespondAsync<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, ResponderConfiguration configuration)
-			where TRequest : MessageBase
-			where TResponse : MessageBase;
+		Task RespondAsync<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, ResponderConfiguration configuration);
 	}
 
 	public class Responder<TMessageContext> : OperatorBase, IResponder<TMessageContext> where TMessageContext: MessageContext
@@ -27,8 +25,6 @@ namespace RawRabbit.Operations
 		}
 
 		public Task RespondAsync<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, ResponderConfiguration configuration)
-			where TRequest : MessageBase
-			where TResponse : MessageBase
 		{
 			var queueTask = DeclareQueueAsync(configuration.Queue);
 			var exchangeTask = DeclareExchangeAsync(configuration.Exchange);

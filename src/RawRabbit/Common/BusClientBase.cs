@@ -31,25 +31,25 @@ namespace RawRabbit.Common
 			_requester = requester;
 		}
 
-		public Task SubscribeAsync<T>(Func<T, TMessageContext, Task> subscribeMethod, Action<ISubscriptionConfigurationBuilder> configuration = null) where T : MessageBase
+		public Task SubscribeAsync<T>(Func<T, TMessageContext, Task> subscribeMethod, Action<ISubscriptionConfigurationBuilder> configuration = null)
 		{
 			var config = _configEval.GetConfiguration<T>(configuration);
 			return _subscriber.SubscribeAsync(subscribeMethod, config);
 		}
 
-		public Task PublishAsync<T>(T message = null, Guid globalMessageId = new Guid(), Action<IPublishConfigurationBuilder> configuration = null) where T : MessageBase
+		public Task PublishAsync<T>(T message = default(T), Guid globalMessageId = new Guid(), Action<IPublishConfigurationBuilder> configuration = null)
 		{
 			var config = _configEval.GetConfiguration<T>(configuration);
 			return _publisher.PublishAsync(message, globalMessageId, config);
 		}
 
-		public Task RespondAsync<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, Action<IResponderConfigurationBuilder> configuration = null) where TRequest : MessageBase where TResponse : MessageBase
+		public Task RespondAsync<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, Action<IResponderConfigurationBuilder> configuration = null)
 		{
 			var config = _configEval.GetConfiguration<TRequest, TResponse>(configuration);
 			return _responder.RespondAsync(onMessage, config);
 		}
 
-		public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest message = null, Guid globalMessageId = new Guid(), Action<IRequestConfigurationBuilder> configuration = null) where TRequest : MessageBase where TResponse : MessageBase 
+		public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest message = default(TRequest), Guid globalMessageId = new Guid(), Action<IRequestConfigurationBuilder> configuration = null)
 		{
 			var config = _configEval.GetConfiguration<TRequest, TResponse>(configuration);
 			return _requester.RequestAsync<TRequest, TResponse>(message, globalMessageId, config);

@@ -2,7 +2,7 @@
 
 namespace RawRabbit.IntegrationTests.TestMessages
 {
-	public class SecondResponse : MessageBase
+	public class SecondResponse
 	{
 		public Guid Source { get; set; }
 	}

@@ -4,13 +4,13 @@ namespace RawRabbit.Conventions
 {
 	public interface IExchangeConventions
 	{
-		ExchangeConfiguration CreateDefaultConfiguration<T>() where T : MessageBase;
+		ExchangeConfiguration CreateDefaultConfiguration<T>();
 		ExchangeConfiguration CreateDefaultRpcExchange<TRequest, TResponse>();
 	}
 
 	public class ExchangeConventions : IExchangeConventions
 	{
-		public ExchangeConfiguration CreateDefaultConfiguration<T>() where T : MessageBase
+		public ExchangeConfiguration CreateDefaultConfiguration<T>()
 		{
 			return new ExchangeConfiguration
 			{

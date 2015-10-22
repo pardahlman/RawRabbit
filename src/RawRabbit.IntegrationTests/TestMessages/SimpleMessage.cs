@@ -1,6 +1,6 @@
 ﻿namespace RawRabbit.IntegrationTests.TestMessages
 {
-	public class SimpleMessage : MessageBase
+	public class SimpleMessage
 	{
 		public bool IsSimple { get; set; }
 	}
