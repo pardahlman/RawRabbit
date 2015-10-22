@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using RabbitMQ.Client.Events;
 using RawRabbit.Common.Serialization;
 using RawRabbit.Core.Configuration.Subscribe;
+using RawRabbit.Core.Context;
 using RawRabbit.Core.Message;
 
 namespace RawRabbit.Common.Operations
@@ -14,9 +15,12 @@ namespace RawRabbit.Common.Operations
 
 	public class Subscriber<TMessageContext> : OperatorBase, ISubscriber<TMessageContext> where TMessageContext : MessageContext
 	{
-		public Subscriber(IChannelFactory channelFactory, IMessageSerializer serializer)
+		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
+
+		public Subscriber(IChannelFactory channelFactory, IMessageSerializer serializer, IMessageContextProvider<TMessageContext> contextProvider)
 			: base(channelFactory, serializer)
 		{
+			_contextProvider = contextProvider;
 		}
 
 		public Task SubscribeAsync<T>(Func<T, TMessageContext, Task> subscribeMethod, SubscriptionConfiguration config) where T : MessageBase
@@ -39,15 +43,15 @@ namespace RawRabbit.Common.Operations
 				var consumer = new EventingBasicConsumer(channel);
 				consumer.Received += (model, ea) =>
 				{
+					var bodyTask = Task.Run(() => Serializer.Deserialize<T>(ea.Body));
+					var contextTask = _contextProvider.ExtractContextAsync(ea.BasicProperties.Headers[_contextProvider.ContextHeaderName]);
 					Task
-						.Run(() => Serializer.Deserialize<T>(ea.Body))
-						.ContinueWith(serializeTask =>
-							{
-								return Task
-									.Run(() => subscribeMethod(serializeTask.Result, default(TMessageContext)))
-									.ContinueWith(subscribeTask => BasicAck(channel, ea.DeliveryTag));
-							}
-						);
+						.WhenAll(bodyTask, contextTask)
+						.ContinueWith(task =>
+						{
+							subscribeMethod(bodyTask.Result, contextTask.Result)
+								.ContinueWith(subscribeTask => BasicAck(channel, ea.DeliveryTag));
+						});
 				};
 
 				channel.BasicConsume(

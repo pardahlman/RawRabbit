@@ -1,20 +1,26 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using RawRabbit.Common.Serialization;
 using RawRabbit.Core.Configuration.Publish;
+using RawRabbit.Core.Context;
+using RawRabbit.Core.Message;
 
 namespace RawRabbit.Common.Operations
 {
 	public interface IPublisher
 	{
-		Task PublishAsync<T>(T message, PublishConfiguration config);
+		Task PublishAsync<TMessage>(TMessage message, PublishConfiguration config);
 	}
 
-	public class Publisher : OperatorBase , IPublisher
+	public class Publisher<TMessageContext> : OperatorBase, IPublisher where TMessageContext : MessageContext
 	{
+		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
 
-		public Publisher(IChannelFactory channelFactory, IMessageSerializer serializer)
+		public Publisher(IChannelFactory channelFactory, IMessageSerializer serializer, IMessageContextProvider<TMessageContext> contextProvider)
 			: base(channelFactory, serializer)
-		{ }
+		{
+			_contextProvider = contextProvider;
+		}
 
 		public Task PublishAsync<T>(T message, PublishConfiguration config)
 		{
@@ -30,16 +36,20 @@ namespace RawRabbit.Common.Operations
 
 		private Task PublishAsync(byte[] body, PublishConfiguration config)
 		{
-			return Task.Run(() =>
-			{
-				var channel = ChannelFactory.GetChannel();
-				channel.BasicPublish(
-					exchange: config.Exchange.ExchangeName,
-					routingKey: config.RoutingKey,
-					basicProperties: channel.CreateBasicProperties(), //TODO: move this to config
-					body: body
-				);
-			});
+			return Task
+				.Run(() => _contextProvider.GetMessageContextAsync())
+				.ContinueWith(ctxTask =>
+				{
+					var channel = ChannelFactory.GetChannel();
+					var properties = channel.CreateBasicProperties();
+					properties.Headers = new Dictionary<string, object> {["message_context"] = ctxTask.Result};
+					channel.BasicPublish(
+						exchange: config.Exchange.ExchangeName,
+						routingKey: config.RoutingKey,
+						basicProperties: properties,
+						body: body
+					);
+				});
 		}
 	}
 }

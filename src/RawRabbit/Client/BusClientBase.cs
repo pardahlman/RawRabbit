@@ -7,6 +7,7 @@ using RawRabbit.Core.Configuration.Publish;
 using RawRabbit.Core.Configuration.Request;
 using RawRabbit.Core.Configuration.Respond;
 using RawRabbit.Core.Configuration.Subscribe;
+using RawRabbit.Core.Context;
 using RawRabbit.Core.Message;
 
 namespace RawRabbit.Client
@@ -17,19 +18,20 @@ namespace RawRabbit.Client
 		private readonly ISubscriber<TMessageContext> _subscriber;
 		private readonly IPublisher _publisher;
 		private readonly IResponder<TMessageContext> _responder;
-		private readonly IRequester _request;
+		private readonly IRequester _requester;
 
 		protected BusClientBase(
 			IConfigurationEvaluator configEval,
 			ISubscriber<TMessageContext> subscriber,
 			IPublisher publisher,
-			IResponder<TMessageContext> responder, IRequester request)
+			IResponder<TMessageContext> responder,
+			IRequester requester)
 		{
 			_configEval = configEval;
 			_subscriber = subscriber;
 			_publisher = publisher;
 			_responder = responder;
-			_request = request;
+			_requester = requester;
 		}
 
 		public Task SubscribeAsync<T>(Func<T, TMessageContext, Task> subscribeMethod, Action<ISubscriptionConfigurationBuilder> configuration = null) where T : MessageBase
@@ -53,7 +55,7 @@ namespace RawRabbit.Client
 		public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest message = null, Action<IRequestConfigurationBuilder> configuration = null) where TRequest : MessageBase where TResponse : MessageBase 
 		{
 			var config = _configEval.GetConfiguration<TRequest, TResponse>(configuration);
-			return _request.RequestAsync<TRequest, TResponse>(message, config);
+			return _requester.RequestAsync<TRequest, TResponse>(message, config);
 		}
 	}
 }

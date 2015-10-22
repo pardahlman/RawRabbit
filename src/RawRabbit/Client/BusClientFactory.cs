@@ -1,8 +1,11 @@
-﻿using RabbitMQ.Client;
+﻿using System;
+using System.Threading.Tasks;
+using RabbitMQ.Client;
 using RawRabbit.Common;
 using RawRabbit.Common.Conventions;
 using RawRabbit.Common.Operations;
 using RawRabbit.Common.Serialization;
+using RawRabbit.Core.Context;
 using RawRabbit.Core.Message;
 
 namespace RawRabbit.Client
@@ -14,11 +17,12 @@ namespace RawRabbit.Client
 			config = config ?? RawRabbitConfiguration.Default;
 			var connection = new ConnectionFactory {HostName = config.Hostname}.CreateConnection();
 			var channelFactory = new ChannelFactory(connection);
+			var contextProvider = new DefaultMessageContextProvider(() => Task.FromResult(Guid.NewGuid()));
 			var serializer = new JsonMessageSerializer();
 			return new BusClient(
 				new ConfigurationEvaluator(new QueueConventions(), new ExchangeConventions()),
-				new Subscriber<MessageContext>(channelFactory, serializer),
-				new Publisher(channelFactory, serializer),
+				new Subscriber<MessageContext>(channelFactory, serializer, contextProvider),
+				new Publisher<MessageContext>(channelFactory, serializer, contextProvider),
 				new Responder<MessageContext>(channelFactory, serializer),
 				new Requester(channelFactory, serializer)
 			);
