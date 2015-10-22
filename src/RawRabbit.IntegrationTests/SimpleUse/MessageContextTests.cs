@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RawRabbit.Common;
 using RawRabbit.Context;
+using RawRabbit.Context.Provider;
 using RawRabbit.Conventions;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.Operations;

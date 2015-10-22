@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RawRabbit.Configuration;
 using RawRabbit.Context;
+using RawRabbit.Context.Provider;
 using RawRabbit.Conventions;
 using RawRabbit.Operations;
 using RawRabbit.Serialization;

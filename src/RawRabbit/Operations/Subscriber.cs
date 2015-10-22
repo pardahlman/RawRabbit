@@ -4,16 +4,17 @@ using RabbitMQ.Client.Events;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Subscribe;
 using RawRabbit.Context;
+using RawRabbit.Context.Provider;
 using RawRabbit.Serialization;
 
 namespace RawRabbit.Operations
 {
-	public interface ISubscriber<out TMessageContext> where TMessageContext : MessageContext
+	public interface ISubscriber<out TMessageContext> where TMessageContext : IMessageContext
 	{
 		Task SubscribeAsync<T>(Func<T, TMessageContext, Task> subscribeMethod, SubscriptionConfiguration config);
 	}
 
-	public class Subscriber<TMessageContext> : OperatorBase, ISubscriber<TMessageContext> where TMessageContext : MessageContext
+	public class Subscriber<TMessageContext> : OperatorBase, ISubscriber<TMessageContext> where TMessageContext : IMessageContext
 	{
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
 

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace RawRabbit.Context
+namespace RawRabbit.Context.Provider
 {
-	public interface IMessageContextProvider<TMessageContext> where TMessageContext : MessageContext
+	public interface IMessageContextProvider<TMessageContext> where TMessageContext : IMessageContext
 	{
 		string ContextHeaderName { get; }
 		Task<object> GetMessageContextAsync(Guid globalMessageId);

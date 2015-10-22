@@ -4,9 +4,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace RawRabbit.Context
+namespace RawRabbit.Context.Provider
 {
-	public abstract class MessageContextProviderBase<TMessageContext> : IMessageContextProvider<TMessageContext> where TMessageContext : MessageContext
+	public abstract class MessageContextProviderBase<TMessageContext> : IMessageContextProvider<TMessageContext> where TMessageContext : IMessageContext
 	{
 		public virtual string ContextHeaderName => "message_context";
 		protected ConcurrentDictionary<Guid, TMessageContext> ContextDictionary;

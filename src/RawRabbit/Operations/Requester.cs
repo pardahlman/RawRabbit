@@ -5,6 +5,7 @@ using RabbitMQ.Client;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Request;
 using RawRabbit.Context;
+using RawRabbit.Context.Provider;
 using RawRabbit.Serialization;
 
 namespace RawRabbit.Operations
@@ -14,7 +15,7 @@ namespace RawRabbit.Operations
 		Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest message, Guid globalMessageId, RequestConfiguration config);
 	}
 
-	public class Requester<TMessageContext> : OperatorBase, IRequester where TMessageContext : MessageContext
+	public class Requester<TMessageContext> : OperatorBase, IRequester where TMessageContext : IMessageContext
 	{
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
 

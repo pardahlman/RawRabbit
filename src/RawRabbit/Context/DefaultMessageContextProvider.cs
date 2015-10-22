@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace RawRabbit.Context
+namespace RawRabbit.Context.Provider
 {
 	public class DefaultMessageContextProvider : MessageContextProviderBase<MessageContext>
 	{

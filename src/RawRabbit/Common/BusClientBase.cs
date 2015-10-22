@@ -9,7 +9,7 @@ using RawRabbit.Operations;
 
 namespace RawRabbit.Common
 {
-	public abstract class BusClientBase<TMessageContext> : IBusClient<TMessageContext> where TMessageContext : MessageContext
+	public abstract class BusClientBase<TMessageContext> : IBusClient<TMessageContext> where TMessageContext : IMessageContext
 	{
 		private readonly IConfigurationEvaluator _configEval;
 		private readonly ISubscriber<TMessageContext> _subscriber;

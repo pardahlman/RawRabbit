@@ -5,16 +5,17 @@ using RabbitMQ.Client.Events;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Respond;
 using RawRabbit.Context;
+using RawRabbit.Context.Provider;
 using RawRabbit.Serialization;
 
 namespace RawRabbit.Operations
 {
-	public interface IResponder<out TMessageContext> where TMessageContext : MessageContext
+	public interface IResponder<out TMessageContext> where TMessageContext : IMessageContext
 	{
 		Task RespondAsync<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, ResponderConfiguration configuration);
 	}
 
-	public class Responder<TMessageContext> : OperatorBase, IResponder<TMessageContext> where TMessageContext: MessageContext
+	public class Responder<TMessageContext> : OperatorBase, IResponder<TMessageContext> where TMessageContext: IMessageContext
 	{
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
 

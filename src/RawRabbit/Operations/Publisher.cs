@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Publish;
 using RawRabbit.Context;
+using RawRabbit.Context.Provider;
 using RawRabbit.Serialization;
 
 namespace RawRabbit.Operations
@@ -13,7 +14,7 @@ namespace RawRabbit.Operations
 		Task PublishAsync<TMessage>(TMessage message, Guid globalMessageId, PublishConfiguration config);
 	}
 
-	public class Publisher<TMessageContext> : OperatorBase, IPublisher where TMessageContext : MessageContext
+	public class Publisher<TMessageContext> : OperatorBase, IPublisher where TMessageContext : IMessageContext
 	{
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
 
