@@ -2,7 +2,7 @@
 
 namespace RawRabbit.Core.Message
 {
-	public class MessageInformation
+	public class MessageContext
 	{
 		public Guid GlobalRequestId { get; set; }
 		public string SessionId { get; set; }

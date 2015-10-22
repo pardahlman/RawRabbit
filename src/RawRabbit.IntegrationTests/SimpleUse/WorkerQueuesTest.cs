@@ -30,7 +30,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 				{
 					allCallTcs.SetResult(noOfPublishes);
 				}
-				return allCallTcs.Task;
+				return Task.FromResult(true);
 			}, cfg => cfg.WithPrefetchCount(1));
 			await secondWorker.SubscribeAsync<BasicMessage>((msg, i) =>
 			{

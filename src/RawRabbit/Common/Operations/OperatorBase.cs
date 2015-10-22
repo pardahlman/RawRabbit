@@ -50,7 +50,7 @@ namespace RawRabbit.Common.Operations
 				);
 		}
 
-		protected void BindQueue(QueueConfiguration queue, ExchangeConfiguration exchange)
+		protected void BindQueue(QueueConfiguration queue, ExchangeConfiguration exchange, string routingKey)
 		{
 			if (exchange.IsDefaultExchange())
 			{
@@ -66,7 +66,7 @@ namespace RawRabbit.Common.Operations
 				.QueueBind(
 					queue: queue.QueueName,
 					exchange: exchange.ExchangeName,
-					routingKey: queue.QueueName
+					routingKey: routingKey
 				);
 		}
 

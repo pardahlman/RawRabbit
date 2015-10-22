@@ -28,7 +28,7 @@ namespace RawRabbit.Common.Operations
 
 			return Task
 				.WhenAll(replyQueueTask, exchangeTask)
-				.ContinueWith(t => BindQueue(config.ReplyQueue, config.Exchange))
+				.ContinueWith(t => BindQueue(config.ReplyQueue, config.Exchange, config.RoutingKey))
 				.ContinueWith(t => SendRequestAsync<TRequest, TResponse>(message, config))
 				.Unwrap();
 		}

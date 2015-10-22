@@ -8,15 +8,15 @@ using RawRabbit.Core.Message;
 
 namespace RawRabbit.Core.Client
 {
-	public interface IBusClient
+	public interface IBusClient<out TMessageContext> where TMessageContext : MessageContext
 	{
-		Task SubscribeAsync<T>(Func<T, MessageInformation, Task> subscribeMethod, Action<ISubscriptionConfigurationBuilder> configuration = null)
+		Task SubscribeAsync<T>(Func<T, TMessageContext, Task> subscribeMethod, Action<ISubscriptionConfigurationBuilder> configuration = null)
 			where T : MessageBase;
 
 		Task PublishAsync<T>(T message = null, Action<IPublishConfigurationBuilder> configuration = null)
 			where T : MessageBase;
 
-		Task RespondAsync<TRequest, TResponse>(Func<TRequest, MessageInformation, Task<TResponse>> onMessage, Action<IResponderConfigurationBuilder> configuration = null)
+		Task RespondAsync<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, Action<IResponderConfigurationBuilder> configuration = null)
 			where TRequest : MessageBase
 			where TResponse : MessageBase;
 

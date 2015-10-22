@@ -8,21 +8,21 @@ using RawRabbit.Core.Message;
 
 namespace RawRabbit.Common.Operations
 {
-	public interface IResponder
+	public interface IResponder<out TMessageContext> where TMessageContext : MessageContext
 	{
-		Task RespondAsync<TRequest, TResponse>(Func<TRequest, MessageInformation, Task<TResponse>> onMessage, ResponderConfiguration configuration)
+		Task RespondAsync<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, ResponderConfiguration configuration)
 			where TRequest : MessageBase
 			where TResponse : MessageBase;
 	}
 
-	public class Responder : OperatorBase, IResponder
+	public class Responder<TMessageContext> : OperatorBase, IResponder<TMessageContext> where TMessageContext: MessageContext
 	{
 		public Responder(IChannelFactory channelFactory, IMessageSerializer serializer)
 			: base(channelFactory, serializer)
 		{
 		}
 
-		public Task RespondAsync<TRequest, TResponse>(Func<TRequest, MessageInformation, Task<TResponse>> onMessage, ResponderConfiguration configuration)
+		public Task RespondAsync<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, ResponderConfiguration configuration)
 			where TRequest : MessageBase
 			where TResponse : MessageBase
 		{
@@ -31,11 +31,11 @@ namespace RawRabbit.Common.Operations
 
 			return Task
 				.WhenAll(queueTask, exchangeTask)
-				.ContinueWith(t => BindQueue(configuration.Queue, configuration.Exchange))
+				.ContinueWith(t => BindQueue(configuration.Queue, configuration.Exchange, configuration.RoutingKey))
 				.ContinueWith(t => ConfigureRespond(onMessage, configuration));
 		}
 
-		private void ConfigureRespond<TRequest, TResponse>(Func<TRequest, MessageInformation, Task<TResponse>> onMessage, ResponderConfiguration cfg)
+		private void ConfigureRespond<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, ResponderConfiguration cfg)
 		{
 			var channel = ChannelFactory.GetChannel();
 			ConfigureQosAsync(channel, cfg.PrefetchCount);

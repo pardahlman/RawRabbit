@@ -3,6 +3,7 @@ using RawRabbit.Common;
 using RawRabbit.Common.Conventions;
 using RawRabbit.Common.Operations;
 using RawRabbit.Common.Serialization;
+using RawRabbit.Core.Message;
 
 namespace RawRabbit.Client
 {
@@ -16,9 +17,9 @@ namespace RawRabbit.Client
 			var serializer = new JsonMessageSerializer();
 			return new BusClient(
 				new ConfigurationEvaluator(new QueueConventions(), new ExchangeConventions()),
-				new Subscriber(channelFactory, serializer),
+				new Subscriber<MessageContext>(channelFactory, serializer),
 				new Publisher(channelFactory, serializer),
-				new Responder(channelFactory, serializer),
+				new Responder<MessageContext>(channelFactory, serializer),
 				new Requester(channelFactory, serializer)
 			);
 		}
