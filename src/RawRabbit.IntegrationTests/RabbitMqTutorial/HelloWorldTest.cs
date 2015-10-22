@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using RawRabbit.Common;
+using RawRabbit.Configuration.Exchange;
 using RawRabbit.IntegrationTests.TestMessages;
 using Xunit;
 
@@ -42,8 +43,8 @@ namespace RawRabbit.IntegrationTests.RabbitMqTutorial
 			);
 
 			/* Test */
-			sender.PublishAsync(sent,
-				builder => builder
+			await sender.PublishAsync(sent,
+				configuration: builder => builder
 					.WithQueue(queue =>
 						queue.WithName("hello")
 						.WithDurability(false)

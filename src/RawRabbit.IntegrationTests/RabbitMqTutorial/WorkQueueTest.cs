@@ -41,8 +41,8 @@ namespace RawRabbit.IntegrationTests.RabbitMqTutorial
 			);
 
 			/* Test */
-			sender.PublishAsync(sent,
-				builder => builder
+			await sender.PublishAsync(sent,
+				configuration: builder => builder
 					.WithRoutingKey("task_queue")
 					.WithQueue(queue =>
 						queue

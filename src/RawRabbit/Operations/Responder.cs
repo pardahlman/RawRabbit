@@ -18,9 +18,12 @@ namespace RawRabbit.Operations
 
 	public class Responder<TMessageContext> : OperatorBase, IResponder<TMessageContext> where TMessageContext: MessageContext
 	{
-		public Responder(IChannelFactory channelFactory, IMessageSerializer serializer)
+		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
+
+		public Responder(IChannelFactory channelFactory, IMessageSerializer serializer, IMessageContextProvider<TMessageContext> contextProvider)
 			: base(channelFactory, serializer)
 		{
+			_contextProvider = contextProvider;
 		}
 
 		public Task RespondAsync<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, ResponderConfiguration configuration)
@@ -45,9 +48,11 @@ namespace RawRabbit.Operations
 
 			consumer.Received += (sender, args) =>
 			{
+				var bodyTask = Task.Run(() => Serializer.Deserialize<TRequest>(args.Body));
+				var contextTask = _contextProvider.ExtractContextAsync(args.BasicProperties.Headers[_contextProvider.ContextHeaderName]);
 				Task
-					.Run(() => Serializer.Deserialize<TRequest>(args.Body))
-					.ContinueWith(t => onMessage(t.Result, null)).Unwrap()
+					.WhenAll(bodyTask, contextTask)
+					.ContinueWith(task => onMessage(bodyTask.Result, contextTask.Result)).Unwrap()
 					.ContinueWith(payloadTask => SendRespondAsync(payloadTask.Result, args))
 					.ContinueWith(t => BasicAck(channel, args.DeliveryTag));
 			};

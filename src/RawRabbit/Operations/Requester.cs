@@ -1,25 +1,31 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Request;
+using RawRabbit.Context;
 using RawRabbit.Serialization;
 
 namespace RawRabbit.Operations
 {
 	public interface IRequester
 	{
-		Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest message, RequestConfiguration config)
+		Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest message, Guid globalMessageId, RequestConfiguration config)
 			where TRequest : MessageBase
 			where TResponse : MessageBase;
 	}
 
-	public class Requester : OperatorBase, IRequester
+	public class Requester<TMessageContext> : OperatorBase, IRequester where TMessageContext : MessageContext
 	{
-		public Requester(IChannelFactory channelFactory, IMessageSerializer serializer) : base(channelFactory, serializer)
-		{ }
+		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
 
-		public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest message, RequestConfiguration config)
+		public Requester(IChannelFactory channelFactory, IMessageSerializer serializer, IMessageContextProvider<TMessageContext> contextProvider) : base(channelFactory, serializer)
+		{
+			_contextProvider = contextProvider;
+		}
+
+		public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest message, Guid globalMessageId, RequestConfiguration config)
 			where TRequest : MessageBase
 			where TResponse : MessageBase
 		{
@@ -29,14 +35,14 @@ namespace RawRabbit.Operations
 			return Task
 				.WhenAll(replyQueueTask, exchangeTask)
 				.ContinueWith(t => BindQueue(config.ReplyQueue, config.Exchange, config.RoutingKey))
-				.ContinueWith(t => SendRequestAsync<TRequest, TResponse>(message, config))
+				.ContinueWith(t => SendRequestAsync<TRequest, TResponse>(message, globalMessageId, config))
 				.Unwrap();
 		}
 
-		private Task<TResponse> SendRequestAsync<TRequest, TResponse>(TRequest message, RequestConfiguration config)
+		private Task<TResponse> SendRequestAsync<TRequest, TResponse>(TRequest message, Guid globalMessageId, RequestConfiguration config)
 		{
 			var responseTcs = new TaskCompletionSource<TResponse>();
-			var propsTask = GetRequestPropsAsync(config.ReplyQueue.QueueName);
+			var propsTask = GetRequestPropsAsync(config.ReplyQueue.QueueName, globalMessageId);
 			var bodyTask = CreateMessageAsync(message);
 
 			Task
@@ -83,16 +89,22 @@ namespace RawRabbit.Operations
 			return responseTcs.Task;
 		}
 
-		private Task<IBasicProperties> GetRequestPropsAsync(string queueName)
+		private Task<IBasicProperties> GetRequestPropsAsync(string queueName, Guid globalMessageId)
 		{
-			return Task.Run(() =>
-			{
-				var channel = ChannelFactory.GetChannel();
-				var props = channel.CreateBasicProperties();
-				props.ReplyTo = queueName;
-				props.CorrelationId = Guid.NewGuid().ToString();
-				return props;
-			});
+			return Task
+				.Run(() => _contextProvider.GetMessageContextAsync(globalMessageId))
+				.ContinueWith(ctxTask =>
+				{
+					var channel = ChannelFactory.GetChannel();
+					var props = channel.CreateBasicProperties();
+					props.ReplyTo = queueName;
+					props.CorrelationId = Guid.NewGuid().ToString();
+					props.Headers = new Dictionary<string, object>
+					{
+						{ _contextProvider.ContextHeaderName, ctxTask.Result}
+					};
+					return props;
+				});
 		}
 	}
 }

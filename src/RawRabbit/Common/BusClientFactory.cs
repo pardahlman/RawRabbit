@@ -22,8 +22,8 @@ namespace RawRabbit.Common
 				new ConfigurationEvaluator(new QueueConventions(), new ExchangeConventions()),
 				new Subscriber<MessageContext>(channelFactory, serializer, contextProvider),
 				new Publisher<MessageContext>(channelFactory, serializer, contextProvider),
-				new Responder<MessageContext>(channelFactory, serializer),
-				new Requester(channelFactory, serializer)
+				new Responder<MessageContext>(channelFactory, serializer, contextProvider),
+				new Requester<MessageContext>(channelFactory, serializer, contextProvider)
 			);
 		}
 	}

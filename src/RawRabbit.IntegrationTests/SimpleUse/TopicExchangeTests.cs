@@ -52,7 +52,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 				.WithExchange(e => e.AssumeInitialized()));
 
 			/* Test */
-			await publisher.PublishAsync(new BasicMessage(), cfg => cfg
+			await publisher.PublishAsync(new BasicMessage(), configuration:cfg => cfg
 				.WithExchange(exchange => exchange.AssumeInitialized())
 				.WithRoutingKey("this.topic.queue"));
 			Task.WaitAll(firstMsgTcs.Task, secondMsgTcs.Task);

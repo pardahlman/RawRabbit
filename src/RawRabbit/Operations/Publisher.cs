@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Publish;
@@ -9,7 +10,7 @@ namespace RawRabbit.Operations
 {
 	public interface IPublisher
 	{
-		Task PublishAsync<TMessage>(TMessage message, PublishConfiguration config);
+		Task PublishAsync<TMessage>(TMessage message, Guid globalMessageId, PublishConfiguration config);
 	}
 
 	public class Publisher<TMessageContext> : OperatorBase, IPublisher where TMessageContext : MessageContext
@@ -22,7 +23,7 @@ namespace RawRabbit.Operations
 			_contextProvider = contextProvider;
 		}
 
-		public Task PublishAsync<T>(T message, PublishConfiguration config)
+		public Task PublishAsync<T>(T message, Guid globalMessageId, PublishConfiguration config)
 		{
 			var queueTask = DeclareQueueAsync(config.Queue);
 			var exchangeTask = DeclareExchangeAsync(config.Exchange);
@@ -30,19 +31,19 @@ namespace RawRabbit.Operations
 
 			return Task
 				.WhenAll(queueTask, exchangeTask, messageTask)
-				.ContinueWith(t => PublishAsync(messageTask.Result, config))
+				.ContinueWith(t => PublishAsync(messageTask.Result, config, globalMessageId))
 				.Unwrap();
 		}
 
-		private Task PublishAsync(byte[] body, PublishConfiguration config)
+		private Task PublishAsync(byte[] body, PublishConfiguration config, Guid globalMessageId)
 		{
 			return Task
-				.Run(() => _contextProvider.GetMessageContextAsync())
+				.Run(() => _contextProvider.GetMessageContextAsync(globalMessageId))
 				.ContinueWith(ctxTask =>
 				{
 					var channel = ChannelFactory.GetChannel();
 					var properties = channel.CreateBasicProperties();
-					properties.Headers = new Dictionary<string, object> {["message_context"] = ctxTask.Result};
+					properties.Headers = new Dictionary<string, object> {[_contextProvider.ContextHeaderName] = ctxTask.Result};
 					channel.BasicPublish(
 						exchange: config.Exchange.ExchangeName,
 						routingKey: config.RoutingKey,
