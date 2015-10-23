@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Request;
 using RawRabbit.Context;
@@ -47,7 +48,21 @@ namespace RawRabbit.Operations
 				.ContinueWith(task =>
 				{
 					var channel = ChannelFactory.GetChannel();
-					var consumer = new QueueingBasicConsumer(channel);
+					var consumer = new EventingBasicConsumer(channel);
+					consumer.Received += (sender, args) =>
+					{
+						if (args.BasicProperties.CorrelationId != propsTask.Result.CorrelationId)
+						{
+							return;
+						}
+						Task
+							.Run(() => Serializer.Deserialize<TResponse>(args.Body))
+							.ContinueWith(t =>
+							{
+								channel.BasicCancel(consumer.ConsumerTag);
+								responseTcs.SetResult(t.Result);
+							});
+					};
 					channel.BasicConsume(
 							queue: config.ReplyQueue.QueueName,
 							noAck: true,
@@ -59,29 +74,6 @@ namespace RawRabbit.Operations
 							basicProperties: propsTask.Result,
 							body: bodyTask.Result
 						);
-					while (true)
-					{
-						var args = consumer.Queue.Dequeue();
-						if (args.BasicProperties.CorrelationId != propsTask.Result.CorrelationId)
-						{
-								/*
-								"You may ask, why should we ignore unknown messages in the callback queue,
-								rather than failing with an error? It's due to a possibility of a race condition
-								on the server side. Although unlikely, it is possible that the RPC server will
-								die just after sending us the answer, but before sending an acknowledgment
-								message for the request." 
-								- https://www.rabbitmq.com/tutorials/tutorial-six-dotnet.html
-								*/
-							continue;
-						}
-						return Task
-								.Run(() => Serializer.Deserialize<TResponse>(args.Body))
-								.ContinueWith(t =>
-								{
-									channel.BasicCancel(consumer.ConsumerTag);
-									responseTcs.SetResult(t.Result);
-								});
-					}
 				}, TaskContinuationOptions.None);
 			return responseTcs.Task;
 		}

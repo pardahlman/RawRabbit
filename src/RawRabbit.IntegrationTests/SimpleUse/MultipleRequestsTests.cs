@@ -15,7 +15,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		public async void Should_Just_Work()
 		{
 			/* Setup */
-			const int numberOfCalls = 1000;
+			const int numberOfCalls = 10000;
 			var bag = new ConcurrentBag<Guid>();
 			var requester = BusClientFactory.CreateDefault();
 			var responder = BusClientFactory.CreateDefault();
