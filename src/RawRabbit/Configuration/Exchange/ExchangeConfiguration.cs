@@ -16,6 +16,13 @@ namespace RawRabbit.Configuration.Exchange
 			Arguments = new Dictionary<string, string>();
 		}
 
+		public ExchangeConfiguration(GeneralExchangeConfiguration exchange) : this()
+		{
+			Durable = exchange.Durable;
+			AutoDelete = exchange.AutoDelete;
+			ExchangeType = exchange.Type.ToString().ToLower();
+		}
+
 		public static ExchangeConfiguration Default => new ExchangeConfiguration
 		{
 			ExchangeName = "",

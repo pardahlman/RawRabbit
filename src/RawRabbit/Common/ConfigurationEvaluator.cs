@@ -30,20 +30,14 @@ namespace RawRabbit.Common
 
 		public SubscriptionConfiguration GetConfiguration<TMessage>(Action<ISubscriptionConfigurationBuilder> configuration = null)
 		{
-			var queueConfig = new QueueConfiguration
+			var queueConfig = new QueueConfiguration(_clientConfig.Queue)
 			{
 				QueueName = _convetions.QueueNamingConvention(typeof(TMessage)),
-				AutoDelete = _clientConfig.Queue.AutoDelete,
-				Durable = _clientConfig.Queue.Durable,
-				Exclusive = _clientConfig.Queue.Exclusive
 			};
 
-			var exchangeConfig = new ExchangeConfiguration
+			var exchangeConfig = new ExchangeConfiguration(_clientConfig.Exchange)
 			{
-				ExchangeName = _convetions.ExchangeNamingConvention(typeof(TMessage)),
-				Durable = _clientConfig.Exchange.Durable,
-				AutoDelete = _clientConfig.Exchange.AutoDelete,
-				ExchangeType = _clientConfig.Exchange.Type.ToString().ToLower(),
+				ExchangeName = _convetions.ExchangeNamingConvention(typeof(TMessage))
 			};
 
 			var builder = new SubscriptionConfigurationBuilder(queueConfig, exchangeConfig);
@@ -53,20 +47,14 @@ namespace RawRabbit.Common
 
 		public PublishConfiguration GetConfiguration<TMessage>(Action<IPublishConfigurationBuilder> configuration)
 		{
-			var queueConfig = new QueueConfiguration()
+			var queueConfig = new QueueConfiguration(_clientConfig.Queue)
 			{
 				QueueName = _convetions.QueueNamingConvention(typeof(TMessage)),
-				AutoDelete = _clientConfig.Queue.AutoDelete,
-				Durable = _clientConfig.Queue.Durable,
-				Exclusive = _clientConfig.Queue.Exclusive
 			};
 
-			var exchangeConfig = new ExchangeConfiguration
+			var exchangeConfig = new ExchangeConfiguration(_clientConfig.Exchange)
 			{
-				ExchangeName = _convetions.ExchangeNamingConvention(typeof(TMessage)),
-				Durable = _clientConfig.Exchange.Durable,
-				AutoDelete = _clientConfig.Exchange.AutoDelete,
-				ExchangeType = _clientConfig.Exchange.Type.ToString().ToLower(),
+				ExchangeName = _convetions.ExchangeNamingConvention(typeof(TMessage))
 			};
 
 			var builder = new PublishConfigurationBuilder(queueConfig, exchangeConfig);
@@ -76,20 +64,14 @@ namespace RawRabbit.Common
 
 		public ResponderConfiguration GetConfiguration<TRequest, TResponse>(Action<IResponderConfigurationBuilder> configuration)
 		{
-			var queueConfig = new QueueConfiguration
+			var queueConfig = new QueueConfiguration(_clientConfig.Queue)
 			{
-				QueueName = _convetions.QueueNamingConvention(typeof(TResponse)),
-				AutoDelete = _clientConfig.Queue.AutoDelete,
-				Durable = _clientConfig.Queue.Durable,
-				Exclusive = _clientConfig.Queue.Exclusive
+				QueueName = _convetions.QueueNamingConvention(typeof(TResponse))
 			};
 
-			var exchangeConfig = new ExchangeConfiguration
+			var exchangeConfig = new ExchangeConfiguration(_clientConfig.Exchange)
 			{
-				ExchangeName = _convetions.RpcExchangeNamingConvention(typeof(TRequest), typeof(TResponse)),
-				Durable = _clientConfig.Exchange.Durable,
-				AutoDelete = _clientConfig.Exchange.AutoDelete,
-				ExchangeType = _clientConfig.Exchange.Type.ToString().ToLower(),
+				ExchangeName = _convetions.RpcExchangeNamingConvention(typeof(TRequest), typeof(TResponse))
 			};
 
 			var builder = new ResponderConfigurationBuilder(queueConfig, exchangeConfig);
@@ -107,11 +89,8 @@ namespace RawRabbit.Common
 				Exclusive = true
 			};
 
-			var exchangeConfig = new ExchangeConfiguration
+			var exchangeConfig = new ExchangeConfiguration(_clientConfig.Exchange)
 			{
-				ExchangeName = _convetions.RpcExchangeNamingConvention(typeof(TRequest), typeof(TResponse)),
-				Durable = _clientConfig.Exchange.Durable,
-				AutoDelete = _clientConfig.Exchange.AutoDelete,
 				ExchangeType = _clientConfig.Exchange.Type.ToString().ToLower(),
 			};
 
