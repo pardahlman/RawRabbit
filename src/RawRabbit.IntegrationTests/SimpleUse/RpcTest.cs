@@ -19,7 +19,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			var requester = BusClientFactory.CreateDefault();
 			var responder = BusClientFactory.CreateDefault();
 			await responder.RespondAsync<BasicRequest, BasicResponse>((req, i) => Task.FromResult(response));
-			
+
 			/* Test */
 			var recieved = await requester.RequestAsync<BasicRequest, BasicResponse>();
 

@@ -27,7 +27,7 @@ namespace RawRabbit.Configuration
 			};
 			Queue = new GeneralQueueConfiguration
 			{
-				Exclusive = true,
+				Exclusive = false,
 				AutoDelete = true,
 				Durable = false
 			};

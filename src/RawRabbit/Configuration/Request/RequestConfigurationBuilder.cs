@@ -10,27 +10,11 @@ namespace RawRabbit.Configuration.Request
 		private readonly ExchangeConfigurationBuilder _exchange;
 		public RequestConfiguration Configuration { get; }
 
-		public RequestConfigurationBuilder(QueueConfiguration defaultQueue = null, QueueConfiguration replyQueue = null, ExchangeConfiguration defaultExchange = null)
-		{
-			_replyQueue = new QueueConfigurationBuilder(replyQueue);
-			_exchange = new ExchangeConfigurationBuilder(defaultExchange);
-			Configuration = new RequestConfiguration
-			{
-				Exchange = _exchange.Configuration,
-				ReplyQueue = _replyQueue.Configuration
-			};
-		}
-
 		public RequestConfigurationBuilder(RequestConfiguration defaultConfig)
 		{
 			_replyQueue = new QueueConfigurationBuilder(defaultConfig.ReplyQueue);
 			_exchange = new ExchangeConfigurationBuilder(defaultConfig.Exchange);
-			Configuration = new RequestConfiguration
-			{
-				Exchange = _exchange.Configuration,
-				ReplyQueue = _replyQueue.Configuration,
-				RoutingKey = defaultConfig.RoutingKey
-			};
+			Configuration = defaultConfig;
 		}
 
 		public IRequestConfigurationBuilder WithExchange(Action<IExchangeConfigurationBuilder> exchange)

@@ -9,20 +9,19 @@ namespace RawRabbit.Configuration.Publish
 	{
 		private readonly QueueConfigurationBuilder _queue;
 		private readonly ExchangeConfigurationBuilder _exchange;
-		private readonly string _routingKey;
+		private string _routingKey;
 
 		public PublishConfiguration Configuration => new PublishConfiguration
 		{
 			Queue = _queue.Configuration,
 			Exchange = _exchange.Configuration,
-			RoutingKey = _routingKey
+			RoutingKey = _routingKey ?? _queue.Configuration.QueueName
 		};
 
 		public PublishConfigurationBuilder(QueueConfiguration replyQueue = null, ExchangeConfiguration defaultExchange = null)
 		{
 			_queue = new QueueConfigurationBuilder(replyQueue);
 			_exchange = new ExchangeConfigurationBuilder(defaultExchange);
-			_routingKey = _queue.Configuration.QueueName;
 		}
 
 		public PublishConfigurationBuilder(RequestConfiguration defaultConfig)
@@ -40,13 +39,17 @@ namespace RawRabbit.Configuration.Publish
 
 		public IPublishConfigurationBuilder WithRoutingKey(string routingKey)
 		{
-			Configuration.RoutingKey = routingKey;
+			_routingKey = routingKey;
 			return this;
 		}
 
 		public IPublishConfigurationBuilder WithQueue(Action<IQueueConfigurationBuilder> replyTo)
 		{
 			replyTo(_queue);
+			if (string.IsNullOrWhiteSpace(_routingKey))
+			{
+				_routingKey = _queue.Configuration.QueueName;
+			}
 			return this;
 		}
 	}

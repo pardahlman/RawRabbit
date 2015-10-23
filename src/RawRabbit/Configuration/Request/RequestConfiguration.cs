@@ -7,6 +7,7 @@ namespace RawRabbit.Configuration.Request
 	{
 		public ExchangeConfiguration Exchange { get; set; }
 		public QueueConfiguration ReplyQueue { get; set; }
+		public string ReplyQueueRoutingKey { get; set; }
 		public string RoutingKey { get; set; }
 
 		public RequestConfiguration()

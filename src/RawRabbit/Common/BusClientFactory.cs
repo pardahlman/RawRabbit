@@ -4,7 +4,6 @@ using RabbitMQ.Client;
 using RawRabbit.Configuration;
 using RawRabbit.Context;
 using RawRabbit.Context.Provider;
-using RawRabbit.Conventions;
 using RawRabbit.Operations;
 using RawRabbit.Serialization;
 
@@ -20,7 +19,7 @@ namespace RawRabbit.Common
 			var contextProvider = new DefaultMessageContextProvider(() => Task.FromResult(Guid.NewGuid()));
 			var serializer = new JsonMessageSerializer();
 			return new BusClient(
-				new ConfigurationEvaluator(new QueueConventions(), new ExchangeConventions()),
+				new ConfigurationEvaluator(config, new NamingConvetions()),
 				new Subscriber<MessageContext>(channelFactory, serializer, contextProvider),
 				new Publisher<MessageContext>(channelFactory, serializer, contextProvider),
 				new Responder<MessageContext>(channelFactory, serializer, contextProvider),
@@ -39,7 +38,7 @@ namespace RawRabbit.Common
 			var contextProvider = new DefaultMessageContextProvider(() => Task.FromResult(Guid.NewGuid()));
 			var serializer = new JsonMessageSerializer();
 			return new BusClient(
-				new ConfigurationEvaluator(new QueueConventions(), new ExchangeConventions()),
+				new ConfigurationEvaluator(config, new NamingConvetions()),
 				new Subscriber<MessageContext>(channelFactory, serializer, contextProvider),
 				new Publisher<MessageContext>(channelFactory, serializer, contextProvider),
 				new Responder<MessageContext>(channelFactory, serializer, contextProvider),

@@ -2,9 +2,9 @@
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RawRabbit.Common;
+using RawRabbit.Configuration;
 using RawRabbit.Context;
 using RawRabbit.Context.Provider;
-using RawRabbit.Conventions;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.Operations;
 using RawRabbit.Serialization;
@@ -25,7 +25,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			var connection = new ConnectionFactory { HostName = "localhost" }.CreateConnection();
 			var contextProvider = new DefaultMessageContextProvider(() => Task.FromResult(expectedId));
 			var publisher = new BusClient(
-				configEval: new ConfigurationEvaluator(new QueueConventions(), new ExchangeConventions()),
+				configEval: new ConfigurationEvaluator(new RawRabbitConfiguration(), new NamingConvetions()),
 				subscriber: null,
 				publisher: new Publisher<MessageContext>(new ChannelFactory(connection), new JsonMessageSerializer(), contextProvider),
 				responder: null,
