@@ -31,7 +31,7 @@ namespace RawRabbit.Operations
 
 			return Task
 				.WhenAll(replyQueueTask, exchangeTask)
-				.ContinueWith(t => BindQueue(config.ReplyQueue, config.Exchange, config.RoutingKey))
+				.ContinueWith(t => BindQueue(config.ReplyQueue, config.Exchange, config.ReplyQueue.QueueName)) //TODO : Gosh. Make sure routing key is unique for an rpc.
 				.ContinueWith(t => SendRequestAsync<TRequest, TResponse>(message, globalMessageId, config))
 				.Unwrap();
 		}
