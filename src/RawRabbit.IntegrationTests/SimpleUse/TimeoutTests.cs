@@ -13,11 +13,11 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		{
 			/* Setup */
 			var responder = BusClientFactory.CreateDefault();
-			var requester = BusClientFactory.CreateDefault();
+			var requester = BusClientFactory.CreateDefault(requestTimeout: TimeSpan.FromMilliseconds(200));
 			await responder.RespondAsync<FirstRequest, FirstResponse>((request, context) =>
 			{
 				return Task
-					.Run(() => Task.Delay(500))
+					.Run(() => Task.Delay(250))
 					.ContinueWith(t => new FirstResponse());
 			});
 
@@ -31,7 +31,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		{
 			/* Setup */
 			var responder = BusClientFactory.CreateDefault();
-			var requester = BusClientFactory.CreateDefault();
+			var requester = BusClientFactory.CreateDefault(requestTimeout: TimeSpan.FromMilliseconds(200));
 			await responder.RespondAsync<FirstRequest, FirstResponse>((request, context) =>
 			{
 				return Task.FromResult(new FirstResponse());

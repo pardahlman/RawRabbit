@@ -33,10 +33,7 @@ namespace RawRabbit.Configuration
 			};
 		}
 
-		public static RawRabbitConfiguration Default = new RawRabbitConfiguration
-		{
-			Hostname = "localhost"
-		};
+		public static RawRabbitConfiguration Default => new RawRabbitConfiguration();
 	}
 
 	public class GeneralQueueConfiguration

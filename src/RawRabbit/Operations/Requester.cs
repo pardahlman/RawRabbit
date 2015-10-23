@@ -20,10 +20,12 @@ namespace RawRabbit.Operations
 	public class Requester<TMessageContext> : OperatorBase, IRequester where TMessageContext : IMessageContext
 	{
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
+		private readonly TimeSpan _requestTimeout;
 
-		public Requester(IChannelFactory channelFactory, IMessageSerializer serializer, IMessageContextProvider<TMessageContext> contextProvider) : base(channelFactory, serializer)
+		public Requester(IChannelFactory channelFactory, IMessageSerializer serializer, IMessageContextProvider<TMessageContext> contextProvider, TimeSpan requestTimeout) : base(channelFactory, serializer)
 		{
 			_contextProvider = contextProvider;
+			_requestTimeout = requestTimeout;
 		}
 
 		public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest message, Guid globalMessageId, RequestConfiguration config)
@@ -62,7 +64,7 @@ namespace RawRabbit.Operations
 						requestTimeOutTimer?.Dispose();
 						channel.BasicCancel(consumer.ConsumerTag);
 						responseTcs.TrySetException(new TimeoutException("Timed out, sorry bro."));
-					}, null, TimeSpan.FromMilliseconds(5000), TimeSpan.FromMilliseconds(-1));
+					}, null, _requestTimeout, TimeSpan.FromMilliseconds(-1));
 
 					consumer.Received += (sender, args) =>
 					{

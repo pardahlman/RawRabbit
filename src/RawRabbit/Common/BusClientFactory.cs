@@ -24,7 +24,26 @@ namespace RawRabbit.Common
 				new Subscriber<MessageContext>(channelFactory, serializer, contextProvider),
 				new Publisher<MessageContext>(channelFactory, serializer, contextProvider),
 				new Responder<MessageContext>(channelFactory, serializer, contextProvider),
-				new Requester<MessageContext>(channelFactory, serializer, contextProvider)
+				new Requester<MessageContext>(channelFactory, serializer, contextProvider, config.RequestTimeout)
+			);
+		}
+
+		public static BusClient CreateDefault(TimeSpan requestTimeout)
+		{
+			var config = new RawRabbitConfiguration
+			{
+				RequestTimeout = requestTimeout
+			};
+			var connection = new ConnectionFactory { HostName = config.Hostname }.CreateConnection();
+			var channelFactory = new ChannelFactory(connection);
+			var contextProvider = new DefaultMessageContextProvider(() => Task.FromResult(Guid.NewGuid()));
+			var serializer = new JsonMessageSerializer();
+			return new BusClient(
+				new ConfigurationEvaluator(new QueueConventions(), new ExchangeConventions()),
+				new Subscriber<MessageContext>(channelFactory, serializer, contextProvider),
+				new Publisher<MessageContext>(channelFactory, serializer, contextProvider),
+				new Responder<MessageContext>(channelFactory, serializer, contextProvider),
+				new Requester<MessageContext>(channelFactory, serializer, contextProvider, config.RequestTimeout)
 			);
 		}
 	}
