@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -49,12 +50,27 @@ namespace RawRabbit.Operations
 				{
 					var channel = ChannelFactory.GetChannel();
 					var consumer = new EventingBasicConsumer(channel);
+					channel.BasicConsume(
+						queue: config.ReplyQueue.QueueName,
+						noAck: true,
+						consumer: consumer
+					);
+
+					Timer requestTimeOutTimer = null;
+					requestTimeOutTimer = new Timer(state =>
+					{
+						requestTimeOutTimer?.Dispose();
+						channel.BasicCancel(consumer.ConsumerTag);
+						responseTcs.TrySetException(new TimeoutException("Timed out, sorry bro."));
+					}, null, TimeSpan.FromMilliseconds(5000), TimeSpan.FromMilliseconds(-1));
+
 					consumer.Received += (sender, args) =>
 					{
 						if (args.BasicProperties.CorrelationId != propsTask.Result.CorrelationId)
 						{
 							return;
 						}
+						requestTimeOutTimer.Dispose();
 						Task
 							.Run(() => Serializer.Deserialize<TResponse>(args.Body))
 							.ContinueWith(t =>
@@ -63,11 +79,7 @@ namespace RawRabbit.Operations
 								responseTcs.SetResult(t.Result);
 							});
 					};
-					channel.BasicConsume(
-							queue: config.ReplyQueue.QueueName,
-							noAck: true,
-							consumer: consumer
-						);
+
 					channel.BasicPublish(
 							exchange: config.Exchange.ExchangeName,
 							routingKey: config.RoutingKey,
