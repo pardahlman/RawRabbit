@@ -10,7 +10,7 @@ using RawRabbit.Operations;
 using RawRabbit.Serialization;
 using Xunit;
 
-namespace RawRabbit.IntegrationTests.SimpleUse
+namespace RawRabbit.IntegrationTests.Features
 {
 	public class MessageContextTests
 	{

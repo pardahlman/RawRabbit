@@ -15,9 +15,9 @@ namespace RawRabbit.Common
 		private IConnection _connection;
 		private readonly ThreadLocal<IModel> _threadChannal;
 
-		public ConfigChannelFactory(RawRabbitConfiguration config)
+		public ConfigChannelFactory(IConnectionFactory connectionFactory)
 		{
-			_connectionFn = () => CreateConnection(config);
+			_connectionFn = () => CreateConnection(connectionFactory);
 			_connection = _connectionFn();
 			_threadChannal = new ThreadLocal<IModel>(_connection.CreateModel);
 			_connection.ConnectionShutdown += (sender, args) =>
@@ -55,14 +55,8 @@ namespace RawRabbit.Common
 			return _threadChannal.Value;
 		}
 
-		private static IConnection CreateConnection(RawRabbitConfiguration config)
+		private static IConnection CreateConnection(IConnectionFactory factory)
 		{
-			var factory = new ConnectionFactory
-			{
-				HostName = config.Hostname,
-				UserName = config.Username,
-				Password = config.Password
-			};
 			try
 			{
 				return factory.CreateConnection();

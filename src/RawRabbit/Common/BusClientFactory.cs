@@ -16,6 +16,11 @@ namespace RawRabbit.Common
 			var services = new ServiceCollection();
 			services
 				.AddSingleton<RawRabbitConfiguration>(provider => config ?? new RawRabbitConfiguration())
+				.AddTransient<IConnectionFactory, ConnectionFactory>(p =>
+				{
+					var cfg = p.GetService<RawRabbitConfiguration>();
+					return new ConnectionFactory {HostName = cfg.Hostname, Password = cfg.Password, UserName = cfg.Username};
+				})
 				.AddTransient<IMessageSerializer, JsonMessageSerializer>()
 				.AddSingleton<IMessageContextProvider<MessageContext>, DefaultMessageContextProvider>(
 					p => new DefaultMessageContextProvider(() => Task.FromResult(Guid.NewGuid())))

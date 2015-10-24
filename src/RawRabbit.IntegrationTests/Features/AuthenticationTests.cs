@@ -1,10 +1,9 @@
-﻿using System;
-using RabbitMQ.Client.Exceptions;
+﻿using RabbitMQ.Client.Exceptions;
 using RawRabbit.Common;
 using RawRabbit.Configuration;
 using Xunit;
 
-namespace RawRabbit.IntegrationTests.SimpleUse
+namespace RawRabbit.IntegrationTests.Features
 {
 	public class AuthenticationTests
 	{

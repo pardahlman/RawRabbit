@@ -4,7 +4,7 @@ using RawRabbit.Common;
 using RawRabbit.IntegrationTests.TestMessages;
 using Xunit;
 
-namespace RawRabbit.IntegrationTests.SimpleUse
+namespace RawRabbit.IntegrationTests.Features
 {
 	public class TimeoutTests
 	{
