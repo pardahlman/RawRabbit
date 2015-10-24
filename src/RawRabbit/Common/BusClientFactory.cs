@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Exceptions;
+using Microsoft.Framework.DependencyInjection;
 using RawRabbit.Configuration;
 using RawRabbit.Context;
 using RawRabbit.Context.Provider;
@@ -12,61 +11,40 @@ namespace RawRabbit.Common
 {
 	public class BusClientFactory
 	{
-		public static BusClient CreateDefault(RawRabbitConfiguration config = null)
+		public static BusClient CreateDefault(RawRabbitConfiguration config = null, Action<IServiceCollection> configureIoc = null)
 		{
-			config = config ?? RawRabbitConfiguration.Default;
-			var connection = CreateConnection(config);
-			var channelFactory = new ConfigChannelFactory(config);
-			var contextProvider = new DefaultMessageContextProvider(() => Task.FromResult(Guid.NewGuid()));
-			var serializer = new JsonMessageSerializer();
+			var services = new ServiceCollection();
+			services
+				.AddSingleton<RawRabbitConfiguration>(provider => config ?? new RawRabbitConfiguration())
+				.AddTransient<IMessageSerializer, JsonMessageSerializer>()
+				.AddSingleton<IMessageContextProvider<MessageContext>, DefaultMessageContextProvider>(
+					p => new DefaultMessageContextProvider(() => Task.FromResult(Guid.NewGuid())))
+				.AddTransient<IChannelFactory, ConfigChannelFactory>()
+				.AddTransient<IConfigurationEvaluator, ConfigurationEvaluator>()
+				.AddTransient<INamingConvetions, NamingConvetions>()
+				.AddTransient<ISubscriber<MessageContext>, Subscriber<MessageContext>>()
+				.AddTransient<IPublisher, Publisher<MessageContext>>()
+				.AddTransient<IResponder<MessageContext>, Responder<MessageContext>>()
+				.AddTransient<IRequester, Requester<MessageContext>>(
+					p => new Requester<MessageContext>(
+						p.GetService<IChannelFactory>(),
+						p.GetService<IMessageSerializer>(),
+						p.GetService<IMessageContextProvider<MessageContext>>(),
+						p.GetService<RawRabbitConfiguration>().RequestTimeout));
+			configureIoc?.Invoke(services);
+			var serviceProvider = services.BuildServiceProvider();
 			return new BusClient(
-				new ConfigurationEvaluator(config, new NamingConvetions()),
-				new Subscriber<MessageContext>(channelFactory, serializer, contextProvider),
-				new Publisher<MessageContext>(channelFactory, serializer, contextProvider),
-				new Responder<MessageContext>(channelFactory, serializer, contextProvider),
-				new Requester<MessageContext>(channelFactory, serializer, contextProvider, config.RequestTimeout)
+				serviceProvider.GetService<IConfigurationEvaluator>(),
+				serviceProvider.GetService<ISubscriber<MessageContext>>(),
+				serviceProvider.GetService<IPublisher>(),
+				serviceProvider.GetService<IResponder<MessageContext>>(),
+				serviceProvider.GetService<IRequester>()
 			);
-		}
-
-		private static IConnection CreateConnection(RawRabbitConfiguration config)
-		{
-			var factory = new ConnectionFactory
-			{
-				HostName = config.Hostname,
-				UserName = config.Username,
-				Password = config.Password
-			};
-			try
-			{
-				return factory.CreateConnection();
-			}
-			catch (BrokerUnreachableException e)
-			{
-				if (e.InnerException is AuthenticationFailureException)
-				{
-					throw e.InnerException;
-				}
-				throw;
-			}
 		}
 
 		public static BusClient CreateDefault(TimeSpan requestTimeout)
 		{
-			var config = new RawRabbitConfiguration
-			{
-				RequestTimeout = requestTimeout
-			};
-			var connection = new ConnectionFactory { HostName = config.Hostname }.CreateConnection();
-			var channelFactory = new ChannelFactory(connection);
-			var contextProvider = new DefaultMessageContextProvider(() => Task.FromResult(Guid.NewGuid()));
-			var serializer = new JsonMessageSerializer();
-			return new BusClient(
-				new ConfigurationEvaluator(config, new NamingConvetions()),
-				new Subscriber<MessageContext>(channelFactory, serializer, contextProvider),
-				new Publisher<MessageContext>(channelFactory, serializer, contextProvider),
-				new Responder<MessageContext>(channelFactory, serializer, contextProvider),
-				new Requester<MessageContext>(channelFactory, serializer, contextProvider, config.RequestTimeout)
-			);
+			return CreateDefault(new RawRabbitConfiguration {RequestTimeout = requestTimeout});
 		}
 	}
 }

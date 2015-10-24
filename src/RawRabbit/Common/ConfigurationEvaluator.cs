@@ -71,7 +71,7 @@ namespace RawRabbit.Common
 
 			var exchangeConfig = new ExchangeConfiguration(_clientConfig.Exchange)
 			{
-				ExchangeName = _convetions.RpcExchangeNamingConvention(typeof(TRequest), typeof(TResponse))
+				ExchangeName = _convetions.RpcExchangeNamingConvention(typeof(TRequest), typeof(TResponse)),
 			};
 
 			var builder = new ResponderConfigurationBuilder(queueConfig, exchangeConfig);
@@ -91,7 +91,7 @@ namespace RawRabbit.Common
 
 			var exchangeConfig = new ExchangeConfiguration(_clientConfig.Exchange)
 			{
-				ExchangeType = _clientConfig.Exchange.Type.ToString().ToLower(),
+				ExchangeName = _convetions.RpcExchangeNamingConvention(typeof(TRequest), typeof(TResponse))
 			};
 
 			var defaultConfig = new RequestConfiguration
