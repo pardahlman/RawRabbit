@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.Framework.DependencyInjection;
+using RabbitMQ.Client;
 using RawRabbit.Configuration;
 using RawRabbit.Context;
 using RawRabbit.Context.Provider;
