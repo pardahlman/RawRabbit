@@ -6,6 +6,8 @@ namespace RawRabbit.Configuration
 	public class RawRabbitConfiguration
 	{
 		public string Hostname { get; set; }
+		public string Username { get; set; }
+		public string Password { get; set; }
 		public string VirtualHost { get; set; }
 
 		/// <summary>
@@ -18,6 +20,8 @@ namespace RawRabbit.Configuration
 		public RawRabbitConfiguration()
 		{
 			Hostname = "localhost";
+			Username = "guest";
+			Password = "guest";
 			RequestTimeout = TimeSpan.FromSeconds(10);
 			Exchange = new GeneralExchangeConfiguration
 			{
@@ -34,6 +38,7 @@ namespace RawRabbit.Configuration
 		}
 
 		public static RawRabbitConfiguration Default => new RawRabbitConfiguration();
+
 	}
 
 	public class GeneralQueueConfiguration
