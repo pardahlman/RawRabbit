@@ -16,7 +16,7 @@ namespace RawRabbit.Common
 		{
 			config = config ?? RawRabbitConfiguration.Default;
 			var connection = CreateConnection(config);
-			var channelFactory = new ChannelFactory(connection);
+			var channelFactory = new ConfigChannelFactory(config);
 			var contextProvider = new DefaultMessageContextProvider(() => Task.FromResult(Guid.NewGuid()));
 			var serializer = new JsonMessageSerializer();
 			return new BusClient(
