@@ -102,6 +102,7 @@ namespace RawRabbit.Operations
 					var props = channel.CreateBasicProperties();
 					props.ReplyTo = queueName;
 					props.CorrelationId = Guid.NewGuid().ToString();
+					props.MessageId = Guid.NewGuid().ToString();
 					props.Headers = new Dictionary<string, object>
 					{
 						{ _contextProvider.ContextHeaderName, ctxTask.Result}

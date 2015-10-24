@@ -19,7 +19,7 @@ namespace RawRabbit.Common
 		{
 			_connectionFn = () => CreateConnection(connectionFactory);
 			_connection = _connectionFn();
-			_threadChannal = new ThreadLocal<IModel>(_connection.CreateModel);
+			_threadChannal = new ThreadLocal<IModel>(_connection.CreateModel, true);
 			_connection.ConnectionShutdown += (sender, args) =>
 			{
 				_connection = _connectionFn();
@@ -38,6 +38,14 @@ namespace RawRabbit.Common
 				{
 					_connection.Close();
 				}
+			}
+		}
+
+		public void CloseAll()
+		{
+			foreach (var channel in _threadChannal.Values)
+			{
+				channel?.Close();
 			}
 		}
 

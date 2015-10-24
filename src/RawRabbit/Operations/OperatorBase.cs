@@ -13,7 +13,6 @@ namespace RawRabbit.Operations
 		protected readonly IChannelFactory ChannelFactory;
 		protected readonly IMessageSerializer Serializer;
 
-
 		protected OperatorBase(IChannelFactory channelFactory, IMessageSerializer serializer)
 		{
 			ChannelFactory = channelFactory;
@@ -75,7 +74,6 @@ namespace RawRabbit.Operations
 		{
 			return Task.Run(() => Serializer.Serialize(message));
 		}
-
 
 		protected void BasicAck(IModel channel, ulong deliveryTag)
 		{
