@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using RabbitMQ.Client.Events;
 using RawRabbit.Common;
@@ -50,8 +51,18 @@ namespace RawRabbit.Operations
 						.WhenAll(bodyTask, contextTask)
 						.ContinueWith(task =>
 						{
-							subscribeMethod(bodyTask.Result, contextTask.Result)
-								.ContinueWith(subscribeTask => BasicAck(channel, ea.DeliveryTag));
+							Task subscribeTask;
+							try
+							{
+								subscribeTask = subscribeMethod(bodyTask.Result, contextTask.Result);
+							}
+							catch (Exception)
+							{
+								return;
+								// TODO: error handling here.
+							}
+							subscribeTask
+								.ContinueWith(t=> BasicAck(channel, ea.DeliveryTag));
 						});
 				};
 
