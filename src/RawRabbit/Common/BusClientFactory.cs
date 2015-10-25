@@ -38,7 +38,7 @@ namespace RawRabbit.Common
 				.AddTransient<IConsumerFactory, EventingBasicConsumerFactory>()
 				.AddSingleton<IMessageContextProvider<MessageContext>, DefaultMessageContextProvider>(
 					p => new DefaultMessageContextProvider(() => Task.FromResult(Guid.NewGuid())))
-				.AddSingleton<IChannelFactory, ConfigChannelFactory>() //TODO: Should this be one/application?
+				.AddSingleton<IChannelFactory, ChannelFactory>() //TODO: Should this be one/application?
 				.AddTransient<IConfigurationEvaluator, ConfigurationEvaluator>()
 				.AddTransient<INamingConvetions, NamingConvetions>()
 				.AddTransient<ISubscriber<MessageContext>, Subscriber<MessageContext>>()

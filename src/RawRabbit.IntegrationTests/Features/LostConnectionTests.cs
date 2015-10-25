@@ -21,7 +21,7 @@ namespace RawRabbit.IntegrationTests.Features
 		public async void Should_Succeed_To_Send_Response_Even_If_Channel_Is_Closed()
 		{
 			/* Setup */
-			var channelFactory = new ConfigChannelFactory(new ConnectionFactory {HostName = "localhost"});
+			var channelFactory = new ChannelFactory(new ConnectionFactory {HostName = "localhost"});
 			var expectedResponse = new FirstResponse {Infered = Guid.NewGuid()};
 			var reqeuster = BusClientFactory.CreateDefault(TimeSpan.FromHours(1));
 			var responder = BusClientFactory.CreateDefault(new RawRabbitConfiguration {RequestTimeout = TimeSpan.FromHours(1)}, s => s.AddInstance(typeof (IChannelFactory), channelFactory));

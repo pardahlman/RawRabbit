@@ -10,13 +10,13 @@ namespace RawRabbit.Common
 		IModel GetChannel();
 	}
 
-	public class ConfigChannelFactory : IChannelFactory
+	public class ChannelFactory : IChannelFactory
 	{
 		private readonly Func<IConnection> _connectionFn;
 		private IConnection _connection;
 		private readonly ThreadLocal<IModel> _threadChannal;
 
-		public ConfigChannelFactory(IConnectionFactory connectionFactory)
+		public ChannelFactory(IConnectionFactory connectionFactory)
 		{
 			_connectionFn = () => CreateConnection(connectionFactory);
 			_connection = _connectionFn();
