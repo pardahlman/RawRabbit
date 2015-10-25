@@ -88,7 +88,7 @@ namespace RawRabbit.Operations
 				);
 		}
 
-		protected void ConfigureQosAsync(IModel channel, ushort prefetchCount)
+		protected void ConfigureQos(IModel channel, ushort prefetchCount)
 		{
 			/*
 				QoS is per consumer on channel. If ChannelFactory is used,

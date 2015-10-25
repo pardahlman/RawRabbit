@@ -3,27 +3,25 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Request;
+using RawRabbit.Consumer.Contract;
 using RawRabbit.Context;
 using RawRabbit.Context.Provider;
+using RawRabbit.Operations.Contracts;
 using RawRabbit.Serialization;
 
 namespace RawRabbit.Operations
 {
-	public interface IRequester
-	{
-		Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest message, Guid globalMessageId, RequestConfiguration config);
-	}
-
 	public class Requester<TMessageContext> : OperatorBase, IRequester where TMessageContext : IMessageContext
 	{
+		private readonly IConsumerFactory _consumerFactory;
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
 		private readonly TimeSpan _requestTimeout;
 
-		public Requester(IChannelFactory channelFactory, IMessageSerializer serializer, IMessageContextProvider<TMessageContext> contextProvider, TimeSpan requestTimeout) : base(channelFactory, serializer)
+		public Requester(IChannelFactory channelFactory, IConsumerFactory consumerFactory, IMessageSerializer serializer, IMessageContextProvider<TMessageContext> contextProvider, TimeSpan requestTimeout) : base(channelFactory, serializer)
 		{
+			_consumerFactory = consumerFactory;
 			_contextProvider = contextProvider;
 			_requestTimeout = requestTimeout;
 		}
@@ -40,55 +38,49 @@ namespace RawRabbit.Operations
 				.Unwrap();
 		}
 
-		private Task<TResponse> SendRequestAsync<TRequest, TResponse>(TRequest message, Guid globalMessageId, RequestConfiguration config)
+		private Task<TResponse> SendRequestAsync<TRequest, TResponse>(TRequest message, Guid globalMessageId, RequestConfiguration cfg)
 		{
 			var responseTcs = new TaskCompletionSource<TResponse>();
-			var propsTask = GetRequestPropsAsync(config.ReplyQueue.QueueName, globalMessageId);
+			var propsTask = GetRequestPropsAsync(cfg.ReplyQueue.QueueName, globalMessageId);
 			var bodyTask = CreateMessageAsync(message);
 
 			Task
 				.WhenAll(propsTask, bodyTask)
 				.ContinueWith(task =>
 				{
-					var channel = ChannelFactory.GetChannel();
-					var consumer = new EventingBasicConsumer(channel);
-					channel.BasicConsume(
-						queue: config.ReplyQueue.QueueName,
-						noAck: true,
-						consumer: consumer
-					);
+					var consumer = _consumerFactory.CreateConsumer(cfg);
 
 					Timer requestTimeOutTimer = null;
 					requestTimeOutTimer = new Timer(state =>
 					{
 						requestTimeOutTimer?.Dispose();
-						channel.BasicCancel(consumer.ConsumerTag);
-						responseTcs.TrySetException(new TimeoutException("Timed out, sorry bro."));
+						consumer.Disconnect();
+						responseTcs.TrySetException(new TimeoutException($"The request timed out after {_requestTimeout.ToString("g")}."));
 					}, null, _requestTimeout, TimeSpan.FromMilliseconds(-1));
 
-					consumer.Received += (sender, args) =>
+					consumer.OnMessageAsync = (o, args) =>
 					{
 						if (args.BasicProperties.CorrelationId != propsTask.Result.CorrelationId)
 						{
-							return;
+							return Task.FromResult(false);
 						}
-						requestTimeOutTimer.Dispose();
-						Task
+						requestTimeOutTimer?.Dispose();
+						return Task
 							.Run(() => Serializer.Deserialize<TResponse>(args.Body))
 							.ContinueWith(t =>
 							{
-								channel.BasicCancel(consumer.ConsumerTag);
+								consumer.Disconnect();
 								responseTcs.SetResult(t.Result);
 							});
 					};
 
-					channel.BasicPublish(
-							exchange: config.Exchange.ExchangeName,
-							routingKey: config.RoutingKey,
+					consumer.Model.BasicPublish(
+							exchange: cfg.Exchange.ExchangeName,
+							routingKey: cfg.RoutingKey,
 							basicProperties: propsTask.Result,
 							body: bodyTask.Result
 						);
-				}, TaskContinuationOptions.None);
+				});
 			return responseTcs.Task;
 		}
 

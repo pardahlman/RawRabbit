@@ -3,7 +3,12 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Framework.DependencyInjection;
 using RawRabbit.Common;
+using RawRabbit.Configuration;
+using RawRabbit.Consumer;
+using RawRabbit.Consumer.Contract;
+using RawRabbit.Consumer.Queueing;
 using RawRabbit.IntegrationTests.TestMessages;
 using Xunit;
 
@@ -16,7 +21,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		{
 			/* Setup */
 			var response = new BasicResponse {Prop = "This is the reponse."};
-			var requester = BusClientFactory.CreateDefault();
+			var requester = BusClientFactory.CreateDefault(TimeSpan.FromHours(2));
 			var responder = BusClientFactory.CreateDefault();
 			await responder.RespondAsync<BasicRequest, BasicResponse>((req, i) => Task.FromResult(response));
 
@@ -84,6 +89,25 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			
 			/* Assert */
 			Assert.Equal(response.Infered, payload);
+		}
+
+		[Fact]
+		public async void Should_Work_With_Queueing_Consumer_Factory()
+		{
+			/* Setup */
+			var response = new BasicResponse { Prop = "This is the reponse." };
+			var requester = BusClientFactory.CreateDefault(
+				new RawRabbitConfiguration { RequestTimeout = TimeSpan.FromHours(1)}
+			);
+
+			var responder = BusClientFactory.CreateDefault(null, service => service.AddTransient<IConsumerFactory, QueueingBaiscConsumerFactory>());
+			await responder.RespondAsync<BasicRequest, BasicResponse>((req, i) => Task.FromResult(response));
+
+			/* Test */
+			var recieved = await requester.RequestAsync<BasicRequest, BasicResponse>();
+
+			/* Assert */
+			Assert.Equal(recieved.Prop, response.Prop);
 		}
 	}
 }

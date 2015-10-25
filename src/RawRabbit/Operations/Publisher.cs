@@ -5,15 +5,11 @@ using RawRabbit.Common;
 using RawRabbit.Configuration.Publish;
 using RawRabbit.Context;
 using RawRabbit.Context.Provider;
+using RawRabbit.Operations.Contracts;
 using RawRabbit.Serialization;
 
 namespace RawRabbit.Operations
 {
-	public interface IPublisher
-	{
-		Task PublishAsync<TMessage>(TMessage message, Guid globalMessageId, PublishConfiguration config);
-	}
-
 	public class Publisher<TMessageContext> : OperatorBase, IPublisher where TMessageContext : IMessageContext
 	{
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;

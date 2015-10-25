@@ -1,9 +1,10 @@
 ﻿using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Queue;
+using RawRabbit.Configuration.Respond;
 
 namespace RawRabbit.Configuration.Subscribe
 {
-	public class SubscriptionConfiguration
+	public class SubscriptionConfiguration : IConsumerConfiguration
 	{
 		public bool NoAck { get; set; }
 		public ushort PrefetchCount { get; set; }

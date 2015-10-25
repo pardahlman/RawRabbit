@@ -19,7 +19,8 @@ namespace RawRabbit.Configuration.Respond
 			{
 				Queue = _queueBuilder.Configuration,
 				Exchange = _exchangeBuilder.Configuration,
-				RoutingKey = _queueBuilder.Configuration.QueueName
+				RoutingKey = _queueBuilder.Configuration.QueueName,
+				NoAck = true //TODO: Move to config.
 			};
 		}
 
