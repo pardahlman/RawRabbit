@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.Framework.DependencyInjection;
 using RabbitMQ.Client;
 using RawRabbit.Common;
 using RawRabbit.Configuration;
@@ -22,15 +23,8 @@ namespace RawRabbit.IntegrationTests.Features
 
 			var expectedId = Guid.NewGuid();
 			var subscribeTcs = new TaskCompletionSource<Guid>();
-			var connection = new ConnectionFactory { HostName = "localhost" }.CreateConnection();
 			var contextProvider = new DefaultMessageContextProvider(() => Task.FromResult(expectedId));
-			var publisher = new BusClient(
-				configEval: new ConfigurationEvaluator(new RawRabbitConfiguration(), new NamingConvetions()),
-				subscriber: null,
-				publisher: new Publisher<MessageContext>(new ChannelFactory(connection), new JsonMessageSerializer(), contextProvider),
-				responder: null,
-				requester: null
-			);
+			var publisher = BusClientFactory.CreateDefault(null, collection => collection.AddInstance(typeof (IMessageContextProvider<MessageContext>), contextProvider));
 			await subscriber.SubscribeAsync<BasicMessage>((msg, c) =>
 			{
 				subscribeTcs.SetResult(c.GlobalRequestId);

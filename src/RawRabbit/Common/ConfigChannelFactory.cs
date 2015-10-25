@@ -1,14 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
-using RawRabbit.Configuration;
 
 namespace RawRabbit.Common
 {
+	public interface IChannelFactory : IDisposable
+	{
+		IModel GetChannel();
+	}
+
 	public class ConfigChannelFactory : IChannelFactory
 	{
 		private readonly Func<IConnection> _connectionFn;
