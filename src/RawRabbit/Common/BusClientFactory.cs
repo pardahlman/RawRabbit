@@ -17,7 +17,7 @@ namespace RawRabbit.Common
 {
 	public class BusClientFactory
 	{
-		public static BusClient CreateDefault(RawRabbitConfiguration config = null, Action<IServiceCollection> configureIoc = null)
+		public static BusClient CreateDefault(RawRabbitConfiguration config, Action<IServiceCollection> configureIoc = null)
 		{
 			var services = new ServiceCollection();
 			services
@@ -54,6 +54,16 @@ namespace RawRabbit.Common
 			configureIoc?.Invoke(services);
 			var serviceProvider = services.BuildServiceProvider();
 
+			return CreateDefault(serviceProvider);
+		}
+
+		public static BusClient CreateDefault(Action<IServiceCollection> services = null)
+		{
+			return CreateDefault(null, services);
+		}
+
+		public static BusClient CreateDefault(IServiceProvider serviceProvider)
+		{
 			return new BusClient(
 				serviceProvider.GetService<IConfigurationEvaluator>(),
 				serviceProvider.GetService<ISubscriber<MessageContext>>(),
