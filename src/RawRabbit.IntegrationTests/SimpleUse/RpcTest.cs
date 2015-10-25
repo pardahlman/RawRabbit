@@ -21,12 +21,15 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		{
 			/* Setup */
 			var response = new BasicResponse {Prop = "This is the reponse."};
-			var requester = BusClientFactory.CreateDefault(TimeSpan.FromHours(2));
-			var responder = BusClientFactory.CreateDefault();
-			await responder.RespondAsync<BasicRequest, BasicResponse>((req, i) => Task.FromResult(response));
+var requester = BusClientFactory.CreateDefault();
+var responder = BusClientFactory.CreateDefault();
+await responder.RespondAsync<BasicRequest, BasicResponse>(async (req, i) =>
+{
+	return new BasicResponse();
+});
 
-			/* Test */
-			var recieved = await requester.RequestAsync<BasicRequest, BasicResponse>();
+/* Test */
+var recieved = await requester.RequestAsync<BasicRequest, BasicResponse>();
 
 			/* Assert */
 			Assert.Equal(recieved.Prop, response.Prop);
