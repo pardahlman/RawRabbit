@@ -90,12 +90,10 @@ var publisher = BusClientFactory.CreateDefault(ioc => ioc
   .AddTransient<IChannelFactory, ChannelFactory>()
 );
 ```
-`RawRabbit` uses the `Microsoft.Framework.DependencyInjection` for dependecy injection, which all the major IoC framework uses. It is therefor super-easy to resolve your favorite flavour of the bus client by just passing you `IServiceProvider` to the `CreateDefault` call.
+`RawRabbit` uses the `Microsoft.Framework.DependencyInjection` for dependecy injection, which all the major IoC framework uses. It is therefor super-easy to register and resolve your favorite flavour of the bus client by calling `AddRawRabbit()` on you `IServiceCollection`.
 ```csharp
-var autofacBuilder = new ContainerBuilder();
-autofacBuilder
-  .RegisterModule<RawRabbitModule>()
-  .RegisterModule<AnotherModule>();
-var container = autofacBuilder.Build();
-var autoClient = BusClientFactory.CreateDefault(container.Resolve<IServiceProvider>());
+public void ConfigureServices(IServiceCollection services)
+{
+  services.AddRawRabbit(); //optional overrides here, too.
+}
 ```
