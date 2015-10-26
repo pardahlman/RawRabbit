@@ -7,12 +7,12 @@ using Xunit;
 
 namespace RawRabbit.Tests.Common
 {
-	public class ConfigurationBuilderTests
+	public class ConfigurationParserTests
 	{
 		private readonly ConfigurationParser _parser;
 		private IConfigurationBuilder _cfgBuilder;
 
-		public ConfigurationBuilderTests()
+		public ConfigurationParserTests()
 		{
 			_cfgBuilder = new ConfigurationBuilder()
 				.AddInMemoryCollection(new List<KeyValuePair<string, string>>
@@ -111,12 +111,14 @@ namespace RawRabbit.Tests.Common
 					new KeyValuePair<string, string>("Data:RawRabbit:Brokers:0:Hostname", "localhost"),
 					new KeyValuePair<string, string>("Data:RawRabbit:Brokers:0:Password", "guest"),
 					new KeyValuePair<string, string>("Data:RawRabbit:Brokers:0:UserName", "guest"),
+					new KeyValuePair<string, string>("Data:RawRabbit:Brokers:0:Port", "5672"),
 					new KeyValuePair<string, string>("Data:RawRabbit:Brokers:0:VirtualHost", "/"),
 					
 					new KeyValuePair<string, string>("Data:RawRabbit:Brokers:1:Hostname", "production"),
 					new KeyValuePair<string, string>("Data:RawRabbit:Brokers:1:VirtualHost", "/"),
 					new KeyValuePair<string, string>("Data:RawRabbit:Brokers:1:Password", "admin"),
 					new KeyValuePair<string, string>("Data:RawRabbit:Brokers:1:UserName", "admin"),
+					new KeyValuePair<string, string>("Data:RawRabbit:Brokers:1:Port", "5672"),
 				})
 				.Build();
 
@@ -128,10 +130,12 @@ namespace RawRabbit.Tests.Common
 			Assert.Equal(config.Brokers[0].VirtualHost, "/");
 			Assert.Equal(config.Brokers[0].Username, "guest");
 			Assert.Equal(config.Brokers[0].Password, "guest");
+			Assert.Equal(config.Brokers[0].Port, "5672");
 			Assert.Equal(config.Brokers[1].Hostname, "production");
 			Assert.Equal(config.Brokers[1].VirtualHost, "/");
 			Assert.Equal(config.Brokers[1].Username, "admin");
 			Assert.Equal(config.Brokers[1].Password, "admin");
-        }
+			Assert.Equal(config.Brokers[1].Port, "5672");
+		}
 	}
 }

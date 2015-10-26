@@ -70,6 +70,7 @@ namespace RawRabbit.Common
 				{
 					Hostname = root[$"Data:RawRabbit:Brokers:{index}:Hostname"],
 					VirtualHost = root[$"Data:RawRabbit:Brokers:{index}:VirtualHost"],
+					Port = root[$"Data:RawRabbit:Brokers:{index}:Port"],
 					Username = root[$"Data:RawRabbit:Brokers:{index}:Username"],
 					Password = root[$"Data:RawRabbit:Brokers:{index}:Password"]
 				};
