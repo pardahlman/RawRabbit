@@ -7,9 +7,14 @@ using RawRabbit.Configuration.Exchange;
 
 namespace RawRabbit.Common
 {
-	public class ConfigurationParser
+	public interface IConfigurationParser
 	{
-		public RawRabbitConfiguration Parse(IConfigurationRoot root)
+		RawRabbitConfiguration Parse(IConfiguration root);
+	}
+
+	public class ConfigurationParser : IConfigurationParser
+	{
+		public RawRabbitConfiguration Parse(IConfiguration root)
 		{
 			if (root == null)
 			{

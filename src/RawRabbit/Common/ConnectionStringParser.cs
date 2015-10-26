@@ -6,11 +6,11 @@ namespace RawRabbit.Common
 {
 	public class ConnectionStringParser
 	{
-		private readonly Regex _requestTimeout = new Regex(@"[Rr]equest[Tt]imeout=(?<timeout>\d+)");
-		private readonly Regex _brokers = new Regex(@"[Bb]rokers=(?<brokers>.*);");
-		private readonly Regex _broker = new Regex(@"(?<user>.*?):(?<password>.*?)@(?<host>.*?):(?<port>.*?)(?<vhost>\/.*)");
+		private static readonly Regex _requestTimeout = new Regex(@"[Rr]equest[Tt]imeout=(?<timeout>\d+)");
+		private static readonly Regex _brokers = new Regex(@"[Bb]rokers=(?<brokers>.*);");
+		private static readonly Regex _broker = new Regex(@"(?<user>.*?):(?<password>.*?)@(?<host>.*?):(?<port>.*?)(?<vhost>\/.*)");
 
-		public RawRabbitConfiguration Parse(string connectionString)
+		public static RawRabbitConfiguration Parse(string connectionString)
 		{
 			var cfg = new RawRabbitConfiguration();
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Framework.Configuration;
 using Microsoft.Framework.DependencyInjection;
 using RawRabbit.Configuration;
 using RawRabbit.Context;
@@ -12,7 +13,7 @@ namespace RawRabbit.Common
 		{
 			var addCfg = new Action<IServiceCollection>(s => s.AddSingleton<RawRabbitConfiguration>(p => config));
 			var provider = new ServiceCollection()
-				.AddRawRabbit(addCfg)
+				.AddRawRabbit(null, addCfg)
 				.BuildServiceProvider();
 			return CreateDefault(provider);
 		}
@@ -20,7 +21,16 @@ namespace RawRabbit.Common
 		public static BusClient CreateDefault(Action<IServiceCollection> services = null)
 		{
 			var provider = new ServiceCollection()
-				.AddRawRabbit(services)
+				.AddRawRabbit(null, services)
+				.BuildServiceProvider();
+			return CreateDefault(provider);
+		}
+
+		public static BusClient CreateDefault(IConfigurationRoot config, Action<IServiceCollection> services)
+		{
+			
+			var provider = new ServiceCollection()
+				.AddRawRabbit(config, services)
 				.BuildServiceProvider();
 			return CreateDefault(provider);
 		}

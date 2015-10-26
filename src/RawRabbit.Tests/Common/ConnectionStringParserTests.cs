@@ -11,10 +11,9 @@ namespace RawRabbit.Tests.Common
 		{
 			/* Setup */
 			const string str = "brokers=firstUser:firstPassword@firstHost:1111/firstVhost,secondUser:secondPassword@secondHost:2222/secondVhost;requestTimeout=3600";
-			var parser = new ConnectionStringParser();
 
 			/* Test */
-			var config = parser.Parse(str);
+			var config = ConnectionStringParser.Parse(str);
 
 			/* Assert */
 			Assert.Equal(config.RequestTimeout, TimeSpan.FromSeconds(3600));

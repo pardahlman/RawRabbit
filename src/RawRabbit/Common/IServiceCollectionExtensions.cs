@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Framework.Configuration;
 using Microsoft.Framework.DependencyInjection;
 using RabbitMQ.Client;
 using RawRabbit.Configuration;
@@ -17,10 +18,13 @@ namespace RawRabbit.Common
 {
 	public static class IServiceCollectionExtensions
 	{
-		public static IServiceCollection AddRawRabbit(this IServiceCollection collection, Action<IServiceCollection> custom = null)
+		public static IServiceCollection AddRawRabbit(this IServiceCollection collection, IConfigurationRoot config = null, Action<IServiceCollection> custom = null)
 		{
 			collection
-				.AddSingleton<RawRabbitConfiguration>(provider => new RawRabbitConfiguration())
+				.AddSingleton<RawRabbitConfiguration>(p =>
+					config == null
+						? new RawRabbitConfiguration()
+						: p.GetService<IConfigurationParser>().Parse(config))
 				.AddSingleton<IEnumerable<IConnectionFactory>>(p =>
 				{
 					var brokers = p.GetService<RawRabbitConfiguration>().Brokers ?? new List<BrokerConfiguration>();
@@ -39,6 +43,7 @@ namespace RawRabbit.Common
 						TimeSpan.FromMinutes(1) //TODO: Move this to config
 					)
 				)
+				.AddTransient<IConfigurationParser, ConfigurationParser>()
 				.AddTransient<IMessageSerializer, JsonMessageSerializer>()
 				.AddTransient<IConsumerFactory, EventingBasicConsumerFactory>()
 				.AddSingleton<IMessageContextProvider<MessageContext>, DefaultMessageContextProvider>(
