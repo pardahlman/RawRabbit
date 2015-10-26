@@ -93,6 +93,7 @@ namespace RawRabbit.Configuration
 		public string Username { get; set; }
 		public string Password { get; set; }
 		public string VirtualHost { get; set; }
+		public string Port { get; set; }
 
 		public static BrokerConfiguration Local => new BrokerConfiguration
 		{
@@ -101,5 +102,6 @@ namespace RawRabbit.Configuration
 			Username = "guest",
 			VirtualHost = "/"
 		};
+
 	}
 }
