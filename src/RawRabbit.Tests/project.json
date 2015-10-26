@@ -2,6 +2,7 @@
 	"version": "1.0.0-*",
 
 	"dependencies": {
+		"Microsoft.Framework.Configuration": "1.0.0-beta8-15586",
 		"RawRabbit": "",
 		"xunit": "2.1.0",
 		"xunit.runner.dnx": "2.1.0-beta5a-build188"
