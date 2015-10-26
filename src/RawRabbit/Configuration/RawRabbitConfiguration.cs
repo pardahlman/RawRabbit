@@ -1,27 +1,23 @@
 ﻿using System;
+using System.Collections.Generic;
 using RawRabbit.Configuration.Exchange;
 
 namespace RawRabbit.Configuration
 {
 	public class RawRabbitConfiguration
 	{
-		public string Hostname { get; set; }
-		public string Username { get; set; }
-		public string Password { get; set; }
-		public string VirtualHost { get; set; }
-
 		/// <summary>
 		/// The amount of time to wait for response to request. Defaults to 10 seconds.
 		/// </summary>
 		public TimeSpan RequestTimeout { get; set; }
+		public List<BrokerConfiguration> Brokers { get; set; }
+
 		public GeneralExchangeConfiguration Exchange { get; set; }
 		public GeneralQueueConfiguration Queue { get; set; }
 
 		public RawRabbitConfiguration()
 		{
-			Hostname = "localhost";
-			Username = "guest";
-			Password = "guest";
+			Brokers = new List<BrokerConfiguration>();
 			RequestTimeout = TimeSpan.FromSeconds(10);
 			Exchange = new GeneralExchangeConfiguration
 			{
@@ -38,7 +34,6 @@ namespace RawRabbit.Configuration
 		}
 
 		public static RawRabbitConfiguration Default => new RawRabbitConfiguration();
-
 	}
 
 	public class GeneralQueueConfiguration
@@ -90,5 +85,21 @@ namespace RawRabbit.Configuration
 		/// There are four different types of exchanges see <see cref="RawRabbit.Configuration.Exchange"/> for more info.
 		/// </summary>
 		public ExchangeType Type { get; set; }
+	}
+
+	public class BrokerConfiguration
+	{
+		public string Hostname { get; set; }
+		public string Username { get; set; }
+		public string Password { get; set; }
+		public string VirtualHost { get; set; }
+
+		public static BrokerConfiguration Local => new BrokerConfiguration
+		{
+			Hostname = "localhost",
+			Password = "guest",
+			Username = "guest",
+			VirtualHost = "/"
+		};
 	}
 }

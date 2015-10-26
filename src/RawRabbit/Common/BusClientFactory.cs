@@ -8,17 +8,21 @@ namespace RawRabbit.Common
 {
 	public class BusClientFactory
 	{
-		public static BusClient CreateDefault(RawRabbitConfiguration config, Action<IServiceCollection> configureIoc = null)
+		public static BusClient CreateDefault(RawRabbitConfiguration config)
 		{
-			var services = new ServiceCollection();
-			services.AddRawRabbit(configureIoc);
-			var serviceProvider = services.BuildServiceProvider();
-			return CreateDefault(serviceProvider);
+			var addCfg = new Action<IServiceCollection>(s => s.AddSingleton<RawRabbitConfiguration>(p => config));
+			var provider = new ServiceCollection()
+				.AddRawRabbit(addCfg)
+				.BuildServiceProvider();
+			return CreateDefault(provider);
 		}
 
 		public static BusClient CreateDefault(Action<IServiceCollection> services = null)
 		{
-			return CreateDefault(null, services);
+			var provider = new ServiceCollection()
+				.AddRawRabbit(services)
+				.BuildServiceProvider();
+			return CreateDefault(provider);
 		}
 
 		public static BusClient CreateDefault(IServiceProvider serviceProvider)

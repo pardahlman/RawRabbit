@@ -104,7 +104,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 				new RawRabbitConfiguration { RequestTimeout = TimeSpan.FromHours(1) }
 			);
 
-			var responder = BusClientFactory.CreateDefault(null, service => service.AddTransient<IConsumerFactory, QueueingBaiscConsumerFactory>());
+			var responder = BusClientFactory.CreateDefault(service => service.AddTransient<IConsumerFactory, QueueingBaiscConsumerFactory>());
 			await responder.RespondAsync<BasicRequest, BasicResponse>((req, i) => Task.FromResult(response));
 
 			/* Test */

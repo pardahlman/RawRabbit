@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Threading;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Exceptions;
 
 namespace RawRabbit.Common
 {
@@ -12,72 +12,49 @@ namespace RawRabbit.Common
 
 	public class ChannelFactory : IChannelFactory
 	{
-		private readonly Func<IConnection> _connectionFn;
-		private IConnection _connection;
-		private readonly ThreadLocal<IModel> _threadChannal;
+		private readonly IConnectionBroker _connectionBroker;
+		private readonly ConcurrentDictionary<IConnection, ThreadLocal<IModel>> _connectionToChannel;
 
-		public ChannelFactory(IConnectionFactory connectionFactory)
+		public ChannelFactory(IConnectionBroker connectionBroker)
 		{
-			_connectionFn = () => CreateConnection(connectionFactory);
-			_connection = _connectionFn();
-			_threadChannal = new ThreadLocal<IModel>(_connection.CreateModel, true);
-			_connection.ConnectionShutdown += (sender, args) =>
-			{
-				_connection = _connectionFn();
-			};
+			_connectionBroker = connectionBroker;
+			_connectionToChannel = new ConcurrentDictionary<IConnection, ThreadLocal<IModel>>();
 		}
 
 		public void Dispose()
 		{
-			foreach (var channel in _threadChannal.Values)
+			foreach (var connection in _connectionToChannel.Keys)
 			{
-				if (channel?.IsOpen ?? false)
-				{
-					channel.Close();
-				}
-				if (_connection?.IsOpen ?? false)
-				{
-					_connection.Close();
-				}
+				connection?.Dispose();
 			}
 		}
 
 		public void CloseAll()
 		{
-			foreach (var channel in _threadChannal.Values)
+			foreach (var connection in _connectionToChannel.Keys)
 			{
-				channel?.Close();
+				connection?.Close();
 			}
 		}
 
 		public IModel GetChannel()
 		{
-			if (_threadChannal.Value.IsOpen)
-			{
-				return _threadChannal.Value;
-			}
-			if (!_connection.IsOpen)
-			{
-				_connection = _connectionFn();
-			}
-			_threadChannal.Value = _connection.CreateModel();
-			return _threadChannal.Value;
-		}
+			var currentConnection = _connectionBroker.GetConnection();
 
-		private static IConnection CreateConnection(IConnectionFactory factory)
-		{
-			try
+			if (!_connectionToChannel.ContainsKey(currentConnection))
 			{
-				return factory.CreateConnection();
+				_connectionToChannel.TryAdd(currentConnection, new ThreadLocal<IModel>(currentConnection.CreateModel));
 			}
-			catch (BrokerUnreachableException e)
+
+			var threadChannel = _connectionToChannel[currentConnection];
+
+			if (threadChannel.Value.IsOpen)
 			{
-				if (e.InnerException is AuthenticationFailureException)
-				{
-					throw e.InnerException;
-				}
-				throw;
+				return threadChannel.Value;
 			}
+			
+			threadChannel.Value = _connectionBroker.GetConnection().CreateModel();
+			return threadChannel.Value;
 		}
 	}
 }

@@ -17,22 +17,28 @@ namespace RawRabbit.Common
 {
 	public static class IServiceCollectionExtensions
 	{
-		public static IServiceCollection AddRawRabbit(this IServiceCollection collection, Action<IServiceCollection> custom)
+		public static IServiceCollection AddRawRabbit(this IServiceCollection collection, Action<IServiceCollection> custom = null)
 		{
 			collection
 				.AddSingleton<RawRabbitConfiguration>(provider => new RawRabbitConfiguration())
-				.AddSingleton<IConnectionFactory, ConnectionFactory>(p =>
+				.AddSingleton<IEnumerable<IConnectionFactory>>(p =>
 				{
-					var cfg = p.GetService<RawRabbitConfiguration>();
-					return new ConnectionFactory
+					var brokers = p.GetService<RawRabbitConfiguration>().Brokers ?? new List<BrokerConfiguration>();
+					brokers = brokers.Any() ? brokers : new List<BrokerConfiguration> { BrokerConfiguration.Local };
+					return brokers.Select(b => new ConnectionFactory
 					{
-						HostName = cfg.Hostname,
-						Password = cfg.Password,
-						UserName = cfg.Username,
-						AutomaticRecoveryEnabled = true,
-						TopologyRecoveryEnabled = true,
-					};
+						HostName = b.Hostname,
+						VirtualHost = b.VirtualHost,
+						UserName = b.Username,
+						Password = b.Password
+					});
 				})
+				.AddSingleton<IConnectionBroker, DefaultConnectionBroker>(
+					p => new DefaultConnectionBroker(
+						p.GetService<IEnumerable<IConnectionFactory>>(),
+						TimeSpan.FromMinutes(1) //TODO: Move this to config
+					)
+				)
 				.AddTransient<IMessageSerializer, JsonMessageSerializer>()
 				.AddTransient<IConsumerFactory, EventingBasicConsumerFactory>()
 				.AddSingleton<IMessageContextProvider<MessageContext>, DefaultMessageContextProvider>(

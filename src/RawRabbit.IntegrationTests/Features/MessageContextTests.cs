@@ -24,7 +24,7 @@ namespace RawRabbit.IntegrationTests.Features
 			var expectedId = Guid.NewGuid();
 			var subscribeTcs = new TaskCompletionSource<Guid>();
 			var contextProvider = new DefaultMessageContextProvider(() => Task.FromResult(expectedId));
-			var publisher = BusClientFactory.CreateDefault(null, collection => collection.AddInstance(typeof (IMessageContextProvider<MessageContext>), contextProvider));
+			var publisher = BusClientFactory.CreateDefault(collection => collection.AddInstance(typeof (IMessageContextProvider<MessageContext>), contextProvider));
 			await subscriber.SubscribeAsync<BasicMessage>((msg, c) =>
 			{
 				subscribeTcs.SetResult(c.GlobalRequestId);

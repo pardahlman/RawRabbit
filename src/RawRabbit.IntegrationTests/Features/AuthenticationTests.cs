@@ -13,8 +13,16 @@ namespace RawRabbit.IntegrationTests.Features
 			/* Setup */
 			var config = new RawRabbitConfiguration
 			{
-				Username = "RawRabbit",
-				Password = "wrong-pass"
+				Brokers =
+				{
+					new BrokerConfiguration
+					{
+						Username = "RawRabbit",
+						Password = "wrong-pass",
+						Hostname = "localhost",
+						VirtualHost = "/"
+					}
+				}
 			};
 
 			/* Test */
@@ -41,8 +49,16 @@ namespace RawRabbit.IntegrationTests.Features
 			/* Setup */
 			var config = new RawRabbitConfiguration
 			{
-				Username = "RawRabbit",
-				Password = "RawRabbit"
+				Brokers =
+				{
+					new BrokerConfiguration
+					{
+						Username = "RawRabbit",
+						Password = "RawRabbit",
+						Hostname = "localhost",
+						VirtualHost = "/"
+					}
+				}
 			};
 
 			/* Test */
