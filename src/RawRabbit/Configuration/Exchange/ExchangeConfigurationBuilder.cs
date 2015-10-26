@@ -21,7 +21,7 @@
 			return this;
 		}
 
-		public IExchangeConfigurationBuilder AsDurable(bool durable = true)
+		public IExchangeConfigurationBuilder WithDurability(bool durable = true)
 		{
 			Configuration.Durable = durable;
 			return this;
