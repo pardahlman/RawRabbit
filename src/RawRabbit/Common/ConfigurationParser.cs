@@ -66,11 +66,12 @@ namespace RawRabbit.Common
 			var index = 0;
 			while (continueParsing)
 			{
+				int port;
 				var broker = new BrokerConfiguration
 				{
 					Hostname = root[$"Data:RawRabbit:Brokers:{index}:Hostname"],
 					VirtualHost = root[$"Data:RawRabbit:Brokers:{index}:VirtualHost"],
-					Port = root[$"Data:RawRabbit:Brokers:{index}:Port"],
+					Port = int.TryParse(root[$"Data:RawRabbit:Brokers:{index}:Port"], out port) ? port : default(int),
 					Username = root[$"Data:RawRabbit:Brokers:{index}:Username"],
 					Password = root[$"Data:RawRabbit:Brokers:{index}:Password"]
 				};

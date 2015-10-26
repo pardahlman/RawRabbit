@@ -130,12 +130,12 @@ namespace RawRabbit.Tests.Common
 			Assert.Equal(config.Brokers[0].VirtualHost, "/");
 			Assert.Equal(config.Brokers[0].Username, "guest");
 			Assert.Equal(config.Brokers[0].Password, "guest");
-			Assert.Equal(config.Brokers[0].Port, "5672");
+			Assert.Equal(config.Brokers[0].Port, 5672);
 			Assert.Equal(config.Brokers[1].Hostname, "production");
 			Assert.Equal(config.Brokers[1].VirtualHost, "/");
 			Assert.Equal(config.Brokers[1].Username, "admin");
 			Assert.Equal(config.Brokers[1].Password, "admin");
-			Assert.Equal(config.Brokers[1].Port, "5672");
+			Assert.Equal(config.Brokers[1].Port, 5672);
 		}
 	}
 }

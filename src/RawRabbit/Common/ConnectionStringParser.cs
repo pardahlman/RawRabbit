@@ -19,12 +19,13 @@ namespace RawRabbit.Common
 
 			foreach (var broker in brokerStrs)
 			{
+				int port;
 				var brokerMatch = _broker.Match(broker);
 				var brokerCfg = new BrokerConfiguration
 				{
 					Hostname = brokerMatch.Groups["host"].Value,
 					VirtualHost = brokerMatch.Groups["vhost"].Value,
-					Port = brokerMatch.Groups["port"].Value,
+					Port = int.TryParse(brokerMatch.Groups["port"].Value, out port) ? port : default(int),
 					Username = brokerMatch.Groups["user"].Value,
 					Password = brokerMatch.Groups["password"].Value,
 				};
