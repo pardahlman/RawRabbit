@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Framework.DependencyInjection;
+using RabbitMQ.Client;
 using RawRabbit.Common;
 using RawRabbit.Configuration;
 using RawRabbit.Consumer;
@@ -20,16 +21,16 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		public async void Should_Perform_Basic_Rpc_Without_Any_Config()
 		{
 			/* Setup */
-			var response = new BasicResponse {Prop = "This is the reponse."};
-var requester = BusClientFactory.CreateDefault();
-var responder = BusClientFactory.CreateDefault();
-await responder.RespondAsync<BasicRequest, BasicResponse>(async (req, i) =>
-{
-	return new BasicResponse();
-});
+			var response = new BasicResponse { Prop = "This is the reponse." };
+			var requester = BusClientFactory.CreateDefault();
+			var responder = BusClientFactory.CreateDefault();
+			await responder.RespondAsync<BasicRequest, BasicResponse>((req, i) =>
+			{
+				return Task.FromResult(response);
+			});
 
-/* Test */
-var recieved = await requester.RequestAsync<BasicRequest, BasicResponse>();
+			/* Test */
+			var recieved = await requester.RequestAsync<BasicRequest, BasicResponse>();
 
 			/* Assert */
 			Assert.Equal(recieved.Prop, response.Prop);
@@ -50,11 +51,11 @@ var recieved = await requester.RequestAsync<BasicRequest, BasicResponse>();
 				{
 					Assert.True(false, "No entities in stack. Try purgin the response queue.");
 				};
-				return Task.FromResult(new BasicResponse {Payload = payload});
+				return Task.FromResult(new BasicResponse { Payload = payload });
 			});
 
 			/* Test */
-			var first = requester.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest {Number = 1});
+			var first = requester.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest { Number = 1 });
 			var second = requester.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest { Number = 2 });
 			var third = requester.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest { Number = 3 });
 			Task.WaitAll(first, second, third);
@@ -81,15 +82,15 @@ var recieved = await requester.RequestAsync<BasicRequest, BasicResponse>();
 			await firstResponder.RespondAsync<FirstRequest, FirstResponse>(async (req, i) =>
 			{
 				var secondResp = await firstResponder.RequestAsync<SecondRequest, SecondResponse>(new SecondRequest());
-				return new FirstResponse {Infered = secondResp.Source};
+				return new FirstResponse { Infered = secondResp.Source };
 			});
 			await secondResponder.RespondAsync<SecondRequest, SecondResponse>((req, i) =>
-				Task.FromResult(new SecondResponse {Source = payload})
+				Task.FromResult(new SecondResponse { Source = payload })
 			);
 
 			/* Test */
 			var response = await requester.RequestAsync<FirstRequest, FirstResponse>(new FirstRequest());
-			
+
 			/* Assert */
 			Assert.Equal(response.Infered, payload);
 		}
@@ -100,7 +101,7 @@ var recieved = await requester.RequestAsync<BasicRequest, BasicResponse>();
 			/* Setup */
 			var response = new BasicResponse { Prop = "This is the reponse." };
 			var requester = BusClientFactory.CreateDefault(
-				new RawRabbitConfiguration { RequestTimeout = TimeSpan.FromHours(1)}
+				new RawRabbitConfiguration { RequestTimeout = TimeSpan.FromHours(1) }
 			);
 
 			var responder = BusClientFactory.CreateDefault(null, service => service.AddTransient<IConsumerFactory, QueueingBaiscConsumerFactory>());
