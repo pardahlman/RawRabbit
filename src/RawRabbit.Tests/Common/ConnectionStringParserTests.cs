@@ -7,7 +7,7 @@ namespace RawRabbit.Tests.Common
 	public class ConnectionStringParserTests
 	{
 		[Fact]
-		public void Should_Be_Able_To_Parse_ConnectionString()
+		public void Should_Be_Able_To_Parse_ConnectionString_With_Multiple_Hosts()
 		{
 			/* Setup */
 			const string str = "brokers=firstUser:firstPassword@firstHost:1111/firstVhost,secondUser:secondPassword@secondHost:2222/secondVhost;requestTimeout=3600";
@@ -27,6 +27,23 @@ namespace RawRabbit.Tests.Common
 			Assert.Equal(config.Brokers[1].Hostname, "secondHost");
 			Assert.Equal(config.Brokers[1].Port, 2222);
 			Assert.Equal(config.Brokers[1].VirtualHost, "/secondVhost");
+		}
+
+		[Fact]
+		public void Should_Be_Able_To_Parse_ConnectionString_With_Single_Hosts()
+		{
+			/* Setup */
+			const string str = "brokers=guest:guest@localhost:5672/;requestTimeout=10";
+
+			/* Test */
+			var config = ConnectionStringParser.Parse(str);
+
+			/* Assert */
+			Assert.Equal(config.Brokers[0].Username, "guest");
+			Assert.Equal(config.Brokers[0].Password, "guest");
+			Assert.Equal(config.Brokers[0].Hostname, "localhost");
+			Assert.Equal(config.Brokers[0].Port, 5672);
+			Assert.Equal(config.Brokers[0].VirtualHost, "/");
 		}
 	}
 }

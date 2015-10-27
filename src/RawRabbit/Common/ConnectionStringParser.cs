@@ -34,7 +34,7 @@ namespace RawRabbit.Common
 
 			var reqMatch = _requestTimeout.Match(connectionString);
 			var timeoutGrp = reqMatch.Groups["timeout"];
-			if (timeoutGrp != null)
+			if (timeoutGrp.Success)
 			{
 				cfg.RequestTimeout = TimeSpan.FromSeconds(int.Parse(timeoutGrp.Value));
 			}
