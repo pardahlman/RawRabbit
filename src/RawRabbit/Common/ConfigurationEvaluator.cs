@@ -99,7 +99,7 @@ namespace RawRabbit.Common
 				ReplyQueue = replyQueueConfig,
 				Exchange = exchangeConfig,
 				RoutingKey = _convetions.QueueNamingConvention(typeof(TRequest)),
-				ReplyQueueRoutingKey = replyQueueConfig.QueueName				
+				ReplyQueueRoutingKey = replyQueueConfig.QueueName
 			};
 
 			var builder = new RequestConfigurationBuilder(defaultConfig);
