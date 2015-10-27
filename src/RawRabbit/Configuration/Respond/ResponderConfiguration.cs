@@ -5,7 +5,7 @@ namespace RawRabbit.Configuration.Respond
 {
 	public class ResponderConfiguration : IConsumerConfiguration
 	{
-		public bool NoAck { get; set; }
+		public bool NoAck { get; }
 		public ushort PrefetchCount { get; set; }
 		public ExchangeConfiguration Exchange { get; set; }
 		public QueueConfiguration Queue { get; set; }
@@ -15,6 +15,7 @@ namespace RawRabbit.Configuration.Respond
 		{
 			Exchange = new ExchangeConfiguration();
 			Queue = new QueueConfiguration();
+			NoAck = true;
 		}
 	}
 

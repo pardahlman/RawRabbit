@@ -19,8 +19,7 @@ namespace RawRabbit.Configuration.Respond
 			{
 				Queue = _queueBuilder.Configuration,
 				Exchange = _exchangeBuilder.Configuration,
-				RoutingKey = _queueBuilder.Configuration.QueueName,
-				NoAck = true //TODO: Move to config.
+				RoutingKey = _queueBuilder.Configuration.QueueName
 			};
 		}
 
@@ -28,6 +27,12 @@ namespace RawRabbit.Configuration.Respond
 		{
 			exchange(_exchangeBuilder);
 			Configuration.Exchange = _exchangeBuilder.Configuration;
+			return this;
+		}
+
+		public IResponderConfigurationBuilder WithPrefetchCount(ushort count)
+		{
+			Configuration.PrefetchCount = count;
 			return this;
 		}
 

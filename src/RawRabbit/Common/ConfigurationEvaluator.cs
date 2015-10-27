@@ -66,7 +66,7 @@ namespace RawRabbit.Common
 		{
 			var queueConfig = new QueueConfiguration(_clientConfig.Queue)
 			{
-				QueueName = _convetions.QueueNamingConvention(typeof(TResponse))
+				QueueName = _convetions.QueueNamingConvention(typeof(TRequest))
 			};
 
 			var exchangeConfig = new ExchangeConfiguration(_clientConfig.Exchange)
@@ -98,8 +98,8 @@ namespace RawRabbit.Common
 			{
 				ReplyQueue = replyQueueConfig,
 				Exchange = exchangeConfig,
-				RoutingKey = _convetions.QueueNamingConvention(typeof(TResponse)),
-				ReplyQueueRoutingKey = replyQueueConfig.QueueName
+				RoutingKey = _convetions.QueueNamingConvention(typeof(TRequest)),
+				ReplyQueueRoutingKey = replyQueueConfig.QueueName				
 			};
 
 			var builder = new RequestConfigurationBuilder(defaultConfig);

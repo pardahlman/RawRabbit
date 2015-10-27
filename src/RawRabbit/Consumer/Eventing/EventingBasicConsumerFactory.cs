@@ -24,7 +24,11 @@ namespace RawRabbit.Consumer.Eventing
 
 		public IRawConsumer CreateConsumer(IConsumerConfiguration cfg)
 		{
-			var channel = _channelFactory.GetChannel();
+			return CreateConsumer(cfg, _channelFactory.GetChannel());
+		}
+
+		public IRawConsumer CreateConsumer(IConsumerConfiguration cfg, IModel channel)
+		{
 			ConfigureQos(channel, cfg.PrefetchCount);
 			var rawConsumer = new EventingRawConsumer(channel);
 			channel.BasicConsume(cfg.Queue.QueueName, cfg.NoAck, rawConsumer);
@@ -53,7 +57,10 @@ namespace RawRabbit.Consumer.Eventing
 						The message handler threw an exception. It is time to hand over the
 						message handling to an error strategy instead.
 					*/
-					BasicAck(channel, args, cfg); // TODO: employ error handling strategy instead
+					if (!cfg.NoAck)
+					{
+						BasicAck(channel, args, cfg); // TODO: employ error handling strategy instead
+					}
 					return;
 				}
 				onMessageTask
@@ -67,7 +74,7 @@ namespace RawRabbit.Consumer.Eventing
 							*/
 							return;
 						}
-							
+
 						BasicAck(channel, args, cfg);
 					});
 			};

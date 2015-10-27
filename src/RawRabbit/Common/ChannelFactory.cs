@@ -8,6 +8,7 @@ namespace RawRabbit.Common
 	public interface IChannelFactory : IDisposable
 	{
 		IModel GetChannel();
+		IModel CreateChannel();
 	}
 
 	public class ChannelFactory : IChannelFactory
@@ -55,6 +56,11 @@ namespace RawRabbit.Common
 			
 			threadChannel.Value = _connectionBroker.GetConnection().CreateModel();
 			return threadChannel.Value;
+		}
+
+		public IModel CreateChannel()
+		{
+			return _connectionBroker.GetConnection().CreateModel();
 		}
 	}
 }
