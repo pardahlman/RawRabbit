@@ -29,7 +29,7 @@ namespace RawRabbit.Configuration
 			{
 				Exclusive = false,
 				AutoDelete = false,
-				Durable = false
+				Durable = true
 			};
 		}
 

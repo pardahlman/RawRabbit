@@ -1,0 +1,19 @@
+﻿{
+	"version": "1.0.0-beta7",
+
+	"dependencies": {
+		"RawRabbit": "",
+		"Microsoft.Framework.DependencyInjection": "1.0.0-beta7",
+		"Microsoft.Framework.Configuration.Abstractions": "1.0.0-beta7"
+	},
+
+	"frameworks": {
+		"dnx451": { },
+		"net451": { }
+	},
+
+	"publishExclude": [
+	],
+	"exclude": [
+	]
+}

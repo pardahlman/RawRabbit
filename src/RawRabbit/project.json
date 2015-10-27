@@ -3,9 +3,7 @@
 
 	"dependencies": {
 		"RabbitMQ.Client": "3.5.6",
-		"Newtonsoft.Json": "7.0.1",
-		"Microsoft.Framework.DependencyInjection": "1.0.0-beta7",
-		"Microsoft.Framework.Configuration.Abstractions" : "1.0.0-beta7"
+		"Newtonsoft.Json": "7.0.1"
 	},
 
 	"commands": {

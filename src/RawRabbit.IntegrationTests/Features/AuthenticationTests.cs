@@ -1,6 +1,7 @@
 ﻿using RabbitMQ.Client.Exceptions;
 using RawRabbit.Common;
 using RawRabbit.Configuration;
+using RawRabbit.vNext;
 using Xunit;
 
 namespace RawRabbit.IntegrationTests.Features

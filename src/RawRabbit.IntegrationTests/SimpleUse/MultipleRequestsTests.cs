@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.IntegrationTests.TestMessages;
+using RawRabbit.vNext;
 using Xunit;
 
 namespace RawRabbit.IntegrationTests.SimpleUse

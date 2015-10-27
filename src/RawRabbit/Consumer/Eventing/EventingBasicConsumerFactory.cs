@@ -11,7 +11,7 @@ using RawRabbit.Consumer.Contract;
 
 namespace RawRabbit.Consumer.Eventing
 {
-	class EventingBasicConsumerFactory : IConsumerFactory
+	public class EventingBasicConsumerFactory : IConsumerFactory
 	{
 		private readonly IChannelFactory _channelFactory;
 		private readonly ConcurrentBag<string> _processedButNotAcked;

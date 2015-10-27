@@ -11,6 +11,7 @@ using RawRabbit.Consumer;
 using RawRabbit.Consumer.Contract;
 using RawRabbit.Consumer.Queueing;
 using RawRabbit.IntegrationTests.TestMessages;
+using RawRabbit.vNext;
 using Xunit;
 
 namespace RawRabbit.IntegrationTests.SimpleUse

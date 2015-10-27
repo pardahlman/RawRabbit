@@ -4,6 +4,7 @@ using Microsoft.Framework.DependencyInjection;
 using RawRabbit.Common;
 using RawRabbit.Configuration;
 using RawRabbit.IntegrationTests.TestMessages;
+using RawRabbit.vNext;
 using Xunit;
 
 namespace RawRabbit.IntegrationTests.Features

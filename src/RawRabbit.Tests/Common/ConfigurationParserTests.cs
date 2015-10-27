@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Framework.Configuration;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Exchange;
+using RawRabbit.vNext;
 using Xunit;
 
 namespace RawRabbit.Tests.Common

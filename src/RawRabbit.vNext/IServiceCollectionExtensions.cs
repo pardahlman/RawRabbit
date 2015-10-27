@@ -1,10 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Framework.Configuration;
 using Microsoft.Framework.DependencyInjection;
 using RabbitMQ.Client;
+using RawRabbit.Common;
 using RawRabbit.Configuration;
 using RawRabbit.Consumer.Contract;
 using RawRabbit.Consumer.Eventing;
@@ -14,7 +15,7 @@ using RawRabbit.Operations;
 using RawRabbit.Operations.Contracts;
 using RawRabbit.Serialization;
 
-namespace RawRabbit.Common
+namespace RawRabbit.vNext
 {
 	public static class IServiceCollectionExtensions
 	{

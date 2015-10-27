@@ -5,7 +5,7 @@ using Microsoft.Framework.Configuration;
 using RawRabbit.Configuration;
 using RawRabbit.Configuration.Exchange;
 
-namespace RawRabbit.Common
+namespace RawRabbit.vNext
 {
 	public interface IConfigurationParser
 	{

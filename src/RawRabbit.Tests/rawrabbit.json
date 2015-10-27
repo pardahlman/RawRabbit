@@ -1,0 +1,32 @@
+﻿{
+	"Data": {
+		"RawRabbit": {
+			"RequestTimeout": "00:02:00",
+			"Exchange": {
+				"Durable": true,
+				"AutoDelete": true,
+				"Type" :  "Topic"
+			},
+			"Queue": {
+				"AutoDelete": true,
+				"Durable": true,
+				"Exclusive":  true
+			},
+			"Brokers": [
+				{
+					"Hostname": "localhost",
+					"VirtualHost": "/",
+					"Port" :  "5672",
+					"UserName": "guest",
+					"Password": "guest"
+				},
+				{
+					"Hostname": "production",
+					"VirtualHost": "/prod",
+					"UserName": "admin",
+					"Password": "admin"
+				}
+			]
+		}
+	}
+}

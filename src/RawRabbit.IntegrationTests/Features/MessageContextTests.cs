@@ -9,6 +9,7 @@ using RawRabbit.Context.Provider;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.Operations;
 using RawRabbit.Serialization;
+using RawRabbit.vNext;
 using Xunit;
 
 namespace RawRabbit.IntegrationTests.Features

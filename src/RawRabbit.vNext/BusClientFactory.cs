@@ -1,11 +1,12 @@
 ﻿using System;
 using Microsoft.Framework.Configuration;
 using Microsoft.Framework.DependencyInjection;
+using RawRabbit.Common;
 using RawRabbit.Configuration;
 using RawRabbit.Context;
 using RawRabbit.Operations.Contracts;
 
-namespace RawRabbit.Common
+namespace RawRabbit.vNext
 {
 	public class BusClientFactory
 	{
@@ -15,7 +16,7 @@ namespace RawRabbit.Common
 			var provider = new ServiceCollection()
 				.AddRawRabbit(null, addCfg)
 				.BuildServiceProvider();
-			return CreateDefault(provider);
+			return CreateDefault((IServiceProvider) provider);
 		}
 
 		public static BusClient CreateDefault(Action<IServiceCollection> services = null)
@@ -23,14 +24,13 @@ namespace RawRabbit.Common
 			var provider = new ServiceCollection()
 				.AddRawRabbit(null, services)
 				.BuildServiceProvider();
-			return CreateDefault(provider);
+			return CreateDefault((IServiceProvider) provider);
 		}
 
 		public static BusClient CreateDefault(IConfigurationRoot config, Action<IServiceCollection> services)
 		{
 			
-			var provider = new ServiceCollection()
-				.AddRawRabbit(config, services)
+			var provider = new ServiceCollection().AddRawRabbit(config, services)
 				.BuildServiceProvider();
 			return CreateDefault(provider);
 		}
