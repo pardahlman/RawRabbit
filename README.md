@@ -135,8 +135,10 @@ With the configuration framework `Microsoft.Framework.Configuration`, we get the
   }
 }
 ```
-What about connection strings in `csproj` projects? There is support for that, too. The expected format for the connection string is `brokers=firstUser:firstPassword@firstHost:1111/firstVhost,secondUser:secondPassword@secondHost:2222/secondVhost;requestTimeout=3600`
+What about connection strings in `csproj` projects? There is support for that, too. The expected format for the connection string is `brokers={comma-seperated list of brokers};requestTimeout=3600`
 where:
 
 * `broker` contains a comma seperated lists of brokers (defined below)
 * `requestTimeout` is the number of seconds before `RPC` request times out.
+
+The format for a broker is `username:password@host:port/virtualHost`, for example `guest:guest@localhost:4562/`.
