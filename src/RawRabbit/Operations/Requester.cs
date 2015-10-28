@@ -42,11 +42,12 @@ namespace RawRabbit.Operations
 			var responseTcs = new TaskCompletionSource<TResponse>();
 			var propsTask = GetRequestPropsAsync(cfg.ReplyQueue.QueueName, globalMessageId);
 			var bodyTask = CreateMessageAsync(message);
-			var channel = ChannelFactory.CreateChannel();
+			
 			Task
 				.WhenAll(propsTask, bodyTask)
 				.ContinueWith(task =>
 				{
+					var channel = ChannelFactory.CreateChannel();
 					var consumer = _consumerFactory.CreateConsumer(cfg, channel);
 
 					Timer requestTimeOutTimer = null;
