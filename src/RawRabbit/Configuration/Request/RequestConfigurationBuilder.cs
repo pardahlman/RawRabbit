@@ -14,7 +14,7 @@ namespace RawRabbit.Configuration.Request
 		{
 			_replyQueue = new QueueConfigurationBuilder(defaultConfig.ReplyQueue);
 			_exchange = new ExchangeConfigurationBuilder(defaultConfig.Exchange);
-			Configuration = defaultConfig;
+			Configuration = defaultConfig ?? new RequestConfiguration();
 		}
 
 		public IRequestConfigurationBuilder WithExchange(Action<IExchangeConfigurationBuilder> exchange)
@@ -34,6 +34,12 @@ namespace RawRabbit.Configuration.Request
 		{
 			replyTo(_replyQueue);
 			Configuration.ReplyQueue = _replyQueue.Configuration;
+			return this;
+		}
+
+		public IRequestConfigurationBuilder WithNoAck(bool noAck)
+		{
+			Configuration.NoAck = noAck;
 			return this;
 		}
 	}

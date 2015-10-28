@@ -9,5 +9,6 @@ namespace RawRabbit.Configuration.Request
 		IRequestConfigurationBuilder WithExchange(Action<IExchangeConfigurationBuilder> exchange);
 		IRequestConfigurationBuilder WithRoutingKey(string routingKey);
 		IRequestConfigurationBuilder WithReplyQueue(Action<IQueueConfigurationBuilder> replyTo);
+		IRequestConfigurationBuilder WithNoAck(bool noAck);
 	}
 }

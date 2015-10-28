@@ -10,7 +10,7 @@ namespace RawRabbit.Configuration.Request
 		public string RoutingKey { get; set; }
 
 		/* Response Queue Configuration*/
-		public bool NoAck { get; }
+		public bool NoAck { get; set; }
 		public ushort PrefetchCount { get; }
 		public QueueConfiguration Queue => ReplyQueue;
 		public QueueConfiguration ReplyQueue { get; set; }
