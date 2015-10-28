@@ -70,6 +70,15 @@ namespace RawRabbit.Operations
 				*/
 				return;
 			}
+			if (queue.IsDirectReplyTo())
+			{
+				/*
+					"Consume from the pseudo-queue amq.rabbitmq.reply-to in no-ack mode. There is no need to
+					declare this "queue" first, although the client can do so if it wants."
+					- https://www.rabbitmq.com/direct-reply-to.html
+				*/
+				return;
+			}
 			ChannelFactory
 				.GetChannel()
 				.QueueBind(
