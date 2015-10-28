@@ -20,8 +20,7 @@ namespace RawRabbit.Configuration.Request
 		{
 			Exchange = new ExchangeConfiguration();
 			ReplyQueue = new QueueConfiguration();
+			NoAck = true;
 		}
-
-		
 	}
 }

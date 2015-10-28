@@ -23,10 +23,6 @@ namespace RawRabbit.Configuration.Queue
 			Exclusive = cfg.Exclusive;
 		}
 
-		public static QueueConfiguration Default => new QueueConfiguration
-		{
-		};
-
-		
+		public static QueueConfiguration Default => new QueueConfiguration { };		
 	}
 }

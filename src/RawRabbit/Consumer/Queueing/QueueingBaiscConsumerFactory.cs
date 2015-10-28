@@ -17,7 +17,11 @@ namespace RawRabbit.Consumer.Queueing
 
 		public IRawConsumer CreateConsumer(IConsumerConfiguration cfg)
 		{
-			var channel = _channelFactory.GetChannel();
+			return CreateConsumer(cfg, _channelFactory.GetChannel());
+		}
+
+		public IRawConsumer CreateConsumer(IConsumerConfiguration cfg, IModel channel)
+		{
 			ConfigureQos(channel, cfg.PrefetchCount);
 			var basicConsumer = new QueueingBasicConsumer(channel);
 			channel.BasicConsume(cfg.Queue.QueueName, cfg.NoAck, basicConsumer);

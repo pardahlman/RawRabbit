@@ -2,7 +2,7 @@
 	"version": "1.0.0-*",
 
 	"dependencies": {
-		"Microsoft.Framework.Configuration": "1.0.0-beta8-15586",
+		"Microsoft.Framework.Configuration": "1.0.0-beta8",
 		"RawRabbit": "",
 		"RawRabbit.vNext": "",
 		"xunit": "2.1.0",

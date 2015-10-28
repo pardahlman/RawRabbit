@@ -60,7 +60,7 @@ namespace RawRabbit.Operations
 				{
 					var channel = ChannelFactory.GetChannel();
 					channel.BasicPublish(
-						exchange: requestPayload.Exchange,
+						exchange: "",
 						routingKey: requestPayload.BasicProperties.ReplyTo,
 						basicProperties: propsTask.Result,
 						body: serializeTask.Result

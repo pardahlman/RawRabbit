@@ -28,14 +28,7 @@ namespace RawRabbit.Operations
 
 		public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest message, Guid globalMessageId, RequestConfiguration config)
 		{
-			var replyQueueTask = DeclareQueueAsync(config.ReplyQueue);
-			var exchangeTask = DeclareExchangeAsync(config.Exchange);
-
-			return Task
-				.WhenAll(replyQueueTask, exchangeTask)
-				.ContinueWith(t => BindQueue(config.ReplyQueue, config.Exchange, config.ReplyQueueRoutingKey))
-				.ContinueWith(t => SendRequestAsync<TRequest, TResponse>(message, globalMessageId, config))
-				.Unwrap();
+			return SendRequestAsync<TRequest, TResponse>(message, globalMessageId, config);
 		}
 
 		private Task<TResponse> SendRequestAsync<TRequest, TResponse>(TRequest message, Guid globalMessageId, RequestConfiguration cfg)
@@ -43,18 +36,18 @@ namespace RawRabbit.Operations
 			var responseTcs = new TaskCompletionSource<TResponse>();
 			var propsTask = GetRequestPropsAsync(cfg.ReplyQueue.QueueName, globalMessageId);
 			var bodyTask = CreateMessageAsync(message);
-
+			var channel = ChannelFactory.CreateChannel();
 			Task
 				.WhenAll(propsTask, bodyTask)
 				.ContinueWith(task =>
 				{
-					var consumer = _consumerFactory.CreateConsumer(cfg);
+					var consumer = _consumerFactory.CreateConsumer(cfg, channel);
 
 					Timer requestTimeOutTimer = null;
 					requestTimeOutTimer = new Timer(state =>
 					{
 						requestTimeOutTimer?.Dispose();
-						consumer.Disconnect();
+						channel.Dispose();
 						responseTcs.TrySetException(new TimeoutException($"The request timed out after {_requestTimeout.ToString("g")}."));
 					}, null, _requestTimeout, TimeSpan.FromMilliseconds(-1));
 
@@ -69,7 +62,7 @@ namespace RawRabbit.Operations
 							.Run(() => Serializer.Deserialize<TResponse>(args.Body))
 							.ContinueWith(t =>
 							{
-								consumer.Disconnect();
+								channel.Dispose();
 								responseTcs.SetResult(t.Result);
 							});
 					};
