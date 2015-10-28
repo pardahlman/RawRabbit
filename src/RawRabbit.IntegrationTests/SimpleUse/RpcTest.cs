@@ -38,6 +38,32 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		}
 
 		[Fact]
+		public async void Should_Perform_Rpc_Without_Direct_Reply_To()
+		{
+			/* Setup */
+			var response = new BasicResponse { Prop = "This is the reponse." };
+			var requester = BusClientFactory.CreateDefault();
+			var responder = BusClientFactory.CreateDefault();
+			await responder.RespondAsync<BasicRequest, BasicResponse>((req, i) =>
+			{
+				return Task.FromResult(response);
+			});
+
+			/* Test */
+			var recieved = await requester.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest(),
+				configuration: cfg => cfg
+					.WithReplyQueue(
+						q => q
+							.WithName("special_reply_queue")
+							.WithAutoDelete())
+					.WithNoAck(false)
+			);
+
+			/* Assert */
+			Assert.Equal(recieved.Prop, response.Prop);
+		}
+
+		[Fact]
 		public async void Should_Succeed_With_Multiple_Rpc_Calls_At_The_Same_Time()
 		{
 			/* Setup */

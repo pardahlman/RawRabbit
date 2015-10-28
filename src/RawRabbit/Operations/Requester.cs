@@ -28,12 +28,11 @@ namespace RawRabbit.Operations
 
 		public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest message, Guid globalMessageId, RequestConfiguration config)
 		{
-			var queueTask = DeclareQueueAsync(config.Queue);
+			var queueTask = DeclareQueueAsync(config.ReplyQueue);
 			var exchangeTask = DeclareExchangeAsync(config.Exchange);
 
 			return Task
 				.WhenAll(queueTask, exchangeTask)
-				.ContinueWith(t => BindQueue(config.Queue, config.Exchange, config.RoutingKey))
 				.ContinueWith(t => SendRequestAsync<TRequest, TResponse >(message, globalMessageId, config)).Unwrap();
 		}
 
