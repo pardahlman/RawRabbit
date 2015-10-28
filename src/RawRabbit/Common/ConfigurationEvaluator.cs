@@ -21,6 +21,7 @@ namespace RawRabbit.Common
 	{
 		private readonly RawRabbitConfiguration _clientConfig;
 		private readonly INamingConvetions _convetions;
+		private readonly string _directReplyTo = "amq.rabbitmq.reply-to";
 
 		public ConfigurationEvaluator(RawRabbitConfiguration clientConfig, INamingConvetions convetions)
 		{
@@ -81,9 +82,10 @@ namespace RawRabbit.Common
 
 		public RequestConfiguration GetConfiguration<TRequest, TResponse>(Action<IRequestConfigurationBuilder> configuration)
 		{
+			// leverage direct reply to: https://www.rabbitmq.com/direct-reply-to.html
 			var replyQueueConfig = new QueueConfiguration
 			{
-				QueueName = _convetions.RpcReturnQueueNamingConvention(),
+				QueueName = _directReplyTo,
 				AutoDelete = true,
 				Durable = false,
 				Exclusive = true
