@@ -35,17 +35,26 @@ namespace RawRabbit.Operations
 				);
 		}
 
-		protected Task DeclareQueueAsync(QueueConfiguration config)
+		protected Task DeclareQueueAsync(QueueConfiguration queue)
 		{
+			if (queue.IsDirectReplyTo())
+			{
+				/*
+					"Consume from the pseudo-queue amq.rabbitmq.reply-to in no-ack mode. There is no need to
+					declare this "queue" first, although the client can do so if it wants."
+					- https://www.rabbitmq.com/direct-reply-to.html
+				*/
+				return Task.FromResult(true);
+			}
 			return Task.Run(() =>
 				ChannelFactory
 					.GetChannel()
 					.QueueDeclare(
-						queue: config.QueueName,
-						durable: config.Durable,
-						exclusive: config.Exclusive,
-						autoDelete: config.AutoDelete,
-						arguments: config.Arguments
+						queue: queue.QueueName,
+						durable: queue.Durable,
+						exclusive: queue.Exclusive,
+						autoDelete: queue.AutoDelete,
+						arguments: queue.Arguments
 					)
 				);
 		}
