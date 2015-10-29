@@ -1,5 +1,7 @@
 {
 	"version": "1.0.1-*",
+	"authors": ["pardahlman", "enrique-avalon"],
+	"description": "A modern frame for communication over RabbitMq.",
 
 	"dependencies": {
 		"RabbitMQ.Client": "3.5.6",
