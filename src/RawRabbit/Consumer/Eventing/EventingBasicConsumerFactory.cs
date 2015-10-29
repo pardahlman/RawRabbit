@@ -15,11 +15,13 @@ namespace RawRabbit.Consumer.Eventing
 	{
 		private readonly IChannelFactory _channelFactory;
 		private readonly ConcurrentBag<string> _processedButNotAcked;
+		private readonly ConcurrentBag<IRawConsumer> _consumers; 
 
 		public EventingBasicConsumerFactory(IChannelFactory channelFactory)
 		{
 			_channelFactory = channelFactory;
 			_processedButNotAcked = new ConcurrentBag<string>();
+			_consumers = new ConcurrentBag<IRawConsumer>();
 		}
 
 		public IRawConsumer CreateConsumer(IConsumerConfiguration cfg)
@@ -31,6 +33,7 @@ namespace RawRabbit.Consumer.Eventing
 		{
 			ConfigureQos(channel, cfg.PrefetchCount);
 			var rawConsumer = new EventingRawConsumer(channel);
+			_consumers.Add(rawConsumer);
 			channel.BasicConsume(cfg.Queue.QueueName, cfg.NoAck, rawConsumer);
 
 			rawConsumer.Received += (sender, args) =>
@@ -104,6 +107,14 @@ namespace RawRabbit.Consumer.Eventing
 			{
 				_processedButNotAcked.Add(args.BasicProperties.MessageId);
 				CreateConsumer(cfg); // TODO: do we really want to re-conect? probably not.
+			}
+		}
+
+		public void Dispose()
+		{
+			foreach (var consumer in _consumers)
+			{
+				consumer?.Disconnect();
 			}
 		}
 	}

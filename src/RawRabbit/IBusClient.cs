@@ -8,7 +8,7 @@ using RawRabbit.Context;
 
 namespace RawRabbit
 {
-	public interface IBusClient<out TMessageContext> where TMessageContext : IMessageContext
+	public interface IBusClient<out TMessageContext> : IDisposable where TMessageContext : IMessageContext
 	{
 		Task SubscribeAsync<T>(Func<T, TMessageContext, Task> subscribeMethod, Action<ISubscriptionConfigurationBuilder> configuration = null);
 

@@ -5,7 +5,6 @@ using RawRabbit.Configuration.Request;
 using RawRabbit.Configuration.Respond;
 using RawRabbit.Configuration.Subscribe;
 using RawRabbit.Context;
-using RawRabbit.Operations;
 using RawRabbit.Operations.Contracts;
 
 namespace RawRabbit.Common
@@ -54,6 +53,14 @@ namespace RawRabbit.Common
 		{
 			var config = _configEval.GetConfiguration<TRequest, TResponse>(configuration);
 			return _requester.RequestAsync<TRequest, TResponse>(message, globalMessageId, config);
+		}
+
+		public void Dispose()
+		{
+			(_subscriber as IDisposable)?.Dispose();
+			(_publisher as IDisposable)?.Dispose();
+			(_requester as IDisposable)?.Dispose();
+			(_responder as IDisposable)?.Dispose();
 		}
 	}
 }

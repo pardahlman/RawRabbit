@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Concurrent;
+using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Respond;
@@ -9,32 +10,33 @@ namespace RawRabbit.Consumer.Queueing
 	public class QueueingBaiscConsumerFactory : IConsumerFactory
 	{
 		private readonly IChannelFactory _channelFactory;
-
+		private readonly ConcurrentBag<IRawConsumer> _consumers;
+		 
 		public QueueingBaiscConsumerFactory(IChannelFactory channelFactory)
 		{
 			_channelFactory = channelFactory;
+			_consumers = new ConcurrentBag<IRawConsumer>();
 		}
 
 		public IRawConsumer CreateConsumer(IConsumerConfiguration cfg)
 		{
 			return CreateConsumer(cfg, _channelFactory.GetChannel());
 		}
-
+	
 		public IRawConsumer CreateConsumer(IConsumerConfiguration cfg, IModel channel)
 		{
 			ConfigureQos(channel, cfg.PrefetchCount);
-			var basicConsumer = new QueueingBasicConsumer(channel);
-			channel.BasicConsume(cfg.Queue.QueueName, cfg.NoAck, basicConsumer);
-			
-			var rawConsumer =new QueueingRawConsumer(channel);
-			
-			//TODO: Add exception handling etc.
+			var consumer = new QueueingRawConsumer(channel);
+			_consumers.Add(consumer);
+			channel.BasicConsume(cfg.Queue.QueueName, cfg.NoAck, consumer);
+
+				//TODO: Add exception handling etc.
 
 			Task
-				.Run(() => basicConsumer.Queue.Dequeue())
-				.ContinueWith(argsTask => rawConsumer.OnMessageAsync(this, argsTask.Result));
+				.Run(() => consumer.Queue.Dequeue())
+				.ContinueWith(argsTask => consumer.OnMessageAsync(this, argsTask.Result));
 
-			return rawConsumer;
+			return consumer;
 		}
 
 		protected void ConfigureQos(IModel channel, ushort prefetchCount)
@@ -44,6 +46,14 @@ namespace RawRabbit.Consumer.Queueing
 				prefetchCount: prefetchCount,
 				global: false
 			);
+		}
+
+		public void Dispose()
+		{
+			foreach (var consumer in _consumers)
+			{
+				consumer?.Disconnect();
+			}
 		}
 	}
 }
