@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
+using RawRabbit.Logging;
 
 namespace RawRabbit.Common
 {
@@ -15,11 +16,14 @@ namespace RawRabbit.Common
 		private readonly ConcurrentDictionary<IConnectionFactory, IConnection> _factoryToConnection;
 		private const int PrimaryIndex = 0;
 		private int _currentIndex = PrimaryIndex;
+		private readonly ILogger _logger;
 
-		public DefaultConnectionBroker(IEnumerable<IConnectionFactory> connectionFactories, TimeSpan retryInterval)
+		public DefaultConnectionBroker(IEnumerable<IConnectionFactory> connectionFactories, TimeSpan retryInterval, ILoggerFactory logFactory)
 		{
+			_logger = logFactory.CreateLogger<DefaultConnectionBroker>();
 			_retryInterval = retryInterval;
 			_factories = connectionFactories.Where(f => f != null).ToList();
+			_logger.LogInformation($"Preparing connection provider for {_factories.Count} potential brokers.");
 
 			if (!_factories.Any())
 			{
@@ -27,14 +31,16 @@ namespace RawRabbit.Common
 			}
 
 			_factoryToConnection = new ConcurrentDictionary<IConnectionFactory, IConnection>();
-			
+
 			IConnection primary;
 			try
 			{
+				_logger.LogDebug("Connecting to first host");
 				primary = _factories[0].CreateConnection();
 			}
 			catch (BrokerUnreachableException e)
 			{
+				_logger.LogError("Unable to connect to broker", e);
 				throw e.InnerException;
 			}
 			_factoryToConnection.TryAdd(_factories[0], primary);

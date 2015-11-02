@@ -11,6 +11,7 @@ using RawRabbit.Consumer.Contract;
 using RawRabbit.Consumer.Eventing;
 using RawRabbit.Context;
 using RawRabbit.Context.Provider;
+using RawRabbit.Logging;
 using RawRabbit.Operations;
 using RawRabbit.Operations.Contracts;
 using RawRabbit.Serialization;
@@ -41,9 +42,11 @@ namespace RawRabbit.vNext
 				.AddSingleton<IConnectionBroker, DefaultConnectionBroker>(
 					p => new DefaultConnectionBroker(
 						p.GetService<IEnumerable<IConnectionFactory>>(),
-						TimeSpan.FromMinutes(1) //TODO: Move this to config
+						TimeSpan.FromMinutes(1), //TODO: Move this to config
+						p.GetService<ILoggerFactory>()
 					)
 				)
+				.AddTransient<ILoggerFactory , LoggerFactory>()
 				.AddTransient<IConfigurationParser, ConfigurationParser>()
 				.AddTransient<IMessageSerializer, JsonMessageSerializer>()
 				.AddTransient<IConsumerFactory, EventingBasicConsumerFactory>()

@@ -6,7 +6,8 @@
 	"dependencies": {
 		"RawRabbit": "",
 		"Microsoft.Framework.DependencyInjection": "1.0.0-beta8",
-		"Microsoft.Framework.Configuration.Abstractions": "1.0.0-beta8"
+		"Microsoft.Framework.Configuration.Abstractions": "1.0.0-beta8",
+		"Microsoft.Framework.Logging.Abstractions": "1.0.0-beta8"
 	},
 
 	"frameworks": {
