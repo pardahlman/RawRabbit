@@ -42,11 +42,10 @@ namespace RawRabbit.vNext
 				.AddSingleton<IConnectionBroker, DefaultConnectionBroker>(
 					p => new DefaultConnectionBroker(
 						p.GetService<IEnumerable<IConnectionFactory>>(),
-						TimeSpan.FromMinutes(1), //TODO: Move this to config
-						p.GetService<ILoggerFactory>()
+						TimeSpan.FromMinutes(1) //TODO: Move this to config
 					)
 				)
-				.AddTransient<ILoggerFactory , LoggerFactory>()
+				.AddSingleton<ILoggerFactory , LoggerFactory>()
 				.AddTransient<IConfigurationParser, ConfigurationParser>()
 				.AddTransient<IMessageSerializer, JsonMessageSerializer>()
 				.AddTransient<IConsumerFactory, EventingBasicConsumerFactory>()

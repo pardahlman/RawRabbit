@@ -16,11 +16,10 @@ namespace RawRabbit.Common
 		private readonly ConcurrentDictionary<IConnectionFactory, IConnection> _factoryToConnection;
 		private const int PrimaryIndex = 0;
 		private int _currentIndex = PrimaryIndex;
-		private readonly ILogger _logger;
+		private readonly ILogger _logger = LogManager.GetLogger<DefaultConnectionBroker>();
 
-		public DefaultConnectionBroker(IEnumerable<IConnectionFactory> connectionFactories, TimeSpan retryInterval, ILoggerFactory logFactory)
+		public DefaultConnectionBroker(IEnumerable<IConnectionFactory> connectionFactories, TimeSpan retryInterval)
 		{
-			_logger = logFactory.CreateLogger<DefaultConnectionBroker>();
 			_retryInterval = retryInterval;
 			_factories = connectionFactories.Where(f => f != null).ToList();
 			_logger.LogInformation($"Preparing connection provider for {_factories.Count} potential brokers.");

@@ -4,6 +4,7 @@ using Microsoft.Framework.DependencyInjection;
 using RawRabbit.Common;
 using RawRabbit.Configuration;
 using RawRabbit.Context;
+using RawRabbit.Logging;
 using RawRabbit.Operations.Contracts;
 
 namespace RawRabbit.vNext
@@ -37,6 +38,8 @@ namespace RawRabbit.vNext
 
 		public static BusClient CreateDefault(IServiceProvider serviceProvider)
 		{
+			LogManager.CurrentFactory = serviceProvider.GetService<ILoggerFactory>();
+
 			return new BusClient(
 				serviceProvider.GetService<IConfigurationEvaluator>(),
 				serviceProvider.GetService<ISubscriber<MessageContext>>(),
