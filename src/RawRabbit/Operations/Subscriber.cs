@@ -5,6 +5,7 @@ using RawRabbit.Configuration.Subscribe;
 using RawRabbit.Consumer.Contract;
 using RawRabbit.Context;
 using RawRabbit.Context.Provider;
+using RawRabbit.Logging;
 using RawRabbit.Operations.Contracts;
 using RawRabbit.Serialization;
 
@@ -14,6 +15,7 @@ namespace RawRabbit.Operations
 	{
 		private readonly IConsumerFactory _consumerFactory;
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
+		private readonly ILogger _logger = LogManager.GetLogger<Subscriber<TMessageContext>>();
 
 		public Subscriber(IChannelFactory channelFactory, IConsumerFactory consumerFactory, IMessageSerializer serializer, IMessageContextProvider<TMessageContext> contextProvider)
 			: base(channelFactory, serializer)
@@ -26,7 +28,7 @@ namespace RawRabbit.Operations
 		{
 			var queueTask = DeclareQueueAsync(config.Queue);
 			var exchangeTask = DeclareExchangeAsync(config.Exchange);
-			
+
 			return Task
 				.WhenAll(queueTask, exchangeTask)
 				.ContinueWith(t => BindQueue(config.Queue, config.Exchange, config.RoutingKey))
@@ -47,6 +49,7 @@ namespace RawRabbit.Operations
 						.ContinueWith(task => subscribeMethod(bodyTask.Result, contextTask.Result));
 				};
 
+				_logger.LogDebug($"Setting up a consumer on queue {cfg.Queue.QueueName} with NoAck set to {cfg.NoAck}.");
 				consumer.Model.BasicConsume(
 					queue: cfg.Queue.QueueName,
 					noAck: cfg.NoAck,

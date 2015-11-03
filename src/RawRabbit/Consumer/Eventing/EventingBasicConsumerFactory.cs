@@ -8,6 +8,7 @@ using RabbitMQ.Client.Exceptions;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Respond;
 using RawRabbit.Consumer.Contract;
+using RawRabbit.Logging;
 
 namespace RawRabbit.Consumer.Eventing
 {
@@ -15,7 +16,8 @@ namespace RawRabbit.Consumer.Eventing
 	{
 		private readonly IChannelFactory _channelFactory;
 		private readonly ConcurrentBag<string> _processedButNotAcked;
-		private readonly ConcurrentBag<IRawConsumer> _consumers; 
+		private readonly ConcurrentBag<IRawConsumer> _consumers;
+		private readonly ILogger _logger = LogManager.GetLogger<EventingBasicConsumerFactory>();
 
 		public EventingBasicConsumerFactory(IChannelFactory channelFactory)
 		{
@@ -52,6 +54,7 @@ namespace RawRabbit.Consumer.Eventing
 				Task onMessageTask;
 				try
 				{
+					_logger.LogInformation($"Message recived: MessageId: {args.BasicProperties.MessageId}");
 					onMessageTask = rawConsumer.OnMessageAsync(sender, args);
 				}
 				catch (Exception)
@@ -87,6 +90,7 @@ namespace RawRabbit.Consumer.Eventing
 
 		protected void ConfigureQos(IModel channel, ushort prefetchCount)
 		{
+			_logger.LogDebug($"Setting QoS\n  Prefetch Size: 0\n  Prefetch Count: {prefetchCount}\n  global: false");
 			channel.BasicQos(
 				prefetchSize: 0,
 				prefetchCount: prefetchCount,
@@ -98,6 +102,7 @@ namespace RawRabbit.Consumer.Eventing
 		{
 			try
 			{
+				_logger.LogDebug($"Ack:ing message with id {args.DeliveryTag}.");
 				channel.BasicAck(
 					deliveryTag: args.DeliveryTag,
 					multiple: false
@@ -105,6 +110,7 @@ namespace RawRabbit.Consumer.Eventing
 			}
 			catch (AlreadyClosedException)
 			{
+				_logger.LogWarning("Unable to ack message, channel is allready closed.");
 				_processedButNotAcked.Add(args.BasicProperties.MessageId);
 				CreateConsumer(cfg); // TODO: do we really want to re-conect? probably not.
 			}

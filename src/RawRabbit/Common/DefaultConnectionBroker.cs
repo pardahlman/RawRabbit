@@ -22,7 +22,7 @@ namespace RawRabbit.Common
 		{
 			_retryInterval = retryInterval;
 			_factories = connectionFactories.Where(f => f != null).ToList();
-			_logger.LogInformation($"Preparing connection provider for {_factories.Count} potential brokers.");
+			_logger.LogInformation($"Preparing connection broker for {_factories.Count} potential brokers.");
 
 			if (!_factories.Any())
 			{
@@ -34,8 +34,9 @@ namespace RawRabbit.Common
 			IConnection primary;
 			try
 			{
-				_logger.LogDebug("Connecting to first host");
+				_logger.LogDebug("Connecting to primary host.");
 				primary = _factories[0].CreateConnection();
+				_logger.LogInformation($"Successfully established connection to {primary.Endpoint.HostName}.");
 			}
 			catch (BrokerUnreachableException e)
 			{
@@ -54,6 +55,7 @@ namespace RawRabbit.Common
 			}
 			for (var secondaryIndex = 1; secondaryIndex < _factories.Count; secondaryIndex++)
 			{
+				_logger.LogInformation("Unable to establish connection to primary broker. Attempting to connect to secondaries.");
 				if (TryGetConnection(secondaryIndex, out connection))
 				{
 					_currentIndex = secondaryIndex;
@@ -61,6 +63,7 @@ namespace RawRabbit.Common
 					Timer retryPrimaryTimer = null;
 					retryPrimaryTimer = new Timer(state =>
 					{
+						_logger.LogDebug("Retry interval elapsed. Will retry with primary host for next connection.");
 						retryPrimaryTimer?.Dispose();
 						_currentIndex = PrimaryIndex;
 					}, null, _retryInterval, TimeSpan.FromMilliseconds(-1));
@@ -73,6 +76,7 @@ namespace RawRabbit.Common
 
 		private bool TryGetConnection(int factoryIndex, out IConnection connection)
 		{
+			_logger.LogDebug($"Attempting to establish connection to broker with index {factoryIndex}");
 			if (factoryIndex > _factories.Count - 1)
 			{
 				connection = null;
@@ -96,6 +100,7 @@ namespace RawRabbit.Common
 			var existingConnection = _factoryToConnection[factory];
 			if (!existingConnection.IsOpen)
 			{
+				_logger.LogWarning($"The previously used connection to {existingConnection.Endpoint.HostName} has beeen closed. Attempting to reconnect");
 				try
 				{
 					_factoryToConnection.TryAdd(factory, factory.CreateConnection());
@@ -108,6 +113,7 @@ namespace RawRabbit.Common
 			}
 
 			connection = _factoryToConnection[factory];
+			_logger.LogDebug($"Using connection to {connection.Endpoint.HostName}.");
 			return connection.IsOpen;
 		}
 

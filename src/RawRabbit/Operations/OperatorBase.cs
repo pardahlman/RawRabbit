@@ -4,6 +4,7 @@ using RabbitMQ.Client;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Queue;
+using RawRabbit.Logging;
 using RawRabbit.Serialization;
 
 namespace RawRabbit.Operations
@@ -12,6 +13,7 @@ namespace RawRabbit.Operations
 	{
 		protected readonly IChannelFactory ChannelFactory;
 		protected readonly IMessageSerializer Serializer;
+		private readonly ILogger _logger = LogManager.GetLogger<OperatorBase>();
 
 		protected OperatorBase(IChannelFactory channelFactory, IMessageSerializer serializer)
 		{
@@ -25,6 +27,7 @@ namespace RawRabbit.Operations
 			{
 				return Task.FromResult(true);
 			}
+			_logger.LogDebug($"Declaring exchange\n  Name: {config.ExchangeName}\n  Type: {config.ExchangeType}\n  Durable: {config.Durable}\n  Autodelete: {config.AutoDelete}");
 			return Task.Run(() =>
 				ChannelFactory
 					.GetChannel()
@@ -46,6 +49,7 @@ namespace RawRabbit.Operations
 				*/
 				return Task.FromResult(true);
 			}
+			_logger.LogDebug($"Declaring queue\n  Name: {queue.QueueName}\n  Exclusive: {queue.Exclusive}\n  Durable: {queue.Durable}\n  Autodelete: {queue.AutoDelete}");
 			return Task.Run(() =>
 				ChannelFactory
 					.GetChannel()
@@ -79,6 +83,7 @@ namespace RawRabbit.Operations
 				*/
 				return;
 			}
+			_logger.LogDebug($"Binding queue {queue.QueueName} to exchange {exchange.ExchangeName} with routing key {routingKey}");
 			ChannelFactory
 				.GetChannel()
 				.QueueBind(
@@ -93,19 +98,6 @@ namespace RawRabbit.Operations
 			return Task.Run(() => Serializer.Serialize(message));
 		}
 
-		protected void BasicAck(IModel channel, ulong deliveryTag)
-		{
-			/*
-				Acknowledgement needs to be called on the same channel that
-				delivered the message. This is the reason we're not using 
-				the ChannelFactory in this instance.
-			*/
-			channel.BasicAck(
-					deliveryTag: deliveryTag,
-					multiple: false
-				);
-		}
-
 		protected void ConfigureQos(IModel channel, ushort prefetchCount)
 		{
 			/*
@@ -113,6 +105,7 @@ namespace RawRabbit.Operations
 				we might get a new channel than the one the consumer is
 				we are configuring.
 			*/
+			_logger.LogDebug($"Setting QoS\n  Prefetch Size: 0\n  Prefetch Count: {prefetchCount}\n  global: false");
 			channel.BasicQos(
 					prefetchSize: 0, //TODO : what is this?
 					prefetchCount: prefetchCount,
