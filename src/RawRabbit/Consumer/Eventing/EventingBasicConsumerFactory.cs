@@ -35,6 +35,8 @@ namespace RawRabbit.Consumer.Eventing
 		{
 			ConfigureQos(channel, cfg.PrefetchCount);
 			var rawConsumer = new EventingRawConsumer(channel);
+			SetupLogging(rawConsumer);
+			
 			_consumers.Add(rawConsumer);
 			channel.BasicConsume(cfg.Queue.QueueName, cfg.NoAck, rawConsumer);
 
@@ -86,6 +88,14 @@ namespace RawRabbit.Consumer.Eventing
 			};
 
 			return rawConsumer;
+		}
+
+		private void SetupLogging(EventingRawConsumer rawConsumer)
+		{
+			rawConsumer.Shutdown += (sender, args) =>
+			{
+				_logger.LogInformation($"Consumer {rawConsumer.ConsumerTag} has been shut down.\n  Reason: {args.Cause}\n  Initiator: {args.Initiator}\n  Reply Text: {args.ReplyText}");
+			};
 		}
 
 		protected void ConfigureQos(IModel channel, ushort prefetchCount)
