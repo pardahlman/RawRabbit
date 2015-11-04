@@ -36,7 +36,9 @@ namespace RawRabbit.vNext
 						HostName = b.Hostname,
 						VirtualHost = b.VirtualHost,
 						UserName = b.Username,
-						Password = b.Password
+						Password = b.Password,
+						AutomaticRecoveryEnabled = true,
+						TopologyRecoveryEnabled = true
 					});
 				})
 				.AddSingleton<IConnectionBroker, DefaultConnectionBroker>(

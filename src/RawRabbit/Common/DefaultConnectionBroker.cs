@@ -36,6 +36,7 @@ namespace RawRabbit.Common
 			{
 				_logger.LogDebug("Connecting to primary host.");
 				primary = _factories[0].CreateConnection();
+				SetupLoggin(primary);
 				_logger.LogInformation($"Successfully established connection to {primary.Endpoint.HostName}.");
 			}
 			catch (BrokerUnreachableException e)
@@ -88,7 +89,9 @@ namespace RawRabbit.Common
 			{
 				try
 				{
-					_factoryToConnection.TryAdd(factory, factory.CreateConnection());
+					var newConnection = factory.CreateConnection();
+					SetupLoggin(newConnection);
+                    _factoryToConnection.TryAdd(factory, newConnection);
 				}
 				catch (BrokerUnreachableException)
 				{
@@ -103,7 +106,9 @@ namespace RawRabbit.Common
 				_logger.LogWarning($"The previously used connection to {existingConnection.Endpoint.HostName} has beeen closed. Attempting to reconnect");
 				try
 				{
-					_factoryToConnection.TryAdd(factory, factory.CreateConnection());
+					var newConnection = factory.CreateConnection();
+					SetupLoggin(newConnection);
+					_factoryToConnection.TryAdd(factory, newConnection);
 				}
 				catch (BrokerUnreachableException e)
 				{
@@ -115,6 +120,16 @@ namespace RawRabbit.Common
 			connection = _factoryToConnection[factory];
 			_logger.LogDebug($"Using connection to {connection.Endpoint.HostName}.");
 			return connection.IsOpen;
+		}
+
+
+		private void SetupLoggin(IConnection primary)
+		{
+			primary.ConnectionShutdown +=
+				(sender, args) =>
+					_logger.LogInformation(
+						$"Connection to host '{primary.Endpoint.HostName}' was shot down.\n  Cause: {args.Cause}\n  Reason: {args.ReplyText}\n  Initiator: {args.Initiator}"
+					);
 		}
 
 		public void Dispose()
