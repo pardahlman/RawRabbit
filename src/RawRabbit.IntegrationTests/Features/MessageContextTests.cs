@@ -80,13 +80,13 @@ namespace RawRabbit.IntegrationTests.Features
 			var firstResponder = BusClientFactory.CreateDefault();
 			var secondResponder = BusClientFactory.CreateDefault();
 
-			await firstResponder.RespondAsync<FirstRequest, FirstResponse>(async (req, c) =>
+			firstResponder.RespondAsync<FirstRequest, FirstResponse>(async (req, c) =>
 			{
 				firstContext = c;
 				var resp = await firstResponder.RequestAsync<SecondRequest, SecondResponse>(new SecondRequest(), c.GlobalRequestId);
 				return new FirstResponse { Infered = resp.Source };
 			});
-			await secondResponder.RespondAsync<SecondRequest, SecondResponse>((req, c) =>
+			secondResponder.RespondAsync<SecondRequest, SecondResponse>((req, c) =>
 			{
 				secondContext = c;
 				tcs.SetResult(true);
@@ -112,7 +112,7 @@ namespace RawRabbit.IntegrationTests.Features
 			var firstResponder = BusClientFactory.CreateDefault();
 			var firstSubscriber = BusClientFactory.CreateDefault();
 
-			await firstResponder.RespondAsync<FirstRequest, FirstResponse>(async (req, c) =>
+			firstResponder.RespondAsync<FirstRequest, FirstResponse>(async (req, c) =>
 			{
 				firstContext = c;
 				await firstResponder.PublishAsync(new BasicMessage(), c.GlobalRequestId);

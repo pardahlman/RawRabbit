@@ -48,11 +48,11 @@ namespace RawRabbit.Common
 			return _publisher.PublishAsync(message, globalMessageId, config);
 		}
 
-		public Task RespondAsync<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, Action<IResponderConfigurationBuilder> configuration = null)
+		public void RespondAsync<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, Action<IResponderConfigurationBuilder> configuration = null)
 		{
 			var config = _configEval.GetConfiguration<TRequest, TResponse>(configuration);
 			_logger.LogInformation($"Responding to to requests '{typeof(TRequest).Name}' with '{typeof(TResponse).Name}'.");
-			return _responder.RespondAsync(onMessage, config);
+			_responder.RespondAsync(onMessage, config);
 		}
 
 		public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest message = default(TRequest), Guid globalMessageId = new Guid(), Action<IRequestConfigurationBuilder> configuration = null)

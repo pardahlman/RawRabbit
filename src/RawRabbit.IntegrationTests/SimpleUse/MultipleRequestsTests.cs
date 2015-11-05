@@ -20,7 +20,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			var bag = new ConcurrentBag<Guid>();
 			var requester = BusClientFactory.CreateDefault();
 			var responder = BusClientFactory.CreateDefault();
-			await responder.RespondAsync<FirstRequest, FirstResponse>((req, i) =>
+			responder.RespondAsync<FirstRequest, FirstResponse>((req, i) =>
 				Task.FromResult(new FirstResponse { Infered = Guid.NewGuid() })
 			);
 

@@ -24,15 +24,12 @@ namespace RawRabbit.Operations
 			_contextProvider = contextProvider;
 		}
 
-		public Task RespondAsync<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, ResponderConfiguration cfg)
+		public void RespondAsync<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, ResponderConfiguration cfg)
 		{
-			var queueTask = Task.Run(() => DeclareQueue(cfg.Queue));
-			var exchangeTask = Task.Run(() => DeclareExchange(cfg.Exchange));
-
-			return Task
-				.WhenAll(queueTask, exchangeTask)
-				.ContinueWith(t => BindQueue(cfg.Queue, cfg.Exchange, cfg.RoutingKey))
-				.ContinueWith(t => ConfigureRespond(onMessage, cfg));
+			DeclareQueue(cfg.Queue);
+			DeclareExchange(cfg.Exchange);
+			BindQueue(cfg.Queue, cfg.Exchange, cfg.RoutingKey);
+			ConfigureRespond(onMessage, cfg);
 		}
 
 		private void ConfigureRespond<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, IConsumerConfiguration cfg)

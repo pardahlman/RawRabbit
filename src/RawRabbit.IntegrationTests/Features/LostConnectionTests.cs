@@ -27,7 +27,7 @@ namespace RawRabbit.IntegrationTests.Features
 					.AddInstance(typeof (IChannelFactory), channelFactory)
 					.AddSingleton(p => new RawRabbitConfiguration { RequestTimeout = TimeSpan.FromHours(1) })
 				);
-			await responder.RespondAsync<FirstRequest, FirstResponse>((req, c) =>
+			responder.RespondAsync<FirstRequest, FirstResponse>((req, c) =>
 			{
 				channelFactory.CloseAll();
 				return Task.FromResult(expectedResponse);

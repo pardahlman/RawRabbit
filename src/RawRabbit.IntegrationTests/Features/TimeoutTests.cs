@@ -15,7 +15,7 @@ namespace RawRabbit.IntegrationTests.Features
 			/* Setup */
 			var responder = BusClientFactory.CreateDefault();
 			var requester = BusClientFactory.CreateDefault(requestTimeout: TimeSpan.FromMilliseconds(200));
-			await responder.RespondAsync<FirstRequest, FirstResponse>((request, context) =>
+			responder.RespondAsync<FirstRequest, FirstResponse>((request, context) =>
 			{
 				return Task
 					.Run(() => Task.Delay(250))
@@ -33,7 +33,7 @@ namespace RawRabbit.IntegrationTests.Features
 			/* Setup */
 			var responder = BusClientFactory.CreateDefault();
 			var requester = BusClientFactory.CreateDefault(requestTimeout: TimeSpan.FromMilliseconds(200));
-			await responder.RespondAsync<FirstRequest, FirstResponse>((request, context) =>
+			responder.RespondAsync<FirstRequest, FirstResponse>((request, context) =>
 			{
 				return Task.FromResult(new FirstResponse());
 			});

@@ -7,6 +7,6 @@ namespace RawRabbit.Operations.Contracts
 {
 	public interface IResponder<out TMessageContext> where TMessageContext : IMessageContext
 	{
-		Task RespondAsync<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, ResponderConfiguration cfg);
+		void RespondAsync<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, ResponderConfiguration cfg);
 	}
 }

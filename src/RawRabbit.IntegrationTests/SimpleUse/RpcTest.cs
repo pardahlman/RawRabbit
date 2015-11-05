@@ -25,7 +25,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			var response = new BasicResponse { Prop = "This is the reponse." };
 			var requester = BusClientFactory.CreateDefault();
 			var responder = BusClientFactory.CreateDefault();
-			await responder.RespondAsync<BasicRequest, BasicResponse>((req, i) =>
+			responder.RespondAsync<BasicRequest, BasicResponse>((req, i) =>
 			{
 				return Task.FromResult(response);
 			});
@@ -44,7 +44,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			var response = new BasicResponse { Prop = "This is the reponse." };
 			var requester = BusClientFactory.CreateDefault();
 			var responder = BusClientFactory.CreateDefault();
-			await responder.RespondAsync<BasicRequest, BasicResponse>((req, i) =>
+			responder.RespondAsync<BasicRequest, BasicResponse>((req, i) =>
 			{
 				return Task.FromResult(response);
 			});
@@ -71,7 +71,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			var uniqueReponse = new ConcurrentStack<Guid>(payloads);
 			var requester = BusClientFactory.CreateDefault();
 			var responder = BusClientFactory.CreateDefault();
-			await responder.RespondAsync<BasicRequest, BasicResponse>((req, i) =>
+			responder.RespondAsync<BasicRequest, BasicResponse>((req, i) =>
 			{
 				Guid payload;
 				if (!uniqueReponse.TryPop(out payload))
@@ -106,12 +106,12 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			var firstResponder = BusClientFactory.CreateDefault();
 			var secondResponder = BusClientFactory.CreateDefault();
 
-			await firstResponder.RespondAsync<FirstRequest, FirstResponse>(async (req, i) =>
+			firstResponder.RespondAsync<FirstRequest, FirstResponse>(async (req, i) =>
 			{
 				var secondResp = await firstResponder.RequestAsync<SecondRequest, SecondResponse>(new SecondRequest());
 				return new FirstResponse { Infered = secondResp.Source };
 			});
-			await secondResponder.RespondAsync<SecondRequest, SecondResponse>((req, i) =>
+			secondResponder.RespondAsync<SecondRequest, SecondResponse>((req, i) =>
 				Task.FromResult(new SecondResponse { Source = payload })
 			);
 
@@ -132,7 +132,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			);
 
 			var responder = BusClientFactory.CreateDefault(service => service.AddTransient<IConsumerFactory, QueueingBaiscConsumerFactory>());
-			await responder.RespondAsync<BasicRequest, BasicResponse>((req, i) => Task.FromResult(response));
+			responder.RespondAsync<BasicRequest, BasicResponse>((req, i) => Task.FromResult(response));
 
 			/* Test */
 			var recieved = await requester.RequestAsync<BasicRequest, BasicResponse>();
