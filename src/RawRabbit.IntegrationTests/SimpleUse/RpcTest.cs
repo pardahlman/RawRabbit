@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Framework.DependencyInjection;
-using RabbitMQ.Client;
-using RawRabbit.Common;
 using RawRabbit.Configuration;
-using RawRabbit.Consumer;
 using RawRabbit.Consumer.Contract;
 using RawRabbit.Consumer.Queueing;
 using RawRabbit.IntegrationTests.TestMessages;
