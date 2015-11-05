@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using RabbitMQ.Client.Framing;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Publish;
 using RawRabbit.Context;
@@ -22,32 +23,29 @@ namespace RawRabbit.Operations
 
 		public Task PublishAsync<T>(T message, Guid globalMessageId, PublishConfiguration config)
 		{
-			var queueTask = Task.Run(() => DeclareQueue(config.Queue));
-			var exchangeTask = Task.Run(() =>DeclareExchange(config.Exchange));
-			var messageTask = Task.Run(() => Serializer.Serialize(message));
+			return Task.Run(() =>
+			{
+				var channel = ChannelFactory.CreateChannel();
+				
+				DeclareQueue(config.Queue, channel);
+				DeclareExchange(config.Exchange, channel);
 
-			return Task
-				.WhenAll(queueTask, exchangeTask, messageTask)
-				.ContinueWith(t => PublishAsync(messageTask.Result, config, globalMessageId))
-				.Unwrap();
-		}
-
-		private Task PublishAsync(byte[] body, PublishConfiguration config, Guid globalMessageId)
-		{
-			return Task
-				.Run(() => _contextProvider.GetMessageContextAsync(globalMessageId))
-				.ContinueWith(ctxTask =>
+				var properties = new BasicProperties
 				{
-					var channel = ChannelFactory.GetChannel();
-					var properties = channel.CreateBasicProperties();
-					properties.Headers = new Dictionary<string, object> {[_contextProvider.ContextHeaderName] = ctxTask.Result};
-					channel.BasicPublish(
-						exchange: config.Exchange.ExchangeName,
-						routingKey: config.RoutingKey,
-						basicProperties: properties,
-						body: body
-					);
-				});
+					MessageId = Guid.NewGuid().ToString(),
+					Headers = new Dictionary<string, object>
+					{
+						[_contextProvider.ContextHeaderName] = _contextProvider.GetMessageContextAsync(globalMessageId)
+					}
+				};
+				channel.BasicPublish(
+					exchange: config.Exchange.ExchangeName,
+					routingKey: config.RoutingKey,
+					basicProperties: properties,
+					body: Serializer.Serialize(message)
+				);
+				channel.Dispose();
+			});
 		}
 	}
 }

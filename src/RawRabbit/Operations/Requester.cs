@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Framing;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Request;
 using RawRabbit.Consumer.Contract;
@@ -28,12 +29,7 @@ namespace RawRabbit.Operations
 
 		public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest message, Guid globalMessageId, RequestConfiguration config)
 		{
-			var queueTask = Task.Run(() => DeclareQueue(config.Queue));
-			var exchangeTask = Task.Run(() => DeclareExchange(config.Exchange));
-
-			return Task
-				.WhenAll(queueTask, exchangeTask)
-				.ContinueWith(t => SendRequestAsync<TRequest, TResponse >(message, globalMessageId, config)).Unwrap();
+			return SendRequestAsync<TRequest, TResponse>(message, globalMessageId, config);
 		}
 
 		private Task<TResponse> SendRequestAsync<TRequest, TResponse>(TRequest message, Guid globalMessageId, RequestConfiguration cfg)
@@ -41,12 +37,14 @@ namespace RawRabbit.Operations
 			var responseTcs = new TaskCompletionSource<TResponse>();
 			var propsTask = GetRequestPropsAsync(cfg.ReplyQueue.QueueName, globalMessageId);
 			var bodyTask = Task.Run(() => Serializer.Serialize(message));
-			
+
 			Task
 				.WhenAll(propsTask, bodyTask)
 				.ContinueWith(task =>
 				{
 					var channel = ChannelFactory.CreateChannel();
+					DeclareQueue(cfg.Queue, channel);
+					DeclareExchange(cfg.Exchange, channel);
 					var consumer = _consumerFactory.CreateConsumer(cfg, channel);
 
 					Timer requestTimeOutTimer = null;
@@ -89,14 +87,16 @@ namespace RawRabbit.Operations
 				.Run(() => _contextProvider.GetMessageContextAsync(globalMessageId))
 				.ContinueWith(ctxTask =>
 				{
-					var channel = ChannelFactory.GetChannel();
-					var props = channel.CreateBasicProperties();
-					props.ReplyTo = queueName;
-					props.CorrelationId = Guid.NewGuid().ToString();
-					props.MessageId = Guid.NewGuid().ToString();
-					props.Headers = new Dictionary<string, object>
+					IBasicProperties props = new BasicProperties
 					{
-						{ _contextProvider.ContextHeaderName, ctxTask.Result}
+						ReplyTo = queueName,
+						CorrelationId = Guid.NewGuid().ToString(),
+						Expiration = _requestTimeout.TotalMilliseconds.ToString(),
+						MessageId = Guid.NewGuid().ToString(),
+						Headers = new Dictionary<string, object>
+						{
+							{_contextProvider.ContextHeaderName, ctxTask.Result}
+						}
 					};
 					return props;
 				});

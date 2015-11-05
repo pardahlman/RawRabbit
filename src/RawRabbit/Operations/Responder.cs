@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RabbitMQ.Client.Framing;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Respond;
 using RawRabbit.Context;
@@ -55,23 +56,25 @@ namespace RawRabbit.Operations
 				.WhenAll(propsTask, serializeTask)
 				.ContinueWith(task =>
 				{
-					var channel = ChannelFactory.GetChannel();
+					var channel = ChannelFactory.CreateChannel();
 					channel.BasicPublish(
 						exchange: "",
 						routingKey: requestPayload.BasicProperties.ReplyTo,
 						basicProperties: propsTask.Result,
 						body: serializeTask.Result
 					);
+					channel.Dispose();
 				});
 		}
 
-		private Task<IBasicProperties> CreateReplyPropsAsync(BasicDeliverEventArgs requestPayload)
+		private static Task<IBasicProperties> CreateReplyPropsAsync(BasicDeliverEventArgs requestPayload)
 		{
 			return Task.Run(() =>
 			{
-				var channel = ChannelFactory.GetChannel();
-				var replyProps = channel.CreateBasicProperties();
-				replyProps.CorrelationId = requestPayload.BasicProperties.CorrelationId;
+				IBasicProperties replyProps = new BasicProperties
+				{
+					CorrelationId = requestPayload.BasicProperties.CorrelationId
+				};
 				return replyProps;
 			});
 		}

@@ -21,22 +21,22 @@ namespace RawRabbit.Operations
 			Serializer = serializer;
 		}
 
-		protected void DeclareExchange(ExchangeConfiguration config)
+		protected void DeclareExchange(ExchangeConfiguration config, IModel channel = null)
 		{
 			if (config.IsDefaultExchange() || config.AssumeInitialized)
 			{
 				return;
 			}
 			_logger.LogDebug($"Declaring exchange\n  Name: {config.ExchangeName}\n  Type: {config.ExchangeType}\n  Durable: {config.Durable}\n  Autodelete: {config.AutoDelete}");
-			ChannelFactory
-				.GetChannel()
+			channel = channel ?? ChannelFactory.GetChannel();
+			channel
 				.ExchangeDeclare(
 					exchange: config.ExchangeName,
 					type: config.ExchangeType
 				);
 		}
 
-		protected void DeclareQueue(QueueConfiguration queue)
+		protected void DeclareQueue(QueueConfiguration queue, IModel channel = null)
 		{
 			if (queue.IsDirectReplyTo())
 			{
@@ -47,9 +47,8 @@ namespace RawRabbit.Operations
 				*/
 				return;
 			}
-
-			ChannelFactory
-				.GetChannel()
+			channel = channel ?? ChannelFactory.GetChannel();
+			channel
 				.QueueDeclare(
 					queue: queue.QueueName,
 					durable: queue.Durable,
