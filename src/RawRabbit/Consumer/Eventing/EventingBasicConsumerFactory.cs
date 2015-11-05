@@ -99,7 +99,7 @@ namespace RawRabbit.Consumer.Eventing
 			rawConsumer.ConsumerCancelled +=
 				(sender, args) => _logger.LogDebug($"The consumer with tag '{args.ConsumerTag}' has been cancelled.");
 			rawConsumer.Unregistered +=
-				(sender, args) => _logger.LogDebug($"The consumer with tag '{args.ConsumerTag}' has been cancelled.");
+				(sender, args) => _logger.LogDebug($"The consumer with tag '{args.ConsumerTag}' has been unregistered.");
 		}
 
 		protected void ConfigureQos(IModel channel, ushort prefetchCount)
