@@ -53,8 +53,10 @@ namespace RawRabbit.Common
 			{
 				return threadChannel.Value;
 			}
-			
+
+			threadChannel.Value?.Dispose();
 			threadChannel.Value = _connectionBroker.GetConnection().CreateModel();
+
 			return threadChannel.Value;
 		}
 
