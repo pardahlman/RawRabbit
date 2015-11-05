@@ -34,11 +34,11 @@ namespace RawRabbit.Common
 			_logger.LogInformation("BusClient initialized.");
 		}
 
-		public Task SubscribeAsync<T>(Func<T, TMessageContext, Task> subscribeMethod, Action<ISubscriptionConfigurationBuilder> configuration = null)
+		public void SubscribeAsync<T>(Func<T, TMessageContext, Task> subscribeMethod, Action<ISubscriptionConfigurationBuilder> configuration = null)
 		{
 			var config = _configEval.GetConfiguration<T>(configuration);
 			_logger.LogInformation($"Subscribing to message '{typeof(T).Name}' on exchange '{config.Exchange.ExchangeName}' with routing key {config.RoutingKey}.");
-			return _subscriber.SubscribeAsync(subscribeMethod, config);
+			_subscriber.SubscribeAsync(subscribeMethod, config);
 		}
 
 		public Task PublishAsync<T>(T message = default(T), Guid globalMessageId = new Guid(), Action<IPublishConfigurationBuilder> configuration = null)

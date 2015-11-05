@@ -21,12 +21,12 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			var basicMsgTcs = new TaskCompletionSource<BasicMessage>();
 			var simpleMsgTcs = new TaskCompletionSource<SimpleMessage>();
 
-			await subscriber.SubscribeAsync<BasicMessage>((msg, i) =>
+			subscriber.SubscribeAsync<BasicMessage>((msg, i) =>
 			{
 				basicMsgTcs.SetResult(msg);
 				return basicMsgTcs.Task;
 			});
-			await subscriber.SubscribeAsync<SimpleMessage>((msg, i) =>
+			subscriber.SubscribeAsync<SimpleMessage>((msg, i) =>
 			{
 				simpleMsgTcs.SetResult(msg);
 				return basicMsgTcs.Task;

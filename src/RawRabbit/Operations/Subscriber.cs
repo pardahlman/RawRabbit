@@ -24,13 +24,12 @@ namespace RawRabbit.Operations
 			_contextProvider = contextProvider;
 		}
 
-		public Task SubscribeAsync<T>(Func<T, TMessageContext, Task> subscribeMethod, SubscriptionConfiguration config)
+		public void SubscribeAsync<T>(Func<T, TMessageContext, Task> subscribeMethod, SubscriptionConfiguration config)
 		{
 			DeclareQueue(config.Queue);
 			DeclareExchange(config.Exchange);
 			BindQueue(config.Queue, config.Exchange, config.RoutingKey);
 			SubscribeAsync(config, subscribeMethod);
-			return Task.FromResult(true);
 		}
 
 		private void SubscribeAsync<T>(SubscriptionConfiguration cfg, Func<T, TMessageContext, Task> subscribeMethod)

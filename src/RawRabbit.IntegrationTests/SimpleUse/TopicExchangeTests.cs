@@ -35,7 +35,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			var firstMsgTcs = new TaskCompletionSource<BasicMessage>();
 			var secondMsgTcs = new TaskCompletionSource<BasicMessage>();
 
-			await firstSubscriber.SubscribeAsync<BasicMessage>((msg, i) =>
+			firstSubscriber.SubscribeAsync<BasicMessage>((msg, i) =>
 			{
 				firstMsgTcs.SetResult(msg);
 				return firstMsgTcs.Task;
@@ -43,7 +43,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 				.WithQueue(q => q.WithName("first.topic.queue"))
 				.WithRoutingKey("*.topic.queue")
 				.WithExchange(e => e.WithType(ExchangeType.Topic)));
-			await secondSubscriber.SubscribeAsync<BasicMessage>((msg, i) =>
+			secondSubscriber.SubscribeAsync<BasicMessage>((msg, i) =>
 			{
 				secondMsgTcs.SetResult(msg);
 				return firstMsgTcs.Task;

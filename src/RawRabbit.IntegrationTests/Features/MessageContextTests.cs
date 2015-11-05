@@ -26,7 +26,7 @@ namespace RawRabbit.IntegrationTests.Features
 			var subscribeTcs = new TaskCompletionSource<Guid>();
 			var contextProvider = new DefaultMessageContextProvider(() => Task.FromResult(expectedId));
 			var publisher = BusClientFactory.CreateDefault(collection => collection.AddInstance(typeof (IMessageContextProvider<MessageContext>), contextProvider));
-			await subscriber.SubscribeAsync<BasicMessage>((msg, c) =>
+			subscriber.SubscribeAsync<BasicMessage>((msg, c) =>
 			{
 				subscribeTcs.SetResult(c.GlobalRequestId);
 				return subscribeTcs.Task;
@@ -49,13 +49,13 @@ namespace RawRabbit.IntegrationTests.Features
 			var publisher = BusClientFactory.CreateDefault();
 			var firstSubscriber = BusClientFactory.CreateDefault();
 			var secondSubscriber = BusClientFactory.CreateDefault();
-			await firstSubscriber.SubscribeAsync<BasicMessage>((msg, i) =>
+			firstSubscriber.SubscribeAsync<BasicMessage>((msg, i) =>
 			{
 				firstCtxTcs.SetResult(i);
 				firstSubscriber.PublishAsync(new SimpleMessage(), i.GlobalRequestId);
 				return firstCtxTcs.Task;
 			});
-			await secondSubscriber.SubscribeAsync<SimpleMessage>((msg, i) =>
+			secondSubscriber.SubscribeAsync<SimpleMessage>((msg, i) =>
 			{
 				secondCtxTcs.SetResult(i);
 				return secondCtxTcs.Task;
@@ -118,7 +118,7 @@ namespace RawRabbit.IntegrationTests.Features
 				await firstResponder.PublishAsync(new BasicMessage(), c.GlobalRequestId);
 				return new FirstResponse();
 			});
-			await firstSubscriber.SubscribeAsync<BasicMessage>((req, c) =>
+			firstSubscriber.SubscribeAsync<BasicMessage>((req, c) =>
 			{
 				secondContext = c;
 				tcs.SetResult(true);

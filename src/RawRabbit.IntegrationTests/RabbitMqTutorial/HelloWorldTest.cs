@@ -29,7 +29,7 @@ namespace RawRabbit.IntegrationTests.RabbitMqTutorial
 			var recieved = new TaskCompletionSource<BasicMessage>();
 			var sender = BusClientFactory.CreateDefault();
 			var reciever = BusClientFactory.CreateDefault();
-			await reciever.SubscribeAsync<BasicMessage>((message, info) =>
+			reciever.SubscribeAsync<BasicMessage>((message, info) =>
 			{
 				recieved.SetResult(message);
 				return Task.FromResult(true);

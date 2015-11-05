@@ -28,7 +28,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			var publisher = BusClientFactory.CreateDefault();
 			var subscriber = BusClientFactory.CreateDefault();
 			
-			await subscriber.SubscribeAsync<BasicMessage>((msg, info) =>
+			subscriber.SubscribeAsync<BasicMessage>((msg, info) =>
 			{
 				recievedTcs.SetResult(msg);
 				return recievedTcs.Task;

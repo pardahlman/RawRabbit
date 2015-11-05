@@ -24,7 +24,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			var firstWorkerCalls = 0;
 			var secondWorkerCalls = 0;
 
-			await firstWorker.SubscribeAsync<BasicMessage>((msg, i) =>
+			firstWorker.SubscribeAsync<BasicMessage>((msg, i) =>
 			{
 				firstWorkerCalls++;
 				if (firstWorkerCalls + secondWorkerCalls == noOfPublishes)
@@ -33,7 +33,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 				}
 				return Task.FromResult(true);
 			}, cfg => cfg.WithPrefetchCount(1));
-			await secondWorker.SubscribeAsync<BasicMessage>((msg, i) =>
+			secondWorker.SubscribeAsync<BasicMessage>((msg, i) =>
 			{
 				secondWorkerCalls++;
 				if (firstWorkerCalls + secondWorkerCalls == noOfPublishes)

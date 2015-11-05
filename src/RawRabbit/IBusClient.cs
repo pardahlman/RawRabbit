@@ -10,7 +10,7 @@ namespace RawRabbit
 {
 	public interface IBusClient<out TMessageContext> : IDisposable where TMessageContext : IMessageContext
 	{
-		Task SubscribeAsync<T>(Func<T, TMessageContext, Task> subscribeMethod, Action<ISubscriptionConfigurationBuilder> configuration = null);
+		void SubscribeAsync<T>(Func<T, TMessageContext, Task> subscribeMethod, Action<ISubscriptionConfigurationBuilder> configuration = null);
 
 		Task PublishAsync<T>(T message = default(T), Guid globalMessageId = new Guid(), Action<IPublishConfigurationBuilder> configuration = null);
 
