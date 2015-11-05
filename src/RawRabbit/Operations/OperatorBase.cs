@@ -20,25 +20,23 @@ namespace RawRabbit.Operations
 			ChannelFactory = channelFactory;
 			Serializer = serializer;
 		}
-		
-		protected Task DeclareExchangeAsync(ExchangeConfiguration config)
+
+		protected void DeclareExchange(ExchangeConfiguration config)
 		{
 			if (config.IsDefaultExchange() || config.AssumeInitialized)
 			{
-				return Task.FromResult(true);
+				return;
 			}
 			_logger.LogDebug($"Declaring exchange\n  Name: {config.ExchangeName}\n  Type: {config.ExchangeType}\n  Durable: {config.Durable}\n  Autodelete: {config.AutoDelete}");
-			return Task.Run(() =>
-				ChannelFactory
-					.GetChannel()
-					.ExchangeDeclare(
-						exchange: config.ExchangeName,
-						type: config.ExchangeType
-					)
+			ChannelFactory
+				.GetChannel()
+				.ExchangeDeclare(
+					exchange: config.ExchangeName,
+					type: config.ExchangeType
 				);
 		}
 
-		protected Task DeclareQueueAsync(QueueConfiguration queue)
+		protected void DeclareQueue(QueueConfiguration queue)
 		{
 			if (queue.IsDirectReplyTo())
 			{
@@ -47,20 +45,19 @@ namespace RawRabbit.Operations
 					declare this "queue" first, although the client can do so if it wants."
 					- https://www.rabbitmq.com/direct-reply-to.html
 				*/
-				return Task.FromResult(true);
+				return;
 			}
-			_logger.LogDebug($"Declaring queue\n  Name: {queue.QueueName}\n  Exclusive: {queue.Exclusive}\n  Durable: {queue.Durable}\n  Autodelete: {queue.AutoDelete}");
-			return Task.Run(() =>
-				ChannelFactory
-					.GetChannel()
-					.QueueDeclare(
-						queue: queue.QueueName,
-						durable: queue.Durable,
-						exclusive: queue.Exclusive,
-						autoDelete: queue.AutoDelete,
-						arguments: queue.Arguments
-					)
+
+			ChannelFactory
+				.GetChannel()
+				.QueueDeclare(
+					queue: queue.QueueName,
+					durable: queue.Durable,
+					exclusive: queue.Exclusive,
+					autoDelete: queue.AutoDelete,
+					arguments: queue.Arguments
 				);
+			_logger.LogDebug($"Declaring queue\n  Name: {queue.QueueName}\n  Exclusive: {queue.Exclusive}\n  Durable: {queue.Durable}\n  Autodelete: {queue.AutoDelete}");
 		}
 
 		protected void BindQueue(QueueConfiguration queue, ExchangeConfiguration exchange, string routingKey)
@@ -91,11 +88,6 @@ namespace RawRabbit.Operations
 					exchange: exchange.ExchangeName,
 					routingKey: routingKey
 				);
-		}
-
-		protected Task<byte[]> CreateMessageAsync<T>(T message)
-		{
-			return Task.Run(() => Serializer.Serialize(message));
 		}
 
 		protected void ConfigureQos(IModel channel, ushort prefetchCount)

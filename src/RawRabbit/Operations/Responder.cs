@@ -26,8 +26,8 @@ namespace RawRabbit.Operations
 
 		public Task RespondAsync<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, ResponderConfiguration cfg)
 		{
-			var queueTask = DeclareQueueAsync(cfg.Queue);
-			var exchangeTask = DeclareExchangeAsync(cfg.Exchange);
+			var queueTask = Task.Run(() => DeclareQueue(cfg.Queue));
+			var exchangeTask = Task.Run(() => DeclareExchange(cfg.Exchange));
 
 			return Task
 				.WhenAll(queueTask, exchangeTask)

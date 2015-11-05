@@ -26,36 +26,31 @@ namespace RawRabbit.Operations
 
 		public Task SubscribeAsync<T>(Func<T, TMessageContext, Task> subscribeMethod, SubscriptionConfiguration config)
 		{
-			var queueTask = DeclareQueueAsync(config.Queue);
-			var exchangeTask = DeclareExchangeAsync(config.Exchange);
-
-			return Task
-				.WhenAll(queueTask, exchangeTask)
-				.ContinueWith(t => BindQueue(config.Queue, config.Exchange, config.RoutingKey))
-				.ContinueWith(t => SubscribeAsync<T>(config, subscribeMethod));
+			DeclareQueue(config.Queue);
+			DeclareExchange(config.Exchange);
+			BindQueue(config.Queue, config.Exchange, config.RoutingKey);
+			SubscribeAsync(config, subscribeMethod);
+			return Task.FromResult(true);
 		}
 
-		private Task SubscribeAsync<T>(SubscriptionConfiguration cfg, Func<T, TMessageContext, Task> subscribeMethod)
+		private void SubscribeAsync<T>(SubscriptionConfiguration cfg, Func<T, TMessageContext, Task> subscribeMethod)
 		{
-			return Task.Run(() =>
+			var consumer = _consumerFactory.CreateConsumer(cfg);
+			consumer.OnMessageAsync = (o, args) =>
 			{
-				var consumer = _consumerFactory.CreateConsumer(cfg);
-				consumer.OnMessageAsync = (o, args) =>
-				{
-					var bodyTask = Task.Run(() => Serializer.Deserialize<T>(args.Body));
-					var contextTask = _contextProvider.ExtractContextAsync(args.BasicProperties.Headers[_contextProvider.ContextHeaderName]);
-					return Task
-						.WhenAll(bodyTask, contextTask)
-						.ContinueWith(task => subscribeMethod(bodyTask.Result, contextTask.Result));
-				};
+				var bodyTask = Task.Run(() => Serializer.Deserialize<T>(args.Body));
+				var contextTask = _contextProvider.ExtractContextAsync(args.BasicProperties.Headers[_contextProvider.ContextHeaderName]);
+				return Task
+					.WhenAll(bodyTask, contextTask)
+					.ContinueWith(task => subscribeMethod(bodyTask.Result, contextTask.Result));
+			};
 
-				_logger.LogDebug($"Setting up a consumer on queue {cfg.Queue.QueueName} with NoAck set to {cfg.NoAck}.");
-				consumer.Model.BasicConsume(
-					queue: cfg.Queue.QueueName,
-					noAck: cfg.NoAck,
-					consumer: consumer
-				);
-			});
+			_logger.LogDebug($"Setting up a consumer on queue {cfg.Queue.QueueName} with NoAck set to {cfg.NoAck}.");
+			consumer.Model.BasicConsume(
+				queue: cfg.Queue.QueueName,
+				noAck: cfg.NoAck,
+				consumer: consumer
+			);
 		}
 	}
 }

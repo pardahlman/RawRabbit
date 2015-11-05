@@ -28,8 +28,8 @@ namespace RawRabbit.Operations
 
 		public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest message, Guid globalMessageId, RequestConfiguration config)
 		{
-			var queueTask = DeclareQueueAsync(config.ReplyQueue);
-			var exchangeTask = DeclareExchangeAsync(config.Exchange);
+			var queueTask = Task.Run(() => DeclareQueue(config.Queue));
+			var exchangeTask = Task.Run(() => DeclareExchange(config.Exchange));
 
 			return Task
 				.WhenAll(queueTask, exchangeTask)
@@ -40,7 +40,7 @@ namespace RawRabbit.Operations
 		{
 			var responseTcs = new TaskCompletionSource<TResponse>();
 			var propsTask = GetRequestPropsAsync(cfg.ReplyQueue.QueueName, globalMessageId);
-			var bodyTask = CreateMessageAsync(message);
+			var bodyTask = Task.Run(() => Serializer.Serialize(message));
 			
 			Task
 				.WhenAll(propsTask, bodyTask)

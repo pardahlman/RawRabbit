@@ -22,9 +22,9 @@ namespace RawRabbit.Operations
 
 		public Task PublishAsync<T>(T message, Guid globalMessageId, PublishConfiguration config)
 		{
-			var queueTask = DeclareQueueAsync(config.Queue);
-			var exchangeTask = DeclareExchangeAsync(config.Exchange);
-			var messageTask = CreateMessageAsync(message);
+			var queueTask = Task.Run(() => DeclareQueue(config.Queue));
+			var exchangeTask = Task.Run(() =>DeclareExchange(config.Exchange));
+			var messageTask = Task.Run(() => Serializer.Serialize(message));
 
 			return Task
 				.WhenAll(queueTask, exchangeTask, messageTask)
