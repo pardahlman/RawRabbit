@@ -70,7 +70,7 @@ namespace RawRabbit.Operations
 								responseTcs.SetResult(t.Result);
 							});
 					};
-
+					consumer.Model.BasicConsume(cfg.Queue.QueueName, cfg.NoAck, consumer);
 					consumer.Model.BasicPublish(
 							exchange: cfg.Exchange.ExchangeName,
 							routingKey: cfg.RoutingKey,

@@ -23,29 +23,30 @@ namespace RawRabbit.Operations
 
 		public Task PublishAsync<T>(T message, Guid globalMessageId, PublishConfiguration config)
 		{
-			return Task.Run(() =>
-			{
-				var channel = ChannelFactory.CreateChannel();
-				
-				DeclareQueue(config.Queue, channel);
-				DeclareExchange(config.Exchange, channel);
-
-				var properties = new BasicProperties
+			return _contextProvider
+				.GetMessageContextAsync(globalMessageId)
+				.ContinueWith(ctxTask =>
 				{
-					MessageId = Guid.NewGuid().ToString(),
-					Headers = new Dictionary<string, object>
+					var channel = ChannelFactory.CreateChannel();
+					DeclareQueue(config.Queue, channel);
+					DeclareExchange(config.Exchange, channel);
+					var properties = new BasicProperties
 					{
-						[_contextProvider.ContextHeaderName] = _contextProvider.GetMessageContextAsync(globalMessageId)
-					}
-				};
-				channel.BasicPublish(
-					exchange: config.Exchange.ExchangeName,
-					routingKey: config.RoutingKey,
-					basicProperties: properties,
-					body: Serializer.Serialize(message)
-				);
-				channel.Dispose();
-			});
+						MessageId = Guid.NewGuid().ToString(),
+						Headers = new Dictionary<string, object>
+						{
+							[_contextProvider.ContextHeaderName] = ctxTask.Result
+						}
+					};
+
+					channel.BasicPublish(
+						exchange: config.Exchange.ExchangeName,
+						routingKey: config.RoutingKey,
+						basicProperties: properties,
+						body: Serializer.Serialize(message)
+						);
+					channel.Dispose();
+				});
 		}
 	}
 }

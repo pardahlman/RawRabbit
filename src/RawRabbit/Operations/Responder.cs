@@ -45,6 +45,7 @@ namespace RawRabbit.Operations
 					.ContinueWith(task =>	onMessage(bodyTask.Result, contextTask.Result)).Unwrap()
 					.ContinueWith(payloadTask => SendResponseAsync(payloadTask.Result, args));
 			};
+			consumer.Model.BasicConsume(cfg.Queue.QueueName, cfg.NoAck, consumer);
 		}
 
 		private Task SendResponseAsync<TResponse>(TResponse result, BasicDeliverEventArgs requestPayload)

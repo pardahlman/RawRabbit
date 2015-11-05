@@ -43,6 +43,7 @@ namespace RawRabbit.Operations
 					.WhenAll(bodyTask, contextTask)
 					.ContinueWith(task => subscribeMethod(bodyTask.Result, contextTask.Result));
 			};
+			consumer.Model.BasicConsume(cfg.Queue.QueueName, cfg.NoAck, consumer);
 
 			_logger.LogDebug($"Setting up a consumer on queue {cfg.Queue.QueueName} with NoAck set to {cfg.NoAck}.");
 		}

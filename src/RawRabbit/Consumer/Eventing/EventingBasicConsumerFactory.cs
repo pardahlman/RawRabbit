@@ -38,7 +38,6 @@ namespace RawRabbit.Consumer.Eventing
 			SetupLogging(rawConsumer);
 			
 			_consumers.Add(rawConsumer);
-			channel.BasicConsume(cfg.Queue.QueueName, cfg.NoAck, rawConsumer);
 
 			rawConsumer.Received += (sender, args) =>
 			{

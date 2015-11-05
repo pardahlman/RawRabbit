@@ -28,9 +28,8 @@ namespace RawRabbit.Consumer.Queueing
 			ConfigureQos(channel, cfg.PrefetchCount);
 			var consumer = new QueueingRawConsumer(channel);
 			_consumers.Add(consumer);
-			channel.BasicConsume(cfg.Queue.QueueName, cfg.NoAck, consumer);
 
-				//TODO: Add exception handling etc.
+			//TODO: Add exception handling etc.
 
 			Task
 				.Run(() => consumer.Queue.Dequeue())
