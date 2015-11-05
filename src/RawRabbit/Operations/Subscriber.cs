@@ -45,11 +45,6 @@ namespace RawRabbit.Operations
 			};
 
 			_logger.LogDebug($"Setting up a consumer on queue {cfg.Queue.QueueName} with NoAck set to {cfg.NoAck}.");
-			consumer.Model.BasicConsume(
-				queue: cfg.Queue.QueueName,
-				noAck: cfg.NoAck,
-				consumer: consumer
-			);
 		}
 	}
 }
