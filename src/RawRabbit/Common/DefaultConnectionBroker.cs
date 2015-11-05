@@ -77,7 +77,7 @@ namespace RawRabbit.Common
 
 		private bool TryGetConnection(int factoryIndex, out IConnection connection)
 		{
-			_logger.LogDebug($"Attempting to establish connection to broker with index {factoryIndex}");
+			_logger.LogDebug($"Retrieving or creating connection from factory with index '{factoryIndex}'.");
 			if (factoryIndex > _factories.Count - 1)
 			{
 				connection = null;
@@ -91,7 +91,7 @@ namespace RawRabbit.Common
 				{
 					var newConnection = factory.CreateConnection();
 					SetupLoggin(newConnection);
-                    _factoryToConnection.TryAdd(factory, newConnection);
+					_factoryToConnection.TryAdd(factory, newConnection);
 				}
 				catch (BrokerUnreachableException)
 				{
@@ -103,7 +103,8 @@ namespace RawRabbit.Common
 			var existingConnection = _factoryToConnection[factory];
 			if (!existingConnection.IsOpen)
 			{
-				_logger.LogWarning($"The previously used connection to {existingConnection.Endpoint.HostName} has beeen closed. Attempting to reconnect");
+				_logger.LogWarning(
+					$"The previously used connection to {existingConnection.Endpoint.HostName} has beeen closed. Attempting to reconnect");
 				try
 				{
 					var newConnection = factory.CreateConnection();
@@ -115,6 +116,10 @@ namespace RawRabbit.Common
 					connection = null;
 					return false;
 				}
+			}
+			else
+			{
+				_logger.LogInformation($"Using existing connection to '{existingConnection.Endpoint.HostName}'.");
 			}
 
 			connection = _factoryToConnection[factory];
@@ -130,6 +135,12 @@ namespace RawRabbit.Common
 					_logger.LogInformation(
 						$"Connection to host '{primary.Endpoint.HostName}' was shot down.\n  Cause: {args.Cause}\n  Reason: {args.ReplyText}\n  Initiator: {args.Initiator}"
 					);
+			primary.ConnectionBlocked +=
+					(sender, args) => _logger.LogInformation($"The connection is block. The reason is '{args.Reason}'"
+				);
+			primary.CallbackException +=
+					(sender, args) => _logger.LogInformation($"The callback threw an exception, '{args.Detail}'. \n{args.Exception}"
+				);
 		}
 
 		public void Dispose()

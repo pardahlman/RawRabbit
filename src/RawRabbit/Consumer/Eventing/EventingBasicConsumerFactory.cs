@@ -96,6 +96,10 @@ namespace RawRabbit.Consumer.Eventing
 			{
 				_logger.LogInformation($"Consumer {rawConsumer.ConsumerTag} has been shut down.\n  Reason: {args.Cause}\n  Initiator: {args.Initiator}\n  Reply Text: {args.ReplyText}");
 			};
+			rawConsumer.ConsumerCancelled +=
+				(sender, args) => _logger.LogDebug($"The consumer with tag '{args.ConsumerTag}' has been cancelled.");
+			rawConsumer.Unregistered +=
+				(sender, args) => _logger.LogDebug($"The consumer with tag '{args.ConsumerTag}' has been cancelled.");
 		}
 
 		protected void ConfigureQos(IModel channel, ushort prefetchCount)
