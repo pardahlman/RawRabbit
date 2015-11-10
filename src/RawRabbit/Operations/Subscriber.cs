@@ -47,5 +47,11 @@ namespace RawRabbit.Operations
 
 			_logger.LogDebug($"Setting up a consumer on queue {cfg.Queue.QueueName} with NoAck set to {cfg.NoAck}.");
 		}
+
+		public override void Dispose()
+		{
+			base.Dispose();
+			(_consumerFactory as IDisposable)?.Dispose();
+		}
 	}
 }

@@ -24,10 +24,7 @@ namespace RawRabbit.Common
 
 		public void Dispose()
 		{
-			foreach (var connection in _connectionToChannel.Keys)
-			{
-				connection?.Dispose();
-			}
+			_connectionBroker?.Dispose();
 		}
 
 		public void CloseAll()

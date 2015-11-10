@@ -79,5 +79,11 @@ namespace RawRabbit.Operations
 				return replyProps;
 			});
 		}
+
+		public override void Dispose()
+		{
+			base.Dispose();
+			(_consumerFactory as IDisposable)?.Dispose();
+		}
 	}
 }

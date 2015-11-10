@@ -12,7 +12,7 @@ using RawRabbit.Logging;
 
 namespace RawRabbit.Consumer.Eventing
 {
-	public class EventingBasicConsumerFactory : IConsumerFactory
+	public class EventingBasicConsumerFactory : IConsumerFactory, IDisposable
 	{
 		private readonly IChannelFactory _channelFactory;
 		private readonly ConcurrentBag<string> _processedButNotAcked;
@@ -131,6 +131,7 @@ namespace RawRabbit.Consumer.Eventing
 
 		public void Dispose()
 		{
+			_channelFactory?.Dispose();
 			foreach (var consumer in _consumers)
 			{
 				consumer?.Disconnect();

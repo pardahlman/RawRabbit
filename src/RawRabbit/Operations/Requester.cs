@@ -101,5 +101,11 @@ namespace RawRabbit.Operations
 					return props;
 				});
 		}
+
+		public override void Dispose()
+		{
+			base.Dispose();
+			(_consumerFactory as IDisposable)?.Dispose();
+		}
 	}
 }
