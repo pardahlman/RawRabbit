@@ -98,6 +98,18 @@ public void ConfigureServices(IServiceCollection services)
   services.AddRawRabbit(); //optional overrides here, too.
 }
 ```
+### Advanced concepts
+In the default client, messages are _ack_'ed once the message handler has executed. There might be some scenarios where you want to _nack_ the message and let another consumer handle the message. This is easily done by registrating bus client that uses an `IAdvancedMessageContext`
+
+```csharp
+var client = service.GetService<IBusClient<AdvancedMessageContext>>();
+client.RespondAsync<BasicRequest, BasicResponse>((req, ctx) =>
+{
+  ctx?.Nack(); // the context implements IAdvancedMessageContext.
+  return Task.FromResult<BasicResponse>(null);
+}, cfg => cfg.WithNoAck(false));
+```
+_For implementation info check the [`NackTests`](https://github.com/pardahlman/RawRabbit/blob/master/src/RawRabbit.IntegrationTests/Features/NackingTests.cs)._
 
 ## Configuration
 With the configuration framework `Microsoft.Framework.Configuration`, we get the ability to structure our configuration in a nice and readable way. The `RawRabbit` configuration contains information about brokers to connect to, as well as some default behaviour on queues, exchanges and timeouts. Below is a full configuration example. ([read more about configuration here](http://whereslou.com/2014/05/23/asp-net-vnext-moving-parts-iconfiguration/))
