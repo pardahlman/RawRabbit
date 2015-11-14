@@ -51,8 +51,7 @@ namespace RawRabbit.vNext
 				.AddTransient<IConfigurationParser, ConfigurationParser>()
 				.AddTransient<IMessageSerializer, JsonMessageSerializer>()
 				.AddTransient<IConsumerFactory, EventingBasicConsumerFactory>()
-				.AddSingleton<IMessageContextProvider<MessageContext>, DefaultMessageContextProvider>(
-					p => new DefaultMessageContextProvider(() => Task.FromResult(Guid.NewGuid())))
+				.AddSingleton<IMessageContextProvider<TMessageContext>, MessageContextProvider<TMessageContext>>()
 				.AddSingleton<IChannelFactory, ChannelFactory>() //TODO: Should this be one/application?
 				.AddTransient<IConfigurationEvaluator, ConfigurationEvaluator>()
 				.AddTransient<INamingConvetions, NamingConvetions>()
