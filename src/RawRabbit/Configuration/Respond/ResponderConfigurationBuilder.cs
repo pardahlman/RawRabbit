@@ -52,5 +52,11 @@ namespace RawRabbit.Configuration.Respond
 			Configuration.RoutingKey = routingKey;
 			return this;
 		}
+
+		public IResponderConfigurationBuilder WithNoAck(bool noAck)
+		{
+			Configuration.NoAck = noAck;
+			return this;
+		}
 	}
 }
