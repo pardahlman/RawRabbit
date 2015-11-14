@@ -10,16 +10,16 @@ using RawRabbit.Operations.Contracts;
 
 namespace RawRabbit.Common
 {
-	public class BusClientBase<TMessageContext> : IBusClient<TMessageContext> where TMessageContext : IMessageContext
+	public class BaseBusClient<TMessageContext> : IBusClient<TMessageContext> where TMessageContext : IMessageContext
 	{
 		private readonly IConfigurationEvaluator _configEval;
 		private readonly ISubscriber<TMessageContext> _subscriber;
 		private readonly IPublisher _publisher;
 		private readonly IResponder<TMessageContext> _responder;
 		private readonly IRequester _requester;
-		private readonly ILogger _logger = LogManager.GetLogger<BusClientBase<TMessageContext>>();
-
-		public BusClientBase(
+		private readonly ILogger _logger = LogManager.GetLogger<BaseBusClient<TMessageContext>>();
+			
+		public BaseBusClient(
 			IConfigurationEvaluator configEval,
 			ISubscriber<TMessageContext> subscriber,
 			IPublisher publisher,

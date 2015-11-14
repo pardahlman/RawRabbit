@@ -72,7 +72,7 @@ namespace RawRabbit.vNext
 						p.GetService<IMessageSerializer>(),
 						p.GetService<IMessageContextProvider<TMessageContext>>(),
 						p.GetService<RawRabbitConfiguration>().RequestTimeout))
-				.AddTransient<IBusClient<TMessageContext>, BusClientBase<TMessageContext>>();
+				.AddTransient<IBusClient<TMessageContext>, BaseBusClient<TMessageContext>>();
 			custom?.Invoke(collection);
 			return collection;
 		}
