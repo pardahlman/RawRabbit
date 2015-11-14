@@ -22,6 +22,13 @@ namespace RawRabbit.vNext
 	{
 		public static IServiceCollection AddRawRabbit(this IServiceCollection collection, IConfigurationRoot config = null, Action<IServiceCollection> custom = null)
 		{
+			return collection
+				.AddTransient<BusClient>()
+				.AddRawRabbit<MessageContext>(config, custom);
+		}
+
+		public static IServiceCollection AddRawRabbit<TMessageContext>(this IServiceCollection collection, IConfigurationRoot config = null, Action<IServiceCollection> custom = null) where TMessageContext : IMessageContext
+		{
 			collection
 				.AddSingleton<RawRabbitConfiguration>(p =>
 					config == null
@@ -47,7 +54,7 @@ namespace RawRabbit.vNext
 						TimeSpan.FromMinutes(1) //TODO: Move this to config
 					)
 				)
-				.AddSingleton<ILoggerFactory , LoggerFactory>()
+				.AddSingleton<ILoggerFactory, LoggerFactory>()
 				.AddTransient<IConfigurationParser, ConfigurationParser>()
 				.AddTransient<IMessageSerializer, JsonMessageSerializer>()
 				.AddTransient<IConsumerFactory, EventingBasicConsumerFactory>()
@@ -55,16 +62,17 @@ namespace RawRabbit.vNext
 				.AddSingleton<IChannelFactory, ChannelFactory>() //TODO: Should this be one/application?
 				.AddTransient<IConfigurationEvaluator, ConfigurationEvaluator>()
 				.AddTransient<INamingConvetions, NamingConvetions>()
-				.AddTransient<ISubscriber<MessageContext>, Subscriber<MessageContext>>()
-				.AddTransient<IPublisher, Publisher<MessageContext>>()
-				.AddTransient<IResponder<MessageContext>, Responder<MessageContext>>()
-				.AddTransient<IRequester, Requester<MessageContext>>(
-					p => new Requester<MessageContext>(
+				.AddTransient<ISubscriber<TMessageContext>, Subscriber<TMessageContext>>()
+				.AddTransient<IPublisher, Publisher<TMessageContext>>()
+				.AddTransient<IResponder<TMessageContext>, Responder<TMessageContext>>()
+				.AddTransient<IRequester, Requester<TMessageContext>>(
+					p => new Requester<TMessageContext>(
 						p.GetService<IChannelFactory>(),
 						p.GetService<IConsumerFactory>(),
 						p.GetService<IMessageSerializer>(),
-						p.GetService<IMessageContextProvider<MessageContext>>(),
-						p.GetService<RawRabbitConfiguration>().RequestTimeout));
+						p.GetService<IMessageContextProvider<TMessageContext>>(),
+						p.GetService<RawRabbitConfiguration>().RequestTimeout))
+				.AddTransient<IBusClient<TMessageContext>, BusClientBase<TMessageContext>>();
 			custom?.Invoke(collection);
 			return collection;
 		}
