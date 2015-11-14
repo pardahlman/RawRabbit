@@ -59,7 +59,11 @@ namespace RawRabbit.Operations
 				return Task
 					.WhenAll(bodyTask, contextTask)
 					.ContinueWith(task =>	onMessage(bodyTask.Result, contextTask.Result)).Unwrap()
-					.ContinueWith(payloadTask => SendResponseAsync(payloadTask.Result, args));
+					.ContinueWith(payloadTask =>
+						consumer.NackedDeliveryTags.Contains(args.DeliveryTag)
+						? Task.FromResult(true)
+						: SendResponseAsync(payloadTask.Result, args)
+					);
 			};
 			consumer.Model.BasicConsume(cfg.Queue.QueueName, cfg.NoAck, consumer);
 		}
