@@ -2,9 +2,8 @@
 
 namespace RawRabbit.Context
 {
-	public class AdvancedMessageContext : IAdvancedMessageContext
+	public class AdvancedMessageContext : MessageContext, IAdvancedMessageContext
 	{
-		public Guid GlobalRequestId { get; set; }
 		public Action Nack { get; set; }
 	}
 }
