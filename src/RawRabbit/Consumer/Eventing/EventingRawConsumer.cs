@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -10,9 +11,11 @@ namespace RawRabbit.Consumer
 	class EventingRawConsumer : EventingBasicConsumer, IRawConsumer
 	{
 		private readonly ILogger _logger = LogManager.GetLogger<EventingRawConsumer>();
+		public List<ulong> NackedDeliveryTags { get; private set; } 
 
 		public EventingRawConsumer(IModel channel) : base(channel)
 		{
+			NackedDeliveryTags = new List<ulong>();
 			SetupLogging(this);
 		}
 
