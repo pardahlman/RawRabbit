@@ -63,7 +63,7 @@ namespace RawRabbit.Consumer.Eventing
 						The message handler threw an exception. It is time to hand over the
 						message handling to an error strategy instead.
 					*/
-					if (!cfg.NoAck)
+					if (!cfg.NoAck || rawConsumer.NackedDeliveryTags.Contains(args.DeliveryTag))
 					{
 						BasicAck(channel, args, cfg); // TODO: employ error handling strategy instead
 					}
@@ -72,7 +72,7 @@ namespace RawRabbit.Consumer.Eventing
 				onMessageTask
 					.ContinueWith(t =>
 					{
-						if (cfg.NoAck)
+						if (cfg.NoAck || rawConsumer.NackedDeliveryTags.Contains(args.DeliveryTag))
 						{
 							/*
 								The consumer has stated that 'ack'-ing is not required, so

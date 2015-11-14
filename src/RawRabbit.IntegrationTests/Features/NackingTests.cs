@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Framework.DependencyInjection;
 using RawRabbit.Common;
@@ -15,8 +16,13 @@ using Xunit;
 
 namespace RawRabbit.IntegrationTests.Features
 {
-	public class NackingTests
+	public class NackingTests : IntegrationTestBase
 	{
+		public NackingTests()
+		{
+			TestChannel.QueueDelete("basicmessage");
+		}
+
 		[Fact]
 		public async void Should_Be_Able_To_Nack_Message()
 		{
@@ -67,6 +73,44 @@ namespace RawRabbit.IntegrationTests.Features
 			/* Assert */
 			Assert.NotNull(result);
 			Assert.True(hasBeenNacked);
+		}
+
+		[Fact]
+		public async void Should_Be_Able_To_Nack_On_Subscribe()
+		{
+			/* Setup */
+			var service = new ServiceCollection()
+				.AddRawRabbit<AdvancedMessageContext>()
+				.BuildServiceProvider();
+
+			var subscriber = service.GetService<IBusClient<AdvancedMessageContext>>();
+			var secondSubscriber = service.GetService<IBusClient<AdvancedMessageContext>>();
+			var publisher = service.GetService<IBusClient<AdvancedMessageContext>>();
+			var callcount = 0;
+			var subscribeTcs = new TaskCompletionSource<bool>();
+			var secondSubscribeTcs = new TaskCompletionSource<bool>();
+			subscriber.SubscribeAsync<BasicMessage>((message, context) =>
+			{
+				Interlocked.Increment(ref callcount);
+				context?.Nack();
+				subscribeTcs.TrySetResult(true);
+				return Task.FromResult(true);
+			});
+			secondSubscriber.SubscribeAsync<BasicMessage>((message, context) =>
+			{
+				secondSubscribeTcs.TrySetResult(true);
+				return Task.FromResult(true);
+			});
+
+			Task.WaitAll(
+				publisher.PublishAsync<BasicMessage>(),
+				subscribeTcs.Task,
+				secondSubscribeTcs.Task
+			);
+
+			TestChannel.QueueDelete("basicmessage");
+
+			Assert.Equal(callcount, 1);
 		}
 	}
 }

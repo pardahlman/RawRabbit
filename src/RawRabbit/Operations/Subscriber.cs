@@ -38,7 +38,22 @@ namespace RawRabbit.Operations
 			consumer.OnMessageAsync = (o, args) =>
 			{
 				var bodyTask = Task.Run(() => Serializer.Deserialize<T>(args.Body));
-				var contextTask = _contextProvider.ExtractContextAsync(args.BasicProperties.Headers[_contextProvider.ContextHeaderName]);
+				var contextTask = _contextProvider
+					.ExtractContextAsync(args.BasicProperties.Headers[_contextProvider.ContextHeaderName])
+					.ContinueWith(ctxTask =>
+					{
+						var advancedCtx = ctxTask.Result as IAdvancedMessageContext;
+						if (advancedCtx == null)
+						{
+							return ctxTask.Result;
+						}
+						advancedCtx.Nack = () =>
+						{
+							consumer.NackedDeliveryTags.Add(args.DeliveryTag);
+							consumer.Model.BasicNack(args.DeliveryTag, false, true);
+						};
+						return ctxTask.Result;
+					});
 				return Task
 					.WhenAll(bodyTask, contextTask)
 					.ContinueWith(task => subscribeMethod(bodyTask.Result, contextTask.Result));

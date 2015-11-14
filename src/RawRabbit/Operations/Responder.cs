@@ -50,6 +50,7 @@ namespace RawRabbit.Operations
 						}
 						advancedCtx.Nack = () =>
 						{
+							consumer.NackedDeliveryTags.Add(args.DeliveryTag);
 							consumer.Model.BasicNack(args.DeliveryTag, false, true);
 						};
 						return ctxTask.Result;
