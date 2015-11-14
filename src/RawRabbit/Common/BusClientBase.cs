@@ -10,7 +10,7 @@ using RawRabbit.Operations.Contracts;
 
 namespace RawRabbit.Common
 {
-	public abstract class BusClientBase<TMessageContext> : IBusClient<TMessageContext> where TMessageContext : IMessageContext
+	public class BusClientBase<TMessageContext> : IBusClient<TMessageContext> where TMessageContext : IMessageContext
 	{
 		private readonly IConfigurationEvaluator _configEval;
 		private readonly ISubscriber<TMessageContext> _subscriber;
@@ -19,7 +19,7 @@ namespace RawRabbit.Common
 		private readonly IRequester _requester;
 		private readonly ILogger _logger = LogManager.GetLogger<BusClientBase<TMessageContext>>();
 
-		protected BusClientBase(
+		public BusClientBase(
 			IConfigurationEvaluator configEval,
 			ISubscriber<TMessageContext> subscriber,
 			IPublisher publisher,
