@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Publish;
@@ -14,11 +16,13 @@ namespace RawRabbit.Operations
 	public class Publisher<TMessageContext> : OperatorBase, IPublisher where TMessageContext : IMessageContext
 	{
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
+		private readonly ThreadLocal<Timer> _timer; 
 
 		public Publisher(IChannelFactory channelFactory, IMessageSerializer serializer, IMessageContextProvider<TMessageContext> contextProvider)
 			: base(channelFactory, serializer)
 		{
 			_contextProvider = contextProvider;
+			_timer = new ThreadLocal<Timer>();
 		}
 
 		public Task PublishAsync<T>(T message, Guid globalMessageId, PublishConfiguration config)
@@ -27,7 +31,7 @@ namespace RawRabbit.Operations
 				.GetMessageContextAsync(globalMessageId)
 				.ContinueWith(ctxTask =>
 				{
-					var channel = ChannelFactory.CreateChannel();
+					var channel = GetChannel();
 					DeclareQueue(config.Queue, channel);
 					DeclareExchange(config.Exchange, channel);
 					var properties = new BasicProperties
@@ -47,6 +51,31 @@ namespace RawRabbit.Operations
 						);
 					channel.Dispose();
 				});
+		}
+
+		private IModel GetChannel()
+		{
+			if (_timer.IsValueCreated)
+			{
+				return ChannelFactory.GetChannel();
+			}
+
+			var channel = ChannelFactory.GetChannel();
+
+			Timer closeChannel = null;
+			closeChannel = new Timer(state =>
+			{
+				closeChannel?.Dispose();
+				channel.Dispose();
+			}, null, TimeSpan.FromSeconds(1), new TimeSpan(-1));
+			_timer.Value = closeChannel;
+			return channel;
+		}
+
+		public override void Dispose()
+		{
+			base.Dispose();
+			_timer.Dispose();
 		}
 	}
 }
