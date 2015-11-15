@@ -33,7 +33,7 @@ namespace RawRabbit.Operations
 				.GetMessageContextAsync(globalMessageId)
 				.ContinueWith(ctxTask =>
 				{
-					var channel = GetChannel();
+					var channel = ChannelFactory.GetChannel();
 					DeclareQueue(config.Queue, channel);
 					DeclareExchange(config.Exchange, channel);
 					var properties = new BasicProperties
@@ -53,25 +53,6 @@ namespace RawRabbit.Operations
 						);
 					channel.Dispose();
 				});
-		}
-
-		private IModel GetChannel()
-		{
-			if (_timer.IsValueCreated)
-			{
-				return ChannelFactory.GetChannel();
-			}
-
-			var channel = ChannelFactory.GetChannel();
-
-			Timer closeChannel = null;
-			closeChannel = new Timer(state =>
-			{
-				closeChannel?.Dispose();
-				channel.Dispose();
-			}, null, TimeSpan.FromSeconds(1), new TimeSpan(-1));
-			_timer.Value = closeChannel;
-			return channel;
 		}
 
 		public override void Dispose()
