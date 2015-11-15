@@ -106,6 +106,7 @@ namespace RawRabbit.Operations
 
 		public virtual void Dispose()
 		{
+			_logger.LogDebug($"Disposing operation.");
 			ChannelFactory?.Dispose();
 		}
 	}

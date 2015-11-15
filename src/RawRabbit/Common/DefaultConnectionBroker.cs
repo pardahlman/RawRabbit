@@ -145,6 +145,7 @@ namespace RawRabbit.Common
 
 		public void Dispose()
 		{
+			_logger.LogInformation($"Disposing connection factory.");
 			foreach (var connection in _factoryToConnection.Values)
 			{
 				connection?.Dispose();

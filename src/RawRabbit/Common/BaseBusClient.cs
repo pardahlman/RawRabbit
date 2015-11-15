@@ -64,6 +64,7 @@ namespace RawRabbit.Common
 
 		public void Dispose()
 		{
+			_logger.LogDebug("Disposing BaseBusClient.");
 			(_subscriber as IDisposable)?.Dispose();
 			(_publisher as IDisposable)?.Dispose();
 			(_requester as IDisposable)?.Dispose();

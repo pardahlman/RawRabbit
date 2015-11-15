@@ -9,6 +9,7 @@ using RawRabbit.Configuration.Request;
 using RawRabbit.Consumer.Contract;
 using RawRabbit.Context;
 using RawRabbit.Context.Provider;
+using RawRabbit.Logging;
 using RawRabbit.Operations.Contracts;
 using RawRabbit.Serialization;
 
@@ -19,6 +20,7 @@ namespace RawRabbit.Operations
 		private readonly IConsumerFactory _consumerFactory;
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
 		private readonly TimeSpan _requestTimeout;
+		private readonly ILogger _logger = LogManager.GetLogger<Requester<TMessageContext>>();
 
 		public Requester(IChannelFactory channelFactory, IConsumerFactory consumerFactory, IMessageSerializer serializer, IMessageContextProvider<TMessageContext> contextProvider, TimeSpan requestTimeout) : base(channelFactory, serializer)
 		{
@@ -104,6 +106,7 @@ namespace RawRabbit.Operations
 
 		public override void Dispose()
 		{
+			_logger.LogDebug("Disposing requester.");
 			base.Dispose();
 			(_consumerFactory as IDisposable)?.Dispose();
 		}

@@ -8,6 +8,7 @@ using RawRabbit.Common;
 using RawRabbit.Configuration.Publish;
 using RawRabbit.Context;
 using RawRabbit.Context.Provider;
+using RawRabbit.Logging;
 using RawRabbit.Operations.Contracts;
 using RawRabbit.Serialization;
 
@@ -16,7 +17,8 @@ namespace RawRabbit.Operations
 	public class Publisher<TMessageContext> : OperatorBase, IPublisher where TMessageContext : IMessageContext
 	{
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
-		private readonly ThreadLocal<Timer> _timer; 
+		private readonly ThreadLocal<Timer> _timer;
+		private readonly ILogger _logger = LogManager.GetLogger<Publisher<TMessageContext>>();
 
 		public Publisher(IChannelFactory channelFactory, IMessageSerializer serializer, IMessageContextProvider<TMessageContext> contextProvider)
 			: base(channelFactory, serializer)
@@ -74,6 +76,7 @@ namespace RawRabbit.Operations
 
 		public override void Dispose()
 		{
+			_logger.LogDebug("Disposing Publisher");
 			base.Dispose();
 			_timer.Dispose();
 		}

@@ -65,6 +65,7 @@ namespace RawRabbit.Operations
 
 		public override void Dispose()
 		{
+			_logger.LogDebug("Disposing Subscriber.");
 			base.Dispose();
 			(_consumerFactory as IDisposable)?.Dispose();
 		}
