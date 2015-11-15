@@ -2,6 +2,8 @@
 	"version": "1.2.0-beta8",
 	"authors": ["pardahlman", "enrique-avalon"],
 	"description": "Take advantage of vNext for your RawRabbit setup. Extenssion for IServiceCollection, IConfiguration support and much more!",
+	"iconUrl": "http://pardahlman.se/raw/icon.png",
+	"projectUrl": "https://github.com/pardahlman/RawRabbit",
 
 	"dependencies": {
 		"RawRabbit": "",
