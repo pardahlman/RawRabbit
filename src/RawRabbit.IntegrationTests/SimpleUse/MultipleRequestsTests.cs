@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Common;
@@ -17,7 +18,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		{
 			/* Setup */
 			const int numberOfCalls = 10000;
-			var bag = new ConcurrentBag<Guid>();
+			var array = new Task[numberOfCalls];
 			var requester = BusClientFactory.CreateDefault();
 			var responder = BusClientFactory.CreateDefault();
 			responder.RespondAsync<FirstRequest, FirstResponse>((req, i) =>
@@ -29,13 +30,20 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			sw.Start();
 			for (var i = 0; i < numberOfCalls; i++)
 			{
-				var response = await requester.RequestAsync<FirstRequest, FirstResponse>();
-				bag.Add(response.Infered);
+				var response = requester.RequestAsync<FirstRequest, FirstResponse>();
+				array[i] =response;
 			}
+			Task.WaitAll(array);
 			sw.Stop();
+			var ids = array
+				.OfType<Task<FirstResponse>>()
+				.Select(b => b.Result.Infered)
+				.Where(id => id != Guid.Empty)
+				.Distinct()
+				.ToList();
 
 			/* Assert */
-			Assert.Equal(numberOfCalls, bag.Count);
+			Assert.Equal(numberOfCalls, ids.Count);
 		}
 	}
 }
