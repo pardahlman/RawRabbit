@@ -36,7 +36,8 @@ namespace RawRabbit.vNext
 						: p.GetService<IConfigurationParser>().Parse(config))
 				.AddSingleton<IEnumerable<IConnectionFactory>>(p =>
 				{
-					var brokers = p.GetService<RawRabbitConfiguration>().Brokers ?? new List<BrokerConfiguration>();
+					var cfg = p.GetService<RawRabbitConfiguration>();
+					var brokers = cfg?.Brokers ?? new List<BrokerConfiguration>();
 					brokers = brokers.Any() ? brokers : new List<BrokerConfiguration> { BrokerConfiguration.Local };
 					return brokers.Select(b => new ConnectionFactory
 					{
@@ -45,7 +46,8 @@ namespace RawRabbit.vNext
 						UserName = b.Username,
 						Password = b.Password,
 						AutomaticRecoveryEnabled = true,
-						TopologyRecoveryEnabled = true
+						TopologyRecoveryEnabled = true,
+						ClientProperties = p.GetService<IClientPropertyProvider>().GetClientProperties(cfg ,b)
 					});
 				})
 				.AddSingleton<IConnectionBroker, DefaultConnectionBroker>(
@@ -54,12 +56,13 @@ namespace RawRabbit.vNext
 						TimeSpan.FromMinutes(1) //TODO: Move this to config
 					)
 				)
+				.AddSingleton<IClientPropertyProvider, ClientPropertyProvider>()
 				.AddSingleton<ILoggerFactory, LoggerFactory>()
 				.AddTransient<IConfigurationParser, ConfigurationParser>()
 				.AddTransient<IMessageSerializer, JsonMessageSerializer>()
 				.AddTransient<IConsumerFactory, EventingBasicConsumerFactory>()
 				.AddSingleton<IMessageContextProvider<TMessageContext>, MessageContextProvider<TMessageContext>>()
-				.AddSingleton<IChannelFactory, ChannelFactory>() //TODO: Should this be one/application?
+				.AddSingleton<IChannelFactory, ChannelFactory>()
 				.AddTransient<IConfigurationEvaluator, ConfigurationEvaluator>()
 				.AddTransient<INamingConvetions, NamingConvetions>()
 				.AddTransient<ISubscriber<TMessageContext>, Subscriber<TMessageContext>>()
