@@ -1,9 +1,11 @@
 {
-	"version": "1.4.1-*",
+	"version": "1.4.2-*",
 	"authors": ["pardahlman", "enrique-avalon"],
 	"description": "A modern frame for communication over RabbitMq.",
 	"iconUrl": "http://pardahlman.se/raw/icon.png",
 	"projectUrl": "https://github.com/pardahlman/RawRabbit",
+	"title": "RawRabbit",
+	"tags": ["rabbitmq", "raw", "rawrabbit", "amqp"],
 
 	"dependencies": {
 		"RabbitMQ.Client": "3.5.6",
