@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RabbitMQ.Client.Exceptions;
 using RawRabbit.Consumer.Contract;
 
 namespace RawRabbit.Consumer.Queueing
@@ -20,7 +21,14 @@ namespace RawRabbit.Consumer.Queueing
 
 		public void Disconnect()
 		{
-			Model.BasicCancel(ConsumerTag);
+			try
+			{
+				Model.BasicCancel(ConsumerTag);
+			}
+			catch (AlreadyClosedException)
+			{
+				// Perfect, someone allready closed this.
+			}
 		}
 	}
 }
