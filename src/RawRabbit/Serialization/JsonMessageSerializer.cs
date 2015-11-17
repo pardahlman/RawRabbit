@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.Serialization.Formatters;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -14,7 +15,10 @@ namespace RawRabbit.Serialization
 		{
 			_converter = new JsonSerializer
 			{
-				ContractResolver = new CamelCasePropertyNamesContractResolver()
+				ContractResolver = new CamelCasePropertyNamesContractResolver(),
+				ObjectCreationHandling = ObjectCreationHandling.Auto,
+				TypeNameHandling = TypeNameHandling.Objects,
+				TypeNameAssemblyFormat = FormatterAssemblyStyle.Simple
 			};
 			config?.Invoke(_converter);
 		}
