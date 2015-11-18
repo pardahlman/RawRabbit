@@ -1,5 +1,5 @@
 {
-	"version": "1.4.2-*",
+	"version": "1.4.4-*",
 	"authors": ["pardahlman", "enrique-avalon"],
 	"description": "A modern frame for communication over RabbitMq.",
 	"iconUrl": "http://pardahlman.se/raw/icon.png",

@@ -113,6 +113,7 @@ namespace RawRabbit.Common
 				}
 				catch (BrokerUnreachableException e)
 				{
+					_logger.LogError("Unable to connect to broker", e);
 					connection = null;
 					return false;
 				}
