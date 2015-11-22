@@ -27,7 +27,7 @@ namespace RawRabbit.Operations
 		private readonly ConcurrentDictionary<Type, IRawConsumer> _typeToConsumer;
 		private readonly ConcurrentDictionary<string, object> _responseTcsDictionary;
 		private readonly ConcurrentDictionary<string, Timer> _requestTimerDictionary;
-		private Timer disposeConsumerTimer;
+		private Timer _disposeConsumerTimer;
 		private readonly ILogger _logger = LogManager.GetLogger<SingleConsumerRequester<TMessageContext>>();
 
 		public SingleConsumerRequester(
@@ -87,12 +87,12 @@ namespace RawRabbit.Operations
 
 		private void CreateOrUpdateDisposeTimer()
 		{
-			if (disposeConsumerTimer == null)
+			if (_disposeConsumerTimer == null)
 			{
-				disposeConsumerTimer = new Timer(state =>
+				_disposeConsumerTimer = new Timer(state =>
 				{
-					disposeConsumerTimer?.Dispose();
-					disposeConsumerTimer = null;
+					_disposeConsumerTimer?.Dispose();
+					_disposeConsumerTimer = null;
 					foreach (var type in _typeToConsumer.Keys)
 					{
 						IRawConsumer consumer;
@@ -106,7 +106,7 @@ namespace RawRabbit.Operations
 			}
 			else
 			{
-				disposeConsumerTimer.Change(_requestTimeout.Add(TimeSpan.FromSeconds(1)), new TimeSpan(-1));
+				_disposeConsumerTimer.Change(_requestTimeout.Add(TimeSpan.FromSeconds(1)), new TimeSpan(-1));
 			}
 		}
 
