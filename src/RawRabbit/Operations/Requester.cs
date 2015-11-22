@@ -22,7 +22,12 @@ namespace RawRabbit.Operations
 		private readonly TimeSpan _requestTimeout;
 		private readonly ILogger _logger = LogManager.GetLogger<Requester<TMessageContext>>();
 
-		public Requester(IChannelFactory channelFactory, IConsumerFactory consumerFactory, IMessageSerializer serializer, IMessageContextProvider<TMessageContext> contextProvider, TimeSpan requestTimeout) : base(channelFactory, serializer)
+		public Requester(
+			IChannelFactory channelFactory,
+			IConsumerFactory consumerFactory,
+			IMessageSerializer serializer,
+			IMessageContextProvider<TMessageContext> contextProvider,
+			TimeSpan requestTimeout) : base(channelFactory, serializer)
 		{
 			_consumerFactory = consumerFactory;
 			_contextProvider = contextProvider;
