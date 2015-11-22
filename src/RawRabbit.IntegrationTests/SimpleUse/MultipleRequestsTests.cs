@@ -45,5 +45,47 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			/* Assert */
 			Assert.Equal(numberOfCalls, ids.Count);
 		}
+
+		[Fact]
+		public async void Should_Work_For_Multiple_Types()
+		{
+			/* Setup */
+			const int numberOfCalls = 10000;
+			var firstResponseTasks = new Task[numberOfCalls];
+			var secondResponseTasks = new Task[numberOfCalls];
+			var requester = BusClientFactory.CreateDefault();
+			var responder = BusClientFactory.CreateDefault();
+			responder.RespondAsync<FirstRequest, FirstResponse>((req, i) =>
+				Task.FromResult(new FirstResponse { Infered = Guid.NewGuid() })
+			);
+			responder.RespondAsync<SecondRequest, SecondResponse>((request, context) => 
+				Task.FromResult(new SecondResponse {  Source = Guid.NewGuid()})
+			);
+
+			/* Test */
+			for (var i = 0; i < numberOfCalls; i++)
+			{
+				var firstResponse = requester.RequestAsync<FirstRequest, FirstResponse>();
+				var secondResponse = requester.RequestAsync<SecondRequest, SecondResponse>();
+				firstResponseTasks[i] = firstResponse;
+				secondResponseTasks[i] = secondResponse;
+			}
+			Task.WaitAll(firstResponseTasks.Concat(secondResponseTasks).ToArray());
+			var firstIds = firstResponseTasks
+				.OfType<Task<FirstResponse>>()
+				.Select(b => b.Result.Infered)
+				.Where(id => id != Guid.Empty)
+				.Distinct()
+				.ToList();
+			var secondIds = secondResponseTasks
+				.OfType<Task<SecondResponse>>()
+				.Select(b => b.Result.Source)
+				.Where(id => id != Guid.Empty)
+				.Distinct()
+				.ToList();
+			/* Assert */
+			Assert.Equal(numberOfCalls, firstIds.Count);
+			Assert.Equal(numberOfCalls, secondIds.Count);
+		}
 	}
 }
