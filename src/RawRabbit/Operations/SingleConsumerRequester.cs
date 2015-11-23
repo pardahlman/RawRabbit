@@ -51,9 +51,10 @@ namespace RawRabbit.Operations
 			var consumer = GetOrCreateConsumerForType<TResponse>(cfg);
 			var propsTask = GetRequestPropsAsync(cfg.ReplyQueue.QueueName, globalMessageId);
 			var bodyTask = Task.Run(() => Serializer.Serialize(message));
+			var disposerTask = Task.Run(() => CreateOrUpdateDisposeTimer());
 
 			return Task
-				.WhenAll(propsTask, bodyTask)
+				.WhenAll(propsTask, bodyTask, disposerTask)
 				.ContinueWith(t =>
 					{
 						var props = propsTask.Result;
@@ -73,7 +74,6 @@ namespace RawRabbit.Operations
 								responseTcs.TrySetException(new TimeoutException($"The request timed out after {_requestTimeout.ToString("g")}."));
 							}, null, _requestTimeout, new TimeSpan(-1)));
 
-						CreateOrUpdateDisposeTimer();
 						consumer.Model.BasicPublish(
 							exchange: cfg.Exchange.ExchangeName,
 							routingKey: cfg.RoutingKey,
