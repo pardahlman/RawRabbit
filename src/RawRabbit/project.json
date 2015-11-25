@@ -1,5 +1,5 @@
 {
-	"version": "1.5.0-*",
+	"version": "1.5.1-*",
 	"authors": ["pardahlman", "enrique-avalon"],
 	"description": "A modern frame for communication over RabbitMq.",
 	"iconUrl": "http://pardahlman.se/raw/icon.png",
@@ -16,8 +16,14 @@
 	},
 
 	"frameworks": {
+		"dnx45": { },
 		"dnx451": { },
-		"net451": { }
+		"dnx50": { },
+		"net45": { },
+		"net451": { },
+		"net452": { },
+		"net46": { },
+		"net50": { }
 	},
 
 	"publishExclude": [
