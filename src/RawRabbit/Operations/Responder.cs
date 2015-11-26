@@ -60,7 +60,7 @@ namespace RawRabbit.Operations
 
 				return Task
 					.WhenAll(bodyTask, contextTask)
-					.ContinueWith(task =>	onMessage(bodyTask.Result, contextTask.Result)).Unwrap()
+					.ContinueWith(task => onMessage(bodyTask.Result, contextTask.Result)).Unwrap()
 					.ContinueWith(payloadTask =>
 						consumer.NackedDeliveryTags.Contains(args.DeliveryTag)
 						? Task.FromResult(true)

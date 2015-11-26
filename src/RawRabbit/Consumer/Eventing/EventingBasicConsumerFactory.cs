@@ -8,6 +8,7 @@ using RabbitMQ.Client.Exceptions;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Respond;
 using RawRabbit.Consumer.Contract;
+using RawRabbit.ErrorHandling;
 using RawRabbit.Logging;
 
 namespace RawRabbit.Consumer.Eventing
@@ -15,13 +16,15 @@ namespace RawRabbit.Consumer.Eventing
 	public class EventingBasicConsumerFactory : IConsumerFactory, IDisposable
 	{
 		private readonly IChannelFactory _channelFactory;
+		private readonly IErrorHandlingStrategy _strategy;
 		private readonly ConcurrentBag<string> _processedButNotAcked;
 		private readonly ConcurrentBag<IRawConsumer> _consumers;
 		private readonly ILogger _logger = LogManager.GetLogger<EventingBasicConsumerFactory>();
 
-		public EventingBasicConsumerFactory(IChannelFactory channelFactory)
+		public EventingBasicConsumerFactory(IChannelFactory channelFactory, IErrorHandlingStrategy strategy)
 		{
 			_channelFactory = channelFactory;
+			_strategy = strategy;
 			_processedButNotAcked = new ConcurrentBag<string>();
 			_consumers = new ConcurrentBag<IRawConsumer>();
 		}
@@ -51,38 +54,27 @@ namespace RawRabbit.Consumer.Eventing
 					return;
 				}
 
-				Task onMessageTask;
 				try
 				{
 					_logger.LogInformation($"Message recived: MessageId: {args.BasicProperties.MessageId}");
-					onMessageTask = rawConsumer.OnMessageAsync(sender, args);
+					rawConsumer.OnMessageAsync(sender, args).Wait();
 				}
-				catch (Exception)
+				catch (Exception e)
 				{
-					/*
-						The message handler threw an exception. It is time to hand over the
-						message handling to an error strategy instead.
-					*/
-					if (!cfg.NoAck || rawConsumer.NackedDeliveryTags.Contains(args.DeliveryTag))
-					{
-						BasicAck(channel, args, cfg); // TODO: employ error handling strategy instead
-					}
+					_logger.LogWarning($"An unhandled exception was caught for message {args.BasicProperties.MessageId}.");
+					_strategy.OnRequestHandlerExceptionAsync(rawConsumer, args, e);
 					return;
 				}
-				onMessageTask
-					.ContinueWith(t =>
-					{
-						if (cfg.NoAck || rawConsumer.NackedDeliveryTags.Contains(args.DeliveryTag))
-						{
-							/*
-								The consumer has stated that 'ack'-ing is not required, so
-								now that the message is handled, the consumer is done.
-							*/
-							return;
-						}
+				if (cfg.NoAck || rawConsumer.NackedDeliveryTags.Contains(args.DeliveryTag))
+				{
+					/*
+						The consumer has stated that 'ack'-ing is not required, so
+						now that the message is handled, the consumer is done.
+					*/
+					return;
+				}
 
-						BasicAck(channel, args, cfg);
-					});
+				BasicAck(channel, args, cfg);
 			};
 
 			return rawConsumer;
