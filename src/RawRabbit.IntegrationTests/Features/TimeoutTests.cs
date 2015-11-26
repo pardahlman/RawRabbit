@@ -10,7 +10,7 @@ namespace RawRabbit.IntegrationTests.Features
 	public class TimeoutTests
 	{
 		[Fact]
-		public async void Should_Interupt_Task_After_Timeout_Not_Met()
+		public async Task Should_Interupt_Task_After_Timeout_Not_Met()
 		{
 			/* Setup */
 			var responder = BusClientFactory.CreateDefault();
@@ -28,7 +28,7 @@ namespace RawRabbit.IntegrationTests.Features
 		}
 
 		[Fact]
-		public async void Should_Not_Throw_If_Response_Is_Handled_Within_Time_Limit()
+		public async Task Should_Not_Throw_If_Response_Is_Handled_Within_Time_Limit()
 		{
 			/* Setup */
 			var responder = BusClientFactory.CreateDefault();

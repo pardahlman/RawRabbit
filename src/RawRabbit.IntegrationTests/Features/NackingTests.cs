@@ -24,7 +24,7 @@ namespace RawRabbit.IntegrationTests.Features
 		}
 
 		[Fact]
-		public async void Should_Be_Able_To_Nack_Message()
+		public async Task Should_Be_Able_To_Nack_Message()
 		{
 			/* Setup */
 			var service = new ServiceCollection()
@@ -76,7 +76,7 @@ namespace RawRabbit.IntegrationTests.Features
 		}
 
 		[Fact]
-		public async void Should_Be_Able_To_Nack_On_Subscribe()
+		public async Task Should_Be_Able_To_Nack_On_Subscribe()
 		{
 			/* Setup */
 			var service = new ServiceCollection()

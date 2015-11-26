@@ -21,7 +21,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		}
 
 		[Fact]
-		public async void Should_Be_Able_To_Subscribe_Without_Any_Additional_Config()
+		public async Task Should_Be_Able_To_Subscribe_Without_Any_Additional_Config()
 		{
 			/* Setup */
 			var message = new BasicMessage { Prop = "Hello, world!" };
@@ -45,7 +45,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		}
 
 		[Fact]
-		public async void Should_Be_Able_To_Perform_Multiple_Pub_Subs()
+		public async Task Should_Be_Able_To_Perform_Multiple_Pub_Subs()
 		{
 			/* Setup */
 			var subscriber = BusClientFactory.CreateDefault();

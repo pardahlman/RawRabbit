@@ -9,7 +9,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 	public class SubscribeToDifferentMessageTypes : IntegrationTestBase
 	{
 		[Fact]
-		public async void Should_Be_Able_To_Recieve_Different_Types_Of_Messages()
+		public async Task Should_Be_Able_To_Recieve_Different_Types_Of_Messages()
 		{
 			/* Setup */
 			var publisher = BusClientFactory.CreateDefault();

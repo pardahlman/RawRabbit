@@ -17,7 +17,7 @@ namespace RawRabbit.IntegrationTests.Features
 		}
 
 		[Fact]
-		public async void Should_Succeed_To_Send_Response_Even_If_Channel_Is_Closed()
+		public async Task Should_Succeed_To_Send_Response_Even_If_Channel_Is_Closed()
 		{
 			/* Setup */
 			var channelFactory = new ChannelFactory(new SingleNodeBroker(BrokerConfiguration.Local));

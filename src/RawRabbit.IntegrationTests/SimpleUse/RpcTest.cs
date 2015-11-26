@@ -15,7 +15,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 	public class RpcTest : IntegrationTestBase
 	{
 		[Fact]
-		public async void Should_Perform_Basic_Rpc_Without_Any_Config()
+		public async Task Should_Perform_Basic_Rpc_Without_Any_Config()
 		{
 			/* Setup */
 			var response = new BasicResponse { Prop = "This is the reponse." };
@@ -34,7 +34,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		}
 
 		[Fact]
-		public async void Should_Perform_Rpc_Without_Direct_Reply_To()
+		public async Task Should_Perform_Rpc_Without_Direct_Reply_To()
 		{
 			/* Setup */
 			var response = new BasicResponse { Prop = "This is the reponse." };
@@ -60,7 +60,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		}
 
 		[Fact]
-		public async void Should_Succeed_With_Multiple_Rpc_Calls_At_The_Same_Time()
+		public async Task Should_Succeed_With_Multiple_Rpc_Calls_At_The_Same_Time()
 		{
 			/* Setup */
 			var payloads = new List<Guid> { Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid() };
@@ -93,7 +93,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		}
 
 		[Fact]
-		public async void Should_Successfully_Perform_Nested_Requests()
+		public async Task Should_Successfully_Perform_Nested_Requests()
 		{
 			/* Setup */
 			var payload = Guid.NewGuid();
@@ -119,7 +119,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		}
 
 		[Fact]
-		public async void Should_Work_With_Queueing_Consumer_Factory()
+		public async Task Should_Work_With_Queueing_Consumer_Factory()
 		{
 			/* Setup */
 			var response = new BasicResponse { Prop = "This is the reponse." };

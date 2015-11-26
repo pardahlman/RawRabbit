@@ -12,7 +12,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 	public class WorkerQueuesTest : IntegrationTestBase
 	{
 		[Fact]
-		public async void Should_Call_Handle_Method_Just_As_Many_Times_As_Published()
+		public async Task Should_Call_Handle_Method_Just_As_Many_Times_As_Published()
 		{
 			/* Setup */
 			var firstWorker = BusClientFactory.CreateDefault();
