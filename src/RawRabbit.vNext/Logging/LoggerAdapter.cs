@@ -1,14 +1,14 @@
 ﻿using System;
-using Microsoft.Framework.Logging;
+using Microsoft.Extensions.Logging;
 using ILogger = RawRabbit.Logging.ILogger;
 
 namespace RawRabbit.vNext.Logging
 {
 	public class LoggerAdapter : ILogger
 	{
-		private readonly Microsoft.Framework.Logging.ILogger _vNextLogger;
+		private readonly Microsoft.Extensions.Logging.ILogger _vNextLogger;
 
-		public LoggerAdapter(Microsoft.Framework.Logging.ILogger vNextLogger)
+		public LoggerAdapter(Microsoft.Extensions.Logging.ILogger vNextLogger)
 		{
 			_vNextLogger = vNextLogger;
 		}

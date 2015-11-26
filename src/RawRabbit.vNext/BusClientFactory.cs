@@ -1,6 +1,6 @@
 ﻿using System;
-using Microsoft.Framework.Configuration;
-using Microsoft.Framework.DependencyInjection;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using RawRabbit.Configuration;
 using RawRabbit.Logging;
 

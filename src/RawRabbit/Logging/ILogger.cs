@@ -3,7 +3,7 @@
 namespace RawRabbit.Logging
 {
 	/*
-		This interface is an abstract of signatures for Microsoft.Framework.Logging's ILogger and its extensionmethods.
+		This interface is an abstract of signatures for Microsoft.Extensions.Logging's ILogger and its extensionmethods.
 	*/
 	public interface ILogger
 	{

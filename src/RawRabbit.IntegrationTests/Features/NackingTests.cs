@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Framework.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using RawRabbit.Common;
 using RawRabbit.Configuration;
 using RawRabbit.Consumer.Contract;
