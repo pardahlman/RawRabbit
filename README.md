@@ -23,7 +23,7 @@
 _No über complex abstractions! No configuration needed (but supported for those who want to have 100% control). Just a thin, layer above the [dotnet RabbitMq client](https://github.com/rabbitmq/rabbitmq-dotnet-client)._
 
 * _Publish_, _subscribe_, and _request_/_response_ (a.k.a `RPC`) async
-* Targets [dnx runtime](https://github.com/aspnet/dnx) `dnx451` as well as `net451`
+* Targets [dnx runtime](https://github.com/aspnet/dnx) `dnx451` to `dnx50` as well as `net451` to `net50`
 * Everything is plugable! Register any custom types with dependecy injection from `Microsoft.Extensions.DependencyInjection`
 * Easy-piecy configuration with `Microsoft.Extensions.Configuration` (but support for old skool, too)
 
