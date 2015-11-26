@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.Framework.Configuration;
+using Microsoft.Extensions.Configuration;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Exchange;
 using RawRabbit.vNext;

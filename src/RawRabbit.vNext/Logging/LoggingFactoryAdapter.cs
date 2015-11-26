@@ -5,9 +5,9 @@ namespace RawRabbit.vNext.Logging
 {
 	public class LoggingFactoryAdapter : ILoggerFactory
 	{
-		private readonly Microsoft.Framework.Logging.ILoggerFactory _vNextFactory;
+		private readonly Microsoft.Extensions.Logging.ILoggerFactory _vNextFactory;
 
-		public LoggingFactoryAdapter(Microsoft.Framework.Logging.ILoggerFactory vNextFactory)
+		public LoggingFactoryAdapter(Microsoft.Extensions.Logging.ILoggerFactory vNextFactory)
 		{
 			_vNextFactory = vNextFactory;
 		}
@@ -21,11 +21,11 @@ namespace RawRabbit.vNext.Logging
 		{
 			get
 			{
-				return (LogLevel)Enum.Parse(typeof(Microsoft.Framework.Logging.LogLevel), _vNextFactory.MinimumLevel.ToString(), true);
+				return (LogLevel)Enum.Parse(typeof(Microsoft.Extensions.Logging.LogLevel), _vNextFactory.MinimumLevel.ToString(), true);
 			}
 			set
 			{
-				_vNextFactory.MinimumLevel = (Microsoft.Framework.Logging.LogLevel)Enum.Parse(typeof(LogLevel), value.ToString(), true);
+				_vNextFactory.MinimumLevel = (Microsoft.Extensions.Logging.LogLevel)Enum.Parse(typeof(LogLevel), value.ToString(), true);
 			}
 		}
 

@@ -24,8 +24,8 @@ _No über complex abstractions! No configuration needed (but supported for those
 
 * _Publish_, _subscribe_, and _request_/_response_ (a.k.a `RPC`) async
 * Targets [dnx runtime](https://github.com/aspnet/dnx) `dnx451` as well as `net451`
-* Everything is plugable! Register any custom types with dependecy injection from `Microsoft.Framework.DependencyInjection`
-* Easy-piecy configuration with `Microsoft.Framework.Configuration` (but support for old skool, too)
+* Everything is plugable! Register any custom types with dependecy injection from `Microsoft.Extensions.DependencyInjection`
+* Easy-piecy configuration with `Microsoft.Extensions.Configuration` (but support for old skool, too)
 
 ## Quick introduction
 The ambision with `RawRabbit` is to provide a simple interface for performing some of the basic things that you typically want to do when working with RabbitMq. Therefore, it is shipped with out-of-the-box functionality for _Publish/Suscibe_ and _Request/Response_. For more information about how to customization, keep on reading.
@@ -91,7 +91,7 @@ var publisher = BusClientFactory.CreateDefault(ioc => ioc
   .AddTransient<IChannelFactory, ChannelFactory>()
 );
 ```
-`RawRabbit` uses the `Microsoft.Framework.DependencyInjection` for dependecy injection, which all the major IoC framework uses. It is therefor super-easy to register and resolve your favorite flavour of the bus client by calling `AddRawRabbit()` on you `IServiceCollection`.
+`RawRabbit` uses the `Microsoft.Extensions.DependencyInjection` for dependecy injection, which all the major IoC framework uses. It is therefor super-easy to register and resolve your favorite flavour of the bus client by calling `AddRawRabbit()` on you `IServiceCollection`.
 ```csharp
 public void ConfigureServices(IServiceCollection services)
 {
@@ -112,7 +112,7 @@ client.RespondAsync<BasicRequest, BasicResponse>((req, ctx) =>
 _For implementation info check the [`NackTests`](https://github.com/pardahlman/RawRabbit/blob/master/src/RawRabbit.IntegrationTests/Features/NackingTests.cs)._
 
 ## Configuration
-With the configuration framework `Microsoft.Framework.Configuration`, we get the ability to structure our configuration in a nice and readable way. The `RawRabbit` configuration contains information about brokers to connect to, as well as some default behaviour on queues, exchanges and timeouts. Below is a full configuration example. ([read more about configuration here](http://whereslou.com/2014/05/23/asp-net-vnext-moving-parts-iconfiguration/))
+With the configuration framework `Microsoft.Extensions.Configuration`, we get the ability to structure our configuration in a nice and readable way. The `RawRabbit` configuration contains information about brokers to connect to, as well as some default behaviour on queues, exchanges and timeouts. Below is a full configuration example. ([read more about configuration here](http://whereslou.com/2014/05/23/asp-net-vnext-moving-parts-iconfiguration/))
 ```js
 {
   "Data": {

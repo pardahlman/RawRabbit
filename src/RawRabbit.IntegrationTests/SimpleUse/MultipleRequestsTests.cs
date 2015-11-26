@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using RawRabbit.Common;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.vNext;
@@ -31,7 +30,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			for (var i = 0; i < numberOfCalls; i++)
 			{
 				var response = requester.RequestAsync<FirstRequest, FirstResponse>();
-				array[i] =response;
+				array[i] = response;
 			}
 			Task.WaitAll(array);
 			sw.Stop();
@@ -59,7 +58,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 				Task.FromResult(new FirstResponse { Infered = Guid.NewGuid() })
 			);
 			responder.RespondAsync<SecondRequest, SecondResponse>((request, context) => 
-				Task.FromResult(new SecondResponse {  Source = Guid.NewGuid()})
+				Task.FromResult(new SecondResponse { Source = Guid.NewGuid() })
 			);
 
 			/* Test */

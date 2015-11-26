@@ -1,5 +1,5 @@
 ﻿{
-	"version": "1.5.1-beta8",
+	"version": "1.5.2-rc1-final",
 	"authors": [ "pardahlman", "enrique-avalon" ],
 	"description": "Take advantage of vNext for your RawRabbit setup. Extenssion for IServiceCollection, IConfiguration support and much more!",
 	"iconUrl": "http://pardahlman.se/raw/icon.png",
@@ -9,16 +9,14 @@
 
 	"dependencies": {
 		"RawRabbit": "",
-		"Microsoft.Framework.DependencyInjection": "1.0.0-beta8",
-		"Microsoft.Framework.Configuration.Abstractions": "1.0.0-beta8",
-		"Microsoft.Framework.Logging.Abstractions": "1.0.0-beta8"
+		"Microsoft.Extensions.DependencyInjection": "1.0.0-rc1-final",
+		"Microsoft.Extensions.Configuration.Abstractions": "1.0.0-rc1-final",
+		"Microsoft.Extensions.Logging.Abstractions": "1.0.0-rc1-final"
 	},
 
 	"frameworks": {
-		"dnx45": { },
 		"dnx451": { },
 		"dnx50": { },
-		"net45": { },
 		"net451": { },
 		"net452": { },
 		"net46": { },

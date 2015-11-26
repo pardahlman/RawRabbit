@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Framework.Configuration;
+using Microsoft.Extensions.Configuration;
 using RawRabbit.Configuration;
 using RawRabbit.Configuration.Exchange;
 
