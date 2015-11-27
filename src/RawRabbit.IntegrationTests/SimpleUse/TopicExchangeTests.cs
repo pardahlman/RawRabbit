@@ -25,7 +25,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		}
 
 		[Fact]
-		public async void Should_Deliver_Message_To_All_Subscribers_On_Exchange()
+		public async Task Should_Deliver_Message_To_All_Subscribers_On_Exchange()
 		{
 			/* Setup */
 			var publisher = BusClientFactory.CreateDefault();

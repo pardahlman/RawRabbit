@@ -13,6 +13,7 @@ using RawRabbit.Configuration.Respond;
 using RawRabbit.Consumer.Contract;
 using RawRabbit.Context;
 using RawRabbit.Context.Provider;
+using RawRabbit.ErrorHandling;
 using RawRabbit.Logging;
 using RawRabbit.Operations.Contracts;
 using RawRabbit.Serialization;
@@ -23,6 +24,7 @@ namespace RawRabbit.Operations
 	{
 		private readonly IConsumerFactory _consumerFactory;
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
+		private readonly IErrorHandlingStrategy _errorStrategy;
 		private readonly TimeSpan _requestTimeout;
 		private readonly ConcurrentDictionary<Type, IRawConsumer> _typeToConsumer;
 		private readonly ConcurrentDictionary<string, object> _responseTcsDictionary;
@@ -35,11 +37,13 @@ namespace RawRabbit.Operations
 			IConsumerFactory consumerFactory,
 			IMessageSerializer serializer,
 			IMessageContextProvider<TMessageContext> contextProvider,
+			IErrorHandlingStrategy errorStrategy,
 			TimeSpan requestTimeout)
 				: base(channelFactory, serializer)
 		{
 			_consumerFactory = consumerFactory;
 			_contextProvider = contextProvider;
+			_errorStrategy = errorStrategy;
 			_requestTimeout = requestTimeout;
 			_typeToConsumer = new ConcurrentDictionary<Type, IRawConsumer>();
 			_responseTcsDictionary = new ConcurrentDictionary<string, object>();
@@ -135,16 +139,24 @@ namespace RawRabbit.Operations
 			DeclareExchange(cfg.Exchange, consumer.Model);
 			consumer.OnMessageAsync = (o, args) =>
 			{
-				object tcs;
-				if (_responseTcsDictionary.TryRemove(args.BasicProperties.CorrelationId, out tcs))
+				object tcsAsObj;
+				if (_responseTcsDictionary.TryRemove(args.BasicProperties.CorrelationId, out tcsAsObj))
 				{
+					var tcs = tcsAsObj as TaskCompletionSource<TResponse>;
 					_logger.LogDebug($"Recived response with correlationId {args.BasicProperties.CorrelationId}.");
 					_requestTimerDictionary[args.BasicProperties.CorrelationId]?.Dispose();
 					return Task
-						.Run(() => Serializer.Deserialize<TResponse>(args.Body))
+						.Run(() => _errorStrategy.OnResponseRecievedAsync(args, tcs))
+						.ContinueWith(t => tcs?.Task?.IsFaulted ?? true
+							? default(TResponse)
+							: Serializer.Deserialize<TResponse>(args.Body))
 						.ContinueWith(t =>
 						{
-							(tcs as TaskCompletionSource<TResponse>)?.TrySetResult(t.Result);
+							if (tcs?.Task?.IsFaulted ?? true)
+							{
+								return;
+							}
+							tcs?.TrySetResult(t.Result);
 						});
 				}
 				throw new Exception($"Can not find callback for {args.BasicProperties.CorrelationId}");

@@ -21,7 +21,7 @@ namespace RawRabbit.IntegrationTests.RabbitMqTutorial
 		}
 
 		[Fact]
-		public async void Should_Support_The_Worker_Queues_Tutorial()
+		public async Task Should_Support_The_Worker_Queues_Tutorial()
 		{
 			/* Setup */
 			var sent = new BasicMessage { Prop = "Hello, world!" };

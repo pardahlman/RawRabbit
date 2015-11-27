@@ -22,7 +22,7 @@ namespace RawRabbit.IntegrationTests.RabbitMqTutorial
 		}
 
 		[Fact]
-		public async void Should_Support_The_Hello_World_Tutorial()
+		public async Task Should_Support_The_Hello_World_Tutorial()
 		{
 			/* Setup */
 			var sent = new BasicMessage { Prop = "Hello, world!" };

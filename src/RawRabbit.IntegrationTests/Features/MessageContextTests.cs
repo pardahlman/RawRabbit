@@ -17,7 +17,7 @@ namespace RawRabbit.IntegrationTests.Features
 	public class MessageContextTests
 	{
 		[Fact]
-		public async void Should_Send_Message_Context_Correctly()
+		public async Task Should_Send_Message_Context_Correctly()
 		{
 			/* Setup */
 			var subscriber = BusClientFactory.CreateDefault();
@@ -41,7 +41,7 @@ namespace RawRabbit.IntegrationTests.Features
 		}
 
 		[Fact]
-		public async void Should_Forward_Context_On_Publish()
+		public async Task Should_Forward_Context_On_Publish()
 		{
 			/* Setup */
 			var firstCtxTcs = new TaskCompletionSource<MessageContext>();
@@ -70,7 +70,7 @@ namespace RawRabbit.IntegrationTests.Features
 		}
 
 		[Fact]
-		public async void Should_Forward_Context_On_Rpc()
+		public async Task Should_Forward_Context_On_Rpc()
 		{
 			/* Setup */
 			var tcs = new TaskCompletionSource<bool>();
@@ -102,7 +102,7 @@ namespace RawRabbit.IntegrationTests.Features
 		}
 
 		[Fact]
-		public async void Should_Forward_Context_On_Rpc_To_Publish()
+		public async Task Should_Forward_Context_On_Rpc_To_Publish()
 		{
 			/* Setup */
 			var tcs = new TaskCompletionSource<bool>();

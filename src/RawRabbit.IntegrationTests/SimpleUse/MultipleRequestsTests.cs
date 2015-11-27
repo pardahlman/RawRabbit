@@ -13,7 +13,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 	public class MultipleRequestsTests
 	{
 		[Fact]
-		public async void Should_Just_Work()
+		public async Task Should_Just_Work()
 		{
 			/* Setup */
 			const int numberOfCalls = 10000;
@@ -46,7 +46,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		}
 
 		[Fact]
-		public async void Should_Work_For_Multiple_Types()
+		public async Task Should_Work_For_Multiple_Types()
 		{
 			/* Setup */
 			const int numberOfCalls = 10000;

@@ -11,6 +11,7 @@ using RawRabbit.Consumer.Contract;
 using RawRabbit.Consumer.Eventing;
 using RawRabbit.Context;
 using RawRabbit.Context.Provider;
+using RawRabbit.ErrorHandling;
 using RawRabbit.Logging;
 using RawRabbit.Operations;
 using RawRabbit.Operations.Contracts;
@@ -61,6 +62,7 @@ namespace RawRabbit.vNext
 				.AddTransient<IConfigurationParser, ConfigurationParser>()
 				.AddTransient<IMessageSerializer, JsonMessageSerializer>()
 				.AddTransient<IConsumerFactory, EventingBasicConsumerFactory>()
+				.AddTransient<IErrorHandlingStrategy, DefaultStrategy>()
 				.AddSingleton<IMessageContextProvider<TMessageContext>, MessageContextProvider<TMessageContext>>()
 				.AddSingleton<IChannelFactory, ChannelFactory>()
 				.AddTransient<IConfigurationEvaluator, ConfigurationEvaluator>()
@@ -74,6 +76,7 @@ namespace RawRabbit.vNext
 						p.GetService<IConsumerFactory>(),
 						p.GetService<IMessageSerializer>(),
 						p.GetService<IMessageContextProvider<TMessageContext>>(),
+						p.GetService<IErrorHandlingStrategy>(),
 						p.GetService<RawRabbitConfiguration>().RequestTimeout))
 				.AddTransient<IBusClient<TMessageContext>, BaseBusClient<TMessageContext>>();
 			custom?.Invoke(collection);
