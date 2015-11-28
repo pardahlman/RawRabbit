@@ -19,6 +19,7 @@ namespace RawRabbit.Operations
 		private readonly IConsumerFactory _consumerFactory;
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
 		private readonly ILogger _logger = LogManager.GetLogger<Responder<TMessageContext>>();
+		private IModel _responseChannel;
 
 		public Responder(IChannelFactory channelFactory, IConsumerFactory consumerFactory, IMessageSerializer serializer, IMessageContextProvider<TMessageContext> contextProvider)
 			: base(channelFactory, serializer)
@@ -74,16 +75,17 @@ namespace RawRabbit.Operations
 
 		private void SendResponse<TResponse>(TResponse request, BasicDeliverEventArgs requestPayload)
 		{
+			_responseChannel = (_responseChannel?.IsOpen ?? false)
+				? _responseChannel
+				: ChannelFactory.CreateChannel();
 			var requestProps = CreateReplyProps(requestPayload);
 			var responseBody = Serializer.Serialize(request);
-			var channel = ChannelFactory.CreateChannel();
-			channel.BasicPublish(
+			_responseChannel.BasicPublish(
 				exchange: "",
 				routingKey: requestPayload.BasicProperties.ReplyTo,
 				basicProperties: requestProps,
 				body: responseBody
 			);
-			channel.Dispose();
 		}
 
 		private static IBasicProperties CreateReplyProps(BasicDeliverEventArgs requestPayload)
@@ -99,6 +101,7 @@ namespace RawRabbit.Operations
 			_logger.LogDebug("Disposing Responder.");
 			base.Dispose();
 			(_consumerFactory as IDisposable)?.Dispose();
+			_responseChannel?.Dispose();
 		}
 	}
 }

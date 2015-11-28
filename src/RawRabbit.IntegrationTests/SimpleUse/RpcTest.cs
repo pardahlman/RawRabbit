@@ -136,5 +136,24 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			/* Assert */
 			Assert.Equal(recieved.Prop, response.Prop);
 		}
+
+		[Fact]
+		public async Task Should_Work_With_Different_Request_Types_For_Same_Responder()
+		{
+			/* Setup */
+			var requester = BusClientFactory.CreateDefault();
+			var responder = BusClientFactory.CreateDefault(service => service.AddTransient<IConsumerFactory, QueueingBaiscConsumerFactory>());
+			
+			responder.RespondAsync<FirstRequest, FirstResponse>((req, i) => Task.FromResult(new FirstResponse()));
+			responder.RespondAsync<SecondRequest, SecondResponse>((req, i) => Task.FromResult(new SecondResponse()));
+
+			/* Test */
+			var firstResponse = await requester.RequestAsync<FirstRequest, FirstResponse>();
+			var secondResponse = await requester.RequestAsync<SecondRequest, SecondResponse>();
+
+			/* Assert */
+			Assert.NotNull(firstResponse);
+			Assert.NotNull(secondResponse);
+		}
 	}
 }
