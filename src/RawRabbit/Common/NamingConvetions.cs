@@ -10,6 +10,7 @@ namespace RawRabbit.Common
 		Func<string> ErrorExchangeNamingConvention { get; set; }
 		Func<string> ErrorQueueNamingConvention { get; set; }
 		Func<string> DeadLetterExchangeNamingConvention { get; set; }
+		Func<string> RetryQueueNamingConvention { get; set; }
 	}
 
 	public class NamingConvetions : INamingConvetions
@@ -20,6 +21,7 @@ namespace RawRabbit.Common
 		public virtual Func<string> ErrorExchangeNamingConvention { get; set; }
 		public virtual Func<string> ErrorQueueNamingConvention { get; set; }
 		public virtual Func<string> DeadLetterExchangeNamingConvention { get; set; }
+		public virtual Func<string> RetryQueueNamingConvention { get; set; }
 
 		public NamingConvetions()
 		{
@@ -29,6 +31,7 @@ namespace RawRabbit.Common
 			ErrorQueueNamingConvention = () => "default_error_queue";
 			ErrorExchangeNamingConvention = () => "default_error_exchange";
 			DeadLetterExchangeNamingConvention = () => "default_dead_letter_exchange";
+			RetryQueueNamingConvention = () => $"retry_{Guid.NewGuid()}";
 		}
 
 		private static string CreateShortAfqn(Type type, string path = "", string delimeter = ".")
