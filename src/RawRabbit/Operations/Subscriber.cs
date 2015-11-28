@@ -40,17 +40,10 @@ namespace RawRabbit.Operations
 			var consumer = _consumerFactory.CreateConsumer(cfg);
 			consumer.OnMessageAsync = (o, args) =>
 			{
-				var bodyTask = Task.Run(() => Serializer.Deserialize<T>(args.Body));
-				var contextTask = _contextProvider
-					.ExtractContextAsync(args.BasicProperties.Headers[_contextProvider.ContextHeaderName])
-					.ContinueWith(ctxTask =>
-					{
-						_contextEnhancer.WireUpContextFeatures(ctxTask.Result, consumer, args);
-						return ctxTask.Result;
-					});
-				return Task
-					.WhenAll(bodyTask, contextTask)
-					.ContinueWith(task => subscribeMethod(bodyTask.Result, contextTask.Result));
+				var body = Serializer.Deserialize<T>(args.Body);
+				var context = _contextProvider.ExtractContext(args.BasicProperties.Headers[_contextProvider.ContextHeaderName]);
+				_contextEnhancer.WireUpContextFeatures(context, consumer, args);
+				return subscribeMethod(body, context);
 			};
 			consumer.Model.BasicConsume(cfg.Queue.QueueName, cfg.NoAck, consumer);
 
