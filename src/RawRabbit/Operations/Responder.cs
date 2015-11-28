@@ -72,7 +72,7 @@ namespace RawRabbit.Operations
 
 		private Task SendResponseAsync<TResponse>(TResponse result, BasicDeliverEventArgs requestPayload)
 		{
-			var propsTask = CreateReplyPropsAsync(requestPayload);
+			var propsTask = Task.Run(() => CreateReplyProps(requestPayload));
 			var serializeTask = Task.Run(() => Serializer.Serialize(result));
 
 			return Task
@@ -90,16 +90,12 @@ namespace RawRabbit.Operations
 				});
 		}
 
-		private static Task<IBasicProperties> CreateReplyPropsAsync(BasicDeliverEventArgs requestPayload)
+		private static IBasicProperties CreateReplyProps(BasicDeliverEventArgs requestPayload)
 		{
-			return Task.Run(() =>
+			return new BasicProperties
 			{
-				IBasicProperties replyProps = new BasicProperties
-				{
-					CorrelationId = requestPayload.BasicProperties.CorrelationId
-				};
-				return replyProps;
-			});
+				CorrelationId = requestPayload.BasicProperties.CorrelationId
+			};
 		}
 
 		public override void Dispose()
