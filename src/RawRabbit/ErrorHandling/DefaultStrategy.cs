@@ -47,7 +47,7 @@ namespace RawRabbit.ErrorHandling
 
 		private static Exception UnwrapInnerException(Exception exception)
 		{
-			if (exception is AggregateException)
+			if (exception is AggregateException && exception.InnerException != null)
 			{
 				return UnwrapInnerException(exception.InnerException);
 			}
