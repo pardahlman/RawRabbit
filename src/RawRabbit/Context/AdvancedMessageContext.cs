@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace RawRabbit.Context
 {
@@ -6,6 +7,12 @@ namespace RawRabbit.Context
 	{
 		public Action Nack { get; set; }
 		public Action<TimeSpan> RetryLater { get; set; }
-		public long Retries { get; set;  }
+		public RetryInformation RetryInfo { get; set; }
+	}
+
+	public class RetryInformation
+	{
+		public long NumberOfRetries { get; set; }
+		public DateTime OriginalSent { get; set; }
 	}
 }

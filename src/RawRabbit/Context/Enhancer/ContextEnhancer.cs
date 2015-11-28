@@ -14,6 +14,7 @@ namespace RawRabbit.Context.Enhancer
 		private readonly IChannelFactory _channelFactory;
 		private readonly INamingConvetions _convetions;
 		private const string DeathHeader = "x-death";
+		private const string EstimatedRetry = "approx_retry";
 
 		public ContextEnhancer(IChannelFactory channelFactory, INamingConvetions convetions)
 		{
@@ -49,6 +50,7 @@ namespace RawRabbit.Context.Enhancer
 						{"x-message-ttl", Convert.ToInt32(timespan.TotalMilliseconds)}
 					});
 					channel.QueueBind(dlQueueName, dlxName, args.RoutingKey, null);
+					AddEstimatedRetryHeader(args.BasicProperties);
 					channel.BasicPublish(dlxName, args.RoutingKey, args.BasicProperties, args.Body);
 					Timer disposeChannel = null;
 					disposeChannel = new Timer(state =>
@@ -59,8 +61,37 @@ namespace RawRabbit.Context.Enhancer
 					}, null, timespan.Add(TimeSpan.FromMilliseconds(20)), new TimeSpan(-1));
 				};
 
-				advancedCtx.Retries = GetCurentRetryCount(args.BasicProperties);
+				advancedCtx.RetryInfo = GetRetryInformatino(args.BasicProperties);
 			}
+		}
+
+		private static void AddEstimatedRetryHeader(IBasicProperties basicProperties)
+		{
+			if (basicProperties.Headers.ContainsKey(EstimatedRetry))
+			{
+				basicProperties.Headers.Remove(EstimatedRetry);
+			}
+			basicProperties.Headers.Add(EstimatedRetry, DateTime.UtcNow.ToString("u"));
+		}
+
+		private RetryInformation GetRetryInformatino(IBasicProperties basicProperties)
+		{
+			return new RetryInformation
+			{
+				OriginalSent = GetOriginalSentDate(basicProperties),
+				NumberOfRetries = GetCurentRetryCount(basicProperties)
+			};
+		}
+
+		private DateTime GetOriginalSentDate(IBasicProperties basicProperties)
+		{
+			if (basicProperties.Headers.ContainsKey("sent_date"))
+			{
+				var sentBytes = basicProperties?.Headers["sent_date"] as byte[] ?? new byte[0];
+				var sentStr = System.Text.Encoding.UTF8.GetString(sentBytes);
+				return DateTime.Parse(sentStr);
+			}
+			return DateTime.MinValue;
 		}
 
 		private long GetCurentRetryCount(IBasicProperties basicProperties)
@@ -71,7 +102,7 @@ namespace RawRabbit.Context.Enhancer
 				var deathDictionary = (basicProperties.Headers[DeathHeader] as List<object>)?.FirstOrDefault() as IDictionary<string, object>;
 				if (deathDictionary?.TryGetValue("count", out retryCount) ?? false)
 				{
-					return (long) retryCount;
+					return (long)retryCount;
 				}
 			}
 			return 0;

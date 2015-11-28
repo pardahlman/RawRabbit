@@ -11,7 +11,7 @@ namespace RawRabbit.IntegrationTests.Features
 	public class RetryWithDelayTests
 	{
 		[Fact]
-		public async Task Should_Retry_After_Given_Timespan()
+		public async Task Should_Retry_For_Publish_Subscribe_After_Given_Timespan()
 		{
 			/* Setup */
 			var service = new ServiceCollection()
