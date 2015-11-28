@@ -41,8 +41,8 @@ namespace RawRabbit.Operations
 						MessageId = Guid.NewGuid().ToString(),
 						Headers = new Dictionary<string, object>
 						{
-							{ _contextProvider.ContextHeaderName, ctxTask.Result},
-							{"sent_date", DateTime.UtcNow.ToString("u") }
+							{ _contextProvider.ContextHeaderName, ctxTask.Result },
+							{PropertyHeaders.Sent, DateTime.UtcNow.ToString("u") }
 						}
 					};
 
