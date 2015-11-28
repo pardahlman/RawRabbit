@@ -10,5 +10,6 @@ namespace RawRabbit.ErrorHandling
 	{
 		Task OnRequestHandlerExceptionAsync(IRawConsumer rawConsumer, BasicDeliverEventArgs args, Exception exception);
 		Task OnResponseRecievedAsync<TResponse>(BasicDeliverEventArgs args, TaskCompletionSource<TResponse> responseTcs);
+		void OnResponseRecieved<TResponse>(BasicDeliverEventArgs args, TaskCompletionSource<TResponse> responseTcs);
 	}
 }
