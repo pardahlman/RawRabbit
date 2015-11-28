@@ -9,6 +9,7 @@ namespace RawRabbit.Common
 		Func<Type, Type, string> RpcExchangeNamingConvention { get; set; }
 		Func<string> ErrorExchangeNamingConvention { get; set; }
 		Func<string> ErrorQueueNamingConvention { get; set; }
+		Func<string> DeadLetterExchangeNamingConvention { get; set; }
 	}
 
 	public class NamingConvetions : INamingConvetions
@@ -18,6 +19,7 @@ namespace RawRabbit.Common
 		public Func<Type, Type, string> RpcExchangeNamingConvention { get; set; }
 		public Func<string> ErrorExchangeNamingConvention { get; set; }
 		public Func<string> ErrorQueueNamingConvention { get; set; }
+		public Func<string> DeadLetterExchangeNamingConvention { get; set; }
 
 		public NamingConvetions()
 		{
@@ -26,6 +28,7 @@ namespace RawRabbit.Common
 			QueueNamingConvention = type => CreateShortAfqn(type);
 			ErrorQueueNamingConvention = () => "default_error_queue";
 			ErrorExchangeNamingConvention = () => "default_error_exchange";
+			DeadLetterExchangeNamingConvention = () => "default_dead_letter_exchange";
 		}
 
 		private static string CreateShortAfqn(Type type, string path = "", string delimeter = ".")
