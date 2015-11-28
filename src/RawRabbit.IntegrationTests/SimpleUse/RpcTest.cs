@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using RawRabbit.Configuration;
@@ -154,6 +155,34 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			/* Assert */
 			Assert.NotNull(firstResponse);
 			Assert.NotNull(secondResponse);
+		}
+
+		[Fact]
+		public async Task Should_Work_When_Not_Awaiting_One_Response_At_A_Time()
+		{
+			/* Setup */
+			const int numberOfCalls = 10;
+			var tasks = new Task[numberOfCalls];
+			var requester = BusClientFactory.CreateDefault();
+			var responder = BusClientFactory.CreateDefault();
+
+			responder.RespondAsync<FirstRequest, FirstResponse>((req, i) => Task.FromResult(new FirstResponse { Infered = Guid.NewGuid()}));
+
+			/* Test */
+			for (int i = 0; i < numberOfCalls; i++)
+			{
+				var responseTask = requester.RequestAsync<FirstRequest, FirstResponse>();
+				tasks[i] = responseTask;
+			}
+			Task.WaitAll(tasks);
+			var ids = tasks
+				.OfType<Task<FirstResponse>>()
+				.Select(t => t.Result.Infered)
+				.Distinct()
+				.ToList();
+
+			/* Assert */
+			Assert.Equal(ids.Count, numberOfCalls);
 		}
 	}
 }
