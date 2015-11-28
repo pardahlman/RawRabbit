@@ -147,6 +147,7 @@ namespace RawRabbit.Operations
 					tcs.TrySetResult(response);
 					return Task.FromResult(true);
 				}
+				_logger.LogWarning($"Unable to find callback for {args.BasicProperties.CorrelationId}.");
 				throw new Exception($"Can not find callback for {args.BasicProperties.CorrelationId}");
 			};
 			consumer.Model.BasicConsume(cfg.Queue.QueueName, cfg.NoAck, consumer);
