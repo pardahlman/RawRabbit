@@ -14,12 +14,12 @@ namespace RawRabbit.Common
 
 	public class NamingConvetions : INamingConvetions
 	{
-		public Func<Type, string> ExchangeNamingConvention { get; set; }
-		public Func<Type, string> QueueNamingConvention { get; set; }
-		public Func<Type, Type, string> RpcExchangeNamingConvention { get; set; }
-		public Func<string> ErrorExchangeNamingConvention { get; set; }
-		public Func<string> ErrorQueueNamingConvention { get; set; }
-		public Func<string> DeadLetterExchangeNamingConvention { get; set; }
+		public virtual Func<Type, string> ExchangeNamingConvention { get; set; }
+		public virtual Func<Type, string> QueueNamingConvention { get; set; }
+		public virtual Func<Type, Type, string> RpcExchangeNamingConvention { get; set; }
+		public virtual Func<string> ErrorExchangeNamingConvention { get; set; }
+		public virtual Func<string> ErrorQueueNamingConvention { get; set; }
+		public virtual Func<string> DeadLetterExchangeNamingConvention { get; set; }
 
 		public NamingConvetions()
 		{
