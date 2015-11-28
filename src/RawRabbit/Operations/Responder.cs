@@ -49,12 +49,17 @@ namespace RawRabbit.Operations
 				_contextEnhancer.WireUpContextFeatures(context, consumer, args);
 
 				return onMessage(body, context)
-					.ContinueWith(payloadTask =>
+					.ContinueWith(responseTask =>
 					{
-						if (!consumer.NackedDeliveryTags.Contains(args.DeliveryTag))
+						if (consumer.NackedDeliveryTags.Contains(args.DeliveryTag))
 						{
-							SendResponse(payloadTask.Result, args);
+							return;
 						}
+						if (responseTask.Result == null)
+						{
+							return;
+						}
+						SendResponse(responseTask.Result, args);
 					});
 			};
 			consumer.Model.BasicConsume(cfg.Queue.QueueName, cfg.NoAck, consumer);
