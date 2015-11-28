@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
@@ -10,6 +9,7 @@ using RawRabbit.Configuration;
 using RawRabbit.Consumer.Contract;
 using RawRabbit.Consumer.Eventing;
 using RawRabbit.Context;
+using RawRabbit.Context.Enhancer;
 using RawRabbit.Context.Provider;
 using RawRabbit.ErrorHandling;
 using RawRabbit.Logging;
@@ -64,6 +64,7 @@ namespace RawRabbit.vNext
 				.AddTransient<IConsumerFactory, EventingBasicConsumerFactory>()
 				.AddTransient<IErrorHandlingStrategy, DefaultStrategy>()
 				.AddSingleton<IMessageContextProvider<TMessageContext>, MessageContextProvider<TMessageContext>>()
+				.AddSingleton<IContextEnhancer, ContextEnhancer>()
 				.AddSingleton<IChannelFactory, ChannelFactory>()
 				.AddTransient<IConfigurationEvaluator, ConfigurationEvaluator>()
 				.AddTransient<INamingConvetions, NamingConvetions>()

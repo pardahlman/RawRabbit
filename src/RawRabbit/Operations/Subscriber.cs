@@ -4,6 +4,7 @@ using RawRabbit.Common;
 using RawRabbit.Configuration.Subscribe;
 using RawRabbit.Consumer.Contract;
 using RawRabbit.Context;
+using RawRabbit.Context.Enhancer;
 using RawRabbit.Context.Provider;
 using RawRabbit.Logging;
 using RawRabbit.Operations.Contracts;
@@ -15,13 +16,15 @@ namespace RawRabbit.Operations
 	{
 		private readonly IConsumerFactory _consumerFactory;
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
+		private readonly IContextEnhancer _contextEnhancer;
 		private readonly ILogger _logger = LogManager.GetLogger<Subscriber<TMessageContext>>();
 
-		public Subscriber(IChannelFactory channelFactory, IConsumerFactory consumerFactory, IMessageSerializer serializer, IMessageContextProvider<TMessageContext> contextProvider)
+		public Subscriber(IChannelFactory channelFactory, IConsumerFactory consumerFactory, IMessageSerializer serializer, IMessageContextProvider<TMessageContext> contextProvider, IContextEnhancer contextEnhancer)
 			: base(channelFactory, serializer)
 		{
 			_consumerFactory = consumerFactory;
 			_contextProvider = contextProvider;
+			_contextEnhancer = contextEnhancer;
 		}
 
 		public void SubscribeAsync<T>(Func<T, TMessageContext, Task> subscribeMethod, SubscriptionConfiguration config)
@@ -42,16 +45,7 @@ namespace RawRabbit.Operations
 					.ExtractContextAsync(args.BasicProperties.Headers[_contextProvider.ContextHeaderName])
 					.ContinueWith(ctxTask =>
 					{
-						var advancedCtx = ctxTask.Result as IAdvancedMessageContext;
-						if (advancedCtx == null)
-						{
-							return ctxTask.Result;
-						}
-						advancedCtx.Nack = () =>
-						{
-							consumer.NackedDeliveryTags.Add(args.DeliveryTag);
-							consumer.Model.BasicNack(args.DeliveryTag, false, true);
-						};
+						_contextEnhancer.WireUpContextFeatures(ctxTask.Result, consumer, args);
 						return ctxTask.Result;
 					});
 				return Task

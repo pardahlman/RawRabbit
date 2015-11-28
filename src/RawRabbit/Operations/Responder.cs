@@ -10,6 +10,7 @@ using RawRabbit.Context.Provider;
 using RawRabbit.Operations.Contracts;
 using RawRabbit.Serialization;
 using RawRabbit.Consumer.Contract;
+using RawRabbit.Context.Enhancer;
 using RawRabbit.Logging;
 
 namespace RawRabbit.Operations
@@ -18,14 +19,16 @@ namespace RawRabbit.Operations
 	{
 		private readonly IConsumerFactory _consumerFactory;
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
+		private readonly IContextEnhancer _contextEnhancer;
 		private readonly ILogger _logger = LogManager.GetLogger<Responder<TMessageContext>>();
 		private IModel _responseChannel;
 
-		public Responder(IChannelFactory channelFactory, IConsumerFactory consumerFactory, IMessageSerializer serializer, IMessageContextProvider<TMessageContext> contextProvider)
+		public Responder(IChannelFactory channelFactory, IConsumerFactory consumerFactory, IMessageSerializer serializer, IMessageContextProvider<TMessageContext> contextProvider, IContextEnhancer contextEnhancer)
 			: base(channelFactory, serializer)
 		{
 			_consumerFactory = consumerFactory;
 			_contextProvider = contextProvider;
+			_contextEnhancer = contextEnhancer;
 		}
 
 		public void RespondAsync<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, ResponderConfiguration cfg)
@@ -43,15 +46,7 @@ namespace RawRabbit.Operations
 			{
 				var body = Serializer.Deserialize<TRequest>(args.Body);
 				var context = _contextProvider.ExtractContext(args.BasicProperties.Headers[_contextProvider.ContextHeaderName]);
-				var advancedCtx = context as IAdvancedMessageContext;
-				if (advancedCtx != null)
-				{
-					advancedCtx.Nack = () =>
-					{
-						consumer.NackedDeliveryTags.Add(args.DeliveryTag);
-						consumer.Model.BasicNack(args.DeliveryTag, false, true);
-					};
-				}
+				_contextEnhancer.WireUpContextFeatures(context, consumer, args);
 
 				return onMessage(body, context)
 					.ContinueWith(payloadTask =>
@@ -70,20 +65,21 @@ namespace RawRabbit.Operations
 			_responseChannel = (_responseChannel?.IsOpen ?? false)
 				? _responseChannel
 				: ChannelFactory.CreateChannel();
-			var requestProps = CreateReplyProps(requestPayload);
-			var responseBody = Serializer.Serialize(request);
+			var props = CreateResponseProps(requestPayload);
+			_logger.LogDebug($"Sending reponse to request with correlation '{props.CorrelationId}' with message '{props.MessageId}'.");
 			_responseChannel.BasicPublish(
 				exchange: "",
 				routingKey: requestPayload.BasicProperties.ReplyTo,
-				basicProperties: requestProps,
-				body: responseBody
+				basicProperties: props,
+				body: Serializer.Serialize(request)
 			);
 		}
 
-		private static IBasicProperties CreateReplyProps(BasicDeliverEventArgs requestPayload)
+		private static IBasicProperties CreateResponseProps(BasicDeliverEventArgs requestPayload)
 		{
 			return new BasicProperties
 			{
+				MessageId = Guid.NewGuid().ToString(),
 				CorrelationId = requestPayload.BasicProperties.CorrelationId
 			};
 		}
