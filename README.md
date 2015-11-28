@@ -20,9 +20,11 @@
                                     (   \        /.-\  \\__   
                                      '--'`._  .-'---,\  '--;  
                                           '--------^^ '--^^   
-_No über complex abstractions! No configuration needed (but supported for those who want to have 100% control). Just a thin, layer above the [dotnet RabbitMq client](https://github.com/rabbitmq/rabbitmq-dotnet-client)._
+_A modern, vNext based, C# framework for communication over [RabbitMq](http://rabbitmq.com/), based on [the official dotnet RabbitMq client](https://github.com/rabbitmq/rabbitmq-dotnet-client)._
 
-* _Publish_, _subscribe_, and _request_/_response_ (a.k.a `RPC`) async
+* Lightning  fast `async` Request/Response with [direct reply-to](https://www.rabbitmq.com/direct-reply-to.html).
+* [`dead-letter-exchange`](https://www.rabbitmq.com/dlx.html) based retry/delay.
+* Out-of-the-box support for `Nack` messages.
 * Targets [dnx runtime](https://github.com/aspnet/dnx) `dnx451` to `dnx50` as well as `net451` to `net50`
 * Everything is plugable! Register any custom types with dependecy injection from `Microsoft.Extensions.DependencyInjection`
 * Easy-piecy configuration with `Microsoft.Extensions.Configuration` (but support for old skool, too)
@@ -110,6 +112,21 @@ client.RespondAsync<BasicRequest, BasicResponse>((req, ctx) =>
 }, cfg => cfg.WithNoAck(false));
 ```
 _For implementation info check the [`NackTests`](https://github.com/pardahlman/RawRabbit/blob/master/src/RawRabbit.IntegrationTests/Features/NackingTests.cs)._
+
+There are times where you're unable to process a message right away, and might want to retry at a later time. This approach can be employed as error handling for when a message handler throws exception. `RawRabbit`'s advanced context does also have methods for retrying after given `TimeSpan`. It follows [yuserinterface's solution](http://yuserinterface.com/dev/2013/01/08/how-to-schedule-delay-messages-with-rabbitmq-using-a-dead-letter-exchange/) that leverages the dead-letter-exchange functionality .
+
+```csharp
+subscriber.SubscribeAsync<BasicMessage>(async (message, ctx) =>
+{
+  if (CanNotProcessRightNow())
+  {
+    ctx.RetryLater(TimeSpan.FromMinutes(5));
+    return;
+  }
+  // five minutes later, we're here...
+});
+```
+
 
 ## Configuration
 With the configuration framework `Microsoft.Extensions.Configuration`, we get the ability to structure our configuration in a nice and readable way. The `RawRabbit` configuration contains information about brokers to connect to, as well as some default behaviour on queues, exchanges and timeouts. Below is a full configuration example. ([read more about configuration here](http://whereslou.com/2014/05/23/asp-net-vnext-moving-parts-iconfiguration/))
