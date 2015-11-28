@@ -6,5 +6,6 @@ namespace RawRabbit.Context
 	{
 		Action Nack { get; set; }
 		Action<TimeSpan> RetryLater { get; set; }
+		long Retries { get; set; }
 	}
 }

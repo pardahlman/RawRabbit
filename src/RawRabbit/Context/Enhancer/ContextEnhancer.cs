@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -12,6 +13,7 @@ namespace RawRabbit.Context.Enhancer
 	{
 		private readonly IChannelFactory _channelFactory;
 		private readonly INamingConvetions _convetions;
+		private const string DeathHeader = "x-death";
 
 		public ContextEnhancer(IChannelFactory channelFactory, INamingConvetions convetions)
 		{
@@ -54,9 +56,25 @@ namespace RawRabbit.Context.Enhancer
 						channel.QueueDelete(dlQueueName); //TODO: investigate why auto-delete doesn't work?
 						channel.Dispose();
 						disposeChannel?.Dispose();
-					}, null, timespan, new TimeSpan(-1));
+					}, null, timespan.Add(TimeSpan.FromMilliseconds(20)), new TimeSpan(-1));
 				};
+
+				advancedCtx.Retries = GetCurentRetryCount(args.BasicProperties);
 			}
+		}
+
+		private long GetCurentRetryCount(IBasicProperties basicProperties)
+		{
+			if (basicProperties.Headers.ContainsKey(DeathHeader))
+			{
+				object retryCount = null;
+				var deathDictionary = (basicProperties.Headers[DeathHeader] as List<object>)?.FirstOrDefault() as IDictionary<string, object>;
+				if (deathDictionary?.TryGetValue("count", out retryCount) ?? false)
+				{
+					return (long) retryCount;
+				}
+			}
+			return 0;
 		}
 	}
 }
