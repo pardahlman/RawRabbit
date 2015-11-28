@@ -41,27 +41,19 @@ namespace RawRabbit.Operations
 			var consumer = _consumerFactory.CreateConsumer(cfg);
 			consumer.OnMessageAsync = (o, args) =>
 			{
-				var bodyTask = Task.Run(() => Serializer.Deserialize<TRequest>(args.Body));
-				var contextTask = _contextProvider
-					.ExtractContextAsync(args.BasicProperties.Headers[_contextProvider.ContextHeaderName])
-					.ContinueWith(ctxTask =>
+				var body = Serializer.Deserialize<TRequest>(args.Body);
+				var context = _contextProvider.ExtractContext(args.BasicProperties.Headers[_contextProvider.ContextHeaderName]);
+				var advancedCtx = context as IAdvancedMessageContext;
+				if (advancedCtx != null)
+				{
+					advancedCtx.Nack = () =>
 					{
-						var advancedCtx = ctxTask.Result as IAdvancedMessageContext;
-						if (advancedCtx == null)
-						{
-							return ctxTask.Result;
-						}
-						advancedCtx.Nack = () =>
-						{
-							consumer.NackedDeliveryTags.Add(args.DeliveryTag);
-							consumer.Model.BasicNack(args.DeliveryTag, false, true);
-						};
-						return ctxTask.Result;
-					});
+						consumer.NackedDeliveryTags.Add(args.DeliveryTag);
+						consumer.Model.BasicNack(args.DeliveryTag, false, true);
+					};
+				}
 
-				return Task
-					.WhenAll(bodyTask, contextTask)
-					.ContinueWith(task => onMessage(bodyTask.Result, contextTask.Result)).Unwrap()
+				return onMessage(body, context)
 					.ContinueWith(payloadTask =>
 					{
 						if (!consumer.NackedDeliveryTags.Contains(args.DeliveryTag))
