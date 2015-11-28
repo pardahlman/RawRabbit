@@ -83,27 +83,28 @@ namespace RawRabbit.Operations
 
 		private void CreateOrUpdateDisposeTimer()
 		{
-			if (_disposeConsumerTimer == null)
+			if (_disposeConsumerTimer != null)
 			{
-				_disposeConsumerTimer = new Timer(state =>
+				return;
+			}
+			_disposeConsumerTimer = new Timer(state =>
+			{
+				if (!_responseTcsDictionary.IsEmpty)
 				{
-					_disposeConsumerTimer?.Dispose();
-					_disposeConsumerTimer = null;
-					foreach (var type in _typeToConsumer.Keys)
+					return;
+				}
+				_disposeConsumerTimer?.Dispose();
+				_disposeConsumerTimer = null;
+				foreach (var type in _typeToConsumer.Keys)
+				{
+					IRawConsumer consumer;
+					if (_typeToConsumer.TryRemove(type, out consumer))
 					{
-						IRawConsumer consumer;
-						if (_typeToConsumer.TryRemove(type, out consumer))
-						{
-							consumer?.Disconnect();
-							consumer?.Model?.Dispose();
-						}
+						consumer?.Disconnect();
+						consumer?.Model?.Dispose();
 					}
-				}, null, _requestTimeout.Add(TimeSpan.FromSeconds(1)), new TimeSpan(-1));
-			}
-			else
-			{
-				_disposeConsumerTimer.Change(_requestTimeout.Add(TimeSpan.FromSeconds(1)), new TimeSpan(-1));
-			}
+				}
+			}, null, _requestTimeout, _requestTimeout);
 		}
 
 		private IRawConsumer GetOrCreateConsumerForType<TResponse>(IConsumerConfiguration cfg)
@@ -137,19 +138,14 @@ namespace RawRabbit.Operations
 					var tcs = tcsAsObj as TaskCompletionSource<TResponse>;
 					_logger.LogDebug($"Recived response with correlationId {args.BasicProperties.CorrelationId}.");
 					_requestTimerDictionary[args.BasicProperties.CorrelationId]?.Dispose();
-					return Task
-						.Run(() => _errorStrategy.OnResponseRecievedAsync(args, tcs))
-						.ContinueWith(t => tcs?.Task?.IsFaulted ?? true
-							? default(TResponse)
-							: Serializer.Deserialize<TResponse>(args.Body))
-						.ContinueWith(t =>
-						{
-							if (tcs?.Task?.IsFaulted ?? true)
-							{
-								return;
-							}
-							tcs?.TrySetResult(t.Result);
-						});
+					_errorStrategy.OnResponseRecievedAsync(args, tcs);
+					if (tcs?.Task?.IsFaulted ?? true)
+					{
+						return Task.FromResult(true);
+					}
+					var response = Serializer.Deserialize<TResponse>(args.Body);
+					tcs.TrySetResult(response);
+					return Task.FromResult(true);
 				}
 				throw new Exception($"Can not find callback for {args.BasicProperties.CorrelationId}");
 			};
