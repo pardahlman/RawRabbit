@@ -16,31 +16,47 @@ namespace RawRabbit.Context.Provider
 			ContextDictionary = new ConcurrentDictionary<Guid, TMessageContext>();
 		}
 
-		public Task<TMessageContext> ExtractContextAsync(object o)
+		public TMessageContext ExtractContext(object o)
 		{
 			var bytes = (byte[])o;
 			var jsonHeader = Encoding.UTF8.GetString(bytes);
 			var context = JsonConvert.DeserializeObject<TMessageContext>(jsonHeader);
 			ContextDictionary.TryAdd(context.GlobalRequestId, context);
+			return context;
+		}
+
+		public Task<TMessageContext> ExtractContextAsync(object o)
+		{
+			var context = ExtractContext(o);
 			return Task.FromResult(context);
+		}
+
+		public object GetMessageContext(Guid globalMessageId)
+		{
+			var context = globalMessageId != Guid.Empty && ContextDictionary.ContainsKey(globalMessageId)
+				? ContextDictionary[globalMessageId]
+				: CreateMessageContext();
+			var contextAsJson = JsonConvert.SerializeObject(context);
+			var contextAsBytes = (object) Encoding.UTF8.GetBytes(contextAsJson);
+			return contextAsBytes;
 		}
 
 		public Task<object> GetMessageContextAsync(Guid globalMessageId)
 		{
-			Task<TMessageContext> createOrGetContextTask;
-			if (globalMessageId != Guid.Empty && ContextDictionary.ContainsKey(globalMessageId))
-			{
-				createOrGetContextTask = Task.FromResult(ContextDictionary[globalMessageId]);
-			}
-			else
-			{
-				createOrGetContextTask = CreateMessageContextAsync();
-			}
-			return createOrGetContextTask
+			var ctxTask = globalMessageId != Guid.Empty && ContextDictionary.ContainsKey(globalMessageId)
+				? Task.FromResult(ContextDictionary[globalMessageId])
+				: CreateMessageContextAsync();
+
+			return ctxTask
 				.ContinueWith(contextTask => JsonConvert.SerializeObject(contextTask.Result))
 				.ContinueWith(jsonTask => (object)Encoding.UTF8.GetBytes(jsonTask.Result));
 		}
 
-		protected abstract Task<TMessageContext> CreateMessageContextAsync();
+		protected virtual Task<TMessageContext> CreateMessageContextAsync()
+		{
+			return Task.FromResult(CreateMessageContext());
+		}
+
+		protected abstract TMessageContext CreateMessageContext();
 	}
 }
