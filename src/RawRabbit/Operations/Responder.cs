@@ -62,32 +62,28 @@ namespace RawRabbit.Operations
 					.WhenAll(bodyTask, contextTask)
 					.ContinueWith(task => onMessage(bodyTask.Result, contextTask.Result)).Unwrap()
 					.ContinueWith(payloadTask =>
-						consumer.NackedDeliveryTags.Contains(args.DeliveryTag)
-						? Task.FromResult(true)
-						: SendResponseAsync(payloadTask.Result, args)
-					);
+					{
+						if (!consumer.NackedDeliveryTags.Contains(args.DeliveryTag))
+						{
+							SendResponse(payloadTask.Result, args);
+						}
+					});
 			};
 			consumer.Model.BasicConsume(cfg.Queue.QueueName, cfg.NoAck, consumer);
 		}
 
-		private Task SendResponseAsync<TResponse>(TResponse result, BasicDeliverEventArgs requestPayload)
+		private void SendResponse<TResponse>(TResponse request, BasicDeliverEventArgs requestPayload)
 		{
-			var propsTask = Task.Run(() => CreateReplyProps(requestPayload));
-			var serializeTask = Task.Run(() => Serializer.Serialize(result));
-
-			return Task
-				.WhenAll(propsTask, serializeTask)
-				.ContinueWith(task =>
-				{
-					var channel = ChannelFactory.CreateChannel();
-					channel.BasicPublish(
-						exchange: "",
-						routingKey: requestPayload.BasicProperties.ReplyTo,
-						basicProperties: propsTask.Result,
-						body: serializeTask.Result
-					);
-					channel.Dispose();
-				});
+			var requestProps = CreateReplyProps(requestPayload);
+			var responseBody = Serializer.Serialize(request);
+			var channel = ChannelFactory.CreateChannel();
+			channel.BasicPublish(
+				exchange: "",
+				routingKey: requestPayload.BasicProperties.ReplyTo,
+				basicProperties: requestProps,
+				body: responseBody
+			);
+			channel.Dispose();
 		}
 
 		private static IBasicProperties CreateReplyProps(BasicDeliverEventArgs requestPayload)
