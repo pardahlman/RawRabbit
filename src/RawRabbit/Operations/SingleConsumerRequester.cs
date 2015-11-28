@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Remoting.Channels;
 using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
@@ -53,40 +51,34 @@ namespace RawRabbit.Operations
 		public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest message, Guid globalMessageId, RequestConfiguration cfg)
 		{
 			var consumer = GetOrCreateConsumerForType<TResponse>(cfg);
-			var propsTask = GetRequestPropsAsync(cfg.ReplyQueue.QueueName, globalMessageId);
-			var bodyTask = Task.Run(() => Serializer.Serialize(message));
-			var disposerTask = Task.Run(() => CreateOrUpdateDisposeTimer());
+			var props = GetRequestProps(cfg.ReplyQueue.QueueName, globalMessageId);
+			var body = Serializer.Serialize(message);
 
-			return Task
-				.WhenAll(propsTask, bodyTask, disposerTask)
-				.ContinueWith(t =>
+			Task.Run(() => CreateOrUpdateDisposeTimer());
+
+			var responseTcs = new TaskCompletionSource<TResponse>();
+			_responseTcsDictionary.TryAdd(props.CorrelationId, responseTcs);
+
+			_requestTimerDictionary.TryAdd(
+				props.CorrelationId,
+				new Timer(state =>
+				{
+					Timer timer;
+					if (!_requestTimerDictionary.TryRemove(props.CorrelationId, out timer))
 					{
-						var props = propsTask.Result;
-						var responseTcs = new TaskCompletionSource<TResponse>();
-						_responseTcsDictionary.TryAdd(props.CorrelationId, responseTcs);
-						
-						_requestTimerDictionary.TryAdd(
-							props.CorrelationId,
-							new Timer(state =>
-							{
-								Timer timer;
-								if (!_requestTimerDictionary.TryRemove(props.CorrelationId, out timer))
-								{
-									_logger.LogWarning($"Unable to find request timer for {props.CorrelationId}.");
-								}
-								timer?.Dispose();
-								responseTcs.TrySetException(new TimeoutException($"The request timed out after {_requestTimeout.ToString("g")}."));
-							}, null, _requestTimeout, new TimeSpan(-1)));
+						_logger.LogWarning($"Unable to find request timer for {props.CorrelationId}.");
+					}
+					timer?.Dispose();
+					responseTcs.TrySetException(new TimeoutException($"The request timed out after {_requestTimeout.ToString("g")}."));
+				}, null, _requestTimeout, new TimeSpan(-1)));
 
-						consumer.Model.BasicPublish(
-							exchange: cfg.Exchange.ExchangeName,
-							routingKey: cfg.RoutingKey,
-							basicProperties: propsTask.Result,
-							body: bodyTask.Result
-						);
-						return responseTcs.Task;
-					})
-				.Unwrap();
+			consumer.Model.BasicPublish(
+				exchange: cfg.Exchange.ExchangeName,
+				routingKey: cfg.RoutingKey,
+				basicProperties: props,
+				body: body
+			);
+			return responseTcs.Task;
 		}
 
 		private void CreateOrUpdateDisposeTimer()
@@ -116,7 +108,7 @@ namespace RawRabbit.Operations
 
 		private IRawConsumer GetOrCreateConsumerForType<TResponse>(IConsumerConfiguration cfg)
 		{
-			var responseType = typeof (TResponse);
+			var responseType = typeof(TResponse);
 			if (_typeToConsumer.ContainsKey(responseType))
 			{
 				_logger.LogDebug($"Channel for existing cunsomer of {responseType.Name} found.");
@@ -134,7 +126,7 @@ namespace RawRabbit.Operations
 
 			var consumer = _consumerFactory.CreateConsumer(cfg, ChannelFactory.CreateChannel());
 			_typeToConsumer.TryAdd(typeof(TResponse), consumer);
-			
+
 			DeclareQueue(cfg.Queue, consumer.Model);
 			DeclareExchange(cfg.Exchange, consumer.Model);
 			consumer.OnMessageAsync = (o, args) =>
@@ -165,25 +157,20 @@ namespace RawRabbit.Operations
 			return consumer;
 		}
 
-		private Task<IBasicProperties> GetRequestPropsAsync(string queueName, Guid globalMessageId)
+		private IBasicProperties GetRequestProps(string queueName, Guid globalMessageId)
 		{
-			return Task
-				.Run(() => _contextProvider.GetMessageContextAsync(globalMessageId))
-				.ContinueWith(ctxTask =>
-				{
-					IBasicProperties props = new BasicProperties
-					{
-						ReplyTo = queueName,
-						CorrelationId = Guid.NewGuid().ToString(),
-						Expiration = _requestTimeout.TotalMilliseconds.ToString(),
-						MessageId = Guid.NewGuid().ToString(),
-						Headers = new Dictionary<string, object>
+			IBasicProperties props = new BasicProperties
+			{
+				ReplyTo = queueName,
+				CorrelationId = Guid.NewGuid().ToString(),
+				Expiration = _requestTimeout.TotalMilliseconds.ToString(),
+				MessageId = Guid.NewGuid().ToString(),
+				Headers = new Dictionary<string, object>
 						{
-							{_contextProvider.ContextHeaderName, ctxTask.Result}
+							{_contextProvider.ContextHeaderName, _contextProvider.GetMessageContext(globalMessageId)}
 						}
-					};
-					return props;
-				});
+			};
+			return props;
 		}
 	}
 }
