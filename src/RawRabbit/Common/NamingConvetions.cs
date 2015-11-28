@@ -23,7 +23,7 @@ namespace RawRabbit.Common
 
 		public NamingConvetions()
 		{
-			ExchangeNamingConvention = type => type?.Namespace?.ToLower();
+			ExchangeNamingConvention = type => type?.Namespace?.ToLower() ?? string.Empty;
 			RpcExchangeNamingConvention = (request, response) => request?.Namespace?.ToLower() ?? "default_rpc_exchange";
 			QueueNamingConvention = type => CreateShortAfqn(type);
 			ErrorQueueNamingConvention = () => "default_error_queue";
