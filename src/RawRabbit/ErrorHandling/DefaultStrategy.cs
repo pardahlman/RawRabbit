@@ -30,10 +30,10 @@ namespace RawRabbit.ErrorHandling
 
 			rawConsumer.Model.BasicPublish(
 				exchange: string.Empty,
-				routingKey: args.BasicProperties?.ReplyTo,
+				routingKey: args.BasicProperties?.ReplyTo ?? String.Empty,
 				basicProperties: new BasicProperties
 				{
-					CorrelationId = args.BasicProperties?.CorrelationId,
+					CorrelationId = args.BasicProperties?.CorrelationId ?? string.Empty,
 					Headers = new Dictionary<string, object>
 					{
 						{ExceptionHeader, _messageExceptionName }
