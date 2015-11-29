@@ -51,7 +51,7 @@ namespace RawRabbit.Context.Enhancer
 						{PropertyHeaders.MessageTtl, Convert.ToInt32(timespan.TotalMilliseconds)}
 				});
 				channel.QueueBind(dlQueueName, dlxName, args.RoutingKey, null);
-				AddEstimatedRetryHeader(args.BasicProperties);
+				UpdateHeaders(args.BasicProperties);
 				channel.BasicPublish(dlxName, args.RoutingKey, args.BasicProperties, args.Body);
 				Timer disposeChannel = null;
 				disposeChannel = new Timer(state =>
@@ -65,13 +65,30 @@ namespace RawRabbit.Context.Enhancer
 			advancedCtx.RetryInfo = GetRetryInformatino(args.BasicProperties);
 		}
 
-		private static void AddEstimatedRetryHeader(IBasicProperties basicProperties)
+		private static void UpdateHeaders(IBasicProperties basicProperties)
 		{
 			if (basicProperties.Headers.ContainsKey(PropertyHeaders.EstimatedRetry))
 			{
 				basicProperties.Headers.Remove(PropertyHeaders.EstimatedRetry);
 			}
 			basicProperties.Headers.Add(PropertyHeaders.EstimatedRetry, DateTime.UtcNow.ToString("u"));
+
+			var currentRetry = 0;
+			if (basicProperties.Headers.ContainsKey(PropertyHeaders.RetryCount))
+			{
+				var valueStr = GetHeaderString(basicProperties.Headers, PropertyHeaders.RetryCount);
+				currentRetry = int.Parse(valueStr);
+				basicProperties.Headers.Remove(PropertyHeaders.RetryCount);
+			}
+			var nextRetry = (++currentRetry).ToString();
+			basicProperties.Headers.Add(PropertyHeaders.RetryCount, nextRetry);
+		}
+
+		private static string GetHeaderString(IDictionary<string, object> headers, string key)
+		{
+			var headerBytes = headers[key] as byte[] ?? new byte[0];
+			var headerStr = System.Text.Encoding.UTF8.GetString(headerBytes);
+			return headerStr;
 		}
 
 		private static RetryInformation GetRetryInformatino(IBasicProperties basicProperties)
@@ -96,14 +113,10 @@ namespace RawRabbit.Context.Enhancer
 
 		private static long GetCurentRetryCount(IBasicProperties basicProperties)
 		{
-			if (basicProperties.Headers.ContainsKey(PropertyHeaders.Death))
+			if (basicProperties.Headers.ContainsKey(PropertyHeaders.RetryCount))
 			{
-				object retryCount = null;
-				var deathDictionary = (basicProperties.Headers[PropertyHeaders.Death] as List<object>)?.FirstOrDefault() as IDictionary<string, object>;
-				if (deathDictionary?.TryGetValue("count", out retryCount) ?? false)
-				{
-					return (long)retryCount;
-				}
+				var countStr = GetHeaderString(basicProperties.Headers, PropertyHeaders.RetryCount);
+				return int.Parse(countStr);
 			}
 			return 0;
 		}

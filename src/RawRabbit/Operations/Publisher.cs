@@ -29,31 +29,28 @@ namespace RawRabbit.Operations
 
 		public Task PublishAsync<T>(T message, Guid globalMessageId, PublishConfiguration config)
 		{
-			return _contextProvider
-				.GetMessageContextAsync(globalMessageId)
-				.ContinueWith(ctxTask =>
-				{
-					var channel = ChannelFactory.GetChannel();
-					DeclareQueue(config.Queue, channel);
-					DeclareExchange(config.Exchange, channel);
-					var properties = new BasicProperties
-					{
-						MessageId = Guid.NewGuid().ToString(),
-						Headers = new Dictionary<string, object>
+			var context = _contextProvider.GetMessageContext(globalMessageId);
+			var channel = ChannelFactory.GetChannel();
+			DeclareQueue(config.Queue, channel);
+			DeclareExchange(config.Exchange, channel);
+			var properties = new BasicProperties
+			{
+				MessageId = Guid.NewGuid().ToString(),
+				Headers = new Dictionary<string, object>
 						{
-							{ _contextProvider.ContextHeaderName, ctxTask.Result },
+							{ _contextProvider.ContextHeaderName, context },
 							{PropertyHeaders.Sent, DateTime.UtcNow.ToString("u") }
 						}
-					};
+			};
 
-					channel.BasicPublish(
-						exchange: config.Exchange.ExchangeName,
-						routingKey: config.RoutingKey,
-						basicProperties: properties,
-						body: Serializer.Serialize(message)
-						);
-					channel.Dispose();
-				});
+			channel.BasicPublish(
+				exchange: config.Exchange.ExchangeName,
+				routingKey: config.RoutingKey,
+				basicProperties: properties,
+				body: Serializer.Serialize(message)
+				);
+			channel.Dispose();
+			return Task.FromResult(true);
 		}
 
 		public override void Dispose()

@@ -8,5 +8,6 @@
 		public static readonly string EstimatedRetry = "approx_retry";
 		public static readonly string DeadLetterExchange = "x-dead-letter-exchange";
 		public static readonly string MessageTtl = "x-message-ttl";
+		public static readonly string RetryCount = "retry_count";
 	}
 }
