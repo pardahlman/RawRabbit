@@ -25,7 +25,7 @@ namespace RawRabbit.Operations
 			_contextProvider = contextProvider;
 		}
 
-		public Task PublishAsync<T>(T message, Guid globalMessageId, PublishConfiguration config)
+		public Task PublishAsync<TMessage>(TMessage message, Guid globalMessageId, PublishConfiguration config)
 		{
 			return _contextProvider
 				.GetMessageContextAsync(globalMessageId)
