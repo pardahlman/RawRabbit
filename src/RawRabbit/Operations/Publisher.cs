@@ -17,14 +17,12 @@ namespace RawRabbit.Operations
 	public class Publisher<TMessageContext> : OperatorBase, IPublisher where TMessageContext : IMessageContext
 	{
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
-		private readonly ThreadLocal<Timer> _timer;
 		private readonly ILogger _logger = LogManager.GetLogger<Publisher<TMessageContext>>();
 
 		public Publisher(IChannelFactory channelFactory, IMessageSerializer serializer, IMessageContextProvider<TMessageContext> contextProvider)
 			: base(channelFactory, serializer)
 		{
 			_contextProvider = contextProvider;
-			_timer = new ThreadLocal<Timer>();
 		}
 
 		public Task PublishAsync<T>(T message, Guid globalMessageId, PublishConfiguration config)
@@ -60,7 +58,6 @@ namespace RawRabbit.Operations
 		{
 			_logger.LogDebug("Disposing Publisher");
 			base.Dispose();
-			_timer.Dispose();
 		}
 	}
 }
