@@ -38,22 +38,20 @@ namespace RawRabbit.Common
 		public IModel GetChannel()
 		{
 			var currentConnection = _connectionBroker.GetConnection();
-
 			if (!_connectionToChannel.ContainsKey(currentConnection))
 			{
 				_connectionToChannel.TryAdd(currentConnection, new ThreadLocal<IModel>(currentConnection.CreateModel));
 			}
-
+			
 			var threadChannel = _connectionToChannel[currentConnection];
-
 			if (threadChannel.Value.IsOpen)
 			{
 				return threadChannel.Value;
 			}
-
+			
 			threadChannel.Value?.Dispose();
 			threadChannel.Value = _connectionBroker.GetConnection().CreateModel();
-
+			
 			return threadChannel.Value;
 		}
 
