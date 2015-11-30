@@ -26,16 +26,16 @@ _A modern, vNext based, C# framework for communication over [RabbitMq](http://ra
 * [`dead-letter-exchange`](https://www.rabbitmq.com/dlx.html) based retry/delay.
 * Out-of-the-box support for `Nack` messages.
 * Targets [dnx runtime](https://github.com/aspnet/dnx) `dnx451` to `dnx50` as well as `net451` to `net50`
-* Everything is plugable! Register any custom types with dependecy injection from `Microsoft.Extensions.DependencyInjection`
-* Easy-piecy configuration with `Microsoft.Extensions.Configuration` (but support for old skool, too)
+* Everything is plugable! Register any custom types with dependecy injection from [`Microsoft.Extensions.DependencyInjection`](https://github.com/aspnet/DependencyInjection)
+* Easy-piecy configuration with [`Microsoft.Extensions.Configuration`](https://github.com/aspnet/Configuration) (but support for old skool, too)
 
 ## Quick introduction
-The ambision with `RawRabbit` is to provide a simple interface for performing some of the basic things that you typically want to do when working with RabbitMq. Therefore, it is shipped with out-of-the-box functionality for _Publish/Suscibe_ and _Request/Response_. For more information about how to customization, keep on reading.
+The ambision with `RawRabbit` is to provide a simple interface for performing some of the basic things that you typically want to do when working with RabbitMq. Performing standard _Publish/Suscibe_ and _Request/Response_ is easy. In fact, you don't need to configure anything. _Like the controll you get by configuring yourself? Keep on reading!_
 ### Publish & Subscribe
 ```csharp
 // setup subscriber
 var subscriber = BusClientFactory.CreateDefault();
-await subscriber.SubscribeAsync<BasicMessage>(async (msg, info) =>
+await subscriber.SubscribeAsync<BasicMessage>(async (msg, context) =>
 {
   Console.WriteLine($"Recieved: {msg.Prop}.");
 });
