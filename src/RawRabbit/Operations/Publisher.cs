@@ -17,65 +17,62 @@ namespace RawRabbit.Operations
 	public class Publisher<TMessageContext> : OperatorBase, IPublisher where TMessageContext : IMessageContext
 	{
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
-		private ThreadLocal<IModel> _channel;
+		private readonly IPublishAcknowledger _acknowledger;
+		private IModel _channel;
 		private Timer _channelTimer;
 		private readonly ILogger _logger = LogManager.GetLogger<Publisher<TMessageContext>>();
 
-		public Publisher(IChannelFactory channelFactory, IMessageSerializer serializer, IMessageContextProvider<TMessageContext> contextProvider)
+		public Publisher(IChannelFactory channelFactory, IMessageSerializer serializer, IMessageContextProvider<TMessageContext> contextProvider, IPublishAcknowledger acknowledger)
 			: base(channelFactory, serializer)
 		{
 			_contextProvider = contextProvider;
+			_acknowledger = acknowledger;
 		}
 
 		public Task PublishAsync<TMessage>(TMessage message, Guid globalMessageId, PublishConfiguration config)
 		{
-			return Task.Run(() =>
+			var context = _contextProvider.GetMessageContext(globalMessageId);
+			var channel = GetOrCreateChannel(config);
+			
+			var properties = new BasicProperties
 			{
-				var context = _contextProvider.GetMessageContext(globalMessageId);
-				var channel = GetOrCreateChannel();
-				DeclareQueue(config.Queue, channel);
-				DeclareExchange(config.Exchange, channel);
-				var properties = new BasicProperties
-				{
-					MessageId = Guid.NewGuid().ToString(),
-					Headers = new Dictionary<string, object>
+				MessageId = Guid.NewGuid().ToString(),
+				
+				Persistent = true,
+				Headers = new Dictionary<string, object>
 						{
 							{ _contextProvider.ContextHeaderName, context },
-							{PropertyHeaders.Sent, DateTime.UtcNow.ToString("u") }
+							{PropertyHeaders.Sent, DateTime.UtcNow.ToString("u") },
 						}
-				};
+			};
 
-				channel.BasicPublish(
-					exchange: config.Exchange.ExchangeName,
-					routingKey: config.RoutingKey,
-					basicProperties: properties,
-					body: Serializer.Serialize(message)
-					);
-			});
+			var publishAckTask = _acknowledger.GetAckTask();
+			channel.BasicPublish(
+				exchange: config.Exchange.ExchangeName,
+				routingKey: config.RoutingKey,
+				basicProperties: properties,
+				body: Serializer.Serialize(message)
+				);
+			return publishAckTask;
 		}
 
-		private IModel GetOrCreateChannel()
+		private IModel GetOrCreateChannel(PublishConfiguration config)
 		{
-			if (_channel == null)
+			if (_channel?.IsOpen ?? false)
 			{
-				_channel = new ThreadLocal<IModel>(() => ChannelFactory.CreateChannel());
-				_channelTimer = new Timer(state =>
-				{
-					foreach (var channel in _channel.Values)
-					{
-						channel?.Dispose();
-					}
-					_channel?.Dispose();
-					_channel = null;
-				}, null, TimeSpan.FromSeconds(1), new TimeSpan(-1));
+				return _channel;
 			}
-			if (_channel.Value.IsClosed)
+			_channelTimer = new Timer(state =>
 			{
-				_channel.Value.Dispose();
-				_channel.Value = ChannelFactory.CreateChannel();
-			}
-			_channelTimer.Change(TimeSpan.FromSeconds(1), new TimeSpan(-1));
-			return _channel.Value;
+				_channelTimer?.Dispose();
+				_channel.Dispose();
+			}, null, TimeSpan.FromSeconds(10), new TimeSpan(-1));
+			_channel = ChannelFactory.CreateChannel();
+			_acknowledger.SetActiveChannel(_channel);
+
+			DeclareQueue(config.Queue, _channel);
+			DeclareExchange(config.Exchange, _channel);
+			return _channel;
 		}
 
 		public override void Dispose()
@@ -86,4 +83,5 @@ namespace RawRabbit.Operations
 			base.Dispose();
 		}
 	}
+
 }
