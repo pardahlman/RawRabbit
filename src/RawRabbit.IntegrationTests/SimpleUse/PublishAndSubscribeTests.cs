@@ -75,5 +75,34 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			/* Assert */
 			Assert.True(true, $"Completed {numberOfCalls} in {sw.ElapsedMilliseconds} ms.");
 		}
+
+		[Fact]
+		public void Should_Be_Able_To_Perform_Subscribe_For_Multiple_Types()
+		{
+			/* Setup */
+			var subscriber = BusClientFactory.CreateDefault();
+			var publisher = BusClientFactory.CreateDefault();
+
+			var basicTcs = new TaskCompletionSource<BasicMessage>();
+			var simpleTcs = new TaskCompletionSource<SimpleMessage>();
+			subscriber.SubscribeAsync<BasicMessage>((message, context) =>
+			{
+				basicTcs.SetResult(message);
+				return Task.FromResult(true);
+			});
+			subscriber.SubscribeAsync<SimpleMessage>((message, context) =>
+			{
+				simpleTcs.SetResult(message);
+				return Task.FromResult(true);
+			});
+
+			/* Test */
+			publisher.PublishAsync<BasicMessage>();
+			publisher.PublishAsync<SimpleMessage >();
+			Task.WaitAll(basicTcs.Task, simpleTcs.Task);
+
+			/* Assert */
+			Assert.True(true, "Successfully recieved messages.");
+		}
 	}
 }
