@@ -10,6 +10,11 @@ namespace RawRabbit.Configuration
 		/// The amount of time to wait for response to request. Defaults to 10 seconds.
 		/// </summary>
 		public TimeSpan RequestTimeout { get; set; }
+		/// <summary>
+		/// The amount of time to wait for a publish to be confirmed. Default to 1 second.
+		/// Read more at: https://www.rabbitmq.com/confirms.html
+		/// </summary>
+		public TimeSpan PublishConfirmTimeout { get; set; }
 		public List<BrokerConfiguration> Brokers { get; set; }
 
 		public GeneralExchangeConfiguration Exchange { get; set; }
@@ -19,6 +24,7 @@ namespace RawRabbit.Configuration
 		{
 			Brokers = new List<BrokerConfiguration>();
 			RequestTimeout = TimeSpan.FromSeconds(10);
+			PublishConfirmTimeout = TimeSpan.FromSeconds(1);
 			Exchange = new GeneralExchangeConfiguration
 			{
 				AutoDelete = false,
