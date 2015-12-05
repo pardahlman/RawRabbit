@@ -9,7 +9,7 @@ using RawRabbit.Logging;
 
 namespace RawRabbit.Consumer
 {
-	class EventingRawConsumer : EventingBasicConsumer, IRawConsumer
+	internal class EventingRawConsumer : EventingBasicConsumer, IRawConsumer
 	{
 		private readonly ILogger _logger = LogManager.GetLogger<EventingRawConsumer>();
 		public List<ulong> NackedDeliveryTags { get; private set; } 
@@ -36,6 +36,11 @@ namespace RawRabbit.Consumer
 
 		public void Disconnect()
 		{
+			if (string.IsNullOrEmpty(ConsumerTag))
+			{
+				// broker has not given a tag yet.
+				return;
+			}
 			try
 			{
 				Model.BasicCancel(ConsumerTag);
@@ -44,7 +49,6 @@ namespace RawRabbit.Consumer
 			{
 				// Perfect, someone allready closed this.
 			}
-			
 		}
 	}
 }
