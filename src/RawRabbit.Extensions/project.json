@@ -1,0 +1,26 @@
+﻿{
+	"version": "0.1.0-rc1-final",
+	"description": "Make the most of RawRabbit with these extensions",
+	"authors": [ "par.dahlman" ],
+	"tags": [ "raw", "rabbit", "rawrabbit", "rabbitmq", "extensions" ],
+	"iconUrl": "http://pardahlman.se/raw/icon.png",
+	"projectUrl": "https://github.com/pardahlman/RawRabbit",
+	"title": "RawRabbit.Extensions",
+
+	"dependencies": {
+		"RawRabbit": "",
+		"RawRabbit.vNext": "",
+		"Microsoft.Extensions.DependencyInjection": "1.0.0-rc1-final",
+		"Microsoft.Extensions.Configuration.Abstractions": "1.0.0-rc1-final",
+		"Microsoft.Extensions.Logging.Abstractions": "1.0.0-rc1-final"
+	},
+
+	"frameworks": {
+		"dnx451": { },
+		"dnx50": { },
+		"net451": { },
+		"net452": { },
+		"net46": { },
+		"net50": { }
+	}
+}
