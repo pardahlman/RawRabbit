@@ -7,7 +7,7 @@ using RabbitMQ.Client.Exceptions;
 using RawRabbit.Consumer.Contract;
 using RawRabbit.Logging;
 
-namespace RawRabbit.Consumer
+namespace RawRabbit.Consumer.Eventing
 {
 	internal class EventingRawConsumer : EventingBasicConsumer, IRawConsumer
 	{
