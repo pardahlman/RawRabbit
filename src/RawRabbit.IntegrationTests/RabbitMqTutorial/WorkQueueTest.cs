@@ -39,16 +39,13 @@ namespace RawRabbit.IntegrationTests.RabbitMqTutorial
 							.WithName("task_queue")
 							.WithDurability()
 						)
+					.WithRoutingKey("task_queue")
 			);
 
 			/* Test */
 			await sender.PublishAsync(sent,
 				configuration: builder => builder
 					.WithRoutingKey("task_queue")
-					.WithQueue(queue =>
-						queue
-							.WithDurability()
-					)
 			);
 			await recieved.Task;
 

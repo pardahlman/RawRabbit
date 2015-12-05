@@ -12,13 +12,6 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 {
 	public class PublishAndSubscribeTests : IntegrationTestBase
 	{
-		public override void Dispose()
-		{
-			TestChannel.QueueDelete("basicmessage");
-			TestChannel.ExchangeDelete("rawrabbit.integrationtests.testmessages");
-			base.Dispose();
-		}
-
 		[Fact]
 		public async Task Should_Be_Able_To_Subscribe_Without_Any_Additional_Config()
 		{

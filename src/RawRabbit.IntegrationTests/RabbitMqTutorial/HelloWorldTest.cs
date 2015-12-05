@@ -41,17 +41,13 @@ namespace RawRabbit.IntegrationTests.RabbitMqTutorial
 							.WithExclusivity(false)
 							.WithAutoDelete(false)
 						)
+					.WithRoutingKey("hello")
 			);
 
 			/* Test */
 			await sender.PublishAsync(sent,
 				configuration: builder => builder
-					.WithQueue(queue =>
-						queue.WithName("hello")
-						.WithDurability(false)
-						.WithExclusivity(false)
-						.WithAutoDelete(false)
-					)
+					.WithRoutingKey("hello")
 			);
 			await recieved.Task;
 

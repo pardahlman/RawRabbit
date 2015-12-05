@@ -70,7 +70,6 @@ namespace RawRabbit.Operations
 			_channel = ChannelFactory.CreateChannel();
 			_acknowledger.SetActiveChannel(_channel);
 
-			DeclareQueue(config.Queue, _channel);
 			DeclareExchange(config.Exchange, _channel);
 			return _channel;
 		}

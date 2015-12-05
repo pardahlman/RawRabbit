@@ -7,26 +7,24 @@ namespace RawRabbit.Configuration.Publish
 {
 	public class PublishConfigurationBuilder : IPublishConfigurationBuilder
 	{
-		private readonly QueueConfigurationBuilder _queue;
 		private readonly ExchangeConfigurationBuilder _exchange;
 		private string _routingKey;
+		private const string _oneOrMoreWords = "#";
 
 		public PublishConfiguration Configuration => new PublishConfiguration
 		{
-			Queue = _queue.Configuration,
 			Exchange = _exchange.Configuration,
-			RoutingKey = _routingKey ?? _queue.Configuration.QueueName
+			RoutingKey = _routingKey
 		};
 
-		public PublishConfigurationBuilder(QueueConfiguration replyQueue = null, ExchangeConfiguration defaultExchange = null)
+		public PublishConfigurationBuilder(ExchangeConfiguration defaultExchange = null, string routingKey =null)
 		{
-			_queue = new QueueConfigurationBuilder(replyQueue);
 			_exchange = new ExchangeConfigurationBuilder(defaultExchange);
+			_routingKey = routingKey ?? _oneOrMoreWords;
 		}
 
 		public PublishConfigurationBuilder(RequestConfiguration defaultConfig)
 		{
-			_queue = new QueueConfigurationBuilder(defaultConfig.ReplyQueue);
 			_exchange = new ExchangeConfigurationBuilder(defaultConfig.Exchange);
 		}
 
@@ -40,16 +38,6 @@ namespace RawRabbit.Configuration.Publish
 		public IPublishConfigurationBuilder WithRoutingKey(string routingKey)
 		{
 			_routingKey = routingKey;
-			return this;
-		}
-
-		public IPublishConfigurationBuilder WithQueue(Action<IQueueConfigurationBuilder> replyTo)
-		{
-			replyTo(_queue);
-			if (string.IsNullOrWhiteSpace(_routingKey))
-			{
-				_routingKey = _queue.Configuration.QueueName;
-			}
 			return this;
 		}
 	}

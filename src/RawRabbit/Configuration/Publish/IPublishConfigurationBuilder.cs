@@ -8,6 +8,5 @@ namespace RawRabbit.Configuration.Publish
 	{
 		IPublishConfigurationBuilder WithExchange(Action<IExchangeConfigurationBuilder> exchange);
 		IPublishConfigurationBuilder WithRoutingKey(string routingKey);
-		IPublishConfigurationBuilder WithQueue(Action<IQueueConfigurationBuilder> replyTo);
 	}
 }
