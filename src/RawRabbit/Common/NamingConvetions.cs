@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
-using RawRabbit.Configuration;
 
 namespace RawRabbit.Common
 {
@@ -23,8 +21,7 @@ namespace RawRabbit.Common
 	public class NamingConvetions : INamingConvetions
 	{
 		private readonly IEnumerable<string> _disallowedDirectoryNames = new[] {"bin", "debug", "release"};
-		private bool _multipleBrokers;
-		private Dictionary<Type, int> _subscriberCounter;
+		private readonly Dictionary<Type, int> _subscriberCounter;
 
 		public virtual Func<Type, string> ExchangeNamingConvention { get; set; }
 		public virtual Func<Type, string> QueueNamingConvention { get; set; }
@@ -35,9 +32,8 @@ namespace RawRabbit.Common
 		public virtual Func<string> RetryQueueNamingConvention { get; set; }
 		public virtual Func<Type, string> SubscriberQueueSuffix { get; set; }
 
-		public NamingConvetions(RawRabbitConfiguration config)
+		public NamingConvetions()
 		{
-			_multipleBrokers = config.Brokers.Count > 1;
 			_subscriberCounter = new Dictionary<Type,int>();
 			
 			ExchangeNamingConvention = type => type?.Namespace?.ToLower() ?? string.Empty;
@@ -59,11 +55,7 @@ namespace RawRabbit.Common
 			var subscriberIndex = ++_subscriberCounter[messageType];
 			_subscriberCounter[messageType] = subscriberIndex;
 
-			var sb = new StringBuilder(GetProgramName());
-			if (_multipleBrokers)
-			{
-				sb.Append($"_{Environment.MachineName.ToLower()}");
-			}
+			var sb = new StringBuilder(GetApplicationName());
 			if (subscriberIndex > 1)
 			{
 				sb.Append($"_{subscriberIndex}");
@@ -72,7 +64,7 @@ namespace RawRabbit.Common
 			return sb.ToString();
 		}
 
-		private string GetProgramName()
+		private string GetApplicationName()
 		{
 			return Directory
 				.GetCurrentDirectory()
