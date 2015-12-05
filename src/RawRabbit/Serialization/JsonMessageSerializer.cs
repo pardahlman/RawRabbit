@@ -41,11 +41,17 @@ namespace RawRabbit.Serialization
 
 		public T Deserialize<T>(byte[] bytes)
 		{
-			T obj;
+			var obj = (T)Deserialize(bytes, typeof(T));
+			return obj;
+		}
+
+		public object Deserialize(byte[] bytes, Type messageType)
+		{
+			object obj;
 			var msgStr = Encoding.UTF8.GetString(bytes);
 			using (var jsonReader = new JsonTextReader(new StringReader(msgStr)))
 			{
-				obj = _converter.Deserialize<T>(jsonReader);
+				obj = _converter.Deserialize(jsonReader, messageType);
 			}
 			return obj;
 		}
