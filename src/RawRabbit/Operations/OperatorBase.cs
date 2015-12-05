@@ -50,13 +50,13 @@ namespace RawRabbit.Operations
 			channel = channel ?? ChannelFactory.GetChannel();
 			channel
 				.QueueDeclare(
-					queue: queue.QueueName,
+					queue: queue.FullQueueName,
 					durable: queue.Durable,
 					exclusive: queue.Exclusive,
 					autoDelete: queue.AutoDelete,
 					arguments: queue.Arguments
 				);
-			_logger.LogDebug($"Declaring queue\n  Name: {queue.QueueName}\n  Exclusive: {queue.Exclusive}\n  Durable: {queue.Durable}\n  Autodelete: {queue.AutoDelete}");
+			_logger.LogDebug($"Declaring queue\n  Name: {queue.FullQueueName}\n  Exclusive: {queue.Exclusive}\n  Durable: {queue.Durable}\n  Autodelete: {queue.AutoDelete}");
 		}
 
 		protected void BindQueue(QueueConfiguration queue, ExchangeConfiguration exchange, string routingKey)
@@ -83,7 +83,7 @@ namespace RawRabbit.Operations
 			ChannelFactory
 				.GetChannel()
 				.QueueBind(
-					queue: queue.QueueName,
+					queue: queue.FullQueueName,
 					exchange: exchange.ExchangeName,
 					routingKey: routingKey
 				);

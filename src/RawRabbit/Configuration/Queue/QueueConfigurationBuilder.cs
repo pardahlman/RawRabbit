@@ -15,6 +15,12 @@
 			return this;
 		}
 
+		public IQueueConfigurationBuilder WithNameSuffix(string suffix)
+		{
+			Configuration.NameSuffix = suffix;
+			return this;
+		}
+
 		public IQueueConfigurationBuilder WithAutoDelete(bool autoDelete = true)
 		{
 			Configuration.AutoDelete = autoDelete;

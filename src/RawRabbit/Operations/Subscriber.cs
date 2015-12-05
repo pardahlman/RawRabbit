@@ -45,7 +45,7 @@ namespace RawRabbit.Operations
 				_contextEnhancer.WireUpContextFeatures(context, consumer, args);
 				return subscribeMethod(body, context);
 			};
-			consumer.Model.BasicConsume(cfg.Queue.QueueName, cfg.NoAck, consumer);
+			consumer.Model.BasicConsume(cfg.Queue.FullQueueName, cfg.NoAck, consumer);
 
 			_logger.LogDebug($"Setting up a consumer on queue {cfg.Queue.QueueName} with NoAck set to {cfg.NoAck}.");
 		}

@@ -4,8 +4,9 @@ namespace RawRabbit.Configuration.Queue
 {
 	public class QueueConfiguration
 	{
-
+		public string FullQueueName => string.IsNullOrEmpty(NameSuffix) ? QueueName : $"{QueueName}_{NameSuffix}";
 		public string QueueName { get; set; }
+		public string NameSuffix { get; set; }
 		public bool Durable { get; set; }
 		public bool Exclusive { get; set; }
 		public bool AutoDelete { get; set; }
@@ -23,6 +24,6 @@ namespace RawRabbit.Configuration.Queue
 			Exclusive = cfg.Exclusive;
 		}
 
-		public static QueueConfiguration Default => new QueueConfiguration { };		
+		public static QueueConfiguration Default => new QueueConfiguration { };
 	}
 }

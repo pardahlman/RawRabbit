@@ -171,5 +171,34 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			/* Assert */
 			Assert.True(true, "Published and subscribe sucessfull.");
 		}
+
+		[Fact]
+		public void Should_Be_Able_To_Deliver_Messages_To_Unique_Subscribers()
+		{
+			/* Setup */
+			var firstSubscriber = BusClientFactory.CreateDefault();
+			var secondSubscriber = BusClientFactory.CreateDefault();
+			var publisher = BusClientFactory.CreateDefault();
+
+			var firstTcs = new TaskCompletionSource<bool>();
+			var secondTcs = new TaskCompletionSource<bool>();
+			firstSubscriber.SubscribeAsync<BasicMessage>((message, context) =>
+			{
+				firstTcs.SetResult(true);
+				return Task.FromResult(true);
+			}, cfg =>cfg.WithSubscriberId("first_subscriber") );
+			secondSubscriber.SubscribeAsync<BasicMessage>((message, context) =>
+			{
+				secondTcs.SetResult(true);
+				return Task.FromResult(true);
+			}, cfg => cfg.WithSubscriberId("second_subscriber"));
+
+			/* Test */
+			var ackTask = publisher.PublishAsync<BasicMessage>();
+			Task.WaitAll(ackTask, firstTcs.Task, secondTcs.Task);
+
+			/* Assert */
+			Assert.True(true, "Published and subscribe sucessfull.");
+		}
 	}
 }

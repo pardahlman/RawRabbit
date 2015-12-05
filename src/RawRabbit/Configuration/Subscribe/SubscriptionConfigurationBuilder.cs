@@ -60,5 +60,11 @@ namespace RawRabbit.Configuration.Subscribe
 			queue(_queueBuilder);
 			return this;
 		}
+
+		public ISubscriptionConfigurationBuilder WithSubscriberId(string subscriberId)
+		{
+			_queueBuilder.WithNameSuffix(subscriberId);
+			return this;
+		}
 	}
 }

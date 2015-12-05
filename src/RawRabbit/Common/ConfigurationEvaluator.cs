@@ -34,7 +34,8 @@ namespace RawRabbit.Common
 			var routingKey = _convetions.QueueNamingConvention(typeof(TMessage));
 			var queueConfig = new QueueConfiguration(_clientConfig.Queue)
 			{
-				QueueName = $"{routingKey}_{_convetions.SubscriberQueueSuffix(typeof(TMessage))}"
+				QueueName = routingKey,
+				NameSuffix = _convetions.SubscriberQueueSuffix(typeof(TMessage))
 			};
 
 			var exchangeConfig = new ExchangeConfiguration(_clientConfig.Exchange)
