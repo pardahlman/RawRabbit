@@ -1,4 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using RawRabbit.Configuration;
 
 namespace RawRabbit.Common
 {
@@ -11,10 +17,15 @@ namespace RawRabbit.Common
 		Func<string> ErrorQueueNamingConvention { get; set; }
 		Func<string> DeadLetterExchangeNamingConvention { get; set; }
 		Func<string> RetryQueueNamingConvention { get; set; }
+		Func<Type, string> SubscriberQueueSuffix { get; set; }
 	}
 
 	public class NamingConvetions : INamingConvetions
 	{
+		private readonly IEnumerable<string> _disallowedDirectoryNames = new[] {"bin", "debug", "release"};
+		private bool _multipleBrokers;
+		private Dictionary<Type, int> _subscriberCounter;
+
 		public virtual Func<Type, string> ExchangeNamingConvention { get; set; }
 		public virtual Func<Type, string> QueueNamingConvention { get; set; }
 		public virtual Func<Type, Type, string> RpcExchangeNamingConvention { get; set; }
@@ -22,9 +33,13 @@ namespace RawRabbit.Common
 		public virtual Func<string> ErrorQueueNamingConvention { get; set; }
 		public virtual Func<string> DeadLetterExchangeNamingConvention { get; set; }
 		public virtual Func<string> RetryQueueNamingConvention { get; set; }
+		public virtual Func<Type, string> SubscriberQueueSuffix { get; set; }
 
-		public NamingConvetions()
+		public NamingConvetions(RawRabbitConfiguration config)
 		{
+			_multipleBrokers = config.Brokers.Count > 1;
+			_subscriberCounter = new Dictionary<Type,int>();
+			
 			ExchangeNamingConvention = type => type?.Namespace?.ToLower() ?? string.Empty;
 			RpcExchangeNamingConvention = (request, response) => request?.Namespace?.ToLower() ?? "default_rpc_exchange";
 			QueueNamingConvention = type => CreateShortAfqn(type);
@@ -32,6 +47,40 @@ namespace RawRabbit.Common
 			ErrorExchangeNamingConvention = () => "default_error_exchange";
 			DeadLetterExchangeNamingConvention = () => "default_dead_letter_exchange";
 			RetryQueueNamingConvention = () => $"retry_{Guid.NewGuid()}";
+			SubscriberQueueSuffix = GetSubscriberQueueSuffix;
+		}
+
+		private string GetSubscriberQueueSuffix(Type messageType)
+		{
+			if (!_subscriberCounter.ContainsKey(messageType))
+			{
+				_subscriberCounter.Add(messageType,0);
+			}
+			var subscriberIndex = ++_subscriberCounter[messageType];
+			_subscriberCounter[messageType] = subscriberIndex;
+
+			var sb = new StringBuilder(GetProgramName());
+			if (_multipleBrokers)
+			{
+				sb.Append($"_{Environment.MachineName.ToLower()}");
+			}
+			if (subscriberIndex > 1)
+			{
+				sb.Append($"_{subscriberIndex}");
+			}
+
+			return sb.ToString();
+		}
+
+		private string GetProgramName()
+		{
+			return Directory
+				.GetCurrentDirectory()
+				.Split('\\')
+				.Select(d => d.ToLower())
+				.Last(d => !_disallowedDirectoryNames.Contains(d))
+				.Split('.')
+				.Last();
 		}
 
 		private static string CreateShortAfqn(Type type, string path = "", string delimeter = ".")

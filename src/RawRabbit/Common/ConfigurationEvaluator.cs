@@ -31,9 +31,10 @@ namespace RawRabbit.Common
 
 		public SubscriptionConfiguration GetConfiguration<TMessage>(Action<ISubscriptionConfigurationBuilder> configuration = null)
 		{
+			var routingKey = _convetions.QueueNamingConvention(typeof(TMessage));
 			var queueConfig = new QueueConfiguration(_clientConfig.Queue)
 			{
-				QueueName = _convetions.QueueNamingConvention(typeof(TMessage)),
+				QueueName = $"{routingKey}_{_convetions.SubscriberQueueSuffix(typeof(TMessage))}"
 			};
 
 			var exchangeConfig = new ExchangeConfiguration(_clientConfig.Exchange)
@@ -41,7 +42,7 @@ namespace RawRabbit.Common
 				ExchangeName = _convetions.ExchangeNamingConvention(typeof(TMessage))
 			};
 
-			var builder = new SubscriptionConfigurationBuilder(queueConfig, exchangeConfig);
+			var builder = new SubscriptionConfigurationBuilder(queueConfig, exchangeConfig, routingKey);
 			configuration?.Invoke(builder);
 			return builder.Configuration;
 		}

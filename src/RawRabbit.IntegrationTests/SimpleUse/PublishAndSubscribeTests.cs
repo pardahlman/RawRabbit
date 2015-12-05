@@ -143,5 +143,33 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 
 			Assert.True(true, "Successfully confirmed all messages.");
 		}
+
+		[Fact]
+		public void Should_Be_Able_To_Delivery_Message_To_Multiple_Subscribers_On_Same_Host()
+		{
+			/* Setup */
+			var subscriber = BusClientFactory.CreateDefault();
+			var publisher = BusClientFactory.CreateDefault();
+			
+			var firstTcs = new TaskCompletionSource<bool>();
+			var secondTcs = new TaskCompletionSource<bool>();
+			subscriber.SubscribeAsync<BasicMessage>((message, context) =>
+			{
+				firstTcs.SetResult(true);
+				return Task.FromResult(true);
+			});
+			subscriber.SubscribeAsync<BasicMessage>((message, context) =>
+			{
+				secondTcs.SetResult(true);
+				return Task.FromResult(true);
+			});
+
+			/* Test */
+			var ackTask = publisher.PublishAsync<BasicMessage>();
+			Task.WaitAll(ackTask, firstTcs.Task, secondTcs.Task);
+
+			/* Assert */
+			Assert.True(true, "Published and subscribe sucessfull.");
+		}
 	}
 }

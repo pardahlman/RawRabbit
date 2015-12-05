@@ -21,13 +21,14 @@ namespace RawRabbit.Configuration.Subscribe
 		private ushort _prefetchCount;
 		private bool _noAck;
 
-		public SubscriptionConfigurationBuilder() : this(null, null)
+		public SubscriptionConfigurationBuilder() : this(null, null, null)
 		{ }
 
-		public SubscriptionConfigurationBuilder(QueueConfiguration initialQueue, ExchangeConfiguration initialExchange)
+		public SubscriptionConfigurationBuilder(QueueConfiguration initialQueue, ExchangeConfiguration initialExchange, string routingKey)
 		{
 			_exchangeBuilder = new ExchangeConfigurationBuilder(initialExchange);
 			_queueBuilder = new QueueConfigurationBuilder(initialQueue);
+			_routingKey = routingKey;
 		}
 
 		public ISubscriptionConfigurationBuilder WithRoutingKey(string routingKey)
