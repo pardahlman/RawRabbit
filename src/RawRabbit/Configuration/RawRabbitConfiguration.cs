@@ -10,21 +10,49 @@ namespace RawRabbit.Configuration
 		/// The amount of time to wait for response to request. Defaults to 10 seconds.
 		/// </summary>
 		public TimeSpan RequestTimeout { get; set; }
+
 		/// <summary>
 		/// The amount of time to wait for a publish to be confirmed. Default to 1 second.
 		/// Read more at: https://www.rabbitmq.com/confirms.html
 		/// </summary>
 		public TimeSpan PublishConfirmTimeout { get; set; }
+
+		/// <summary>
+		/// The time to wait before trying to reconnect to the primary broker in case of 
+		/// lost connection. Defaults to 1 minute.
+		/// </summary>
+		public TimeSpan RetryReconnectTimespan { get; set; }
+
+		/// <summary>
+		/// A list of RabbitMq brokers to connect to.
+		/// </summary>
 		public List<BrokerConfiguration> Brokers { get; set; }
 
+		/// <summary>
+		/// The default values for exchnages. Can be overriden using the fluent configuration
+		/// builder that is available as an optional argument for all operations
+		/// </summary>
 		public GeneralExchangeConfiguration Exchange { get; set; }
+
+		/// <summary>
+		/// The default values for queues. Can be overriden using the fluent configuration
+		/// builder that is available as an optional argument for all operations
+		/// </summary>
 		public GeneralQueueConfiguration Queue { get; set; }
+
+		/// <summary>
+		/// Indicates if messages should be stored on disk or held in memory.
+		/// Set this to false if performance is more important than delivery of messages.
+		/// </summary>
+		public bool PersistentDeliveryMode { get; set; }
 
 		public RawRabbitConfiguration()
 		{
 			Brokers = new List<BrokerConfiguration>();
 			RequestTimeout = TimeSpan.FromSeconds(10);
 			PublishConfirmTimeout = TimeSpan.FromSeconds(1);
+			RetryReconnectTimespan = TimeSpan.FromMinutes(1);
+			PersistentDeliveryMode = true;
 			Exchange = new GeneralExchangeConfiguration
 			{
 				AutoDelete = false,

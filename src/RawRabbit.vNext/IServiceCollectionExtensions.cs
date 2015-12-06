@@ -54,7 +54,7 @@ namespace RawRabbit.vNext
 				.AddSingleton<IConnectionBroker, DefaultConnectionBroker>(
 					p => new DefaultConnectionBroker(
 						p.GetService<IEnumerable<IConnectionFactory>>(),
-						TimeSpan.FromMinutes(1) //TODO: Move this to config
+						p.GetService<RawRabbitConfiguration>().RetryReconnectTimespan
 					)
 				)
 				.AddSingleton<IClientPropertyProvider, ClientPropertyProvider>()
