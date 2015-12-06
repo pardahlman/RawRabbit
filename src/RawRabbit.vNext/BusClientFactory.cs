@@ -26,7 +26,7 @@ namespace RawRabbit.vNext
 			return CreateDefault(services);
 		}
 
-		public static BusClient CreateDefault(IConfigurationRoot config, Action<IServiceCollection> custom)
+		public static BusClient CreateDefault(Action<IConfigurationBuilder> config, Action<IServiceCollection> custom)
 		{
 			var services = new ServiceCollection().AddRawRabbit(config, custom);
 			return CreateDefault(services);

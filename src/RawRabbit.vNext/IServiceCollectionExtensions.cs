@@ -21,20 +21,27 @@ namespace RawRabbit.vNext
 {
 	public static class IServiceCollectionExtensions
 	{
-		public static IServiceCollection AddRawRabbit(this IServiceCollection collection, IConfigurationRoot config = null, Action<IServiceCollection> custom = null)
+		public static IServiceCollection AddRawRabbit(this IServiceCollection collection, Action<IConfigurationBuilder> config = null, Action<IServiceCollection> custom = null)
 		{
 			return collection
 				.AddTransient<BusClient>()
 				.AddRawRabbit<MessageContext>(config, custom);
 		}
 
-		public static IServiceCollection AddRawRabbit<TMessageContext>(this IServiceCollection collection, IConfigurationRoot config = null, Action<IServiceCollection> custom = null) where TMessageContext : IMessageContext
+		public static IServiceCollection AddRawRabbit<TMessageContext>(this IServiceCollection collection, Action<IConfigurationBuilder> config = null, Action<IServiceCollection> custom = null) where TMessageContext : IMessageContext
 		{
+			if (config != null)
+			{
+				var builder = new ConfigurationBuilder();
+				config(builder);
+				collection.AddSingleton(c => builder.Build().Get<RawRabbitConfiguration>());
+			}
+			else
+			{
+				collection.AddSingleton(c => new RawRabbitConfiguration());
+			}
+
 			collection
-				.AddSingleton<RawRabbitConfiguration>(p =>
-					config == null
-						? new RawRabbitConfiguration()
-						: p.GetService<IConfigurationParser>().Parse(config))
 				.AddSingleton<IEnumerable<IConnectionFactory>>(p =>
 				{
 					var cfg = p.GetService<RawRabbitConfiguration>();
