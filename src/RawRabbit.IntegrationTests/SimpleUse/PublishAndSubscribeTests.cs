@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using RawRabbit.Common;
 using RawRabbit.Configuration;
 using RawRabbit.Exceptions;
 using RawRabbit.IntegrationTests.TestMessages;
@@ -143,7 +144,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			/* Setup */
 			var subscriber = BusClientFactory.CreateDefault();
 			var publisher = BusClientFactory.CreateDefault();
-			
+
 			var firstTcs = new TaskCompletionSource<bool>();
 			var secondTcs = new TaskCompletionSource<bool>();
 			subscriber.SubscribeAsync<BasicMessage>((message, context) =>
@@ -179,7 +180,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			{
 				firstTcs.SetResult(true);
 				return Task.FromResult(true);
-			}, cfg =>cfg.WithSubscriberId("first_subscriber") );
+			}, cfg => cfg.WithSubscriberId("first_subscriber"));
 			secondSubscriber.SubscribeAsync<BasicMessage>((message, context) =>
 			{
 				secondTcs.SetResult(true);
@@ -192,6 +193,49 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 
 			/* Assert */
 			Assert.True(true, "Published and subscribe sucessfull.");
+		}
+
+		[Fact]
+		public async Task Should_Be_Able_To_Use_Priority()
+		{
+			/* Setup */
+			var subscriber = BusClientFactory.CreateDefault();
+			var publisher = BusClientFactory.CreateDefault();
+			var prioritySent = false;
+			var queueBuilt = new TaskCompletionSource<bool>();
+			var priorityTcs = new TaskCompletionSource<BasicMessage>();
+			subscriber.SubscribeAsync<BasicMessage>(async (message, context) =>
+			{
+				await queueBuilt.Task;
+				if (!prioritySent)
+				{
+					await subscriber.PublishAsync(new BasicMessage
+					{
+						Prop = "I am important!"
+					}, configuration: cfg => cfg.WithProperties(p =>
+					{
+						p.Priority = 3;
+					}));
+					prioritySent = true;
+				}
+				else
+				{
+					priorityTcs.TrySetResult(message);
+				}
+
+			}, cfg => cfg
+				.WithQueue(q => q.WithArgument(QueueArgument.MaxPriority, 3))
+				.WithSubscriberId("priority")
+				.WithPrefetchCount(1));
+
+			/* Test */
+			await publisher.PublishAsync(new BasicMessage {Prop = "I will be delivered"});
+			await publisher.PublishAsync(new BasicMessage {Prop = "Someone will pass me in the queue"}, configuration: cfg => cfg.WithProperties(p => p.Priority = 0));
+			queueBuilt.SetResult(true);
+			await priorityTcs.Task;
+
+			/* Asset */
+			Assert.Equal(priorityTcs.Task.Result.Prop, "I am important!");
 		}
 	}
 }

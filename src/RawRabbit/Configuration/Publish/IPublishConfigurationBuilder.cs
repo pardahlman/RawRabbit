@@ -1,6 +1,6 @@
 ﻿using System;
+using RabbitMQ.Client;
 using RawRabbit.Configuration.Exchange;
-using RawRabbit.Configuration.Queue;
 
 namespace RawRabbit.Configuration.Publish
 {
@@ -8,5 +8,6 @@ namespace RawRabbit.Configuration.Publish
 	{
 		IPublishConfigurationBuilder WithExchange(Action<IExchangeConfigurationBuilder> exchange);
 		IPublishConfigurationBuilder WithRoutingKey(string routingKey);
+		IPublishConfigurationBuilder WithProperties(Action<IBasicProperties> properties);
 	}
 }

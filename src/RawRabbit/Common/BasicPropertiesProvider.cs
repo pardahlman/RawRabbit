@@ -25,14 +25,13 @@ namespace RawRabbit.Common
 			var properties = new BasicProperties
 			{
 				MessageId = Guid.NewGuid().ToString(),
-				Persistent = _config.PersistentDeliveryMode,
-				Headers = new Dictionary<string, object>
-				{
-					{ PropertyHeaders.Sent, DateTime.UtcNow.ToString("u") },
-					{ PropertyHeaders.MessageType, typeof(TMessage).FullName }
-				}
+				Headers = new Dictionary<string, object>(),
+				Persistent = _config.PersistentDeliveryMode
 			};
 			custom?.Invoke(properties);
+			properties.Headers.Add(PropertyHeaders.Sent, DateTime.UtcNow.ToString("u"));
+			properties.Headers.Add(PropertyHeaders.MessageType, typeof(TMessage).FullName);
+
 			return properties;
 		}
 	}

@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Framing;
 using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Queue;
 using RawRabbit.Configuration.Request;
@@ -9,12 +12,14 @@ namespace RawRabbit.Configuration.Publish
 	{
 		private readonly ExchangeConfigurationBuilder _exchange;
 		private string _routingKey;
+		private Action<IBasicProperties> _properties;
 		private const string _oneOrMoreWords = "#";
 
 		public PublishConfiguration Configuration => new PublishConfiguration
 		{
 			Exchange = _exchange.Configuration,
-			RoutingKey = _routingKey
+			RoutingKey = _routingKey,
+			PropertyModifier = _properties ?? (b => {})
 		};
 
 		public PublishConfigurationBuilder(ExchangeConfiguration defaultExchange = null, string routingKey =null)
@@ -38,6 +43,12 @@ namespace RawRabbit.Configuration.Publish
 		public IPublishConfigurationBuilder WithRoutingKey(string routingKey)
 		{
 			_routingKey = routingKey;
+			return this;
+		}
+
+		public IPublishConfigurationBuilder WithProperties(Action<IBasicProperties> properties)
+		{
+			_properties = properties;
 			return this;
 		}
 	}

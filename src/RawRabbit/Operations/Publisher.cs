@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Framing;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Publish;
 using RawRabbit.Context;
@@ -33,7 +35,7 @@ namespace RawRabbit.Operations
 		{
 			var context = _contextProvider.GetMessageContext(globalMessageId);
 			var channel = GetOrCreateChannel(config);
-			var props = _propertiesProvider.GetProperties<TMessage>(p => p.Headers.Add(PropertyHeaders.Context, context));
+			var props = _propertiesProvider.GetProperties<TMessage>(config.PropertyModifier + (p => p.Headers.Add(PropertyHeaders.Context, context)));
 
 			var publishAckTask = _acknowledger.GetAckTask();
 			channel.BasicPublish(
