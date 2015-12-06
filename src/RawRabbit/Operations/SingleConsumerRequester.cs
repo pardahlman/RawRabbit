@@ -23,6 +23,7 @@ namespace RawRabbit.Operations
 		private readonly IConsumerFactory _consumerFactory;
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
 		private readonly IErrorHandlingStrategy _errorStrategy;
+		private readonly IBasicPropertiesProvider _propertiesProvider;
 		private readonly TimeSpan _requestTimeout;
 		private readonly ConcurrentDictionary<Type, IRawConsumer> _typeToConsumer;
 		private readonly ConcurrentDictionary<string, object> _responseTcsDictionary;
@@ -36,12 +37,14 @@ namespace RawRabbit.Operations
 			IMessageSerializer serializer,
 			IMessageContextProvider<TMessageContext> contextProvider,
 			IErrorHandlingStrategy errorStrategy,
+			IBasicPropertiesProvider propertiesProvider,
 			TimeSpan requestTimeout)
 				: base(channelFactory, serializer)
 		{
 			_consumerFactory = consumerFactory;
 			_contextProvider = contextProvider;
 			_errorStrategy = errorStrategy;
+			_propertiesProvider = propertiesProvider;
 			_requestTimeout = requestTimeout;
 			_typeToConsumer = new ConcurrentDictionary<Type, IRawConsumer>();
 			_responseTcsDictionary = new ConcurrentDictionary<string, object>();
@@ -50,8 +53,14 @@ namespace RawRabbit.Operations
 
 		public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest message, Guid globalMessageId, RequestConfiguration cfg)
 		{
+			var props = _propertiesProvider.GetProperties<TResponse>(p =>
+			{
+				p.ReplyTo = cfg.ReplyQueue.QueueName;
+				p.CorrelationId = Guid.NewGuid().ToString();
+				p.Expiration = _requestTimeout.TotalMilliseconds.ToString();
+				p.Headers.Add(_contextProvider.ContextHeaderName, _contextProvider.GetMessageContext(globalMessageId));
+			});
 			var consumer = GetOrCreateConsumerForType<TResponse>(cfg);
-			var props = GetRequestProps(cfg.ReplyQueue.QueueName, globalMessageId);
 			var body = Serializer.Serialize(message);
 
 			Task.Run(() => CreateOrUpdateDisposeTimer());
@@ -152,22 +161,6 @@ namespace RawRabbit.Operations
 			};
 			consumer.Model.BasicConsume(cfg.Queue.QueueName, cfg.NoAck, consumer);
 			return consumer;
-		}
-
-		private IBasicProperties GetRequestProps(string queueName, Guid globalMessageId)
-		{
-			IBasicProperties props = new BasicProperties
-			{
-				ReplyTo = queueName,
-				CorrelationId = Guid.NewGuid().ToString(),
-				Expiration = _requestTimeout.TotalMilliseconds.ToString(),
-				MessageId = Guid.NewGuid().ToString(),
-				Headers = new Dictionary<string, object>
-						{
-							{_contextProvider.ContextHeaderName, _contextProvider.GetMessageContext(globalMessageId)}
-						}
-			};
-			return props;
 		}
 	}
 }

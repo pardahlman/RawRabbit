@@ -71,6 +71,7 @@ namespace RawRabbit.vNext
 				.AddTransient<IErrorHandlingStrategy, DefaultStrategy>()
 				.AddSingleton<IMessageContextProvider<TMessageContext>, MessageContextProvider<TMessageContext>>()
 				.AddSingleton<IContextEnhancer, ContextEnhancer>()
+				.AddSingleton<IBasicPropertiesProvider, BasicPropertiesProvider>()
 				.AddSingleton<IChannelFactory, ChannelFactory>()
 				.AddTransient<IConfigurationEvaluator, ConfigurationEvaluator>()
 				.AddTransient<IPublishAcknowledger, PublishAcknowledger>(
@@ -87,6 +88,7 @@ namespace RawRabbit.vNext
 						p.GetService<IMessageSerializer>(),
 						p.GetService<IMessageContextProvider<TMessageContext>>(),
 						p.GetService<IErrorHandlingStrategy>(),
+						p.GetService<IBasicPropertiesProvider>(),
 						p.GetService<RawRabbitConfiguration>().RequestTimeout))
 				.AddTransient<IBusClient<TMessageContext>, BaseBusClient<TMessageContext>>();
 			custom?.Invoke(collection);

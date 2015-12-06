@@ -20,15 +20,17 @@ namespace RawRabbit.Operations
 		private readonly IConsumerFactory _consumerFactory;
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
 		private readonly IContextEnhancer _contextEnhancer;
+		private readonly IBasicPropertiesProvider _propertyProvider;
 		private readonly ILogger _logger = LogManager.GetLogger<Responder<TMessageContext>>();
 		private IModel _responseChannel;
 
-		public Responder(IChannelFactory channelFactory, IConsumerFactory consumerFactory, IMessageSerializer serializer, IMessageContextProvider<TMessageContext> contextProvider, IContextEnhancer contextEnhancer)
+		public Responder(IChannelFactory channelFactory, IConsumerFactory consumerFactory, IMessageSerializer serializer, IMessageContextProvider<TMessageContext> contextProvider, IContextEnhancer contextEnhancer, IBasicPropertiesProvider propertyProvider)
 			: base(channelFactory, serializer)
 		{
 			_consumerFactory = consumerFactory;
 			_contextProvider = contextProvider;
 			_contextEnhancer = contextEnhancer;
+			_propertyProvider = propertyProvider;
 		}
 
 		public void RespondAsync<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, ResponderConfiguration cfg)
@@ -70,23 +72,13 @@ namespace RawRabbit.Operations
 			_responseChannel = (_responseChannel?.IsOpen ?? false)
 				? _responseChannel
 				: ChannelFactory.CreateChannel();
-			var props = CreateResponseProps(requestPayload);
-			_logger.LogDebug($"Sending reponse to request with correlation '{props.CorrelationId}' with message '{props.MessageId}'.");
+			_logger.LogDebug($"Sending reponse to request with correlation '{requestPayload.BasicProperties.CorrelationId}'.");
 			_responseChannel.BasicPublish(
 				exchange: "",
 				routingKey: requestPayload.BasicProperties.ReplyTo,
-				basicProperties: props,
+				basicProperties: _propertyProvider.GetProperties<TResponse>(p => p.CorrelationId = requestPayload.BasicProperties.CorrelationId),
 				body: Serializer.Serialize(request)
 			);
-		}
-
-		private static IBasicProperties CreateResponseProps(BasicDeliverEventArgs requestPayload)
-		{
-			return new BasicProperties
-			{
-				MessageId = Guid.NewGuid().ToString(),
-				CorrelationId = requestPayload.BasicProperties.CorrelationId
-			};
 		}
 
 		public override void Dispose()
