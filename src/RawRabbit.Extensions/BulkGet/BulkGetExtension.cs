@@ -53,7 +53,7 @@ namespace RawRabbit.Extensions.BulkGet
 							// msg is not of right type.
 							continue;
 						}
-						var context = contextProvider.ExtractContext(getResult.BasicProperties.Headers[contextProvider.ContextHeaderName]);
+						var context = contextProvider.ExtractContext(getResult.BasicProperties.Headers[PropertyHeaders.Context]);
 						var bulkMessage = CreateBulkMessage(msgConfig.MessageType, message, context, channel, getResult.DeliveryTag);
 						rawMsgs.Add(bulkMessage);
 					}

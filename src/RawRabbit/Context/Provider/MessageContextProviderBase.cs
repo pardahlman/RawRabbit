@@ -8,7 +8,6 @@ namespace RawRabbit.Context.Provider
 {
 	public abstract class MessageContextProviderBase<TMessageContext> : IMessageContextProvider<TMessageContext> where TMessageContext : IMessageContext
 	{
-		public virtual string ContextHeaderName => "message_context";
 		protected ConcurrentDictionary<Guid, TMessageContext> ContextDictionary;
 
 		protected MessageContextProviderBase()

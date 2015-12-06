@@ -46,7 +46,7 @@ namespace RawRabbit.Operations
 			consumer.OnMessageAsync = (o, args) =>
 			{
 				var body = Serializer.Deserialize<TRequest>(args.Body);
-				var context = _contextProvider.ExtractContext(args.BasicProperties.Headers[_contextProvider.ContextHeaderName]);
+				var context = _contextProvider.ExtractContext(args.BasicProperties.Headers[PropertyHeaders.Context]);
 				_contextEnhancer.WireUpContextFeatures(context, consumer, args);
 
 				return onMessage(body, context)

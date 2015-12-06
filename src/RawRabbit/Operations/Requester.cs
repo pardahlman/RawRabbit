@@ -55,7 +55,7 @@ namespace RawRabbit.Operations
 				p.ReplyTo = cfg.ReplyQueue.QueueName;
 				p.CorrelationId = Guid.NewGuid().ToString();
 				p.Expiration = _requestTimeout.TotalMilliseconds.ToString();
-				p.Headers.Add(_contextProvider.ContextHeaderName, _contextProvider.GetMessageContext(globalMessageId));
+				p.Headers.Add(PropertyHeaders.Context, _contextProvider.GetMessageContext(globalMessageId));
 			});
 			var consumer = GetOrCreateConsumerForType<TResponse>(cfg);
 			var body = Serializer.Serialize(message);

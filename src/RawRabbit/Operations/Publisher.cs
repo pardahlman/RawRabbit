@@ -33,7 +33,7 @@ namespace RawRabbit.Operations
 		{
 			var context = _contextProvider.GetMessageContext(globalMessageId);
 			var channel = GetOrCreateChannel(config);
-			var props = _propertiesProvider.GetProperties<TMessage>(p => p.Headers.Add(_contextProvider.ContextHeaderName, context));
+			var props = _propertiesProvider.GetProperties<TMessage>(p => p.Headers.Add(PropertyHeaders.Context, context));
 
 			var publishAckTask = _acknowledger.GetAckTask();
 			channel.BasicPublish(
