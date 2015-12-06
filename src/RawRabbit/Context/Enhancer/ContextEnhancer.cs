@@ -47,8 +47,8 @@ namespace RawRabbit.Context.Enhancer
 				channel.ExchangeDeclare(dlxName, ExchangeType.Direct);
 				channel.QueueDeclare(dlQueueName, false, false, true, new Dictionary<string, object>
 				{
-						{PropertyHeaders.DeadLetterExchange, args.Exchange},
-						{PropertyHeaders.MessageTtl, Convert.ToInt32(timespan.TotalMilliseconds)}
+						{QueueArgument.DeadLetterExchange, args.Exchange},
+						{QueueArgument.MessageTtl, Convert.ToInt32(timespan.TotalMilliseconds)}
 				});
 				channel.QueueBind(dlQueueName, dlxName, args.RoutingKey, null);
 				UpdateHeaders(args.BasicProperties);
