@@ -34,7 +34,7 @@ namespace RawRabbit.IntegrationTests.Extensions
 		}
 
 		[Fact]
-		public void Should_Be_Able_To_()
+		public void Should_Be_Able_To_Bulk_Get_Messages()
 		{
 			var firstBasicMsg = new BasicMessage { Prop = "This is the first message" };
 			var secondBasicMsg = new BasicMessage { Prop = "This is the second message" };
