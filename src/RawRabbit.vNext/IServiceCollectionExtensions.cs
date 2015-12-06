@@ -66,7 +66,6 @@ namespace RawRabbit.vNext
 				)
 				.AddSingleton<IClientPropertyProvider, ClientPropertyProvider>()
 				.AddSingleton<ILoggerFactory, LoggerFactory>()
-				.AddTransient<IConfigurationParser, ConfigurationParser>()
 				.AddTransient<IMessageSerializer, JsonMessageSerializer>()
 				.AddTransient<IConsumerFactory, EventingBasicConsumerFactory>()
 				.AddTransient<IErrorHandlingStrategy, DefaultStrategy>()
