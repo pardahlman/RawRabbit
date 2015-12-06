@@ -81,8 +81,8 @@ namespace RawRabbit.vNext
 				.AddTransient<ISubscriber<TMessageContext>, Subscriber<TMessageContext>>()
 				.AddTransient<IPublisher, Publisher<TMessageContext>>()
 				.AddTransient<IResponder<TMessageContext>, Responder<TMessageContext>>()
-				.AddTransient<IRequester, SingleConsumerRequester<TMessageContext>>(
-					p => new SingleConsumerRequester<TMessageContext>(
+				.AddTransient<IRequester, Requester<TMessageContext>>(
+					p => new Requester<TMessageContext>(
 						p.GetService<IChannelFactory>(),
 						p.GetService<IConsumerFactory>(),
 						p.GetService<IMessageSerializer>(),

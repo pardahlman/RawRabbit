@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -6,9 +7,11 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Request;
+using RawRabbit.Configuration.Respond;
 using RawRabbit.Consumer.Contract;
 using RawRabbit.Context;
 using RawRabbit.Context.Provider;
+using RawRabbit.ErrorHandling;
 using RawRabbit.Logging;
 using RawRabbit.Operations.Contracts;
 using RawRabbit.Serialization;
@@ -19,7 +22,13 @@ namespace RawRabbit.Operations
 	{
 		private readonly IConsumerFactory _consumerFactory;
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
+		private readonly IErrorHandlingStrategy _errorStrategy;
+		private readonly IBasicPropertiesProvider _propertiesProvider;
 		private readonly TimeSpan _requestTimeout;
+		private readonly ConcurrentDictionary<Type, IRawConsumer> _typeToConsumer;
+		private readonly ConcurrentDictionary<string, object> _responseTcsDictionary;
+		private readonly ConcurrentDictionary<string, Timer> _requestTimerDictionary;
+		private Timer _disposeConsumerTimer;
 		private readonly ILogger _logger = LogManager.GetLogger<Requester<TMessageContext>>();
 
 		public Requester(
@@ -27,93 +36,131 @@ namespace RawRabbit.Operations
 			IConsumerFactory consumerFactory,
 			IMessageSerializer serializer,
 			IMessageContextProvider<TMessageContext> contextProvider,
-			TimeSpan requestTimeout) : base(channelFactory, serializer)
+			IErrorHandlingStrategy errorStrategy,
+			IBasicPropertiesProvider propertiesProvider,
+			TimeSpan requestTimeout)
+				: base(channelFactory, serializer)
 		{
 			_consumerFactory = consumerFactory;
 			_contextProvider = contextProvider;
+			_errorStrategy = errorStrategy;
+			_propertiesProvider = propertiesProvider;
 			_requestTimeout = requestTimeout;
+			_typeToConsumer = new ConcurrentDictionary<Type, IRawConsumer>();
+			_responseTcsDictionary = new ConcurrentDictionary<string, object>();
+			_requestTimerDictionary = new ConcurrentDictionary<string, Timer>();
 		}
 
-		public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest message, Guid globalMessageId, RequestConfiguration config)
+		public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest message, Guid globalMessageId, RequestConfiguration cfg)
 		{
-			return SendRequestAsync<TRequest, TResponse>(message, globalMessageId, config);
-		}
+			var props = _propertiesProvider.GetProperties<TResponse>(p =>
+			{
+				p.ReplyTo = cfg.ReplyQueue.QueueName;
+				p.CorrelationId = Guid.NewGuid().ToString();
+				p.Expiration = _requestTimeout.TotalMilliseconds.ToString();
+				p.Headers.Add(_contextProvider.ContextHeaderName, _contextProvider.GetMessageContext(globalMessageId));
+			});
+			var consumer = GetOrCreateConsumerForType<TResponse>(cfg);
+			var body = Serializer.Serialize(message);
 
-		private Task<TResponse> SendRequestAsync<TRequest, TResponse>(TRequest message, Guid globalMessageId, RequestConfiguration cfg)
-		{
+			Task.Run(() => CreateOrUpdateDisposeTimer());
+
 			var responseTcs = new TaskCompletionSource<TResponse>();
-			var propsTask = GetRequestPropsAsync(cfg.ReplyQueue.QueueName, globalMessageId);
-			var bodyTask = Task.Run(() => Serializer.Serialize(message));
+			_responseTcsDictionary.TryAdd(props.CorrelationId, responseTcs);
 
-			Task
-				.WhenAll(propsTask, bodyTask)
-				.ContinueWith(task =>
+			_requestTimerDictionary.TryAdd(
+				props.CorrelationId,
+				new Timer(state =>
 				{
-					var channel = ChannelFactory.CreateChannel();
-					DeclareQueue(cfg.Queue, channel);
-					DeclareExchange(cfg.Exchange, channel);
-					var consumer = _consumerFactory.CreateConsumer(cfg, channel);
-
-					Timer requestTimeOutTimer = null;
-					requestTimeOutTimer = new Timer(state =>
+					Timer timer;
+					if (!_requestTimerDictionary.TryRemove(props.CorrelationId, out timer))
 					{
-						requestTimeOutTimer?.Dispose();
-						channel.Dispose();
-						responseTcs.TrySetException(new TimeoutException($"The request timed out after {_requestTimeout.ToString("g")}."));
-					}, null, _requestTimeout, TimeSpan.FromMilliseconds(-1));
+						_logger.LogWarning($"Unable to find request timer for {props.CorrelationId}.");
+					}
+					timer?.Dispose();
+					responseTcs.TrySetException(new TimeoutException($"The request timed out after {_requestTimeout.ToString("g")}."));
+				}, null, _requestTimeout, new TimeSpan(-1)));
 
-					consumer.OnMessageAsync = (o, args) =>
-					{
-						if (args.BasicProperties.CorrelationId != propsTask.Result.CorrelationId)
-						{
-							return Task.FromResult(false);
-						}
-						requestTimeOutTimer?.Dispose();
-						return Task
-							.Run(() => Serializer.Deserialize<TResponse>(args.Body))
-							.ContinueWith(t =>
-							{
-								channel.Dispose();
-								responseTcs.SetResult(t.Result);
-							});
-					};
-					consumer.Model.BasicConsume(cfg.Queue.QueueName, cfg.NoAck, consumer);
-					consumer.Model.BasicPublish(
-							exchange: cfg.Exchange.ExchangeName,
-							routingKey: cfg.RoutingKey,
-							basicProperties: propsTask.Result,
-							body: bodyTask.Result
-						);
-				});
+			consumer.Model.BasicPublish(
+				exchange: cfg.Exchange.ExchangeName,
+				routingKey: cfg.RoutingKey,
+				basicProperties: props,
+				body: body
+			);
 			return responseTcs.Task;
 		}
 
-		private Task<IBasicProperties> GetRequestPropsAsync(string queueName, Guid globalMessageId)
+		private void CreateOrUpdateDisposeTimer()
 		{
-			return Task
-				.Run(() => _contextProvider.GetMessageContextAsync(globalMessageId))
-				.ContinueWith(ctxTask =>
+			if (_disposeConsumerTimer != null)
+			{
+				return;
+			}
+			_disposeConsumerTimer = new Timer(state =>
+			{
+				if (!_responseTcsDictionary.IsEmpty)
 				{
-					IBasicProperties props = new BasicProperties
+					return;
+				}
+				_disposeConsumerTimer?.Dispose();
+				_disposeConsumerTimer = null;
+				foreach (var type in _typeToConsumer.Keys)
+				{
+					IRawConsumer consumer;
+					if (_typeToConsumer.TryRemove(type, out consumer))
 					{
-						ReplyTo = queueName,
-						CorrelationId = Guid.NewGuid().ToString(),
-						Expiration = _requestTimeout.TotalMilliseconds.ToString(),
-						MessageId = Guid.NewGuid().ToString(),
-						Headers = new Dictionary<string, object>
-						{
-							{_contextProvider.ContextHeaderName, ctxTask.Result}
-						}
-					};
-					return props;
-				});
+						consumer?.Disconnect();
+						consumer?.Model?.Dispose();
+					}
+				}
+			}, null, _requestTimeout, _requestTimeout);
 		}
 
-		public override void Dispose()
+		private IRawConsumer GetOrCreateConsumerForType<TResponse>(IConsumerConfiguration cfg)
 		{
-			_logger.LogDebug("Disposing requester.");
-			base.Dispose();
-			(_consumerFactory as IDisposable)?.Dispose();
+			var responseType = typeof(TResponse);
+			if (_typeToConsumer.ContainsKey(responseType))
+			{
+				_logger.LogDebug($"Channel for existing cunsomer of {responseType.Name} found.");
+				if (_typeToConsumer[responseType].Model.IsOpen)
+				{
+					_logger.LogDebug($"Channel is open and will be reused.");
+					return _typeToConsumer[responseType];
+				}
+				else
+				{
+					_typeToConsumer[responseType]?.Model?.Dispose();
+					_logger.LogInformation($"Channel for consumer of {responseType.Name} is closed. A new consumer will be created.");
+				}
+			}
+
+			var consumer = _consumerFactory.CreateConsumer(cfg, ChannelFactory.CreateChannel());
+			_typeToConsumer.TryAdd(typeof(TResponse), consumer);
+
+			DeclareQueue(cfg.Queue, consumer.Model);
+			DeclareExchange(cfg.Exchange, consumer.Model);
+			consumer.OnMessageAsync = (o, args) =>
+			{
+				object tcsAsObj;
+				if (_responseTcsDictionary.TryRemove(args.BasicProperties.CorrelationId, out tcsAsObj))
+				{
+					var tcs = tcsAsObj as TaskCompletionSource<TResponse>;
+					_logger.LogDebug($"Recived response with correlationId {args.BasicProperties.CorrelationId}.");
+					_requestTimerDictionary[args.BasicProperties.CorrelationId]?.Dispose();
+					_errorStrategy.OnResponseRecievedAsync(args, tcs);
+					if (tcs?.Task?.IsFaulted ?? true)
+					{
+						return Task.FromResult(true);
+					}
+					var response = Serializer.Deserialize<TResponse>(args.Body);
+					tcs.TrySetResult(response);
+					return Task.FromResult(true);
+				}
+				_logger.LogWarning($"Unable to find callback for {args.BasicProperties.CorrelationId}.");
+				throw new Exception($"Can not find callback for {args.BasicProperties.CorrelationId}");
+			};
+			consumer.Model.BasicConsume(cfg.Queue.QueueName, cfg.NoAck, consumer);
+			return consumer;
 		}
 	}
 }
