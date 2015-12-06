@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 using RawRabbit.Common;
 using RawRabbit.Configuration;
-using RawRabbit.Consumer.Contract;
+using RawRabbit.Consumer.Abstraction;
 using RawRabbit.Consumer.Eventing;
 using RawRabbit.Context;
 using RawRabbit.Context.Enhancer;
@@ -14,7 +14,7 @@ using RawRabbit.Context.Provider;
 using RawRabbit.ErrorHandling;
 using RawRabbit.Logging;
 using RawRabbit.Operations;
-using RawRabbit.Operations.Contracts;
+using RawRabbit.Operations.Abstraction;
 using RawRabbit.Serialization;
 
 namespace RawRabbit.vNext

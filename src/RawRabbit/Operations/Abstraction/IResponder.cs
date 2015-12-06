@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using RawRabbit.Configuration.Respond;
 using RawRabbit.Context;
 
-namespace RawRabbit.Operations.Contracts
+namespace RawRabbit.Operations.Abstraction
 {
 	public interface IResponder<out TMessageContext> where TMessageContext : IMessageContext
 	{

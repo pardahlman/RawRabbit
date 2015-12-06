@@ -3,7 +3,7 @@ using System.Runtime.Remoting.Services;
 using Microsoft.Extensions.DependencyInjection;
 using RawRabbit.Common;
 using RawRabbit.Context;
-using RawRabbit.Operations.Contracts;
+using RawRabbit.Operations.Abstraction;
 
 namespace RawRabbit.Extensions.Client
 {

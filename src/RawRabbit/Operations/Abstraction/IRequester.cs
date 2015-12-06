@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using RawRabbit.Configuration.Request;
 
-namespace RawRabbit.Operations.Contracts
+namespace RawRabbit.Operations.Abstraction
 {
 	public interface IRequester
 	{

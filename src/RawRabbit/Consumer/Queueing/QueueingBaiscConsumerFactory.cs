@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Respond;
-using RawRabbit.Consumer.Contract;
+using RawRabbit.Consumer.Abstraction;
 
 namespace RawRabbit.Consumer.Queueing
 {

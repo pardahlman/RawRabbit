@@ -2,12 +2,12 @@
 using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Subscribe;
-using RawRabbit.Consumer.Contract;
+using RawRabbit.Consumer.Abstraction;
 using RawRabbit.Context;
 using RawRabbit.Context.Enhancer;
 using RawRabbit.Context.Provider;
 using RawRabbit.Logging;
-using RawRabbit.Operations.Contracts;
+using RawRabbit.Operations.Abstraction;
 using RawRabbit.Serialization;
 
 namespace RawRabbit.Operations

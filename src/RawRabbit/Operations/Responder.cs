@@ -2,16 +2,15 @@
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using RabbitMQ.Client.Framing;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Respond;
+using RawRabbit.Consumer.Abstraction;
 using RawRabbit.Context;
 using RawRabbit.Context.Provider;
-using RawRabbit.Operations.Contracts;
 using RawRabbit.Serialization;
-using RawRabbit.Consumer.Contract;
 using RawRabbit.Context.Enhancer;
 using RawRabbit.Logging;
+using RawRabbit.Operations.Abstraction;
 
 namespace RawRabbit.Operations
 {

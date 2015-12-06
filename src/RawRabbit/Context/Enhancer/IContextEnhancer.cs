@@ -1,5 +1,5 @@
 ﻿using RabbitMQ.Client.Events;
-using RawRabbit.Consumer.Contract;
+using RawRabbit.Consumer.Abstraction;
 
 namespace RawRabbit.Context.Enhancer
 {

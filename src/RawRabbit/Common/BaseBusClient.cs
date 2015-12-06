@@ -6,7 +6,7 @@ using RawRabbit.Configuration.Respond;
 using RawRabbit.Configuration.Subscribe;
 using RawRabbit.Context;
 using RawRabbit.Logging;
-using RawRabbit.Operations.Contracts;
+using RawRabbit.Operations.Abstraction;
 
 namespace RawRabbit.Common
 {

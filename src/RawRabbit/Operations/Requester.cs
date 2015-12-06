@@ -1,19 +1,16 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Framing;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Request;
 using RawRabbit.Configuration.Respond;
-using RawRabbit.Consumer.Contract;
+using RawRabbit.Consumer.Abstraction;
 using RawRabbit.Context;
 using RawRabbit.Context.Provider;
 using RawRabbit.ErrorHandling;
 using RawRabbit.Logging;
-using RawRabbit.Operations.Contracts;
+using RawRabbit.Operations.Abstraction;
 using RawRabbit.Serialization;
 
 namespace RawRabbit.Operations

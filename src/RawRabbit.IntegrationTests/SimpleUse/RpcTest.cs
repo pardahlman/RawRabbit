@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using RawRabbit.Configuration;
-using RawRabbit.Consumer.Contract;
+using RawRabbit.Consumer.Abstraction;
 using RawRabbit.Consumer.Queueing;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.vNext;

@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Linq;
-using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Respond;
-using RawRabbit.Consumer.Contract;
+using RawRabbit.Consumer.Abstraction;
 using RawRabbit.ErrorHandling;
 using RawRabbit.Logging;
 

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-namespace RawRabbit.Consumer.Contract
+namespace RawRabbit.Consumer.Abstraction
 {
 	public interface IRawConsumer : IBasicConsumer
 	{

@@ -7,7 +7,7 @@ using RawRabbit.Configuration.Publish;
 using RawRabbit.Context;
 using RawRabbit.Context.Provider;
 using RawRabbit.Logging;
-using RawRabbit.Operations.Contracts;
+using RawRabbit.Operations.Abstraction;
 using RawRabbit.Serialization;
 
 namespace RawRabbit.Operations

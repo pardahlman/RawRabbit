@@ -5,7 +5,7 @@ using System.Threading;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RawRabbit.Common;
-using RawRabbit.Consumer.Contract;
+using RawRabbit.Consumer.Abstraction;
 
 namespace RawRabbit.Context.Enhancer
 {

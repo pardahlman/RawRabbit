@@ -1,7 +1,7 @@
 ﻿using RabbitMQ.Client;
 using RawRabbit.Configuration.Respond;
 
-namespace RawRabbit.Consumer.Contract
+namespace RawRabbit.Consumer.Abstraction
 {
 	public interface IConsumerFactory
 	{
