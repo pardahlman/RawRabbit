@@ -25,11 +25,16 @@ namespace RawRabbit.Context.Provider
 				: Task.FromResult(ActivateOrDefault());
 		}
 
-		protected override TContext CreateMessageContext()
+		protected override TContext CreateMessageContext(Guid globalRequestId = default(Guid))
 		{
-			return _createContext != null
-				? _createContext()
-				: ActivateOrDefault();
+			var context = _createContext != null
+						? _createContext()
+						: ActivateOrDefault();
+			if (globalRequestId != Guid.Empty)
+			{
+				context.GlobalRequestId = globalRequestId;
+			}
+			return context;
 		}
 
 		private static TContext ActivateOrDefault()

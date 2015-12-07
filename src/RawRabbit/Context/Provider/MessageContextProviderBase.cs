@@ -34,7 +34,7 @@ namespace RawRabbit.Context.Provider
 		{
 			var context = globalMessageId != Guid.Empty && ContextDictionary.ContainsKey(globalMessageId)
 				? ContextDictionary[globalMessageId]
-				: CreateMessageContext();
+				: CreateMessageContext(globalMessageId);
 			var contextAsJson = JsonConvert.SerializeObject(context);
 			var contextAsBytes = (object) Encoding.UTF8.GetBytes(contextAsJson);
 			return contextAsBytes;
@@ -56,6 +56,6 @@ namespace RawRabbit.Context.Provider
 			return Task.FromResult(CreateMessageContext());
 		}
 
-		protected abstract TMessageContext CreateMessageContext();
+		protected abstract TMessageContext CreateMessageContext(Guid globalRequestId = default(Guid));
 	}
 }
