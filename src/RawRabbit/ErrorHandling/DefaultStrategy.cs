@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Framing;
+using RawRabbit.Common;
 using RawRabbit.Configuration.Respond;
 using RawRabbit.Consumer.Abstraction;
 using RawRabbit.Consumer.Eventing;
@@ -14,12 +15,13 @@ namespace RawRabbit.ErrorHandling
 	public class DefaultStrategy : IErrorHandlingStrategy
 	{
 		private readonly IMessageSerializer _serializer;
-		private const string ExceptionHeader = "exception";
+		private readonly IBasicPropertiesProvider _propertiesProvider;
 		private readonly string _messageExceptionName = typeof(MessageHandlerException).Name;
 
-		public DefaultStrategy(IMessageSerializer serializer)
+		public DefaultStrategy(IMessageSerializer serializer, IBasicPropertiesProvider propertiesProvider)
 		{
 			_serializer = serializer;
+			_propertiesProvider = propertiesProvider;
 		}
 
 		public Task OnRequestHandlerExceptionAsync(IRawConsumer rawConsumer, IConsumerConfiguration cfg, BasicDeliverEventArgs args, Exception exception)
@@ -33,17 +35,14 @@ namespace RawRabbit.ErrorHandling
 			rawConsumer.Model.BasicPublish(
 				exchange: string.Empty,
 				routingKey: args.BasicProperties?.ReplyTo ?? string.Empty,
-				basicProperties: new BasicProperties
+				basicProperties: _propertiesProvider.GetProperties<MessageHandlerException>(p =>
 				{
-					CorrelationId = args.BasicProperties?.CorrelationId ?? string.Empty,
-					Headers = new Dictionary<string, object>
-					{
-						{ExceptionHeader, _messageExceptionName }
-					}
-				},
+					p.CorrelationId = args.BasicProperties?.CorrelationId ?? string.Empty;
+					p.Headers.Add(PropertyHeaders.ExceptionHeader, _messageExceptionName);
+				}),
 				body: _serializer.Serialize(rawException)
 			);
-			
+
 			if (!cfg.NoAck)
 			{
 				rawConsumer.Model.BasicNack(args.DeliveryTag, false, false);
@@ -68,7 +67,7 @@ namespace RawRabbit.ErrorHandling
 
 		public void OnResponseRecieved<TResponse>(BasicDeliverEventArgs args, TaskCompletionSource<TResponse> responseTcs)
 		{
-			var containsException = args?.BasicProperties?.Headers?.ContainsKey(ExceptionHeader) ?? false;
+			var containsException = args?.BasicProperties?.Headers?.ContainsKey(PropertyHeaders.ExceptionHeader) ?? false;
 
 			if (!containsException)
 			{
