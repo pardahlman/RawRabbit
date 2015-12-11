@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Threading;
 using RabbitMQ.Client;
+using RawRabbit.Configuration;
 
 namespace RawRabbit.Common
 {
@@ -24,11 +25,13 @@ namespace RawRabbit.Common
 	{
 		private readonly IConnectionBroker _connectionBroker;
 		private readonly ConcurrentDictionary<IConnection, ThreadLocal<IModel>> _connectionToChannel;
+		private readonly bool _autoDelete;
 
-		public ChannelFactory(IConnectionBroker connectionBroker)
+		public ChannelFactory(IConnectionBroker connectionBroker, RawRabbitConfiguration config)
 		{
 			_connectionBroker = connectionBroker;
 			_connectionToChannel = new ConcurrentDictionary<IConnection, ThreadLocal<IModel>>();
+			_autoDelete = config.AutoDeleteConnection;
 		}
 
 		public void Dispose()
@@ -57,16 +60,28 @@ namespace RawRabbit.Common
 			{
 				return threadChannel.Value;
 			}
-			
+
+			var channel = currentConnection.CreateModel();
+			if (_autoDelete && !currentConnection.AutoClose)
+			{
+				currentConnection.AutoClose = true;
+			}
+
 			threadChannel.Value?.Dispose();
-			threadChannel.Value = _connectionBroker.GetConnection().CreateModel();
+			threadChannel.Value = channel;
 			
 			return threadChannel.Value;
 		}
 
 		public IModel CreateChannel()
 		{
-			return _connectionBroker.GetConnection().CreateModel();
+			var connection = _connectionBroker.GetConnection();
+			var channel = connection.CreateModel();
+			if (_autoDelete && !connection.AutoClose)
+			{
+				connection.AutoClose = true;
+			}
+			return channel;
 		}
 	}
 }

@@ -46,6 +46,12 @@ namespace RawRabbit.Configuration
 		/// </summary>
 		public bool PersistentDeliveryMode { get; set; }
 
+		/// <summary>
+		/// Indicates if a connection should be closed when the last channel disconnects
+		/// from the connection. Read more: https://www.rabbitmq.com/dotnet-api-guide.html
+		/// </summary>
+		public bool AutoDeleteConnection { get; set; }
+
 		public RawRabbitConfiguration()
 		{
 			Brokers = new List<BrokerConfiguration>();
