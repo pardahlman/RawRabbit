@@ -50,7 +50,7 @@ namespace RawRabbit.Configuration
 		/// Indicates if a connection should be closed when the last channel disconnects
 		/// from the connection. Read more: https://www.rabbitmq.com/dotnet-api-guide.html
 		/// </summary>
-		public bool AutoDeleteConnection { get; set; }
+		public bool AutoCloseConnection { get; set; }
 
 		public RawRabbitConfiguration()
 		{
@@ -59,6 +59,7 @@ namespace RawRabbit.Configuration
 			PublishConfirmTimeout = TimeSpan.FromSeconds(1);
 			RetryReconnectTimespan = TimeSpan.FromMinutes(1);
 			PersistentDeliveryMode = true;
+			AutoCloseConnection = true;
 			Exchange = new GeneralExchangeConfiguration
 			{
 				AutoDelete = false,
