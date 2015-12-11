@@ -60,8 +60,8 @@ namespace RawRabbit.Consumer.Eventing
 				}
 				catch (Exception e)
 				{
-					_logger.LogWarning($"An unhandled exception was caught for message {args.BasicProperties.MessageId}.");
-					_strategy.OnRequestHandlerExceptionAsync(rawConsumer, args, e);
+					_logger.LogError($"An unhandled exception was caught for message {args.BasicProperties.MessageId}.\n", e);
+					_strategy.OnRequestHandlerExceptionAsync(rawConsumer, cfg, args, e);
 					return;
 				}
 				if (cfg.NoAck || rawConsumer.NackedDeliveryTags.Contains(args.DeliveryTag))

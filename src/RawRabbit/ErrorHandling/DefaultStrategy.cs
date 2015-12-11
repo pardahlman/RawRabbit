@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Framing;
+using RawRabbit.Configuration.Respond;
 using RawRabbit.Consumer.Abstraction;
+using RawRabbit.Consumer.Eventing;
 using RawRabbit.Exceptions;
 using RawRabbit.Serialization;
 
@@ -20,17 +22,17 @@ namespace RawRabbit.ErrorHandling
 			_serializer = serializer;
 		}
 
-		public Task OnRequestHandlerExceptionAsync(IRawConsumer rawConsumer, BasicDeliverEventArgs args, Exception exception)
+		public Task OnRequestHandlerExceptionAsync(IRawConsumer rawConsumer, IConsumerConfiguration cfg, BasicDeliverEventArgs args, Exception exception)
 		{
 			var innerException = UnwrapInnerException(exception);
 			var rawException = new MessageHandlerException(
-				message: $"An unhandled exception was thrown when responding to message with id {args.BasicProperties.MessageId}. See inner exception for more details.",
+				message: $"An unhandled exception was thrown when consuming a message\n  MessageId: {args.BasicProperties.MessageId}\n  Queue: '{cfg.Queue.FullQueueName}'\n  Exchange: '{cfg.Exchange.ExchangeName}'\nSee inner exception for more details.",
 				inner: innerException
 			);
 
 			rawConsumer.Model.BasicPublish(
 				exchange: string.Empty,
-				routingKey: args.BasicProperties?.ReplyTo ?? String.Empty,
+				routingKey: args.BasicProperties?.ReplyTo ?? string.Empty,
 				basicProperties: new BasicProperties
 				{
 					CorrelationId = args.BasicProperties?.CorrelationId ?? string.Empty,
@@ -41,7 +43,11 @@ namespace RawRabbit.ErrorHandling
 				},
 				body: _serializer.Serialize(rawException)
 			);
-			rawConsumer.Model.BasicNack(args.DeliveryTag, false, false);
+			
+			if (!cfg.NoAck)
+			{
+				rawConsumer.Model.BasicNack(args.DeliveryTag, false, false);
+			}
 			return Task.FromResult(true);
 		}
 
