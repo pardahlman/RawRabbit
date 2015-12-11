@@ -20,7 +20,7 @@ namespace RawRabbit.IntegrationTests.Features
 		public async Task Should_Succeed_To_Send_Response_Even_If_Channel_Is_Closed()
 		{
 			/* Setup */
-			var channelFactory = new ChannelFactory(new SingleNodeBroker(BrokerConfiguration.Local));
+			var channelFactory = new ChannelFactory(new SingleNodeBroker(BrokerConfiguration.Local), new RawRabbitConfiguration());
 			var expectedResponse = new FirstResponse {Infered = Guid.NewGuid()};
 			var reqeuster = BusClientFactory.CreateDefault(TimeSpan.FromHours(1));
 			var responder = BusClientFactory.CreateDefault(s => s
