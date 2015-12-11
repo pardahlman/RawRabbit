@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using RawRabbit.Configuration;
 
 namespace RawRabbit.Common
@@ -15,10 +16,10 @@ namespace RawRabbit.Common
 		{
 			var props = new Dictionary<string, object>
 			{
-				{ "client_api", "RawRabbit" },
-				{ "client_version", typeof(BusClient).Assembly.GetName().Version.ToString() },
+				{ "product", "RawRabbit" },
+				{ "version", typeof(BusClient).Assembly.GetName().Version.ToString() },
+				{ "platform", ".NET" },
 				{ "client_directory", typeof(BusClient).Assembly.CodeBase},
-				{ "client_connected", DateTime.UtcNow.ToString("u") },
 				{ "client_server", Environment.MachineName },
 			};
 			if (brokerCfg != null)
@@ -29,7 +30,6 @@ namespace RawRabbit.Common
 			{
 				props.Add("request_timeout", cfg.RequestTimeout.ToString("g"));
 			}
-			
 
 			return props;
 		}
