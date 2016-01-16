@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 using RawRabbit.Configuration;
 
@@ -6,35 +7,22 @@ namespace RawRabbit.Common
 {
 	public class ConnectionStringParser
 	{
-		private static readonly Regex _requestTimeout = new Regex(@"[Rr]equest[Tt]imeout=(?<timeout>\d+)");
-		private static readonly Regex _brokers = new Regex(@"[Bb]rokers=(?<brokers>.*);");
-		private static readonly Regex _broker = new Regex(@"(?<user>.*?):(?<password>.*?)@(?<host>.*?):(?<port>.*?)(?<vhost>\/.*)");
+		private static readonly Regex MainRegex = new Regex(@"(?<username>.*):(?<password>.*)@(?<hosts>.*):(?<port>\d*)(?<vhost>.*)\?");
+		private static readonly Regex RequestTimeout = new Regex(@"[Rr]equest[Tt]imeout=(?<timeout>\d+)");
 
 		public static RawRabbitConfiguration Parse(string connectionString)
 		{
-			var cfg = new RawRabbitConfiguration();
-
-			var brokersMatch = _brokers.Match(connectionString);
-			var brokerStrs = brokersMatch.Groups["brokers"].Value.Split(',');
-
-			foreach (var broker in brokerStrs)
+			var mainMatch = MainRegex.Match(connectionString);
+			var cfg = new RawRabbitConfiguration
 			{
-				int port;
-				var brokerMatch = _broker.Match(broker);
-				/*
-				var brokerCfg = new BrokerConfiguration
-				{
-					Hostname = brokerMatch.Groups["host"].Value,
-					VirtualHost = brokerMatch.Groups["vhost"].Value,
-					Port = int.TryParse(brokerMatch.Groups["port"].Value, out port) ? port : default(int),
-					Username = brokerMatch.Groups["user"].Value,
-					Password = brokerMatch.Groups["password"].Value,
-				};
-				cfg.Brokers.Add(brokerCfg);
-				*/
-			}
+				Username = mainMatch.Groups["username"].Value,
+				Password = mainMatch.Groups["password"].Value,
+				VirtualHost = mainMatch.Groups["vhost"].Value,
+				Port = int.Parse(mainMatch.Groups["port"].Value),
+				Hostnames = mainMatch.Groups["hosts"].Value.Split(',').ToList()
+			};
 
-			var reqMatch = _requestTimeout.Match(connectionString);
+			var reqMatch = RequestTimeout.Match(connectionString);
 			var timeoutGrp = reqMatch.Groups["timeout"];
 			if (timeoutGrp.Success)
 			{
