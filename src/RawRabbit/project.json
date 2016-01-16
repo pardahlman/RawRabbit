@@ -9,7 +9,7 @@
 
 	"dependencies": {
     "RabbitMQ.Client": "3.6.0",
-		"Newtonsoft.Json": "7.0.1"
+    "Newtonsoft.Json": "8.0.2"
 	},
 	"commands": {
 	},
