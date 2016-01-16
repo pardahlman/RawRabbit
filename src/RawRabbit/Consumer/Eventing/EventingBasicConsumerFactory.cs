@@ -103,7 +103,6 @@ namespace RawRabbit.Consumer.Eventing
 			{
 				_logger.LogWarning("Unable to ack message, channel is allready closed.");
 				_processedButNotAcked.Add(args.BasicProperties.MessageId);
-				CreateConsumer(cfg); // TODO: do we really want to re-conect? probably not.
 			}
 		}
 
