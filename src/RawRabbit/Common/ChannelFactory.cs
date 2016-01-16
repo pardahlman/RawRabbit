@@ -16,7 +16,7 @@ namespace RawRabbit.Common
 		private ThreadLocal<IModel> _threadChannels; 
 		private IConnection _connection;
 		private readonly ILogger _logger = LogManager.GetLogger<ChannelFactory>();
-		private readonly List<string> _hosts;
+		private RawRabbitConfiguration _config;
 
 		public ChannelFactory(RawRabbitConfiguration config, IClientPropertyProvider propsProvider)
 		{
@@ -31,13 +31,13 @@ namespace RawRabbit.Common
 				NetworkRecoveryInterval = config.RecoveryInterval,
 				ClientProperties = propsProvider.GetClientProperties(config)
 			};
-			_hosts = config.Hostnames;
+			_config = config;
 			_threadChannels = new ThreadLocal<IModel>(true);
 
 			try
 			{
 				_logger.LogDebug("Connecting to primary host.");
-				_connection = _connectionFactory.CreateConnection(_hosts);
+				_connection = _connectionFactory.CreateConnection(_config.Hostnames);
 				_logger.LogInformation($"Successfully established connection.");
 			}
 			catch (BrokerUnreachableException e)
@@ -82,6 +82,11 @@ namespace RawRabbit.Common
 			{
 				_logger.LogInformation($"Creating a new channel for thread with id '{Thread.CurrentThread.ManagedThreadId}'");
 				_threadChannels.Value = connection.CreateModel();
+				if (_config.AutoCloseConnection && !connection.AutoClose)
+				{
+					_logger.LogInformation($"Setting AutoClose to true for current connection");
+					connection.AutoClose = _config.AutoCloseConnection;
+				}
 				return Task.FromResult(_threadChannels.Value);
 			}
 			if (_threadChannels.Value.IsOpen)
@@ -113,8 +118,8 @@ namespace RawRabbit.Common
 		{
 			if (_connection == null)
 			{
-				_logger.LogDebug($"Creating a new connection for {_hosts.Count} hosts.");
-				_connection = _connectionFactory.CreateConnection(_hosts);
+				_logger.LogDebug($"Creating a new connection for {_config.Hostnames.Count} hosts.");
+				_connection = _connectionFactory.CreateConnection(_config.Hostnames);
 			}
 			if (_connection.IsOpen)
 			{
@@ -130,7 +135,7 @@ namespace RawRabbit.Common
 				_connection.Dispose();
 				try
 				{
-					_connection = _connectionFactory.CreateConnection(_hosts);
+					_connection = _connectionFactory.CreateConnection(_config.Hostnames);
 					return Task.FromResult(_connection);
 				}
 				catch (BrokerUnreachableException)
@@ -138,7 +143,7 @@ namespace RawRabbit.Common
 					_logger.LogInformation("None of the hosts are reachable. Waiting five seconds and try again.");
 					return Task
 						.Delay(TimeSpan.FromSeconds(5))
-						.ContinueWith(t => _connectionFactory.CreateConnection(_hosts));
+						.ContinueWith(t => _connectionFactory.CreateConnection(_config.Hostnames));
 				}
 			}
 
