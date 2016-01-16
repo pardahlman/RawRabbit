@@ -18,12 +18,6 @@ namespace RawRabbit.Configuration
 		public TimeSpan PublishConfirmTimeout { get; set; }
 
 		/// <summary>
-		/// The time to wait before trying to reconnect to the primary broker in case of 
-		/// lost connection. Defaults to 1 minute.
-		/// </summary>
-		public TimeSpan RetryReconnectTimespan { get; set; }
-
-		/// <summary>
 		/// Indicates if automatic recovery (reconnect, re-open channels, restore QoS) should be enabled
 		/// Defaults to true.
 		/// </summary>
@@ -63,7 +57,6 @@ namespace RawRabbit.Configuration
 		{
 			RequestTimeout = TimeSpan.FromSeconds(10);
 			PublishConfirmTimeout = TimeSpan.FromSeconds(1);
-			RetryReconnectTimespan = TimeSpan.FromMinutes(1);
 			PersistentDeliveryMode = true;
 			AutoCloseConnection = true;
 			AutomaticRecovery = true;
