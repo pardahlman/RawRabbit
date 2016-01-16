@@ -157,4 +157,4 @@ With the configuration framework `Microsoft.Extensions.Configuration`, we get th
 }
 ```
 What about connection strings in `csproj` projects? There is support for that, too. The expected format for the connection string is `username@password:host[,host2,hostN]/virtualHost(?requestTimeout=10)`
-like  `guest:guest@localhost:4562/` or "admin:admin@prodhost1,prodhost2:4562/prodVhost?requestTimeout=20.
+like  `guest:guest@localhost:4562/` or `admin:admin@prodhost1,prodhost2:4562/prodVhost?requestTimeout=20`.
