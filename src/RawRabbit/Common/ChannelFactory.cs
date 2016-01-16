@@ -136,7 +136,7 @@ namespace RawRabbit.Common
 			recoverable.Recovery += (sender, args) =>
 			{
 				_logger.LogDebug("Connection has been recovered!");
-				recoverTcs.SetResult(recoverable as IConnection);
+				recoverTcs.TrySetResult(recoverable as IConnection);
 			};
 			return recoverTcs.Task;
 		}
