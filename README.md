@@ -132,42 +132,29 @@ subscriber.SubscribeAsync<BasicMessage>(async (message, ctx) =>
 With the configuration framework `Microsoft.Extensions.Configuration`, we get the ability to structure our configuration in a nice and readable way. The `RawRabbit` configuration contains information about brokers to connect to, as well as some default behaviour on queues, exchanges and timeouts. Below is a full configuration example. ([read more about configuration here](http://whereslou.com/2014/05/23/asp-net-vnext-moving-parts-iconfiguration/))
 ```js
 {
-  "Data": {
-    "RawRabbit": {
-      "RequestTimeout": "00:02:00",
-      "Exchange": {
-        "Durable": true,
-        "AutoDelete": true,
-        "Type" :  "Topic"
-      },
-      "Queue": {
-        "AutoDelete": true,
-        "Durable": true,
-        "Exclusive":  true
-      },
-      "Brokers": [
-        {
-          "Hostname": "localhost",
-          "VirtualHost": "/",
-          "Port" :  "5672",
-          "UserName": "guest",
-          "Password": "guest"
-        },
-        {
-          "Hostname": "production",
-          "VirtualHost": "/prod",
-          "UserName": "admin",
-          "Password": "admin"
-        }
-      ]
-    }
-  }
+	"Username": "guest",
+	"Password": "guest",
+	"VirtualHost": "/",
+	"Port": 5672,
+	"Hostnames": [ "localhost" ],
+	"RequestTimeout": "00:00:10",
+	"PublishConfirmTimeout": "00:00:01",
+	"RecoveryInterval": "00:00:10",
+	"PersistentDeliveryMode": true,
+	"AutoCloseConnection": true,
+	"AutomaticRecovery": true,
+	"TopologyRecovery": true,
+	"Exchange": {
+		"Durable": true,
+		"AutoDelete": true,
+		"Type": "Topic"
+	},
+	"Queue": {
+		"AutoDelete": true,
+		"Durable": true,
+		"Exclusive": true
+	}
 }
 ```
-What about connection strings in `csproj` projects? There is support for that, too. The expected format for the connection string is `brokers={comma-seperated list of brokers};requestTimeout=3600`
-where:
-
-* `broker` contains a comma seperated lists of brokers (defined below)
-* `requestTimeout` is the number of seconds before `RPC` request times out.
-
-The format for a broker is `username:password@host:port/virtualHost`, for example `guest:guest@localhost:4562/`.
+What about connection strings in `csproj` projects? There is support for that, too. The expected format for the connection string is `username@password:host[,host2,hostN]/virtualHost(?requestTimeout=10)`
+like  `guest:guest@localhost:4562/` or "admin:admin@prodhost1,prodhost2:4562/prodVhost?requestTimeout=20.
