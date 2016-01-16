@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -127,8 +128,18 @@ namespace RawRabbit.Common
 			{
 				_logger.LogInformation("Connection is not recoverable, trying to create a new connection.");
 				_connection.Dispose();
-				_connection = _connectionFactory.CreateConnection(_hosts);
-				return Task.FromResult(_connection);
+				try
+				{
+					_connection = _connectionFactory.CreateConnection(_hosts);
+					return Task.FromResult(_connection);
+				}
+				catch (BrokerUnreachableException)
+				{
+					_logger.LogInformation("None of the hosts are reachable. Waiting five seconds and try again.");
+					return Task
+						.Delay(TimeSpan.FromSeconds(5))
+						.ContinueWith(t => _connectionFactory.CreateConnection(_hosts));
+				}
 			}
 
 			_logger.LogDebug("Connection is recoverable. Waiting for 'Recovery' event to be triggered. ");
