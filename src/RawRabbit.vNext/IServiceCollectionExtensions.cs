@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using RabbitMQ.Client;
 using RawRabbit.Common;
 using RawRabbit.Configuration;
@@ -38,32 +39,10 @@ namespace RawRabbit.vNext
 			}
 			else
 			{
-				collection.AddSingleton(c => new RawRabbitConfiguration());
+				collection.TryAddSingleton(typeof(RawRabbitConfiguration), c => RawRabbitConfiguration.Local);
 			}
 
 			collection
-				.AddSingleton<IEnumerable<IConnectionFactory>>(p =>
-				{
-					var cfg = p.GetService<RawRabbitConfiguration>();
-					var brokers = cfg?.Brokers ?? new List<BrokerConfiguration>();
-					brokers = brokers.Any() ? brokers : new List<BrokerConfiguration> { BrokerConfiguration.Local };
-					return brokers.Select(b => new ConnectionFactory
-					{
-						HostName = b.Hostname,
-						VirtualHost = b.VirtualHost,
-						UserName = b.Username,
-						Password = b.Password,
-						AutomaticRecoveryEnabled = true,
-						TopologyRecoveryEnabled = true,
-						ClientProperties = p.GetService<IClientPropertyProvider>().GetClientProperties(cfg ,b)
-					});
-				})
-				.AddSingleton<IConnectionBroker, DefaultConnectionBroker>(
-					p => new DefaultConnectionBroker(
-						p.GetService<IEnumerable<IConnectionFactory>>(),
-						p.GetService<RawRabbitConfiguration>().RetryReconnectTimespan
-					)
-				)
 				.AddSingleton<IClientPropertyProvider, ClientPropertyProvider>()
 				.AddSingleton<ILoggerFactory, LoggerFactory>()
 				.AddTransient<IMessageSerializer, JsonMessageSerializer>()

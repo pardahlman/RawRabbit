@@ -23,40 +23,35 @@ namespace RawRabbit.Extensions.CleanEverything
 				throw new InvalidOperationException("Bus client does not support extensions. Make sure that the client is of type ExtendableBusClient.");
 			}
 
-			var brokerConfig = extended.GetService<RawRabbitConfiguration>().Brokers;
-			if (!brokerConfig.Any())
-			{
-				brokerConfig.Add(BrokerConfiguration.Local);
-			}
-
 			var config = GetCleanConfiguration(cfg);
 			Task removeQueueTask = Task.FromResult(true);
 			Task removeExchangesTask = Task.FromResult(true);
 			Task closeConnectionsTask = Task.FromResult(true);
+			var rawConfig = extended.GetService<RawRabbitConfiguration>();
 			if (config.RemoveQueues)
 			{
-				removeQueueTask = RemoveEntities<Exchange>("queues", brokerConfig);
+				removeQueueTask = RemoveEntities<Exchange>("queues", rawConfig);
 			}
 			if (config.RemoveExchanges)
 			{
-				removeExchangesTask = RemoveEntities<Exchange>("exchanges", brokerConfig);
+				removeExchangesTask = RemoveEntities<Exchange>("exchanges", rawConfig);
 			}
 			if (config.CloseConnections)
 			{
 				throw new NotImplementedException("Removal of connection is not implemented.");
-				closeConnectionsTask = RemoveEntities<Connection>("connections", brokerConfig);
+				closeConnectionsTask = RemoveEntities<Connection>("connections", rawConfig);
 			}
 			return Task.WhenAll(removeQueueTask, removeExchangesTask, closeConnectionsTask);
 		}
 
-		private static Task RemoveEntities<TEntity>(string entityName, IEnumerable<BrokerConfiguration> brokerConfig) where TEntity : IRabbtMqEntity
+		private static Task RemoveEntities<TEntity>(string entityName, RawRabbitConfiguration config) where TEntity : IRabbtMqEntity
 		{
 			var tasks = new List<Task>();
-			foreach (var cfg in brokerConfig)
+			foreach (var hostname in config.Hostnames)
 			{
-				var credentials = new NetworkCredential(cfg.Username, cfg.Password);
+				var credentials = new NetworkCredential(config.Username, config.Password);
 				var queuesTask = new WebRequester()
-					.WithUrl($"http://{cfg.Hostname}:15672/api/{entityName}")
+					.WithUrl($"http://{hostname}:15672/api/{entityName}")
 					.WithMethod(HttpMethod.Get)
 					.WithCredentials(credentials)
 					.PerformAsync<List<TEntity>>()
@@ -70,7 +65,7 @@ namespace RawRabbit.Extensions.CleanEverything
 								continue;
 							}
 							var removeEntityTask = new WebRequester()
-								.WithUrl($"http://{cfg.Hostname}:15672/api/{entityName}/{Uri.EscapeDataString(entity.Vhost)}/{Uri.EscapeUriString(entity.Name)}")
+								.WithUrl($"http://{hostname}:15672/api/{entityName}/{Uri.EscapeDataString(entity.Vhost)}/{Uri.EscapeUriString(entity.Name)}")
 								.WithMethod(HttpMethod.Delete)
 								.WithCredentials(credentials)
 								.GetResponseAsync();
@@ -81,7 +76,6 @@ namespace RawRabbit.Extensions.CleanEverything
 				tasks.Add(queuesTask);
 			}
 			return Task.WhenAll(tasks);
-
 		}
 
 		private static CleanConfiguration GetCleanConfiguration(Action<ICleanConfigurationBuilder> cfg)

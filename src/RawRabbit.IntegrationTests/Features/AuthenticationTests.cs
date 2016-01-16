@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using RabbitMQ.Client.Exceptions;
 using RawRabbit.Common;
 using RawRabbit.Configuration;
@@ -15,16 +16,11 @@ namespace RawRabbit.IntegrationTests.Features
 			/* Setup */
 			var config = new RawRabbitConfiguration
 			{
-				Brokers =
-				{
-					new BrokerConfiguration
-					{
-						Username = "RawRabbit",
-						Password = "wrong-pass",
-						Hostname = "localhost",
-						VirtualHost = "/"
-					}
-				}
+				Username = "RawRabbit",
+				Password = "wrong-pass",
+				Hostnames = {"localhost"},
+				VirtualHost = "/",
+				Port = 5672
 			};
 
 			/* Test */
@@ -36,10 +32,8 @@ namespace RawRabbit.IntegrationTests.Features
 		public async Task Should_Use_Guest_Credentials_By_Default()
 		{
 			/* Setup */
-			var config = new RawRabbitConfiguration();
-
 			/* Test */
-			BusClientFactory.CreateDefault(config);
+			BusClientFactory.CreateDefault();
 
 			/* Assert */
 			Assert.True(true, "Does not throw.");
@@ -51,16 +45,11 @@ namespace RawRabbit.IntegrationTests.Features
 			/* Setup */
 			var config = new RawRabbitConfiguration
 			{
-				Brokers =
-				{
-					new BrokerConfiguration
-					{
-						Username = "RawRabbit",
-						Password = "RawRabbit",
-						Hostname = "localhost",
-						VirtualHost = "/"
-					}
-				}
+				Username = "RawRabbit",
+				Password = "RawRabbit",
+				Hostnames = new List<string> {"localhost"},
+				VirtualHost = "/",
+				Port = 5672
 			};
 
 			/* Test */

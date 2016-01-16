@@ -10,7 +10,9 @@ namespace RawRabbit.vNext
 	{
 		public static BusClient CreateDefault(TimeSpan requestTimeout)
 		{
-			return CreateDefault(new RawRabbitConfiguration { RequestTimeout = requestTimeout });
+			var cfg = RawRabbitConfiguration.Local;
+			cfg.RequestTimeout = requestTimeout;
+			return CreateDefault(cfg);
 		}
 
 		public static BusClient CreateDefault(RawRabbitConfiguration config)

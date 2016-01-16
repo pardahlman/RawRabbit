@@ -24,9 +24,16 @@ namespace RawRabbit.Configuration
 		public TimeSpan RetryReconnectTimespan { get; set; }
 
 		/// <summary>
-		/// A list of RabbitMq brokers to connect to.
+		/// Indicates if automatic recovery (reconnect, re-open channels, restore QoS) should be enabled
+		/// Defaults to true.
 		/// </summary>
-		public List<BrokerConfiguration> Brokers { get; set; }
+		public bool AutomaticRecovery { get; set; }
+
+		/// <summary>
+		/// Indicates if topology recovery (re-declare queues/exchanges, recover bindings and consumers) should be enabled
+		/// Defaults to true
+		/// </summary>
+		public bool TopologyRecovery { get; set;}
 
 		/// <summary>
 		/// The default values for exchnages. Can be overriden using the fluent configuration
@@ -54,12 +61,16 @@ namespace RawRabbit.Configuration
 
 		public RawRabbitConfiguration()
 		{
-			Brokers = new List<BrokerConfiguration>();
 			RequestTimeout = TimeSpan.FromSeconds(10);
 			PublishConfirmTimeout = TimeSpan.FromSeconds(1);
 			RetryReconnectTimespan = TimeSpan.FromMinutes(1);
 			PersistentDeliveryMode = true;
 			AutoCloseConnection = true;
+			AutomaticRecovery = true;
+			TopologyRecovery = true;
+			RecoveryInterval = TimeSpan.FromSeconds(10);
+
+			Hostnames = new List<string>();
 			Exchange = new GeneralExchangeConfiguration
 			{
 				AutoDelete = false,
@@ -74,7 +85,20 @@ namespace RawRabbit.Configuration
 			};
 		}
 
-		public static RawRabbitConfiguration Default => new RawRabbitConfiguration();
+		public static RawRabbitConfiguration Local => new RawRabbitConfiguration
+		{
+			VirtualHost = "/",
+			Username = "guest",
+			Password = "guest",
+			Port = 5672,
+			Hostnames = new List<string> { "localhost" }
+		};
+		public string VirtualHost { get; set; }
+		public string Username { get; set; }
+		public string Password { get; set; }
+		public int Port { get; set; }
+		public List<string> Hostnames { get; set; }
+		public TimeSpan RecoveryInterval { get; set; }
 	}
 
 	public class GeneralQueueConfiguration
@@ -126,24 +150,5 @@ namespace RawRabbit.Configuration
 		/// There are four different types of exchanges see <see cref="RawRabbit.Configuration.Exchange"/> for more info.
 		/// </summary>
 		public ExchangeType Type { get; set; }
-	}
-
-	public class BrokerConfiguration
-	{
-		public string Hostname { get; set; }
-		public string Username { get; set; }
-		public string Password { get; set; }
-		public string VirtualHost { get; set; }
-		public int Port { get; set; }
-
-		public static BrokerConfiguration Local => new BrokerConfiguration
-		{
-			Hostname = "localhost",
-			Password = "guest",
-			Username = "guest",
-			VirtualHost = "/",
-			Port = 5672
-		};
-
 	}
 }

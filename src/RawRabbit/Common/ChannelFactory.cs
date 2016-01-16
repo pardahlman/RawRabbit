@@ -1,94 +1,157 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Exceptions;
 using RawRabbit.Configuration;
 using RawRabbit.Logging;
 
 namespace RawRabbit.Common
 {
-	public interface IChannelFactory : IDisposable
-	{
-		/// <summary>
-		/// Retrieves a channel that is disposed by the channel factory
-		/// </summary>
-		/// <returns>A new or existing instance of an IModel</returns>
-		IModel GetChannel();
-		/// <summary>
-		/// Creates a new istance of a channal that the caller is responsible
-		/// in closing and disposing.
-		/// </summary>
-		/// <returns>A new instance of an IModel</returns>
-		IModel CreateChannel(IConnection connection = null);
-	}
-
 	public class ChannelFactory : IChannelFactory
 	{
-		private readonly IConnectionBroker _connectionBroker;
-		private readonly ConcurrentDictionary<IConnection, ThreadLocal<IModel>> _connectionToChannel;
-		private readonly bool _autoClose;
+		private readonly IConnectionFactory _connectionFactory;
+		private ThreadLocal<IModel> _threadChannels; 
+		private IConnection _connection;
 		private readonly ILogger _logger = LogManager.GetLogger<ChannelFactory>();
+		private readonly List<string> _hosts;
 
-		public ChannelFactory(IConnectionBroker connectionBroker, RawRabbitConfiguration config)
+		public ChannelFactory(RawRabbitConfiguration config, IClientPropertyProvider propsProvider)
 		{
-			_connectionBroker = connectionBroker;
-			_connectionToChannel = new ConcurrentDictionary<IConnection, ThreadLocal<IModel>>();
-			_autoClose = config.AutoCloseConnection;
+			_connectionFactory = new ConnectionFactory
+			{
+				VirtualHost =  config.VirtualHost,
+				UserName = config.Username,
+				Password = config.Password,
+				Port = config.Port,
+				AutomaticRecoveryEnabled = config.AutomaticRecovery,
+				TopologyRecoveryEnabled = config.TopologyRecovery,
+				NetworkRecoveryInterval = config.RecoveryInterval,
+				ClientProperties = propsProvider.GetClientProperties(config)
+			};
+			_hosts = config.Hostnames;
+			_threadChannels = new ThreadLocal<IModel>(true);
+
+			try
+			{
+				_logger.LogDebug("Connecting to primary host.");
+				_connection = _connectionFactory.CreateConnection(_hosts);
+				_logger.LogInformation($"Successfully established connection.");
+			}
+			catch (BrokerUnreachableException e)
+			{
+				_logger.LogError("Unable to connect to broker", e);
+				throw e.InnerException;
+			}
 		}
 
 		public void Dispose()
 		{
-			_connectionBroker?.Dispose();
-		}
-
-		public void CloseAll()
-		{
-			_logger.LogDebug("Trying to close all connections.");
-			foreach (var connection in _connectionToChannel.Keys)
+			_connection?.Dispose();
+			foreach (var channel in _threadChannels?.Values ?? Enumerable.Empty<IModel>())
 			{
-				connection?.Close();
+				channel?.Dispose();
 			}
+			_threadChannels?.Dispose();
+			_threadChannels = null;
 		}
 
 		public IModel GetChannel()
 		{
-			var currentConnection = _connectionBroker.GetConnection();
+			return GetChannelAsync().Result;
+		}
 
-			if (!_connectionToChannel.ContainsKey(currentConnection))
+		public Task<IModel> GetChannelAsync()
+		{
+			if (_threadChannels.Value?.IsOpen ?? false)
 			{
-				_connectionToChannel.TryAdd(currentConnection, new ThreadLocal<IModel>());
-				var newChannel = CreateChannel(currentConnection);
-				_connectionToChannel[currentConnection].Value = newChannel;
+				_logger.LogDebug($"Using existing channel with id '{_threadChannels.Value.ChannelNumber}' on thread '{Thread.CurrentThread.ManagedThreadId}'");
+				return Task.FromResult(_threadChannels.Value);
 			}
 
-			var threadChannel = _connectionToChannel[currentConnection];
-			if (threadChannel.Value.IsOpen)
+			return GetConnectionAsync()
+				.ContinueWith(connectionTask => GetOrCreateChannelAsync(connectionTask.Result))
+				.Unwrap();
+		}
+
+		private Task<IModel> GetOrCreateChannelAsync(IConnection connection)
+		{
+			if (_threadChannels.Value == null)
 			{
-				return threadChannel.Value;
+				_logger.LogInformation($"Creating a new channel for thread with id '{Thread.CurrentThread.ManagedThreadId}'");
+				_threadChannels.Value = connection.CreateModel();
+				return Task.FromResult(_threadChannels.Value);
+			}
+			if (_threadChannels.Value.IsOpen)
+			{
+				_logger.LogDebug($"Using open channel with id {_threadChannels.Value.ChannelNumber}");
+				return Task.FromResult(_threadChannels.Value);
 			}
 
-			var channel = CreateChannel(currentConnection);
+			_logger.LogInformation($"Channel {_threadChannels.Value.ChannelNumber} is closed.");
+			var recoveryChannel = _threadChannels.Value as IRecoverable;
+			if (recoveryChannel == null)
+			{
+				_logger.LogInformation("Channel is not recoverable. Opening a new channel.");
+				_threadChannels.Value.Dispose();
+				_threadChannels.Value = connection.CreateModel();
+				return Task.FromResult(_threadChannels.Value);
+			}
 
-			threadChannel.Value?.Dispose();
-			threadChannel.Value = channel;
+			_logger.LogDebug("Channel is recoverable. Waiting for 'Recovery' event to be triggered.");
+			var recoverTcs = new TaskCompletionSource<IModel>();
+			recoveryChannel.Recovery += (sender, args) =>
+			{
+				recoverTcs.SetResult(recoveryChannel as IModel);
+			};
+			return recoverTcs.Task;
+		}
 
-			return threadChannel.Value;
+		private Task<IConnection> GetConnectionAsync()
+		{
+			if (_connection == null)
+			{
+				_logger.LogDebug($"Creating a new connection for {_hosts.Count} hosts.");
+				_connection = _connectionFactory.CreateConnection(_hosts);
+			}
+			if (_connection.IsOpen)
+			{
+				_logger.LogDebug("Existing connection is open and will be used.");
+				return Task.FromResult(_connection);
+			}
+
+			_logger.LogInformation("The existing connection is not open.");
+			var recoverable = _connection as IRecoverable;
+			if (recoverable == null)
+			{
+				_logger.LogInformation("Connection is not recoverable, trying to create a new connection.");
+				_connection.Dispose();
+				_connection = _connectionFactory.CreateConnection(_hosts);
+				return Task.FromResult(_connection);
+			}
+
+			_logger.LogDebug("Connection is recoverable. Waiting for 'Recovery' event to be triggered. ");
+			var recoverTcs = new TaskCompletionSource<IConnection>();
+			recoverable.Recovery += (sender, args) =>
+			{
+				_logger.LogDebug("Connection has been recovered!");
+				recoverTcs.SetResult(recoverable as IConnection);
+			};
+			return recoverTcs.Task;
 		}
 
 		public IModel CreateChannel(IConnection connection = null)
 		{
-			connection = connection ?? _connectionBroker.GetConnection();
-			var channel = connection.CreateModel();
-			if (_autoClose && !connection.AutoClose)
-			{
-				_logger.LogInformation("Setting AutoClose to true for connection while calling 'CreateChannel'.");
-				connection.AutoClose = true;
-			}
-			else
-			{
-				_logger.LogDebug($"AutoClose in settings object is set to: '{_autoClose}' and on connection '{connection.AutoClose}'");
-			}
-			return channel;
+			return CreateChannelAsync(connection).Result;
+		}
+
+		public Task<IModel> CreateChannelAsync(IConnection connection = null)
+		{
+			var connectionTask = connection != null
+				? Task.FromResult(connection)
+				: GetConnectionAsync();
+			return connectionTask.ContinueWith(c => c.Result.CreateModel());
 		}
 	}
 }

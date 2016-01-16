@@ -21,6 +21,7 @@ namespace RawRabbit.Common
 			{
 				int port;
 				var brokerMatch = _broker.Match(broker);
+				/*
 				var brokerCfg = new BrokerConfiguration
 				{
 					Hostname = brokerMatch.Groups["host"].Value,
@@ -30,6 +31,7 @@ namespace RawRabbit.Common
 					Password = brokerMatch.Groups["password"].Value,
 				};
 				cfg.Brokers.Add(brokerCfg);
+				*/
 			}
 
 			var reqMatch = _requestTimeout.Match(connectionString);

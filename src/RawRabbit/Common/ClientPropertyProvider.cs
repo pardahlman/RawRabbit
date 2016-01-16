@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 using RawRabbit.Configuration;
 
 namespace RawRabbit.Common
 {
 	public interface IClientPropertyProvider
 	{
-		IDictionary<string, object> GetClientProperties(RawRabbitConfiguration cfg = null, BrokerConfiguration brokerCfg = null);
+		IDictionary<string, object> GetClientProperties(RawRabbitConfiguration cfg = null);
 	}
 
 	public class ClientPropertyProvider : IClientPropertyProvider
 	{
-		public IDictionary<string, object> GetClientProperties(RawRabbitConfiguration cfg = null, BrokerConfiguration brokerCfg = null)
+		public IDictionary<string, object> GetClientProperties(RawRabbitConfiguration cfg = null)
 		{
 			var props = new Dictionary<string, object>
 			{
@@ -22,13 +21,11 @@ namespace RawRabbit.Common
 				{ "client_directory", typeof(BusClient).Assembly.CodeBase},
 				{ "client_server", Environment.MachineName },
 			};
-			if (brokerCfg != null)
-			{
-				props.Add("broker_username", brokerCfg.Username);
-			}
+
 			if (cfg != null)
 			{
 				props.Add("request_timeout", cfg.RequestTimeout.ToString("g"));
+				props.Add("broker_username", cfg.Username);
 			}
 
 			return props;

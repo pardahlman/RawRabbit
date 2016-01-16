@@ -102,12 +102,9 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		public async Task Should_Throw_Publish_Confirm_Exception_If_Server_Doesnt_Respond_Within_Time_Limit()
 		{
 			/* Setup */
-			var publisher = BusClientFactory.CreateDefault(
-				new RawRabbitConfiguration
-				{
-					PublishConfirmTimeout = TimeSpan.FromTicks(1)
-				}
-			);
+			var config = RawRabbitConfiguration.Local;
+			config.PublishConfirmTimeout = TimeSpan.FromTicks(1);
+			var publisher = BusClientFactory.CreateDefault(config);
 
 			/* Test */
 			/* Assert */
@@ -120,12 +117,9 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			/* Setup */
 			const int numberOfCalls = 100;
 			var confirmTasks = new Task[numberOfCalls];
-			var publisher = BusClientFactory.CreateDefault(
-				new RawRabbitConfiguration
-				{
-					PublishConfirmTimeout = TimeSpan.FromMilliseconds(500)
-				}
-			);
+			var config = RawRabbitConfiguration.Local;
+			config.PublishConfirmTimeout = TimeSpan.FromMilliseconds(500);
+			var publisher = BusClientFactory.CreateDefault(config);
 
 			for (int i = 0; i < numberOfCalls; i++)
 			{
