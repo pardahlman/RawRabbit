@@ -12,6 +12,7 @@
     "Newtonsoft.Json": "8.0.2"
 	},
 	"commands": {
+		"test": "xunit.runner.dnx"
 	},
 	"frameworks": {
 		"dnx45": { },
