@@ -1,0 +1,13 @@
+assembly_info: 
+  assembly_file_version: "{version}"
+  assembly_informational_version: "{version}"
+  assembly_version: "{version}"
+  file: "**\\AssemblyInfo.*"
+  patch: true
+before_build: 
+  ps: "dnu restore"
+build: 
+  verbosity: minimal
+test_script: 
+  ps: "dnx -p src/RawRabbit.Tests test"
+version: "1.8.1.{build}"
