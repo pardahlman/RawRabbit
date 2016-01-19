@@ -20,6 +20,9 @@
                                     (   \        /.-\  \\__   
                                      '--'`._  .-'---,\  '--;  
                                           '--------^^ '--^^   
+
+[![Build Status](https://img.shields.io/appveyor/ci/pardahlman/rawrabbit.svg?style=flat-square)](https://ci.appveyor.com/project/pardahlman/rawrabbit) [![NuGet](https://img.shields.io/nuget/v/RawRabbit.svg?style=flat-square)](https://www.nuget.org/packages/RawRabbit) [![GitHub release](https://img.shields.io/github/release/pardahlman/rawrabbit.svg?style=flat-square)](https://github.com/pardahlman/rawrabbit/releases/latest)
+
 _A modern, vNext based, C# framework for communication over [RabbitMq](http://rabbitmq.com/), based on [the official dotnet RabbitMq client](https://github.com/rabbitmq/rabbitmq-dotnet-client)._
 
 * Lightning  fast `async` Request/Response with [direct reply-to](https://www.rabbitmq.com/direct-reply-to.html).
@@ -28,6 +31,8 @@ _A modern, vNext based, C# framework for communication over [RabbitMq](http://ra
 * Targets [dnx runtime](https://github.com/aspnet/dnx) `dnx451` to `dnx50` as well as `net451` to `net50`
 * Everything is plugable! Register any custom types with dependecy injection from [`Microsoft.Extensions.DependencyInjection`](https://github.com/aspnet/DependencyInjection)
 * Easy-piecy configuration with [`Microsoft.Extensions.Configuration`](https://github.com/aspnet/Configuration) (but support for old skool, too)
+
+
 
 ## Quick introduction
 The ambision with `RawRabbit` is to provide a simple interface for performing some of the basic things that you typically want to do when working with RabbitMq. Performing standard _Publish/Suscibe_ and _Request/Response_ is easy. In fact, you don't need to configure anything. _Like the controll you get by configuring yourself? Keep on reading!_
