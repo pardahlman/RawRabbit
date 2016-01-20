@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using RabbitMQ.Client.Events;
 using RawRabbit.Configuration.Respond;
-using RawRabbit.Consumer;
 using RawRabbit.Consumer.Abstraction;
 
 namespace RawRabbit.ErrorHandling

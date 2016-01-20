@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using RabbitMQ.Client.Events;
-using RabbitMQ.Client.Framing;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Respond;
 using RawRabbit.Consumer.Abstraction;
-using RawRabbit.Consumer.Eventing;
 using RawRabbit.Exceptions;
 using RawRabbit.Serialization;
 

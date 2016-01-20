@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.Remoting.Services;
 using Microsoft.Extensions.DependencyInjection;
 using RawRabbit.Common;
 using RawRabbit.Context;

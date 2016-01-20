@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace RawRabbit.Extensions.CleanEverything.Model
+﻿namespace RawRabbit.Extensions.CleanEverything.Model
 {
 	public class Connection : IRabbtMqEntity
 	{

@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
 using RawRabbit.Exceptions;
 using RawRabbit.Logging;
 

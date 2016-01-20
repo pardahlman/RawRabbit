@@ -1,9 +1,6 @@
 using System;
-using System.Collections.Generic;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Framing;
 using RawRabbit.Configuration.Exchange;
-using RawRabbit.Configuration.Queue;
 using RawRabbit.Configuration.Request;
 
 namespace RawRabbit.Configuration.Publish

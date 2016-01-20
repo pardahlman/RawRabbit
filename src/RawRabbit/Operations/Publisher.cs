@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Framing;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Publish;
 using RawRabbit.Context;
