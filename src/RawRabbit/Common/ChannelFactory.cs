@@ -17,19 +17,10 @@ namespace RawRabbit.Common
 		private readonly ILogger _logger = LogManager.GetLogger<ChannelFactory>();
 		private readonly RawRabbitConfiguration _config;
 
-		public ChannelFactory(RawRabbitConfiguration config, IClientPropertyProvider propsProvider)
+		public ChannelFactory(RawRabbitConfiguration config, IConnectionFactory connectionFactory, IClientPropertyProvider propsProvider)
 		{
-			_connectionFactory = new ConnectionFactory
-			{
-				VirtualHost =  config.VirtualHost,
-				UserName = config.Username,
-				Password = config.Password,
-				Port = config.Port,
-				AutomaticRecoveryEnabled = config.AutomaticRecovery,
-				TopologyRecoveryEnabled = config.TopologyRecovery,
-				NetworkRecoveryInterval = config.RecoveryInterval,
-				ClientProperties = propsProvider.GetClientProperties(config)
-			};
+			_connectionFactory = connectionFactory;
+			
 			_config = config;
 			_threadChannels = new ThreadLocal<IModel>(true);
 
