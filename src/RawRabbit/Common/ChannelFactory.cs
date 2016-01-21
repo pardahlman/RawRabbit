@@ -15,7 +15,7 @@ namespace RawRabbit.Common
 		private ThreadLocal<IModel> _threadChannels; 
 		private IConnection _connection;
 		private readonly ILogger _logger = LogManager.GetLogger<ChannelFactory>();
-		private RawRabbitConfiguration _config;
+		private readonly RawRabbitConfiguration _config;
 
 		public ChannelFactory(RawRabbitConfiguration config, IClientPropertyProvider propsProvider)
 		{
@@ -37,7 +37,7 @@ namespace RawRabbit.Common
 			{
 				_logger.LogDebug("Connecting to primary host.");
 				_connection = _connectionFactory.CreateConnection(_config.Hostnames);
-				_logger.LogInformation($"Successfully established connection.");
+				_logger.LogInformation("Successfully established connection.");
 			}
 			catch (BrokerUnreachableException e)
 			{
