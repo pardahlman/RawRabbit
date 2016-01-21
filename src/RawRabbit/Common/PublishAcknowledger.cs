@@ -70,17 +70,7 @@ namespace RawRabbit.Common
 			TaskCompletionSource<ulong> tcs;
 			if (_deliveredAckDictionary.TryRemove(tag, out tcs))
 			{
-				Timer ackTimer;
-				if (_ackTimers.TryRemove(tag, out ackTimer))
-				{
-					_logger.LogDebug($"Disposed ack timer for {tag}");
-					ackTimer.Dispose();
-				}
-				else
-				{
-					_logger.LogDebug($"$Unable to find ack timer for {tag}. It has probably been ack'ed allready.");
-				}
-				_logger.LogDebug($"Message with delivery tag {tag} has been acknowledged by broker.");
+				TryDisposeTimer(tag);
 				tcs.TrySetResult(tag);
 			}
 		}
@@ -100,11 +90,25 @@ namespace RawRabbit.Common
 			_ackTimers.TryAdd(nextTag, new Timer(state =>
 			{
 				_logger.LogWarning($"Ack for {nextTag} has timed out.");
-				_ackTimers[nextTag].Dispose();
+				TryDisposeTimer(nextTag);
 				_deliveredAckDictionary[nextTag].TrySetException(
 						new PublishConfirmException($"The broker did not send a publish acknowledgement for message {nextTag} within {_publishTimeout.ToString("g")}."));
 			}, null, _publishTimeout, new TimeSpan(-1)));
 			return tcs.Task;
+		}
+
+		private void TryDisposeTimer(ulong tag)
+		{
+			Timer ackTimer;
+			if (_ackTimers.TryRemove(tag, out ackTimer))
+			{
+				_logger.LogDebug($"Disposed ack timer for {tag}");
+				ackTimer.Dispose();
+			}
+			else
+			{
+				_logger.LogDebug($"$Unable to find ack timer for {tag}. It has probably been ack'ed allready.");
+			}
 		}
 	}
 }
