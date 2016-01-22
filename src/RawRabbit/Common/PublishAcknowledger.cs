@@ -62,6 +62,10 @@ namespace RawRabbit.Common
 				}
 
 			};
+			_channel.FlowControl += (sender, args) =>
+			{
+				_logger.LogInformation($"The flow control event has been raised on channel '{_channel.ChannelNumber}'. Active: {args.Active}.");
+			};
 			channel.ConfirmSelect();
 		}
 
