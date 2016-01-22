@@ -100,9 +100,24 @@ namespace RawRabbit.Common
 			_ackTimers.TryAdd(nextTag, new Timer(state =>
 			{
 				_logger.LogWarning($"Ack for {nextTag} has timed out.");
-				_ackTimers[nextTag].Dispose();
-				_deliveredAckDictionary[nextTag].TrySetException(
-						new PublishConfirmException($"The broker did not send a publish acknowledgement for message {nextTag} within {_publishTimeout.ToString("g")}."));
+				Timer ackTimer;
+				if (!_ackTimers.TryRemove(nextTag, out ackTimer))
+				{
+					_logger.LogInformation($"Unable to dispose ack timer for {nextTag}: not be found.");
+					return;
+				}
+
+				_logger.LogDebug($"Disposing ack timer for {nextTag}.");
+				ackTimer.Dispose();
+
+				TaskCompletionSource<ulong> ackTcs;
+				if (!_deliveredAckDictionary.TryRemove(nextTag, out ackTcs))
+				{
+					_logger.LogInformation($"TaskCompletionSource for '{nextTag}' not found. Message has probably been confirmed.");
+					return;
+				}
+				ackTcs.TrySetException(new PublishConfirmException(
+					$"The broker did not send a publish acknowledgement for message {nextTag} within {_publishTimeout.ToString("g")}."));
 			}, null, _publishTimeout, new TimeSpan(-1)));
 			return tcs.Task;
 		}
