@@ -17,7 +17,7 @@ namespace RawRabbit.Operations
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
 		private readonly IPublishAcknowledger _acknowledger;
 		private readonly IBasicPropertiesProvider _propertiesProvider;
-		private IModel _channel;
+		protected IModel _channel;
 		private Timer _channelTimer;
 		private readonly ILogger _logger = LogManager.GetLogger<Publisher<TMessageContext>>();
 
@@ -45,7 +45,7 @@ namespace RawRabbit.Operations
 			return publishAckTask;
 		}
 
-		private IModel GetOrCreateChannel(PublishConfiguration config)
+		protected virtual IModel GetOrCreateChannel(PublishConfiguration config)
 		{
 			if (_channel?.IsOpen ?? false)
 			{
