@@ -50,15 +50,14 @@ namespace RawRabbit.Common
 				_logger.LogInformation($"Recieved ack for {args.DeliveryTag} with multiple set to '{args.Multiple}'");
 				if (args.Multiple)
 				{
-					_logger.LogInformation($"Woop woop, is multiple {args.DeliveryTag}");
 					for (var i = args.DeliveryTag; i > 0; i--)
 					{
-						DisposeTimer(i);
+						CompleteConfirm(i);
 					}
 				}
 				else
 				{
-					DisposeTimer(args.DeliveryTag);
+					CompleteConfirm(args.DeliveryTag);
 				}
 
 			};
@@ -69,7 +68,7 @@ namespace RawRabbit.Common
 			channel.ConfirmSelect();
 		}
 
-		private void DisposeTimer(ulong tag)
+		private void CompleteConfirm(ulong tag)
 		{
 			TaskCompletionSource<ulong> tcs;
 			if (_deliveredAckDictionary.TryRemove(tag, out tcs))
@@ -94,15 +93,7 @@ namespace RawRabbit.Common
 			_ackTimers.TryAdd(nextTag, new Timer(state =>
 			{
 				_logger.LogWarning($"Ack for {nextTag} has timed out.");
-				Timer ackTimer;
-				if (!_ackTimers.TryRemove(nextTag, out ackTimer))
-				{
-					_logger.LogInformation($"Unable to dispose ack timer for {nextTag}: not be found.");
-					return;
-				}
-
-				_logger.LogDebug($"Disposing ack timer for {nextTag}.");
-				ackTimer.Dispose();
+				TryDisposeTimer(nextTag);
 
 				TaskCompletionSource<ulong> ackTcs;
 				if (!_deliveredAckDictionary.TryRemove(nextTag, out ackTcs))
@@ -126,7 +117,7 @@ namespace RawRabbit.Common
 			}
 			else
 			{
-				_logger.LogDebug($"$Unable to find ack timer for {tag}. It has probably been ack'ed allready.");
+				_logger.LogDebug($"$Unable to find ack timer for {tag}.");
 			}
 		}
 	}
