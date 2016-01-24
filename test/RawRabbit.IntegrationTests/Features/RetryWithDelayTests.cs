@@ -15,12 +15,8 @@ namespace RawRabbit.IntegrationTests.Features
 		public async Task Should_Retry_For_Publish_Subscribe_After_Given_Timespan()
 		{
 			/* Setup */
-			var service = new ServiceCollection()
-				.AddRawRabbit<AdvancedMessageContext>()
-				.BuildServiceProvider();
-
-			var subscriber = service.GetService<IBusClient<AdvancedMessageContext>>();
-			var publisher = service.GetService<IBusClient<AdvancedMessageContext>>();
+			var subscriber = BusClientFactory.CreateDefault<AdvancedMessageContext>();
+			var publisher = BusClientFactory.CreateDefault<AdvancedMessageContext>();
 
 			var subscribeTcs = new TaskCompletionSource<bool>();
 			var deplay = TimeSpan.FromSeconds(1);
@@ -53,12 +49,8 @@ namespace RawRabbit.IntegrationTests.Features
 		[Fact]
 		public async Task Should_Retry_And_Leave_Requester_Hanging_On_Rpc()
 		{
-			var service = new ServiceCollection()
-				.AddRawRabbit<AdvancedMessageContext>()
-				.BuildServiceProvider();
-
-			var requester = service.GetService<IBusClient<AdvancedMessageContext>>();
-			var responder = service.GetService<IBusClient<AdvancedMessageContext>>();
+			var requester = BusClientFactory.CreateDefault<AdvancedMessageContext>();
+			var responder = BusClientFactory.CreateDefault<AdvancedMessageContext>();
 
 			var delay = TimeSpan.FromSeconds(1);
 			var hasBeenDelayed = false;

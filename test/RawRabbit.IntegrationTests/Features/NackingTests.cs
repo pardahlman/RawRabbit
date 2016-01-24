@@ -25,13 +25,9 @@ namespace RawRabbit.IntegrationTests.Features
 		public async Task Should_Be_Able_To_Nack_Message()
 		{
 			/* Setup */
-			var service = new ServiceCollection()
-				.AddRawRabbit<AdvancedMessageContext>()
-				.BuildServiceProvider();
-
-			var firstResponder = service.GetService<IBusClient<AdvancedMessageContext>>();
-			var secondResponder = service.GetService<IBusClient<AdvancedMessageContext>>();
-			var requester = service.GetService<IBusClient<AdvancedMessageContext>>();
+			var firstResponder = BusClientFactory.CreateDefault<AdvancedMessageContext>();
+			var secondResponder = BusClientFactory.CreateDefault<AdvancedMessageContext>();
+			var requester = BusClientFactory.CreateDefault<AdvancedMessageContext>();
 
 			var hasBeenNacked = false;
 			firstResponder.RespondAsync<BasicRequest, BasicResponse>((request, context) =>
@@ -77,13 +73,9 @@ namespace RawRabbit.IntegrationTests.Features
 		public async Task Should_Be_Able_To_Nack_On_Subscribe()
 		{
 			/* Setup */
-			var service = new ServiceCollection()
-				.AddRawRabbit<AdvancedMessageContext>()
-				.BuildServiceProvider();
-
-			var subscriber = service.GetService<IBusClient<AdvancedMessageContext>>();
-			var secondSubscriber = service.GetService<IBusClient<AdvancedMessageContext>>();
-			var publisher = service.GetService<IBusClient<AdvancedMessageContext>>();
+			var subscriber = BusClientFactory.CreateDefault<AdvancedMessageContext>();
+			var secondSubscriber = BusClientFactory.CreateDefault<AdvancedMessageContext>();
+			var publisher = BusClientFactory.CreateDefault<AdvancedMessageContext>();
 			var callcount = 0;
 			var subscribeTcs = new TaskCompletionSource<bool>();
 			var secondSubscribeTcs = new TaskCompletionSource<bool>();
