@@ -1,22 +1,29 @@
 # Multiple Subscribers
-### Introduction
-_Publishing_ and _Subscribing_ to messages involves configuration of _queues_ and _exchanges_, as well as deciding on the routing key a published message should use. If you're interested in learning more about the implications of different type of configuration, see the excellent [tutorials on RabbitMq's site](http://www.rabbitmq.com/tutorials/tutorial-one-dotnet.html).
 
-### Default behaviour
-By default, RawRabbit assumes that a when a message is published (`client.PublishAsync<BasicMessage>()`) , all _unique_ subscribers wants it delivered to them. A unique subscriber is just about any subscriber, with the exception of subscribers that have multiple instances on different servers (like a load balanced scenario where the application is installed on multiple servers).
+By default, RawRabbit assumes that when a message is published (`PublishAsync<TMessage>()`), all _unique_, subscribers (with matching routing key on corresponding exchange) wants it. All subscribers are considered to be unique, except those who are hosted in applications that have multiple instances connected to the broker. This can happend if applications are deployed to multiple servers and connected to the same RabbitMq host (or clustered hosts).
 
-_Why is that?_ Well, say that you have a subscriber to a message that sends a message to a email address retrieved from the message. If this application service exists on multiple servers and each of them would receive the message, then the user would get as many mails as instances of the service.
+The reason for this behaviour  is that in many cases it is unwanted to perform an operation multiple times.
 
-The default behaviour, which can be replaced by register a custom implementation of `INamingConvention`, is achieved by creating unique queue names that contains:
+## Default behaviour
+
+### Example: Confirmation email
+A service subscribes to a message `OrderSent`, the service sends an email to the customer. Even if this service has multiple insanse connected to the same broker, only one email should be sent.
+
+The default behaviour is achieved by creating unique queue names that contains:
 * queue name (extracted from naing convention)
 * the application name (extracted from executing folder)
 * a unique counter of subscriber to a message type (given the instance of the bus client). In order to make the queue names shorter, the counter is emitted for the first subscriber.
 
 Note that the unique counter is per instance of `IBusClient`. It is therefore recommended to wire up the bus client as a singelton in the IoC container. If you use the `BusClientFactory` or register the IoC using the ServiceCollection extension `AddRawRabbit()`, this is done for you.
 
-### Customizing
-Sometimes the defaults aren't good enough for a subscriber. One applied example would be a service that hold a cache and at some point a `ClearCacheMessage` is published. When this happends, we want _all_ subscribers to clear the cache. This can be achieved by overriding the default queue prefix:
+## Custom Behaviour
+For some scenarios, the default behaviour is not desired. It can be modified on for each subscriber by setting a _subscription id_, or for the entire client by registering a custom `INamingConvention`. 
 
+### Example: Clear Cache
+A service subscribes to a `NewDataAvailable`, the service should clear its cache when recieving this message. If the service has multiple instance connected to the broker, each instanse should recieve the message and clear the cache.
+
+### Specifying Subscriber Id
+The solution is to specify a unique subscription id for the service.
 ```csharp
 secondSubscriber.SubscribeAsync<BasicMessage>(async (message, context) =>
 {

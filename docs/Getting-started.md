@@ -1,43 +1,92 @@
 # Getting Started
 
-Getting started to work with `RawRabbit` is easy. Download the [latest version on NuGet](https://www.nuget.org/packages/RawRabbit/) and instantiate a new client with the factory class `BusClientFactory`.
+## Installation
+
+Install the latest version of [`RawRabbit`](https://www.nuget.org/packages/RawRabbit/) and [`RawRabbit.vNext`](https://www.nuget.org/packages/RawRabbit.vNext/) from NuGet.
+
+```nuget
+
+  PM> Install-Package RawRabbit
+  PM> Install-Package RawRabbit.vNext
+
+```
+The `vNext` package contains the convenience class `BusClientFactory` that can be used to create a default instance of the `RawRabbit` client. It makes life easier, but is not necesary.
+
+## Creating instanse
+Depending on the scenario, there are a few different ways to instansiate the `RawRabbit` client. The methods described below all have optional arguments for registering specific subdependeices.
+
+### vNext Application wire-up
+If the application is bootstrapped from a `vNext` application, the dependecies and client can be registed by using the `AddRawRabbit` extension for `IServiceCollection`
+
+```csharp
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddRawRabbit(); //optional overrides here, too.
+}
+```
+### Instance from factory
+
+Create a new client by calling `BusClientFactory.CreateDefault`. If no arguments are provided, the local configuration will be used (`guest` user on `localhost:5672` with virtual host `/`).
 
 ```csharp
 var raw = BusClientFactory.CreateDefault();
 ```
+## Broker connection
+As soon as the client is instansiated, it will try to connect to the broker.  By default `RawRabbit` will try to connect to `localhost`. Configuration can be provided in different ways.
 
-Next up, it's time to wire up message handlers and publishers. We're going to look at [remote procedure calls](https://www.rabbitmq.com/tutorials/tutorial-six-dotnet.html) and [publish/subscribe](https://www.rabbitmq.com/tutorials/tutorial-three-dotnet.html). If you're not familiar with these concept, head over to RabbitMq's homepage and check out there great tutorial. We'll still be here when you're back.
+### Configuration object
+The main configuration object for `RawRabbit` is `RawRabbitConfiguration`.
+```csharp
+var config = new RawRabbitConfiguration
+{
+	Username = "user",
+	Password = "password",
+	Port = 5672,
+	VirtualHost = "/vhost",
+	Hostnames = { "production" }
+	// more props here.
+};
+var client = BusClientFactory.CreateDefault(config);
+``` 
 
-## Request/Response (RPC)
+Configuration can be supplied in configuration files. See the [configuration section](configuration.html) for more information.
 
-It takes two to tango; in order to get the _remote procedure calls_ going, we need to set up a bus client that knows how to _respond_ to a (request) message, and another client that can _produce_ a (request) message. A message in the world of `RawRabbit` is a [POCO class](https://en.wikipedia.org/wiki/Plain_Old_CLR_Object).
+## Messaging pattern
+Two of the main messaging patterns for RabbitMq are [remote procedure calls](https://www.rabbitmq.com/tutorials/tutorial-six-dotnet.html) (sometimes refered to as `RPC` or _request/reply_) and [publish/subscribe](https://www.rabbitmq.com/tutorials/tutorial-three-dotnet.html).
+
+### Publish/Subscribe
+Implementing the publish/subscribe pattern can be done with just a few lines of code. The `SubscribeAsyn<TMessage>` method takes one argument `Func<TMessage,TMessageContext,Task>` that will be invoked as the message is recived. Read more about the `TMessageContext` in the [Message Context](fixme) section. Publish a message by calling `PublishAsync<TMessage>` with an instance of the message as argument.
+```csharp
+var client = BusClientFactory.CreateDefault();
+client.SubscribeAsync<BasicMessage>(async (msg, context) =>
+{
+  Console.WriteLine($"Recieved: {msg.Prop}.");
+});
+
+await client.PublishAsync(new BasicMessage { Prop = "Hello, world!"});
+```
+### Request/Reply
+Similar to [publish/subscribe](#publish-subscribe), the message handler for a `RequestAsync<TRequest, TResponse>` in invoked with the request and message context. It returns a `Task<TResponse>` that is sent back to the waiting requester.
 
 ```csharp
-var requester = BusClientFactory.CreateDefault();
-var responder = BusClientFactory.CreateDefault();
-
-responder.RespondAsync<BasicRequest, BasicResponse>(async (request, ctx) =>
+var client = BusClientFactory.CreateDefault();
+client.RespondAsync<BasicRequest, BasicResponse>(async (request, context) =>
 {
-	//do some stuff...
-	return new BasicResponse();
+  return new BasicResponse();
 });
-var recieved = await requester.RequestAsync<BasicRequest, BasicResponse>();
+
+var response = await client.RequestAsync<BasicRequest, BasicResponse>();
 ```
-
-A few things happened here. First off, we created two bus clients. Since we haven't specified any configuration, it defaults to connecting to `localhost:5672` with the user name and password `guest`/`guest` ([the default user](https://www.rabbitmq.com/access-control.html)). Next up, we wired up the event handler for the responder; saying that it knows how to respond to `BasicRequest` with `BasicReponse`.
-
-All message handlers in `RawRabbit` has two arguments. The first argument is the actual message (or request in this case). The second argument is the _message context_. We'll get back to that one later. A responder responds to a request by returning a response. The overhead of RPC calls are almost neglectable. On an average computer, 10'000 RPC calls are executed in approximately 2 seconds (that is 0.2 millisecond per call).
-
-## Publish/Subscribe
-Using a publish/subscribe pattern is a great message driven, asynchronous programming. Programmatically, it does not differ much from the _remote procedure call_ above.
+### Other patterns
+While publish/subscribe and request/reply lays in the core of `RawRabbit`, there are other ways to work with messages. The [BulkGet extension](Bulk-fetching-messages.html) (from NuGet `RawRabbit.Extensions`) allows for retrieving multiple messages from multiple queues and `Ack`/`Nack` them in bulk:
 ```csharp
-var publisher = BusClientFactory.CreateDefault();
-var subscriber = BusClientFactory.CreateDefault();
-			
-subscriber.SubscribeAsync<BasicMessage>((async msg, ctx) =>
-{
-	Console.WriteLine(msg.Prop); // Hello, world!
-});
-publisher.PublishAsync(new BasicMessage {Prop = "Hello, world!"});
+var bulk = client.GetMessages(cfg => cfg
+    .ForMessage<BasicMessage>(msg => msg
+        .FromQueues("first_queue", "second_queue")
+        .WithBatchSize(4))
+    .ForMessage<SimpleMessage>(msg => msg
+        .FromQueues("another_queue")
+        .GetAll()
+        .WithNoAck()
+    ));
 ```
-There is no return statement in the subscriber's message handler (or there would be if the method wasn't marked with `async`). If the properties in the message isn't important you could send a message just by typing `publisher.PublishAsync<BasicMessage>()`.
