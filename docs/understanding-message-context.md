@@ -26,12 +26,9 @@ The default message context, `MessageContext`, has only one member; `GlobalReque
 The `AdvancedMessageContext` contains properties that can be used to [requeue message with delay](delayed-requeue-of-messages.html) and send negative acknowledgements. Note that there is *nothing magical* with the `AdvancedMessageContext`. It is just a [custom context]("#custom-context").
 
 ### Instansiate bus with advanced context
-The easiest way to create an instance of a `RawRabbit` client that uses an advanced context is to use the generic `AddRawRabbit<TMessageContext>` method on the `IServiceCollection` (from `RawRabbit.vNext`) and then resolve it from there.
+The easiest way to create an instance of a `RawRabbit` client that uses an advanced context is to use the generic `CreateDefault<TMessageContext>` method on `BusClientFactory` (from `RawRabbit.vNext`).
 ```csharp
-var service = new ServiceCollection()
-  .AddRawRabbit<AdvancedMessageContext>()
-  .BuildServiceProvider();
-var client = service.GetService<IBusClient<AdvancedMessageContext>>();
+var client = BusClientFactory.CreateDefault<AdvancedMessageContext>();
 ```
 ## Custom Context
 
@@ -42,6 +39,7 @@ There are only two requirements for a message context class. It needs to impleme
 public class CustomContext : IMessageContext
 {
   public string CustomProperty { get; set; }
+  public ulong DeliveryTag {get; set;}
   public Guid GlobalRequestId { get; set; }
 }
 ```
@@ -49,10 +47,30 @@ public class CustomContext : IMessageContext
 Message contexts are provided to the messages by the registered `IMessageContextProvider`. The default implementation, `MessageContextProvider<TMessageContext>` can be used for most context (typically `POCO` classes).
 
 ### The Context Enhancer
-If the context contains 
+A recieved message passes through the registered `IContextEnhancer` before any message handler is invoked. The method `WireUpContextFeatures` is called with the current context, consumer and `BasicDeliverEventArgs` (from `RabbitMQ.Client`).
+```csharp
+public class CustomContextEnhancer : IContextEnhancer
+{
+  public void WireUpContextFeatures<TMessageContext>(TMessageContext context, IRawConsumer consumer, BasicDeliverEventArgs args)
+    where TMessageContext : IMessageContext
+  {
+    var customContext = context as CustomContext;
+    if (customContext == null)
+    {
+      return;
+    }
+    customContext.DeliveryTag = args.DeliveryTag;
+  }
+}
+```
 
 ### The RawRabbit Client
+The easist way to create a client is by using the generic `CreateDefault<TMessageContext>` method on `BusClientFactory`.
 
+```csharp
+var client = BusClientFactory.CreateDefault<AdvancedMessageContext>();
+```
+The client can also be resolved from the service collection.
 ```csharp
 var service = new ServiceCollection()
   .AddRawRabbit<CustomContext>()

@@ -1,4 +1,4 @@
-
+﻿
 Welcome to RawRabbit's documentations
 =====================================
 
@@ -11,15 +11,13 @@ Contents:
 
    Getting-started
    understanding-message-context
+   configuration
    Extending-RawRabbit
    Bulk-fetching-messages
-   Chaining-messages
    Publisher-Acknowledgements
    Message-Priority
    Multiple-Subscribers-for-Messages
-   Rpc-using-direct-reply-to
    Delayed-requeue-of-messages
-   Configuration-and-Customization
 
 
 

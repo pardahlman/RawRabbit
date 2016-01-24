@@ -44,32 +44,12 @@ var config = new RawRabbitConfiguration
 	Port = 5672,
 	VirtualHost = "/vhost",
 	Hostnames = { "production" }
+	// more props here.
 };
 var client = BusClientFactory.CreateDefault(config);
 ``` 
 
-### vNext Configuration builder
-If the application is bootstrapped from a `vNext` application, the `Action<IConfigurationBuilder>` argument can be used to specify configuration files. 
-```csharp
-public void ConfigureServices(IServiceCollection services)
-{
-    services.AddRawRabbit(cfg => cfg.AddJsonFile("rawrabbit.json"))
-}
-```
-Read more about `rawrabbit.json`in the configuration section.
-
-### ConnectionString
-The format for connection strings are: `username:password@host[,host2,..hostN]:port/vhost(?param=value)`. Where hosts are seperated by a comma seperated list. Additional parameters are optional, and include
-
-* `requestTimeout` the number of seconds before RPC request times out.
-
-For localhost that is `guest:guest@localhost:5672/?requestTimeout=10`. The class `ConnectionStringParser` can be used to convert the connection string into a `RawRabbitConfiguration` object.
-
-```csharp
-var connectionString = ConfigurationManager.ConnectionStrings["RabbitMq"];
-var config = ConnectionStringParser.Parse(connectionString.ConnectionString);
-var client = BusClientFactory.CreateDefault(config);
-```
+Configuration can be supplied in configuration files. See the [configuration section](configuration.html) for more information.
 
 ## Messaging pattern
 Two of the main messaging patterns for RabbitMq are [remote procedure calls](https://www.rabbitmq.com/tutorials/tutorial-six-dotnet.html) (sometimes refered to as `RPC` or _request/reply_) and [publish/subscribe](https://www.rabbitmq.com/tutorials/tutorial-three-dotnet.html).

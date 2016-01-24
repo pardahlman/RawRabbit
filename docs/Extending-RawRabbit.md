@@ -1,10 +1,20 @@
 # Extending RawRabbit
-The core mission for `RawRabbit` is to provide a solid foundation enabling simple Request/Reply and Publish/Subscribe operations. However, sometimes this is not enough and you'd like a way to do more specialized tasks. Below is an introduction how you can extend the `RawRabbit` client with just about anything you'd like.
+`RawRabbit` provides a solid foundation for reliable request/reply and publish/subscribe operations. In addition to this, [`RawRabbit.Extensions`](https://www.nuget.org/packages/RawRabbit.Extensions/) can be used to write extensions to the client, making it possilbe to customize the client for any specific needs. The extension framework exposes a method for resolving registered `RawRabbit` internal services.
 
-### The ExtendableBusClient
-The `ExtendableBusClient` is found in [`RawRabbit.Extensions`](https://www.nuget.org/packages/RawRabbit.Extensions/) NuGet pacakge. It is an super class of the normal bus client, that exposes the method `GetService<TService>` (which is just a wrapper around [`Microsoft.Extensions.DependencyInjection`](https://www.nuget.org/packages/Microsoft.Extensions.DependencyInjection.Abstractions/)). This method allows you to resolve the registered services that `RawRabbit` uses. This way, if you for example has a custom `IContextProvider` that you need to get a hold of, it's just a call away.
+## Installation
+Install the latest version of `RawRabbit.Extensions` from NuGet.
 
-Below is a small boiler plait for an extension
+```nuget
+
+  PM> Install-Package RawRabbit.Extensions
+
+```
+
+## The Extendable Bus Client
+
+The `ExtendableBusClient` is an super class of the normal bus client, that exposes the method `GetService<TService>` (which is just a wrapper around [`Microsoft.Extensions.DependencyInjection.IServiceProvider`](https://www.nuget.org/packages/Microsoft.Extensions.DependencyInjection.Abstractions/)). This method allows you to resolve the registered services that `RawRabbit` uses. This way, if you for example has a custom `IContextProvider` that you need to get a hold of, it's just a call away.
+
+## Extension boiler plait
 
 ```csharp
 public static class RawRabbitExtensionExample
@@ -24,4 +34,5 @@ public static class RawRabbitExtensionExample
 }
 ```
 
-Wondering about the generic parameter `TContext`? This has to do with the message context that you're using. It can be handly when [chaining messages](https://github.com/pardahlman/RawRabbit/wiki/Chaining-messages) or using advanced contexts like  [delayed requeue of messages](https://github.com/pardahlman/RawRabbit/wiki/Delayed-requeue-of-messages).
+## List of extensions
+The [BulkGet extension](Bulk-fetching-message.html) can be used to fetch multiple messages from multiple queues and `ACK`/`NACK` them in bulk.
