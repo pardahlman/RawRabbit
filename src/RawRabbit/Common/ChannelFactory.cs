@@ -15,21 +15,12 @@ namespace RawRabbit.Common
 		private ThreadLocal<IModel> _threadChannels; 
 		private IConnection _connection;
 		private readonly ILogger _logger = LogManager.GetLogger<ChannelFactory>();
-		private RawRabbitConfiguration _config;
+		private readonly RawRabbitConfiguration _config;
 
-		public ChannelFactory(RawRabbitConfiguration config, IClientPropertyProvider propsProvider)
+		public ChannelFactory(RawRabbitConfiguration config, IConnectionFactory connectionFactory, IClientPropertyProvider propsProvider)
 		{
-			_connectionFactory = new ConnectionFactory
-			{
-				VirtualHost =  config.VirtualHost,
-				UserName = config.Username,
-				Password = config.Password,
-				Port = config.Port,
-				AutomaticRecoveryEnabled = config.AutomaticRecovery,
-				TopologyRecoveryEnabled = config.TopologyRecovery,
-				NetworkRecoveryInterval = config.RecoveryInterval,
-				ClientProperties = propsProvider.GetClientProperties(config)
-			};
+			_connectionFactory = connectionFactory;
+			
 			_config = config;
 			_threadChannels = new ThreadLocal<IModel>(true);
 
@@ -37,7 +28,7 @@ namespace RawRabbit.Common
 			{
 				_logger.LogDebug("Connecting to primary host.");
 				_connection = _connectionFactory.CreateConnection(_config.Hostnames);
-				_logger.LogInformation($"Successfully established connection.");
+				_logger.LogInformation("Successfully established connection.");
 			}
 			catch (BrokerUnreachableException e)
 			{

@@ -50,37 +50,30 @@ namespace RawRabbit.Common
 				_logger.LogInformation($"Recieved ack for {args.DeliveryTag} with multiple set to '{args.Multiple}'");
 				if (args.Multiple)
 				{
-					_logger.LogInformation($"Woop woop, is multiple {args.DeliveryTag}");
 					for (var i = args.DeliveryTag; i > 0; i--)
 					{
-						DisposeTimer(i);
+						CompleteConfirm(i);
 					}
 				}
 				else
 				{
-					DisposeTimer(args.DeliveryTag);
+					CompleteConfirm(args.DeliveryTag);
 				}
 
+			};
+			_channel.FlowControl += (sender, args) =>
+			{
+				_logger.LogInformation($"The flow control event has been raised on channel '{_channel.ChannelNumber}'. Active: {args.Active}.");
 			};
 			channel.ConfirmSelect();
 		}
 
-		private void DisposeTimer(ulong tag)
+		private void CompleteConfirm(ulong tag)
 		{
 			TaskCompletionSource<ulong> tcs;
 			if (_deliveredAckDictionary.TryRemove(tag, out tcs))
 			{
-				Timer ackTimer;
-				if (_ackTimers.TryRemove(tag, out ackTimer))
-				{
-					_logger.LogDebug($"Disposed ack timer for {tag}");
-					ackTimer.Dispose();
-				}
-				else
-				{
-					_logger.LogDebug($"$Unable to find ack timer for {tag}. It has probably been ack'ed allready.");
-				}
-				_logger.LogDebug($"Message with delivery tag {tag} has been acknowledged by broker.");
+				TryDisposeTimer(tag);
 				tcs.TrySetResult(tag);
 			}
 		}
@@ -100,11 +93,32 @@ namespace RawRabbit.Common
 			_ackTimers.TryAdd(nextTag, new Timer(state =>
 			{
 				_logger.LogWarning($"Ack for {nextTag} has timed out.");
-				_ackTimers[nextTag].Dispose();
-				_deliveredAckDictionary[nextTag].TrySetException(
-						new PublishConfirmException($"The broker did not send a publish acknowledgement for message {nextTag} within {_publishTimeout.ToString("g")}."));
+				TryDisposeTimer(nextTag);
+
+				TaskCompletionSource<ulong> ackTcs;
+				if (!_deliveredAckDictionary.TryRemove(nextTag, out ackTcs))
+				{
+					_logger.LogInformation($"TaskCompletionSource for '{nextTag}' not found. Message has probably been confirmed.");
+					return;
+				}
+				ackTcs.TrySetException(new PublishConfirmException(
+					$"The broker did not send a publish acknowledgement for message {nextTag} within {_publishTimeout.ToString("g")}."));
 			}, null, _publishTimeout, new TimeSpan(-1)));
 			return tcs.Task;
+		}
+
+		private void TryDisposeTimer(ulong tag)
+		{
+			Timer ackTimer;
+			if (_ackTimers.TryRemove(tag, out ackTimer))
+			{
+				_logger.LogDebug($"Disposed ack timer for {tag}");
+				ackTimer.Dispose();
+			}
+			else
+			{
+				_logger.LogDebug($"$Unable to find ack timer for {tag}.");
+			}
 		}
 	}
 }

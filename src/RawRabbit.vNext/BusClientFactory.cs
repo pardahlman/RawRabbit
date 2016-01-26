@@ -1,7 +1,9 @@
 ﻿using System;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using RawRabbit.Common;
 using RawRabbit.Configuration;
+using RawRabbit.Context;
 using RawRabbit.Logging;
 
 namespace RawRabbit.vNext
@@ -41,6 +43,15 @@ namespace RawRabbit.vNext
 			LogManager.CurrentFactory = serviceProvider.GetService<ILoggerFactory>();
 
 			return serviceProvider.GetService<BusClient>();
+		}
+
+		public static IBusClient<TMessageContext> CreateDefault<TMessageContext>(Action<IConfigurationBuilder> config = null, Action<IServiceCollection> custom = null) where TMessageContext : IMessageContext
+		{
+			var serviceProvider = new ServiceCollection()
+				.AddRawRabbit<TMessageContext>(config, custom)
+				.BuildServiceProvider();
+
+			return serviceProvider.GetService<IBusClient<TMessageContext>>();
 		}
 	}
 }

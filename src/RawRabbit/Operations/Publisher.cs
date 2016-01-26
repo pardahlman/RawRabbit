@@ -17,7 +17,7 @@ namespace RawRabbit.Operations
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
 		private readonly IPublishAcknowledger _acknowledger;
 		private readonly IBasicPropertiesProvider _propertiesProvider;
-		private IModel _channel;
+		protected IModel _channel;
 		private Timer _channelTimer;
 		private readonly ILogger _logger = LogManager.GetLogger<Publisher<TMessageContext>>();
 
@@ -45,7 +45,7 @@ namespace RawRabbit.Operations
 			return publishAckTask;
 		}
 
-		private IModel GetOrCreateChannel(PublishConfiguration config)
+		protected virtual IModel GetOrCreateChannel(PublishConfiguration config)
 		{
 			if (_channel?.IsOpen ?? false)
 			{
@@ -53,13 +53,27 @@ namespace RawRabbit.Operations
 			}
 			_channelTimer = new Timer(state =>
 			{
-				_channelTimer?.Dispose();
-				_channel.Dispose();
-			}, null, TimeSpan.FromSeconds(10), new TimeSpan(-1));
+				var firstRef = _channel.NextPublishSeqNo;
+				Timer inner = null;
+				inner = new Timer(o =>
+				{
+					inner?.Dispose();
+					var secondRef = _channel.NextPublishSeqNo;
+					if (firstRef != secondRef)
+					{
+						_logger.LogDebug($"Channel has published ${secondRef-firstRef} message(s) the last second and is still considered active.");
+						return;
+					}
+					_logger.LogInformation($"sClosing publish channel '{_channel.ChannelNumber}'");
+					_channelTimer?.Dispose();
+					_channel.Dispose();
+				}, null, TimeSpan.FromSeconds(1), new TimeSpan(-1));
+			}, null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
+
 			_channel = ChannelFactory.CreateChannel();
 			_acknowledger.SetActiveChannel(_channel);
-
 			DeclareExchange(config.Exchange, _channel);
+
 			return _channel;
 		}
 

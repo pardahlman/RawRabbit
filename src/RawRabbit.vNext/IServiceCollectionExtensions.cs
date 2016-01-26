@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using RabbitMQ.Client;
 using RawRabbit.Common;
 using RawRabbit.Configuration;
 using RawRabbit.Consumer.Abstraction;
@@ -38,8 +39,24 @@ namespace RawRabbit.vNext
 			{
 				collection.TryAddSingleton(typeof(RawRabbitConfiguration), c => RawRabbitConfiguration.Local);
 			}
+			
 
 			collection
+				.AddSingleton< IConnectionFactory, ConnectionFactory>(provider =>
+				{
+					var cfg = provider.GetService<RawRabbitConfiguration>();
+					return new ConnectionFactory
+					{
+						VirtualHost = cfg.VirtualHost,
+						UserName = cfg.Username,
+						Password = cfg.Password,
+						Port = cfg.Port,
+						AutomaticRecoveryEnabled = cfg.AutomaticRecovery,
+						TopologyRecoveryEnabled = cfg.TopologyRecovery,
+						NetworkRecoveryInterval = cfg.RecoveryInterval,
+						ClientProperties = provider.GetService<IClientPropertyProvider>().GetClientProperties(cfg)
+					};
+				})
 				.AddSingleton<IClientPropertyProvider, ClientPropertyProvider>()
 				.AddSingleton<ILoggerFactory, LoggerFactory>()
 				.AddTransient<IMessageSerializer, JsonMessageSerializer>()
