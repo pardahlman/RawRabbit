@@ -71,7 +71,7 @@ namespace RawRabbit.Operations
 			_responseChannel = (_responseChannel?.IsOpen ?? false)
 				? _responseChannel
 				: ChannelFactory.CreateChannel();
-			_logger.LogDebug($"Sending reponse to request with correlation '{requestPayload.BasicProperties.CorrelationId}'.");
+			_logger.LogDebug($"Sending response to request with correlation '{requestPayload.BasicProperties.CorrelationId}'.");
 			_responseChannel.BasicPublish(
 				exchange: "",
 				routingKey: requestPayload.BasicProperties.ReplyTo,

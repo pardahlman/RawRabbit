@@ -19,7 +19,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		public async Task Should_Perform_Basic_Rpc_Without_Any_Config()
 		{
 			/* Setup */
-			var response = new BasicResponse { Prop = "This is the reponse." };
+			var response = new BasicResponse { Prop = "This is the response." };
 			var requester = BusClientFactory.CreateDefault();
 			var responder = BusClientFactory.CreateDefault();
 			responder.RespondAsync<BasicRequest, BasicResponse>((req, i) =>
@@ -38,7 +38,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		public async Task Should_Perform_Rpc_Without_Direct_Reply_To()
 		{
 			/* Setup */
-			var response = new BasicResponse { Prop = "This is the reponse." };
+			var response = new BasicResponse { Prop = "This is the response." };
 			var requester = BusClientFactory.CreateDefault();
 			var responder = BusClientFactory.CreateDefault();
 			responder.RespondAsync<BasicRequest, BasicResponse>((req, i) =>
@@ -65,13 +65,13 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		{
 			/* Setup */
 			var payloads = new List<Guid> { Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid() };
-			var uniqueReponse = new ConcurrentStack<Guid>(payloads);
+			var uniqueResponse = new ConcurrentStack<Guid>(payloads);
 			var requester = BusClientFactory.CreateDefault();
 			var responder = BusClientFactory.CreateDefault();
 			responder.RespondAsync<BasicRequest, BasicResponse>((req, i) =>
 			{
 				Guid payload;
-				if (!uniqueReponse.TryPop(out payload))
+				if (!uniqueResponse.TryPop(out payload))
 				{
 					Assert.True(false, "No entities in stack. Try purgin the response queue.");
 				};
@@ -123,7 +123,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		public async Task Should_Work_With_Queueing_Consumer_Factory()
 		{
 			/* Setup */
-			var response = new BasicResponse { Prop = "This is the reponse." };
+			var response = new BasicResponse { Prop = "This is the response." };
 			var requester = BusClientFactory.CreateDefault();
 
 			var responder = BusClientFactory.CreateDefault(service => service.AddTransient<IConsumerFactory, QueueingBaiscConsumerFactory>());

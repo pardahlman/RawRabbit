@@ -61,10 +61,10 @@ namespace RawRabbit.Operations
 					var secondRef = _channel.NextPublishSeqNo;
 					if (firstRef != secondRef)
 					{
-						_logger.LogDebug($"Channel has published ${secondRef-firstRef} message(s) the last second and is still considered active.");
+						_logger.LogDebug($"Channel has published {secondRef-firstRef} message(s) the last second and is still considered active.");
 						return;
 					}
-					_logger.LogInformation($"sClosing publish channel '{_channel.ChannelNumber}'");
+					_logger.LogInformation($"Closing publish channel '{_channel.ChannelNumber}'");
 					_channelTimer?.Dispose();
 					_channel.Dispose();
 				}, null, TimeSpan.FromSeconds(1), new TimeSpan(-1));
