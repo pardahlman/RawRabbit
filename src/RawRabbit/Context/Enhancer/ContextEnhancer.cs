@@ -11,12 +11,12 @@ namespace RawRabbit.Context.Enhancer
 	public class ContextEnhancer : IContextEnhancer
 	{
 		private readonly IChannelFactory _channelFactory;
-		private readonly INamingConvetions _convetions;
+		private readonly INamingConventions _conventions;
 
-		public ContextEnhancer(IChannelFactory channelFactory, INamingConvetions convetions)
+		public ContextEnhancer(IChannelFactory channelFactory, INamingConventions conventions)
 		{
 			_channelFactory = channelFactory;
-			_convetions = convetions;
+			_conventions = conventions;
 		}
 
 		public void WireUpContextFeatures<TMessageContext>(TMessageContext context, IRawConsumer consumer, BasicDeliverEventArgs args) where TMessageContext : IMessageContext
@@ -40,8 +40,8 @@ namespace RawRabbit.Context.Enhancer
 
 			advancedCtx.RetryLater = timespan =>
 			{
-				var dlxName = _convetions.DeadLetterExchangeNamingConvention();
-				var dlQueueName = _convetions.RetryQueueNamingConvention();
+				var dlxName = _conventions.DeadLetterExchangeNamingConvention();
+				var dlQueueName = _conventions.RetryQueueNamingConvention();
 				var channel = _channelFactory.CreateChannel();
 				channel.ExchangeDeclare(dlxName, ExchangeType.Direct);
 				channel.QueueDeclare(dlQueueName, false, false, true, new Dictionary<string, object>
