@@ -20,27 +20,27 @@ namespace RawRabbit.Common
 	public class ConfigurationEvaluator : IConfigurationEvaluator
 	{
 		private readonly RawRabbitConfiguration _clientConfig;
-		private readonly INamingConvetions _convetions;
+		private readonly INamingConventions _conventions;
 		private readonly string _directReplyTo = "amq.rabbitmq.reply-to";
 
-		public ConfigurationEvaluator(RawRabbitConfiguration clientConfig, INamingConvetions convetions)
+		public ConfigurationEvaluator(RawRabbitConfiguration clientConfig, INamingConventions conventions)
 		{
 			_clientConfig = clientConfig;
-			_convetions = convetions;
+			_conventions = conventions;
 		}
 
 		public SubscriptionConfiguration GetConfiguration<TMessage>(Action<ISubscriptionConfigurationBuilder> configuration = null)
 		{
-			var routingKey = _convetions.QueueNamingConvention(typeof(TMessage));
+			var routingKey = _conventions.QueueNamingConvention(typeof(TMessage));
 				var queueConfig = new QueueConfiguration(_clientConfig.Queue)
 			{
 				QueueName = routingKey,
-				NameSuffix = _convetions.SubscriberQueueSuffix(typeof(TMessage))
+				NameSuffix = _conventions.SubscriberQueueSuffix(typeof(TMessage))
 			};
 
 			var exchangeConfig = new ExchangeConfiguration(_clientConfig.Exchange)
 			{
-				ExchangeName = _convetions.ExchangeNamingConvention(typeof(TMessage))
+				ExchangeName = _conventions.ExchangeNamingConvention(typeof(TMessage))
 			};
 
 			var builder = new SubscriptionConfigurationBuilder(queueConfig, exchangeConfig, routingKey);
@@ -52,9 +52,9 @@ namespace RawRabbit.Common
 		{
 			var exchangeConfig = new ExchangeConfiguration(_clientConfig.Exchange)
 			{
-				ExchangeName = _convetions.ExchangeNamingConvention(typeof(TMessage))
+				ExchangeName = _conventions.ExchangeNamingConvention(typeof(TMessage))
 			};
-			var routingKey = _convetions.QueueNamingConvention(typeof(TMessage));
+			var routingKey = _conventions.QueueNamingConvention(typeof(TMessage));
 			var builder = new PublishConfigurationBuilder(exchangeConfig, routingKey);
 			configuration?.Invoke(builder);
 			return builder.Configuration;
@@ -64,12 +64,12 @@ namespace RawRabbit.Common
 		{
 			var queueConfig = new QueueConfiguration(_clientConfig.Queue)
 			{
-				QueueName = _convetions.QueueNamingConvention(typeof(TRequest))
+				QueueName = _conventions.QueueNamingConvention(typeof(TRequest))
 			};
 
 			var exchangeConfig = new ExchangeConfiguration(_clientConfig.Exchange)
 			{
-				ExchangeName = _convetions.RpcExchangeNamingConvention(typeof(TRequest), typeof(TResponse)),
+				ExchangeName = _conventions.RpcExchangeNamingConvention(typeof(TRequest), typeof(TResponse)),
 			};
 
 			var builder = new ResponderConfigurationBuilder(queueConfig, exchangeConfig);
@@ -90,14 +90,14 @@ namespace RawRabbit.Common
 
 			var exchangeConfig = new ExchangeConfiguration(_clientConfig.Exchange)
 			{
-				ExchangeName = _convetions.RpcExchangeNamingConvention(typeof(TRequest), typeof(TResponse))
+				ExchangeName = _conventions.RpcExchangeNamingConvention(typeof(TRequest), typeof(TResponse))
 			};
 
 			var defaultConfig = new RequestConfiguration
 			{
 				ReplyQueue = replyQueueConfig,
 				Exchange = exchangeConfig,
-				RoutingKey = _convetions.QueueNamingConvention(typeof(TRequest)),
+				RoutingKey = _conventions.QueueNamingConvention(typeof(TRequest)),
 				ReplyQueueRoutingKey = replyQueueConfig.QueueName
 			};
 

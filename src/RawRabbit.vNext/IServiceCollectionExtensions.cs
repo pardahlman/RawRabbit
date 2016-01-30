@@ -70,7 +70,7 @@ namespace RawRabbit.vNext
 				.AddTransient<IPublishAcknowledger, PublishAcknowledger>(
 					p => new PublishAcknowledger(p.GetService<RawRabbitConfiguration>().PublishConfirmTimeout)
 				)
-				.AddSingleton<INamingConvetions, NamingConvetions>()
+				.AddSingleton<INamingConventions, NamingConventions>()
 				.AddTransient<ISubscriber<TMessageContext>, Subscriber<TMessageContext>>()
 				.AddTransient<IPublisher, Publisher<TMessageContext>>()
 				.AddTransient<IResponder<TMessageContext>, Responder<TMessageContext>>()

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace RawRabbit.Common
 {
-	public interface INamingConvetions
+	public interface INamingConventions
 	{
 		Func<Type, string> ExchangeNamingConvention { get; set; }
 		Func<Type, string> QueueNamingConvention { get; set; }
@@ -18,7 +18,7 @@ namespace RawRabbit.Common
 		Func<Type, string> SubscriberQueueSuffix { get; set; }
 	}
 
-	public class NamingConvetions : INamingConvetions
+	public class NamingConventions : INamingConventions
 	{
 		private readonly IEnumerable<string> _disallowedDirectoryNames = new[] {"bin", "debug", "release"};
 		private readonly Dictionary<Type, int> _subscriberCounter;
@@ -32,7 +32,7 @@ namespace RawRabbit.Common
 		public virtual Func<string> RetryQueueNamingConvention { get; set; }
 		public virtual Func<Type, string> SubscriberQueueSuffix { get; set; }
 
-		public NamingConvetions()
+		public NamingConventions()
 		{
 			_subscriberCounter = new Dictionary<Type,int>();
 			
