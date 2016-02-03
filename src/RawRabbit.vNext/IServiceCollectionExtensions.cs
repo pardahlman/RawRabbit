@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -51,6 +52,7 @@ namespace RawRabbit.vNext
 						UserName = cfg.Username,
 						Password = cfg.Password,
 						Port = cfg.Port,
+						HostName = cfg.Hostnames.FirstOrDefault() ?? string.Empty,
 						AutomaticRecoveryEnabled = cfg.AutomaticRecovery,
 						TopologyRecoveryEnabled = cfg.TopologyRecovery,
 						NetworkRecoveryInterval = cfg.RecoveryInterval,
