@@ -17,7 +17,7 @@ namespace RawRabbit.Common
 		private readonly ILogger _logger = LogManager.GetLogger<ChannelFactory>();
 		private readonly RawRabbitConfiguration _config;
 
-		public ChannelFactory(RawRabbitConfiguration config, IConnectionFactory connectionFactory, IClientPropertyProvider propsProvider)
+		public ChannelFactory(RawRabbitConfiguration config, IConnectionFactory connectionFactory)
 		{
 			_connectionFactory = connectionFactory;
 			
