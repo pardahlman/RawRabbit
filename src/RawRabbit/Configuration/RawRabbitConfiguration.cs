@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using RawRabbit.Configuration.Exchange;
+using RabbitMQ.Client;
+using ExchangeType = RawRabbit.Configuration.Exchange.ExchangeType;
 
 namespace RawRabbit.Configuration
 {
@@ -53,6 +54,11 @@ namespace RawRabbit.Configuration
 		/// </summary>
 		public bool AutoCloseConnection { get; set; }
 
+		/// <summary>
+		/// Used for configure Ssl connection to the broker(s).
+		/// </summary>
+		public SslOption Ssl { get; set; }
+
 		public RawRabbitConfiguration()
 		{
 			RequestTimeout = TimeSpan.FromSeconds(10);
@@ -62,7 +68,7 @@ namespace RawRabbit.Configuration
 			AutomaticRecovery = true;
 			TopologyRecovery = true;
 			RecoveryInterval = TimeSpan.FromSeconds(10);
-
+			Ssl = new SslOption {Enabled = false};
 			Hostnames = new List<string>();
 			Exchange = new GeneralExchangeConfiguration
 			{

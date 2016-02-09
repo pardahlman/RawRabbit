@@ -56,7 +56,8 @@ namespace RawRabbit.vNext
 						AutomaticRecoveryEnabled = cfg.AutomaticRecovery,
 						TopologyRecoveryEnabled = cfg.TopologyRecovery,
 						NetworkRecoveryInterval = cfg.RecoveryInterval,
-						ClientProperties = provider.GetService<IClientPropertyProvider>().GetClientProperties(cfg)
+						ClientProperties = provider.GetService<IClientPropertyProvider>().GetClientProperties(cfg),
+						Ssl = cfg.Ssl
 					};
 				})
 				.AddSingleton<IClientPropertyProvider, ClientPropertyProvider>()
