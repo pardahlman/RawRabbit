@@ -24,7 +24,7 @@ namespace RawRabbit.vNext
 		public static IServiceCollection AddRawRabbit(this IServiceCollection collection, Action<IConfigurationBuilder> config = null, Action<IServiceCollection> custom = null)
 		{
 			return collection
-				.AddTransient<BusClient>()
+				.AddTransient<IBusClient,BusClient>()
 				.AddRawRabbit<MessageContext>(config, custom);
 		}
 
