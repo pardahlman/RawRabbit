@@ -2,8 +2,21 @@
 {
 	public class QueueArgument
 	{
+		/// <summary>
+		/// Indicates that the queue is a priority queue that honours the <br />
+		/// priority property of a recieved message.
+		/// </summary>
 		public static readonly string MaxPriority = "x-max-priority";
+
+		/// <summary>
+		/// Sets what exchange that will be used as a dead letter exchange. <br/>
+		/// More information: https://www.rabbitmq.com/dlx.html
+		/// </summary>
 		public static readonly string DeadLetterExchange = "x-dead-letter-exchange";
+
+		/// <summary>
+		/// Sets the Time To Live (TTL) in milliseconds for messages in the queue.
+		/// </summary>
 		public static readonly string MessageTtl = "x-message-ttl";
 
 		/// <summary>
