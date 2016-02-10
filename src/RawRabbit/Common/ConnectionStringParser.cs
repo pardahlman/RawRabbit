@@ -7,7 +7,7 @@ namespace RawRabbit.Common
 {
 	public class ConnectionStringParser
 	{
-		private static readonly Regex MainRegex = new Regex(@"(?<username>.*):(?<password>.*)@(?<hosts>.*):(?<port>\d*)(?<vhost>.*)\?");
+		private static readonly Regex MainRegex = new Regex(@"(?<username>.*):(?<password>.*)@(?<hosts>.*):(?<port>\d*)(?<vhost>[^\?]*)");
 		private static readonly Regex RequestTimeout = new Regex(@"[Rr]equest[Tt]imeout=(?<timeout>\d+)");
 
 		public static RawRabbitConfiguration Parse(string connectionString)
