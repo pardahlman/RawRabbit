@@ -1,5 +1,5 @@
 ﻿{
-	"version": "1.8.5-rc1-final",
+	"version": "1.8.6-rc1-final",
 	"authors": [ "pardahlman", "enrique-avalon" ],
 	"description": "Take advantage of vNext for your RawRabbit setup. Extenssion for IServiceCollection, IConfiguration support and much more!",
 	"iconUrl": "http://pardahlman.se/raw/icon.png",
