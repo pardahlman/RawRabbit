@@ -75,7 +75,7 @@ namespace RawRabbit.Operations
 						_logger.LogWarning($"Unable to find request timer for {props.CorrelationId}.");
 					}
 					timer?.Dispose();
-					responseTcs.TrySetException(new TimeoutException($"The request timed out after {_requestTimeout.ToString("g")}."));
+					responseTcs.TrySetException(new TimeoutException($"The request '{props.CorrelationId}' timed out after {_requestTimeout.ToString("g")}."));
 				}, null, _requestTimeout, new TimeSpan(-1)));
 
 			consumer.Model.BasicPublish(
@@ -143,7 +143,16 @@ namespace RawRabbit.Operations
 				{
 					var tcs = tcsAsObj as TaskCompletionSource<TResponse>;
 					_logger.LogDebug($"Recived response with correlationId {args.BasicProperties.CorrelationId}.");
-					_requestTimerDictionary[args.BasicProperties.CorrelationId]?.Dispose();
+
+					Timer timer;
+					if (_requestTimerDictionary.TryRemove(args.BasicProperties.CorrelationId, out timer))
+					{
+						timer?.Dispose();
+					}
+					else
+					{
+						_logger.LogInformation($"Unable to find request timer for message {args.BasicProperties.CorrelationId}.");
+					}
 					_errorStrategy.OnResponseRecievedAsync(args, tcs);
 					if (tcs?.Task?.IsFaulted ?? true)
 					{
