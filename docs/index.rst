@@ -18,6 +18,7 @@ Contents:
    Message-Priority
    Multiple-Subscribers-for-Messages
    Delayed-requeue-of-messages
+   rabbitmq-features
 
 
 
