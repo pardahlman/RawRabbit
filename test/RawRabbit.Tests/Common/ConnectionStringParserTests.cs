@@ -35,6 +35,7 @@ namespace RawRabbit.Tests.Common
 			/* Assert */
 			Assert.Equal("username", config.Username);
 			Assert.Equal("password", config.Password);
+			Assert.Equal("/", config.VirtualHost);
 			Assert.Equal("host1", config.Hostnames[0]);
 			Assert.Equal("host2", config.Hostnames[1]);
 		}
