@@ -306,5 +306,51 @@ namespace RawRabbit.Tests.Common
 			Assert.Equal(false, config.TopologyRecovery);
 		}
 
+		[Fact]
+		public void Should_Throw_Format_Exception_When_ConnectionString_Has_Bad_Port()
+		{
+			/* Setup */
+			const string connectionString = "username:password@host1,host2:port";
+			Exception exception = null;
+
+			/* Test */
+			try
+			{
+				ConnectionStringParser.Parse(connectionString);
+			}
+			catch (Exception e)
+			{
+				exception = e;
+			}
+
+			/* Assert */
+			Assert.NotNull(exception);
+			Assert.IsType(typeof(FormatException), exception);
+			Assert.Equal("The supplied port 'port' in the connection string is not a number", exception.Message);
+		}
+
+		[Fact]
+		public void Should_Throw_Argument_Exception_When_ConnectionString_Has_Bad_Property()
+		{
+			/* Setup */
+			const string connectionString = "username:password@host1,host2?badproperty=true";
+			Exception exception = null;
+
+			/* Test */
+			try
+			{
+				ConnectionStringParser.Parse(connectionString);
+			}
+			catch (Exception e)
+			{
+				exception = e;
+			}
+
+			/* Assert */
+			Assert.NotNull(exception);
+			Assert.IsType(typeof(ArgumentException), exception);
+			Assert.Equal("No configuration property named 'badproperty'", exception.Message);
+		}
+
 	}
 }
