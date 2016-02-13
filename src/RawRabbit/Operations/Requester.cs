@@ -116,17 +116,18 @@ namespace RawRabbit.Operations
 		private IRawConsumer GetOrCreateConsumerForType<TResponse>(IConsumerConfiguration cfg)
 		{
 			var responseType = typeof(TResponse);
-			if (_typeToConsumer.ContainsKey(responseType))
+			IRawConsumer existingConsumer;
+			if (_typeToConsumer.TryGetValue(responseType, out existingConsumer))
 			{
 				_logger.LogDebug($"Channel for existing cunsomer of {responseType.Name} found.");
-				if (_typeToConsumer[responseType].Model.IsOpen)
+				if (existingConsumer.Model.IsOpen)
 				{
 					_logger.LogDebug($"Channel is open and will be reused.");
-					return _typeToConsumer[responseType];
+					return existingConsumer;
 				}
 				else
 				{
-					_typeToConsumer[responseType]?.Model?.Dispose();
+					existingConsumer?.Model?.Dispose();
 					_logger.LogInformation($"Channel for consumer of {responseType.Name} is closed. A new consumer will be created.");
 				}
 			}
