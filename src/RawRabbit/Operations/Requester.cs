@@ -27,6 +27,7 @@ namespace RawRabbit.Operations
 		private readonly ConcurrentDictionary<string, Timer> _requestTimerDictionary;
 		private Timer _disposeConsumerTimer;
 		private readonly ILogger _logger = LogManager.GetLogger<Requester<TMessageContext>>();
+		private bool _channelActive;
 
 		public Requester(
 			IChannelFactory channelFactory,
@@ -91,10 +92,16 @@ namespace RawRabbit.Operations
 		{
 			if (_disposeConsumerTimer != null)
 			{
+				_channelActive = true;
 				return;
 			}
 			_disposeConsumerTimer = new Timer(state =>
 			{
+				if (_channelActive)
+				{
+					_channelActive = false;
+					return;
+				}
 				if (!_responseTcsDictionary.IsEmpty)
 				{
 					return;
