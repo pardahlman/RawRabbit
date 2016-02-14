@@ -58,7 +58,7 @@ namespace RawRabbit.Operations
 			_logger.LogDebug($"Declaring queue\n  Name: {queue.FullQueueName}\n  Exclusive: {queue.Exclusive}\n  Durable: {queue.Durable}\n  Autodelete: {queue.AutoDelete}");
 		}
 
-		protected void BindQueue(QueueConfiguration queue, ExchangeConfiguration exchange, string routingKey)
+		protected void BindQueue(QueueConfiguration queue, ExchangeConfiguration exchange, string routingKey, IModel channel = null) 
 		{
 			if (exchange.IsDefaultExchange())
 			{
@@ -79,8 +79,8 @@ namespace RawRabbit.Operations
 				return;
 			}
 			_logger.LogDebug($"Binding queue {queue.QueueName} to exchange {exchange.ExchangeName} with routing key {routingKey}");
-			ChannelFactory
-				.GetChannel()
+			channel = channel ?? ChannelFactory.GetChannel();
+			channel
 				.QueueBind(
 					queue: queue.FullQueueName,
 					exchange: exchange.ExchangeName,

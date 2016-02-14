@@ -34,15 +34,11 @@ namespace RawRabbit.Operations
 
 		public void RespondAsync<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, ResponderConfiguration cfg)
 		{
-			DeclareQueue(cfg.Queue);
-			DeclareExchange(cfg.Exchange);
-			BindQueue(cfg.Queue, cfg.Exchange, cfg.RoutingKey);
-			ConfigureRespond(onMessage, cfg);
-		}
-
-		private void ConfigureRespond<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, IConsumerConfiguration cfg)
-		{
-			var consumer = _consumerFactory.CreateConsumer(cfg);
+			var channel = ChannelFactory.CreateChannel();
+			DeclareQueue(cfg.Queue, channel);
+			DeclareExchange(cfg.Exchange, channel);
+			BindQueue(cfg.Queue, cfg.Exchange, cfg.RoutingKey, channel);
+			var consumer = _consumerFactory.CreateConsumer(cfg, channel);
 			consumer.OnMessageAsync = (o, args) =>
 			{
 				var body = Serializer.Deserialize<TRequest>(args.Body);
