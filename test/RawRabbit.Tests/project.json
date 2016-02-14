@@ -2,8 +2,10 @@
 	"version": "1.0.0-*",
 
 	"dependencies": {
+		"Autofac": "2.2.4.900",
 		"Microsoft.Extensions.Configuration": "1.0.0-rc1-final",
 		"RawRabbit": "",
+		"RawRabbit.DependencyInjection.Autofac": "",
 		"RawRabbit.vNext": "",
 		"xunit": "2.1.0",
 		"xunit.runner.dnx": "2.1.0-rc1-build204"

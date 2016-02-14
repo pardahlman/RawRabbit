@@ -23,6 +23,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{2F91E22A-A
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.IntegrationTests", "test\RawRabbit.IntegrationTests\RawRabbit.IntegrationTests.xproj", "{A3181958-F6A1-489A-AFCB-388AF4BAAB4A}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.DependencyInjection.Autofac", "src\RawRabbit.DependencyInjection.Autofac\RawRabbit.DependencyInjection.Autofac.xproj", "{CB108BB0-9CA3-44DD-9D58-5A42AA8750B1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +51,10 @@ Global
 		{A3181958-F6A1-489A-AFCB-388AF4BAAB4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A3181958-F6A1-489A-AFCB-388AF4BAAB4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A3181958-F6A1-489A-AFCB-388AF4BAAB4A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CB108BB0-9CA3-44DD-9D58-5A42AA8750B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CB108BB0-9CA3-44DD-9D58-5A42AA8750B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CB108BB0-9CA3-44DD-9D58-5A42AA8750B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CB108BB0-9CA3-44DD-9D58-5A42AA8750B1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -59,5 +65,6 @@ Global
 		{252773AA-C8E3-4AB9-A073-0BA9B120297E} = {7FCF8D3B-BA55-4C47-AC60-5CEF75418BEB}
 		{2318827A-0FE9-49D0-916E-3E0955AF6544} = {2F91E22A-AEBA-4BEF-9A03-C8232830F697}
 		{A3181958-F6A1-489A-AFCB-388AF4BAAB4A} = {2F91E22A-AEBA-4BEF-9A03-C8232830F697}
+		{CB108BB0-9CA3-44DD-9D58-5A42AA8750B1} = {7FCF8D3B-BA55-4C47-AC60-5CEF75418BEB}
 	EndGlobalSection
 EndGlobal

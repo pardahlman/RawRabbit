@@ -31,6 +31,17 @@ Create a new client by calling `BusClientFactory.CreateDefault`. If no arguments
 ```csharp
 var raw = BusClientFactory.CreateDefault();
 ```
+
+### Autofac
+
+The package [`RawRabbit.DependencyInjection.Autofac`](https://www.nuget.org/packages/RawRabbit.DependencyInjection.Autofac) contains modules and extension methods for registering `RawRabbit`.
+
+```csharp
+var builder = new ContainerBuilder();
+builder.RegisterRawRabbit("guest:guest@localhost:5672/");
+var container = builder.Build();
+``` 
+
 ## Broker connection
 As soon as the client is instansiated, it will try to connect to the broker.  By default `RawRabbit` will try to connect to `localhost`. Configuration can be provided in different ways.
 

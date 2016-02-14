@@ -1,0 +1,25 @@
+﻿{
+	"authors": [ "par.dahlman" ],
+	"dependencies": {
+		"RawRabbit": "",
+		"RabbitMQ.Client": "3.6.0",
+		"Newtonsoft.Json": "8.0.2",
+		"Autofac": "2.2.4.900"
+	},
+	"description": "Wire up RawRabbit with Autfac!",
+	"frameworks": {
+		"dnx45": { },
+		"dnx451": { },
+		"dnx50": { },
+		"net45": { },
+		"net451": { },
+		"net452": { },
+		"net46": { },
+		"net50": { }
+	},
+	"iconUrl": "http://pardahlman.se/raw/icon.png",
+	"projectUrl": "https://github.com/pardahlman/RawRabbit",
+	"tags": [ "rabbitmq", "raw", "rawrabbit", "autfac" ],
+	"title": "RawRabbit.DependencyInjection.Autofac",
+	"version": "1.8.7-*"
+}
