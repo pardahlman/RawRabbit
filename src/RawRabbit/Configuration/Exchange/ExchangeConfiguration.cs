@@ -8,12 +8,12 @@ namespace RawRabbit.Configuration.Exchange
 		public string ExchangeType { get; set; }
 		public bool Durable { get; set; }
 		public bool AutoDelete { get; set; }
-		public Dictionary<string,string> Arguments { get; set; }
+		public IDictionary<string,object> Arguments { get; set; }
 		public bool AssumeInitialized { get; set; }
 
 		public ExchangeConfiguration()
 		{
-			Arguments = new Dictionary<string, string>();
+			Arguments = new Dictionary<string, object>();
 		}
 
 		public ExchangeConfiguration(GeneralExchangeConfiguration exchange) : this()

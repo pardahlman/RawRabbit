@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using RabbitMQ.Client;
 
 namespace RawRabbit.Common
@@ -16,5 +17,8 @@ namespace RawRabbit.Common
 		/// </summary>
 		/// <returns>A new instance of an IModel</returns>
 		IModel CreateChannel(IConnection connection = null);
+
+		Task<IModel> GetChannelAsync();
+		Task<IModel> CreateChannelAsync(IConnection connection = null);
 	}
 }

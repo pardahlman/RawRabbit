@@ -69,6 +69,7 @@ namespace RawRabbit.vNext
 				.AddSingleton<IContextEnhancer, ContextEnhancer>()
 				.AddSingleton<IBasicPropertiesProvider, BasicPropertiesProvider>()
 				.AddSingleton<IChannelFactory, ChannelFactory>()
+				.AddSingleton<ITopologyProvider, TopologyProvider>()
 				.AddTransient<IConfigurationEvaluator, ConfigurationEvaluator>()
 				.AddTransient<IPublishAcknowledger, PublishAcknowledger>(
 					p => new PublishAcknowledger(p.GetService<RawRabbitConfiguration>().PublishConfirmTimeout)

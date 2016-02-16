@@ -10,18 +10,14 @@ namespace RawRabbit.Common
 {
 	public interface IPublishAcknowledger
 	{
-		void SetActiveChannel(IModel channel);
-		Task GetAckTask();
+		Task GetAckTask(IModel result);
 	}
 
 	public class NoAckAcknowledger : IPublishAcknowledger
 	{
 		public static Task Completed = Task.FromResult(0ul);
-		
-		public void SetActiveChannel(IModel channel)
-		{ }
 
-		public Task GetAckTask()
+		public Task GetAckTask(IModel result)
 		{
 			return Completed;
 		}
@@ -31,93 +27,106 @@ namespace RawRabbit.Common
 	{
 		private readonly TimeSpan _publishTimeout;
 		private readonly ILogger _logger = LogManager.GetLogger<PublishAcknowledger>();
-		private ConcurrentDictionary<ulong, TaskCompletionSource<ulong>> _deliveredAckDictionary;
-		private ConcurrentDictionary<ulong, Timer> _ackTimers;
-		private IModel _channel;
+		private readonly ConcurrentDictionary<string, TaskCompletionSource<ulong>> _deliveredAckDictionary;
+		private readonly ConcurrentDictionary<string, Timer> _ackTimers;
 
 		public PublishAcknowledger(TimeSpan publishTimeout)
 		{
 			_publishTimeout = publishTimeout;
+			_deliveredAckDictionary = new ConcurrentDictionary<string, TaskCompletionSource<ulong>>();
+			_ackTimers = new ConcurrentDictionary<string, Timer>();
 		}
 
-		public void SetActiveChannel(IModel channel)
+		public Task GetAckTask(IModel channel)
 		{
-			_deliveredAckDictionary = new ConcurrentDictionary<ulong, TaskCompletionSource<ulong>>();
-			_ackTimers = new ConcurrentDictionary<ulong, Timer>();
-			_channel = channel;
-			_channel.BasicAcks += (sender, args) =>
+			if (channel.NextPublishSeqNo == 0UL)
 			{
-				_logger.LogInformation($"Recieved ack for {args.DeliveryTag} with multiple set to '{args.Multiple}'");
-				if (args.Multiple)
+				_logger.LogInformation($"Setting 'Publish Acknowledge' for channel '{channel.ChannelNumber}'");
+				channel.ConfirmSelect();
+				channel.BasicAcks += (sender, args) =>
 				{
-					for (var i = args.DeliveryTag; i > 0; i--)
+					var model = sender as IModel;
+					_logger.LogInformation($"Recieved ack for {args.DeliveryTag}/{model.ChannelNumber} with multiple set to '{args.Multiple}'");
+					if (args.Multiple)
 					{
-						CompleteConfirm(i);
+						for (var i = args.DeliveryTag; i > 0; i--)
+						{
+							CompleteConfirm(model, i, true);
+						}
 					}
-				}
-				else
-				{
-					CompleteConfirm(args.DeliveryTag);
-				}
-
-			};
-			_channel.FlowControl += (sender, args) =>
-			{
-				_logger.LogInformation($"The flow control event has been raised on channel '{_channel.ChannelNumber}'. Active: {args.Active}.");
-			};
-			channel.ConfirmSelect();
-		}
-
-		private void CompleteConfirm(ulong tag)
-		{
-			TaskCompletionSource<ulong> tcs;
-			if (_deliveredAckDictionary.TryRemove(tag, out tcs))
-			{
-				TryDisposeTimer(tag);
-				tcs.TrySetResult(tag);
+					else
+					{
+						CompleteConfirm(model, args.DeliveryTag);
+					}
+				};
 			}
-		}
 
-		public Task GetAckTask()
-		{
+			var key = CreatePublishKey(channel, channel.NextPublishSeqNo);
 			var tcs = new TaskCompletionSource<ulong>();
-			var nextTag = _channel.NextPublishSeqNo;
-			if (!_deliveredAckDictionary.TryAdd(nextTag, tcs))
+			if (!_deliveredAckDictionary.TryAdd(key, tcs))
 			{
-				_logger.LogWarning($"Unable to add delivery tag {nextTag} to ack list.");
+				_logger.LogWarning($"Unable to add delivery tag {key} to ack list.");
 			}
-			else
+			_ackTimers.TryAdd(key, new Timer(state =>
 			{
-				_logger.LogDebug($"Successfully added ack task for {nextTag}.");
-			}
-			_ackTimers.TryAdd(nextTag, new Timer(state =>
-			{
-				_logger.LogWarning($"Ack for {nextTag} has timed out.");
-				TryDisposeTimer(nextTag);
+				_logger.LogWarning($"Ack for {key} has timed out.");
+				TryDisposeTimer(key);
 
 				TaskCompletionSource<ulong> ackTcs;
-				if (!_deliveredAckDictionary.TryRemove(nextTag, out ackTcs))
+				if (!_deliveredAckDictionary.TryGetValue(key, out ackTcs))
 				{
-					_logger.LogInformation($"TaskCompletionSource for '{nextTag}' not found. Message has probably been confirmed.");
+					_logger.LogWarning($"Unable to get TaskCompletionSource for {key}");
 					return;
 				}
-				ackTcs.TrySetException(new PublishConfirmException(
-					$"The broker did not send a publish acknowledgement for message {nextTag} within {_publishTimeout.ToString("g")}."));
-			}, null, _publishTimeout, new TimeSpan(-1)));
+				ackTcs.TrySetException(new PublishConfirmException($"The broker did not send a publish acknowledgement for message {key} within {_publishTimeout.ToString("g")}."));
+			}, channel, _publishTimeout, new TimeSpan(-1)));
 			return tcs.Task;
 		}
 
-		private void TryDisposeTimer(ulong tag)
+		private void CompleteConfirm(IModel channel, ulong tag, bool multiple = false)
 		{
-			Timer ackTimer;
-			if (_ackTimers.TryRemove(tag, out ackTimer))
+			var key = CreatePublishKey(channel, tag);
+			TryDisposeTimer(key);
+			TaskCompletionSource<ulong> tcs;
+			if (!_deliveredAckDictionary.TryRemove(key, out tcs))
 			{
-				_logger.LogDebug($"Disposed ack timer for {tag}");
-				ackTimer.Dispose();
+				if (!multiple)
+				{
+					_logger.LogWarning($"Unable to remove task completion source for Publish Confirm on '{key}'.");
+				}
 			}
 			else
 			{
-				_logger.LogDebug($"$Unable to find ack timer for {tag}.");
+				if (tcs.TrySetResult(tag))
+				{
+					_logger.LogDebug($"Successfully confirmed publish {key}");
+				}
+				else
+				{
+					if (!multiple)
+					{
+						_logger.LogWarning($"Unable to set result for Publish Confirm on key '{key}'.");
+					}
+				}
+			}
+		}
+
+		private static string CreatePublishKey(IModel channel, ulong nextTag)
+		{
+			return $"{nextTag}/{channel.ChannelNumber}";
+		}
+
+		private void TryDisposeTimer(string key)
+		{
+			Timer ackTimer;
+			if (!_ackTimers.TryGetValue(key, out ackTimer))
+			{
+				_logger.LogDebug($"Unable to get ack timer for {key}.");
+			}
+			else
+			{
+				_logger.LogDebug($"Disposed ack timer for {key}");
+				ackTimer.Dispose();
 			}
 		}
 	}

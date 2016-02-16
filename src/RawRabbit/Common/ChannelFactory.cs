@@ -68,6 +68,13 @@ namespace RawRabbit.Common
 
 		private Task<IModel> GetOrCreateChannelAsync(IConnection connection)
 		{
+			if (!connection?.IsOpen ?? true)
+			{
+				_logger.LogInformation("Connection is not open or defined. Waiting for a open connection.");
+				return GetConnectionAsync()
+						.ContinueWith(c => GetOrCreateChannelAsync(c.Result))
+						.Unwrap();
+			}
 			if (_threadChannels.Value == null)
 			{
 				_logger.LogInformation($"Creating a new channel for thread with id '{Thread.CurrentThread.ManagedThreadId}'");
