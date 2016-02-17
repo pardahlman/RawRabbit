@@ -63,6 +63,12 @@ namespace RawRabbit.DependencyInjection.Autofac
 				.PreserveExistingDefaults();
 
 			builder
+				.RegisterType<TopologyProvider>()
+				.As<ITopologyProvider>()
+				.SingleInstance()
+				.PreserveExistingDefaults();
+
+			builder
 				.RegisterType<ContextEnhancer>()
 				.As<IContextEnhancer>()
 				.SingleInstance()
