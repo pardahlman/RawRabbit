@@ -34,7 +34,7 @@ namespace RawRabbit.IntegrationTests.Extensions
 		}
 
 		[Fact]
-		public void Should_Be_Able_To_Bulk_Get_Messages()
+		public async Task Should_Be_Able_To_Bulk_Get_Messages()
 		{
 			var firstBasicMsg = new BasicMessage { Prop = "This is the first message" };
 			var secondBasicMsg = new BasicMessage { Prop = "This is the second message" };
@@ -42,10 +42,10 @@ namespace RawRabbit.IntegrationTests.Extensions
 			var firstSimpleMsg = new SimpleMessage { IsSimple = true };
 
 			var client = RawRabbitFactory.GetExtendableClient() as ExtendableBusClient<MessageContext>;
-			client.PublishAsync(secondBasicMsg);
-			client.PublishAsync(firstBasicMsg);
-			client.PublishAsync(thridBasicMsg);
-			client.PublishAsync(firstSimpleMsg);
+			await client.PublishAsync(secondBasicMsg);
+			await client.PublishAsync(firstBasicMsg);
+			await client.PublishAsync(thridBasicMsg);
+			await client.PublishAsync(firstSimpleMsg);
 
 			var bulk = client.GetMessages(cfg => cfg
 				.ForMessage<BasicMessage>(msg => msg
