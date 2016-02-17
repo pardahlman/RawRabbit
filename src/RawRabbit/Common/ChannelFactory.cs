@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 using RawRabbit.Configuration;
@@ -16,11 +18,13 @@ namespace RawRabbit.Common
 		private IConnection _connection;
 		private readonly ILogger _logger = LogManager.GetLogger<ChannelFactory>();
 		private readonly RawRabbitConfiguration _config;
+		private readonly ConcurrentDictionary<IModel, DateTime> _accessDictionary;
+		private readonly System.Threading.Timer _closeTimer;
 
 		public ChannelFactory(RawRabbitConfiguration config, IConnectionFactory connectionFactory)
 		{
 			_connectionFactory = connectionFactory;
-			
+			_accessDictionary = new ConcurrentDictionary<IModel, DateTime>();
 			_config = config;
 			_threadChannels = new ThreadLocal<IModel>(true);
 
@@ -35,6 +39,22 @@ namespace RawRabbit.Common
 				_logger.LogError("Unable to connect to broker", e);
 				throw e.InnerException;
 			}
+			_closeTimer = new System.Threading.Timer(state =>
+			{
+				var enumerator = _accessDictionary.GetEnumerator();
+				while (enumerator.MoveNext())
+				{
+					if (DateTime.Now - enumerator.Current.Value > TimeSpan.FromSeconds(10))
+					{
+						DateTime lastUsed;
+						if (_accessDictionary.TryRemove(enumerator.Current.Key, out lastUsed))
+						{
+							_logger.LogInformation($"Channel {enumerator.Current.Key.ChannelNumber} was last used {lastUsed}. Closing...");
+							enumerator.Current.Key.Close();
+						}
+					}
+				}
+			}, null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
 		}
 
 		public void Dispose()
@@ -45,6 +65,7 @@ namespace RawRabbit.Common
 				channel?.Dispose();
 			}
 			_threadChannels?.Dispose();
+			_closeTimer?.Dispose();
 			_threadChannels = null;
 		}
 
@@ -58,12 +79,18 @@ namespace RawRabbit.Common
 			if (_threadChannels.Value?.IsOpen ?? false)
 			{
 				_logger.LogDebug($"Using existing channel with id '{_threadChannels.Value.ChannelNumber}' on thread '{Thread.CurrentThread.ManagedThreadId}'");
+				_accessDictionary.AddOrUpdate(_threadChannels.Value, DateTime.Now, (model, time) => DateTime.Now);
 				return Task.FromResult(_threadChannels.Value);
 			}
 
 			return GetConnectionAsync()
 				.ContinueWith(connectionTask => GetOrCreateChannelAsync(connectionTask.Result))
-				.Unwrap();
+				.Unwrap()
+				.ContinueWith(tChannel =>
+				{
+					_accessDictionary.AddOrUpdate(tChannel.Result, DateTime.Now, (model, time) => DateTime.Now);
+					return tChannel.Result;
+				});
 		}
 
 		private Task<IModel> GetOrCreateChannelAsync(IConnection connection)
