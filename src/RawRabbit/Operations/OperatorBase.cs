@@ -28,10 +28,12 @@ namespace RawRabbit.Operations
 			}
 			_logger.LogDebug($"Declaring exchange\n  Name: {config.ExchangeName}\n  Type: {config.ExchangeType}\n  Durable: {config.Durable}\n  Autodelete: {config.AutoDelete}");
 			channel = channel ?? ChannelFactory.GetChannel();
-			channel
-				.ExchangeDeclare(
-					exchange: config.ExchangeName,
-					type: config.ExchangeType
+			channel.ExchangeDeclare(
+					config.ExchangeName,
+					config.ExchangeType,
+					config.Durable,
+					config.AutoDelete,
+					config.Arguments
 				);
 		}
 

@@ -50,7 +50,7 @@ namespace RawRabbit.Operations
 					{
 						lock (_publishLock)
 						{
-							var ackTask = _acknowledger.GetAckTask(channelTask.Result) as Task<ulong>;
+							var ackTask = _acknowledger.GetAckTask(channelTask.Result);
 							channelTask.Result.BasicPublish(
 								exchange: config.Exchange.ExchangeName,
 								routingKey: config.RoutingKey,
