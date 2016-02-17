@@ -1,3 +1,12 @@
+# 1.8.9
+
+Fixes a problem with subscriptions being terminated that was introduced in `1.8.8`.
+
+ - [#58](https://github.com/pardahlman/RawRabbit/issues/58) - Subscribers are terminated +fix
+
+Commits: 8b627ae192...c6f928addf
+
+
 # 1.8.8
 
 The first step in a refactoring has been taken. The aim is to increase thoughput by using async methods and allowing for multiple threads to publish messages.
