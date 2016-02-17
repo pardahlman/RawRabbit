@@ -37,7 +37,7 @@ namespace RawRabbit.Operations
 
 		private void SubscribeAsync<T>(SubscriptionConfiguration cfg, Func<T, TMessageContext, Task> subscribeMethod)
 		{
-			var consumer = _consumerFactory.CreateConsumer(cfg);
+			var consumer = _consumerFactory.CreateConsumer(cfg, ChannelFactory.CreateChannel());
 			consumer.OnMessageAsync = (o, args) =>
 			{
 				var body = Serializer.Deserialize<T>(args.Body);
