@@ -44,7 +44,7 @@ namespace RawRabbit.Common
 				var enumerator = _accessDictionary.GetEnumerator();
 				while (enumerator.MoveNext())
 				{
-					if (DateTime.Now - enumerator.Current.Value > TimeSpan.FromSeconds(10))
+					if (DateTime.Now - enumerator.Current.Value > _config.RequestTimeout)
 					{
 						DateTime lastUsed;
 						if (_accessDictionary.TryRemove(enumerator.Current.Key, out lastUsed))
@@ -54,7 +54,7 @@ namespace RawRabbit.Common
 						}
 					}
 				}
-			}, null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
+			}, null, _config.RequestTimeout, _config.RequestTimeout);
 		}
 
 		public void Dispose()
