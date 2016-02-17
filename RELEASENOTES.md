@@ -1,3 +1,15 @@
+# 1.8.8
+
+The first step in a refactoring has been taken. The aim is to increase thoughput by using async methods and allowing for multiple threads to publish messages.
+
+Also, a new NuGet package, [`RawRabbit.DependencyInjection.Autofac`](https://www.nuget.org/packages/RawRabbit.DependencyInjection.Autofac) has been created.
+
+ - [#57](https://github.com/pardahlman/RawRabbit/issues/57) - Refactor Operations: Publisher
+ - [#55](https://github.com/pardahlman/RawRabbit/issues/55) - Support Autofac
+
+Commits: 8b627ae192...13b86c7bf6
+
+
 # 1.8.7
 
 In this release the `ConnectionStringParser` has been polished by [Originalutter](https://github.com/Originalutter). It now supports all configuration parameters available in the configuration object. There are also some nice default values, like port `5672` which can be omitted from connection string.
