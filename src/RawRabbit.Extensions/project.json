@@ -1,5 +1,5 @@
 ﻿{
-	"version": "1.8.9-rc1-final",
+	"version": "1.8.10-rc1-final",
 	"description": "Make the most of RawRabbit with these extensions",
 	"authors": [ "par.dahlman" ],
 	"tags": [ "raw", "rabbit", "rawrabbit", "rabbitmq", "extensions" ],

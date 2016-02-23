@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
@@ -42,38 +43,49 @@ namespace RawRabbit.Consumer.Eventing
 
 			rawConsumer.Received += (sender, args) =>
 			{
-				if (_processedButNotAcked.Contains(args.BasicProperties.MessageId))
+				Task.Run(() =>
 				{
-					/*
-						This instance of the consumer has allready handled this message,
-						but something went wrong when 'ack'-ing the message, therefore
-						and the message was resent.
-					*/
-					BasicAck(channel, args, cfg);
-					return;
-				}
-
-				try
-				{
+					if (_processedButNotAcked.Contains(args.BasicProperties.MessageId))
+					{
+						/*
+							This instance of the consumer has allready handled this message,
+							but something went wrong when 'ack'-ing the message, therefore
+							and the message was resent.
+						*/
+						BasicAck(channel, args, cfg);
+						return;
+					}
 					_logger.LogInformation($"Message recived: MessageId: {args.BasicProperties.MessageId}");
-					rawConsumer.OnMessageAsync(sender, args).Wait();
-				}
-				catch (Exception e)
-				{
-					_logger.LogError($"An unhandled exception was caught for message {args.BasicProperties.MessageId}.\n", e);
-					_strategy.OnRequestHandlerExceptionAsync(rawConsumer, cfg, args, e);
-					return;
-				}
-				if (cfg.NoAck || rawConsumer.NackedDeliveryTags.Contains(args.DeliveryTag))
-				{
-					/*
-						The consumer has stated that 'ack'-ing is not required, so
-						now that the message is handled, the consumer is done.
-					*/
-					return;
-				}
+					try
+					{
+						rawConsumer
+							.OnMessageAsync(sender, args)
+							.ContinueWith(t =>
+							{
+								if (t.IsFaulted)
+								{
+									_logger.LogError($"An unhandled exception was caught for message {args.BasicProperties.MessageId}.\n", t.Exception);
+									_strategy.OnRequestHandlerExceptionAsync(rawConsumer, cfg, args, t.Exception);
+									return;
+								}
+								if (cfg.NoAck || rawConsumer.NackedDeliveryTags.Contains(args.DeliveryTag))
+								{
+								/*
+									The consumer has stated that 'ack'-ing is not required, so
+									now that the message is handled, the consumer is done.
+								*/
+									return;
+								}
 
-				BasicAck(channel, args, cfg);
+								BasicAck(channel, args, cfg);
+						});
+					}
+					catch (Exception e)
+					{
+						_logger.LogError($"An unhandled exception was caught for message {args.BasicProperties.MessageId}.\n", e);
+						_strategy.OnRequestHandlerExceptionAsync(rawConsumer, cfg, args, e);
+					}
+				});
 			};
 
 			return rawConsumer;

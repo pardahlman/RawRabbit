@@ -48,6 +48,10 @@ namespace RawRabbit.Operations
 				return onMessage(body, context)
 					.ContinueWith(responseTask =>
 					{
+						if (responseTask.IsFaulted)
+						{
+							throw responseTask.Exception ?? new Exception();
+						}
 						if (consumer.NackedDeliveryTags.Contains(args.DeliveryTag))
 						{
 							return;
