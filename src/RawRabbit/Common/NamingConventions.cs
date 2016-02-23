@@ -85,11 +85,7 @@ namespace RawRabbit.Common
 					applicationName = match.Groups["ApplicationName"].Value;
 				}
 			}
-
-			if (applicationName == string.Empty)
-			{
-				throw new IOException("Could not determine the application name");
-			}
+			
 			return applicationName;
 		}
 
