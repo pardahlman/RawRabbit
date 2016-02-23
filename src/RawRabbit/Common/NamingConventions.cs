@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace RawRabbit.Common
 {
@@ -22,6 +23,7 @@ namespace RawRabbit.Common
 	{
 		private readonly IEnumerable<string> _disallowedDirectoryNames = new[] {"bin", "debug", "release"};
 		private readonly Dictionary<Type, int> _subscriberCounter;
+		private readonly string _applicationName = GetApplicationNameFromUrl(Directory.GetCurrentDirectory());
 
 		public virtual Func<Type, string> ExchangeNamingConvention { get; set; }
 		public virtual Func<Type, string> QueueNamingConvention { get; set; }
@@ -55,7 +57,7 @@ namespace RawRabbit.Common
 			var subscriberIndex = ++_subscriberCounter[messageType];
 			_subscriberCounter[messageType] = subscriberIndex;
 
-			var sb = new StringBuilder(GetApplicationName());
+			var sb = new StringBuilder(_applicationName);
 			if (subscriberIndex > 1)
 			{
 				sb.Append($"_{subscriberIndex}");
@@ -64,15 +66,31 @@ namespace RawRabbit.Common
 			return sb.ToString();
 		}
 
-		private string GetApplicationName()
+		public static string GetApplicationNameFromUrl(string url)
 		{
-			return Directory
-				.GetCurrentDirectory()
-				.Split('\\')
-				.Select(d => d.ToLower())
-				.Last(d => !_disallowedDirectoryNames.Contains(d))
-				.Split('.')
-				.Last();
+			var consoleOrIisHostedAppRegex = new Regex(@".*\\(?<ApplicationName>.*[a-zA-Z][^\\]*)(\\[0-9.]*)?\\bin.*");
+			var match = consoleOrIisHostedAppRegex.Match(url);
+			var applicationName = string.Empty;
+
+			if (match.Success)
+			{
+				applicationName = match.Groups["ApplicationName"].Value;
+			}
+			else
+			{
+				var windowsServiceRegex = new Regex(@".*\\(?<ApplicationName>.*[a-zA-Z][^\\]*)(\\[0-9.]*\\)?");
+				match = windowsServiceRegex.Match(url);
+				if (match.Success)
+				{
+					applicationName = match.Groups["ApplicationName"].Value;
+				}
+			}
+
+			if (applicationName == string.Empty)
+			{
+				throw new IOException("Could not determine the application name");
+			}
+			return applicationName;
 		}
 
 		private static string CreateShortAfqn(Type type, string path = "", string delimeter = ".")
