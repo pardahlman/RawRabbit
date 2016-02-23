@@ -1,3 +1,12 @@
+# 1.8.10
+
+Improving invokation of Response handler.
+
+ - [#60](https://github.com/pardahlman/RawRabbit/issues/60) - Improve handling multiple RPC Requests
+
+Commits: 444efffedb...e4c3178885
+
+
 # 1.8.9
 
 Fixes a problem with subscriptions being terminated that was introduced in `1.8.8`.
