@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using RawRabbit.Common;
+﻿using RawRabbit.Common;
 using Xunit;
 
 namespace RawRabbit.Tests.Common
@@ -8,80 +6,55 @@ namespace RawRabbit.Tests.Common
 	public class NamingConventionsTests
 	{
 		[Fact]
-		public void Should_Be_Able_To_Get_Application_Name_From_Console_App()
+		public void Should_Be_Able_To_Get_Application_Name_From_Console_App_Or_Service()
 		{
 			/* Setup */
-			var consoleAppUrl = "C:\\Projects\\Temp\\My.Console.App\\bin\\Debug\\RawException.vshost.exe";
+			var consoleAppUrl = @"\""Services\\Micro.Services.MagicMaker\\bin\\Micro.Services.MagicMaker.exe\"" ";
 
 			/* Test */
-			var consoleAppRes = NamingConventions.GetApplicationNameFromUrl(consoleAppUrl);
+			var consoleAppRes = NamingConventions.GetApplicationName(consoleAppUrl);
 
 			/* Assert */
-			Assert.Equal("My.Console.App", consoleAppRes);
-		}
-		[Fact]
-		public void Should_Be_Able_To_Get_Application_Name_From_Console_App_With_Version_Number()
-		{
-			/* Setup */
-			var consoleAppUrl = "C:\\Projects\\Temp\\My.Console.App\\1.2.3.456\\bin\\Debug\\RawException.vshost.exe";
-
-			/* Test */
-			var consoleAppRes = NamingConventions.GetApplicationNameFromUrl(consoleAppUrl);
-
-			/* Assert */
-			Assert.Equal("My.Console.App", consoleAppRes);
+			Assert.Equal(expected: "micro_services_magicmaker", actual: consoleAppRes);
 		}
 
 		[Fact]
-		public void Should_Be_Able_To_Get_Application_Name_From_IIS_Hosted_App()
+		public void Should_Be_Able_To_Get_Application_Name_From_Console_App_Or_Service_With_Vshost()
 		{
 			/* Setup */
-			var iisHostedApp = "C:\\Projects\\Temp\\My.Application\\My.Application.Web\\bin";
+			var consoleAppUrl = @"\""Services\\Micro.Services.MagicMaker\\bin\\Micro.Services.MagicMaker.vshost.exe\"" ";
 
 			/* Test */
-			var iisHostedAppRes = NamingConventions.GetApplicationNameFromUrl(iisHostedApp);
+			var consoleAppRes = NamingConventions.GetApplicationName(consoleAppUrl);
 
 			/* Assert */
-			Assert.Equal("My.Application.Web", iisHostedAppRes);
+			Assert.Equal(expected: "micro_services_magicmaker", actual: consoleAppRes);
 		}
 
 		[Fact]
-		public void Should_Be_Able_To_Get_Application_Name_From_IIS_Hosted_App_With_Version_Number()
+		public void Should_Be_Able_To_Get_Application_Name_From_IIS_Hosted_App_With_ApplicationPool_Flag()
 		{
 			/* Setup */
-			var iisHostedApp = "C:\\Projects\\Temp\\My.Application\\My.Application.Web\\1.2.3.456\\bin";
+			var iisHostedApp = @"""c:\\windows\\system32\\inetsrv\\w3wp.exe -ap \""Application.Name\"" -v \""v4.0\"" -l \""webengine4.dll\"" -a \\\\.\\pipe\\iisipm6866bb0f-a36a-49b2-9ea8-d83ca69e873d -w \""\"" -m 0 -t 20 -ta 0""";
 
 			/* Test */
-			var iisHostedAppRes = NamingConventions.GetApplicationNameFromUrl(iisHostedApp);
+			var iisHostedAppRes = NamingConventions.GetApplicationName(iisHostedApp);
 
 			/* Assert */
-			Assert.Equal("My.Application.Web", iisHostedAppRes);
+			Assert.Equal(expected: "application_name", actual: iisHostedAppRes);
 		}
 
 		[Fact]
-		public void Should_Be_Able_To_Get_Application_Name_From_Service()
+		public void Should_Be_Able_To_Get_Application_Name_From_IIS_Hosted_App_With_Host_Flag()
 		{
 			/* Setup */
-			var windowsServiceDeployedWithVersionNumber = "C:\\Application\\PRODUCTION\\My.Windows.Service\\";
+			var iisHostedApp = @"""c:\\windows\\system32\\inetsrv\\w3wp.exe -ap \""Application.Name\"" -v \""v4.0\"" -l \""webengine4.dll\"" -a \\\\.\\pipe\\iisipm6866bb0f-a36a-49b2-9ea8-d83ca69e873d -h \""C:\\inetpub\\temp\\apppools\\voyager_dk\\voyager_dk.config\"" -w \""\"" -m 0 -t 20 -ta 0""";
 
 			/* Test */
-			var windowsServiceDeployedWithVersionNumberRes = NamingConventions.GetApplicationNameFromUrl(windowsServiceDeployedWithVersionNumber);
+			var iisHostedAppRes = NamingConventions.GetApplicationName(iisHostedApp);
 
 			/* Assert */
-			Assert.Equal("My.Windows.Service", windowsServiceDeployedWithVersionNumberRes);
-		}
-
-		[Fact]
-		public void Should_Be_Able_To_Get_Application_Name_From_Service_With_Version_Number()
-		{
-			/* Setup */
-			var windowsServiceDeployedWithVersionNumber = "C:\\Application\\PRODUCTION\\My.Windows.Service\\1.2.3.456\\";
-
-			/* Test */
-			var windowsServiceDeployedWithVersionNumberRes = NamingConventions.GetApplicationNameFromUrl(windowsServiceDeployedWithVersionNumber);
-
-			/* Assert */
-			Assert.Equal("My.Windows.Service", windowsServiceDeployedWithVersionNumberRes);
+			Assert.Equal(expected: "application_name", actual: iisHostedAppRes);
 		}
 	}
 }

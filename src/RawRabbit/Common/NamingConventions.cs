@@ -23,7 +23,7 @@ namespace RawRabbit.Common
 	{
 		private readonly IEnumerable<string> _disallowedDirectoryNames = new[] {"bin", "debug", "release"};
 		private readonly Dictionary<Type, int> _subscriberCounter;
-		private readonly string _applicationName = GetApplicationNameFromUrl(Directory.GetCurrentDirectory());
+		private readonly string _applicationName = GetApplicationName(Environment.CommandLine);
 
 		public virtual Func<Type, string> ExchangeNamingConvention { get; set; }
 		public virtual Func<Type, string> QueueNamingConvention { get; set; }
@@ -66,27 +66,39 @@ namespace RawRabbit.Common
 			return sb.ToString();
 		}
 
-		public static string GetApplicationNameFromUrl(string url)
+		public static string GetApplicationName(string commandLine)
 		{
-			var consoleOrIisHostedAppRegex = new Regex(@".*\\(?<ApplicationName>.*[a-zA-Z][^\\]*)(\\[0-9.]*)?\\bin.*");
-			var match = consoleOrIisHostedAppRegex.Match(url);
+			var consoleOrServiceRegex = new Regex(@"(?<ApplicationName>[^\\]*).exe");
+			var match = consoleOrServiceRegex.Match(commandLine);
 			var applicationName = string.Empty;
+			const string iisWorkerProcessName = "w3wp";
 
-			if (match.Success)
+			if (match.Success && match.Groups["ApplicationName"].Value != iisWorkerProcessName)
 			{
 				applicationName = match.Groups["ApplicationName"].Value;
+				if (applicationName.EndsWith(".vshost"))
+					applicationName = applicationName.Remove(applicationName.Length - ".vshost".Length);
 			}
 			else
 			{
-				var windowsServiceRegex = new Regex(@".*\\(?<ApplicationName>.*[a-zA-Z][^\\]*)(\\[0-9.]*\\)?");
-				match = windowsServiceRegex.Match(url);
+				var iisHostedAppRegexVer1 = new Regex(@"-ap\s\\""(?<ApplicationName>[^\\]+)");
+				match = iisHostedAppRegexVer1.Match(commandLine);
 				if (match.Success)
 				{
 					applicationName = match.Groups["ApplicationName"].Value;
 				}
+				else
+				{
+					var iisHostedAppRegexVer2 = new Regex(@"\\\\apppools\\\\(?<ApplicationName>[^\\]+)");
+					match = iisHostedAppRegexVer2.Match(commandLine);
+					if (match.Success)
+					{
+						applicationName = match.Groups["ApplicationName"].Value;
+					}
+				}
 			}
 			
-			return applicationName;
+			return applicationName.Replace(".","_").ToLower();
 		}
 
 		private static string CreateShortAfqn(Type type, string path = "", string delimeter = ".")
