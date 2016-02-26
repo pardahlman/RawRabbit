@@ -9,8 +9,8 @@ namespace RawRabbit.Common
 {
 	public interface ITopologyProvider
 	{
-		Task CreateExchangeAsync(ExchangeConfiguration exchange);
-		Task CreateQueueAsync(QueueConfiguration queue);
+		Task DeclareExchangeAsync(ExchangeConfiguration exchange);
+		Task DeclareQueueAsync(QueueConfiguration queue);
 		Task BindQueueAsync(QueueConfiguration queue, ExchangeConfiguration exchange, string routingKey);
 	}
 
@@ -28,7 +28,7 @@ namespace RawRabbit.Common
 			_initQueues = new ConcurrentDictionary<string, Task>();
 		}
 
-		public Task CreateExchangeAsync(ExchangeConfiguration exchange)
+		public Task DeclareExchangeAsync(ExchangeConfiguration exchange)
 		{
 			Task existingTask;
 			if (_initExchanges.TryGetValue(exchange.ExchangeName, out existingTask))
@@ -57,7 +57,7 @@ namespace RawRabbit.Common
 			return exchangeTask;
 		}
 
-		public Task CreateQueueAsync(QueueConfiguration queue)
+		public Task DeclareQueueAsync(QueueConfiguration queue)
 		{
 			Task existingTask;
 			if (_initQueues.TryGetValue(queue.FullQueueName, out existingTask))
@@ -94,8 +94,8 @@ namespace RawRabbit.Common
 
 		public Task BindQueueAsync(QueueConfiguration queue, ExchangeConfiguration exchange, string routingKey)
 		{
-			var queueTask = CreateQueueAsync(queue);
-			var exchangeTask = CreateExchangeAsync(exchange);
+			var queueTask = DeclareQueueAsync(queue);
+			var exchangeTask = DeclareExchangeAsync(exchange);
 			var channelTask = _channelFactory.CreateChannelAsync();
 
 			return Task

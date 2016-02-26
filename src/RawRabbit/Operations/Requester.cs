@@ -135,10 +135,11 @@ namespace RawRabbit.Operations
 				else
 				{
 					existingConsumer?.Model?.Dispose();
-					_logger.LogInformation($"Channel for consumer of {responseType.Name} is closed. A new consumer will be created.");
+					_logger.LogInformation($"Channel for consumer of {responseType.Name} is closed. A new consumer will be created, of course.");
 				}
 			}
 
+			_logger.LogInformation($"Creatinga new consumer for message {responseType.Name}.");
 			var consumer = _consumerFactory.CreateConsumer(cfg, ChannelFactory.CreateChannel());
 			_typeToConsumer.TryAdd(typeof(TResponse), consumer);
 

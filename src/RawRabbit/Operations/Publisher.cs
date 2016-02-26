@@ -40,7 +40,7 @@ namespace RawRabbit.Operations
 			Task exchangeTask;
 			lock (_topologyLock)
 			{
-				exchangeTask = _topologyProvider.CreateExchangeAsync(config.Exchange);
+				exchangeTask = _topologyProvider.DeclareExchangeAsync(config.Exchange);
 			}
 			var channelTask = _channelFactory.GetChannelAsync();
 
