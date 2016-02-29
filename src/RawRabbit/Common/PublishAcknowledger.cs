@@ -103,7 +103,11 @@ namespace RawRabbit.Common
 				}
 				else
 				{
-					if (!multiple)
+					if (tcs.Task.IsFaulted)
+					{
+						_logger.LogDebug($"Unable to set result for '{key}'. Task has been faulted.");
+					}
+					else if (!multiple)
 					{
 						_logger.LogWarning($"Unable to set result for Publish Confirm on key '{key}'.");
 					}
