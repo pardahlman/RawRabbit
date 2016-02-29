@@ -50,7 +50,7 @@ namespace RawRabbit.IntegrationTests.RabbitMqTutorial
 			await recieved.Task;
 
 			/* Assert */
-			Assert.Equal(sent.Prop, recieved.Task.Result.Prop);
+			Assert.Equal(expected: sent.Prop, actual: recieved.Task.Result.Prop);
 		}
 	}
 }

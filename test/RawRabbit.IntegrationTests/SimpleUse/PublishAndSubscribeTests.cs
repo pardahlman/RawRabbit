@@ -34,7 +34,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			await recievedTcs.Task;
 
 			/* Assert */
-			Assert.Equal(recievedTcs.Task.Result.Prop, message.Prop);
+			Assert.Equal(expected: message.Prop, actual: recievedTcs.Task.Result.Prop);
 		}
 
 		[Fact]
@@ -229,7 +229,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			await priorityTcs.Task;
 
 			/* Asset */
-			Assert.Equal(priorityTcs.Task.Result.Prop, "I am important!");
+			Assert.Equal(expected: "I am important!", actual: priorityTcs.Task.Result.Prop);
 		}
 	}
 }

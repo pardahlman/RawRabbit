@@ -24,7 +24,7 @@ namespace RawRabbit.IntegrationTests.Features
 			/* Test */
 			/* Assert */
 			var e = await Assert.ThrowsAsync<MessageHandlerException>(() => requester.RequestAsync<BasicRequest, BasicResponse>());
-			Assert.Equal(e.InnerException.Message, responseException.Message);
+			Assert.Equal(expected: responseException.Message, actual: e.InnerException.Message);
 		}
 
 		[Fact]
@@ -42,7 +42,7 @@ namespace RawRabbit.IntegrationTests.Features
 			/* Test */
 			/* Assert */
 			var e = await Assert.ThrowsAsync<MessageHandlerException>(() => requester.RequestAsync<BasicRequest, BasicResponse>());
-			Assert.Equal(e.InnerException.Message, responseException.Message);
+			Assert.Equal(expected: responseException.Message, actual: e.InnerException.Message);
 		}
 	}
 }

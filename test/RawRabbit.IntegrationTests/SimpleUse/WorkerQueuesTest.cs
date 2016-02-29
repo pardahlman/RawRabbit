@@ -51,7 +51,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			await allCallTcs.Task;
 
 			/* Assert */
-			Assert.Equal(firstWorkerCalls + secondWorkerCalls, noOfPublishes);
+			Assert.Equal(expected: noOfPublishes, actual: firstWorkerCalls + secondWorkerCalls);
 			Assert.NotEqual(firstWorkerCalls, 0);
 			Assert.NotEqual(secondWorkerCalls, 0);
 		}

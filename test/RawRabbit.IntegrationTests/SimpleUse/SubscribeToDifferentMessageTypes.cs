@@ -38,8 +38,8 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			Task.WaitAll(basicMsgTcs.Task, simpleMsgTcs.Task);
 
 			/* Assert */
-			Assert.Equal(basicMsgTcs.Task.Result.Prop, basicMsg.Prop);
-			Assert.Equal(simpleMsgTcs.Task.Result.IsSimple, simpleMsg.IsSimple);
+			Assert.Equal(expected: basicMsg.Prop, actual: basicMsgTcs.Task.Result.Prop);
+			Assert.Equal(expected: simpleMsg.IsSimple, actual: simpleMsgTcs.Task.Result.IsSimple);
 		}
 
 		public override void Dispose()

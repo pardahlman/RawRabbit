@@ -60,8 +60,8 @@ namespace RawRabbit.IntegrationTests.Extensions
 			var simple = bulk.GetMessages<SimpleMessage>().ToList();
 			bulk.AckAll();
 			
-			Assert.Equal(basics.Count, 4);
-			Assert.Equal(simple.Count, 1);
+			Assert.Equal(expected: 4, actual: basics.Count);
+			Assert.Equal(expected: 1, actual: simple.Count);
 		}
 	}
 }
