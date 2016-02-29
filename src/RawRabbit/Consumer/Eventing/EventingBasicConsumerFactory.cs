@@ -52,7 +52,7 @@ namespace RawRabbit.Consumer.Eventing
 							but something went wrong when 'ack'-ing the message, therefore
 							and the message was resent.
 						*/
-						BasicAck(channel, args, cfg);
+						BasicAck(channel, args);
 						return;
 					}
 					_logger.LogInformation($"Message recived: MessageId: {args.BasicProperties.MessageId}");
@@ -77,7 +77,7 @@ namespace RawRabbit.Consumer.Eventing
 									return;
 								}
 
-								BasicAck(channel, args, cfg);
+								BasicAck(channel, args);
 						});
 					}
 					catch (Exception e)
@@ -101,7 +101,7 @@ namespace RawRabbit.Consumer.Eventing
 			);
 		}
 
-		protected void BasicAck(IModel channel, BasicDeliverEventArgs args, IConsumerConfiguration cfg)
+		protected void BasicAck(IModel channel, BasicDeliverEventArgs args)
 		{
 			try
 			{
