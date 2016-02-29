@@ -19,7 +19,7 @@ namespace RawRabbit.IntegrationTests.Features
 			var publisher = BusClientFactory.CreateDefault<AdvancedMessageContext>();
 
 			var subscribeTcs = new TaskCompletionSource<bool>();
-			var deplay = TimeSpan.FromSeconds(1);
+			var delay = TimeSpan.FromSeconds(1);
 			var hasBeenDelayed = false;
 			var firstRecieved = DateTime.MinValue;
 			var secondRecieved = DateTime.MinValue;
@@ -29,7 +29,7 @@ namespace RawRabbit.IntegrationTests.Features
 				if (!hasBeenDelayed)
 				{
 					firstRecieved = DateTime.Now;
-					context.RetryLater(deplay);
+					context.RetryLater(delay);
 					hasBeenDelayed = true;
 					return Task.FromResult(true);
 				}
@@ -43,7 +43,7 @@ namespace RawRabbit.IntegrationTests.Features
 			var actualDelay = secondRecieved - firstRecieved;
 			
 			/* Assert */
-			Assert.Equal(expected: deplay.Seconds, actual: actualDelay.Seconds);
+			Assert.Equal(expected: delay.Seconds, actual: actualDelay.Seconds);
 		}
 
 		[Fact]
