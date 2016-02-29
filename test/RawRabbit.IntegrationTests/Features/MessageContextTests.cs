@@ -37,7 +37,7 @@ namespace RawRabbit.IntegrationTests.Features
 			await subscribeTcs.Task;
 
 			/* Assert */
-			Assert.Equal(subscribeTcs.Task.Result, expectedId);
+			Assert.Equal(expected: expectedId, actual: subscribeTcs.Task.Result);
 		}
 
 		[Fact]

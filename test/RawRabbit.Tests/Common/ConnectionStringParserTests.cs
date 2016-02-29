@@ -16,11 +16,11 @@ namespace RawRabbit.Tests.Common
 			var config = ConnectionStringParser.Parse(connectionString);
 
 			/* Assert */
-			Assert.Equal("guest", config.Username);
-			Assert.Equal("guest", config.Password);
-			Assert.Equal("/", config.VirtualHost);
-			Assert.Equal("host", config.Hostnames[0]);
-			Assert.Equal(5672, config.Port);
+			Assert.Equal(expected: "guest", actual: config.Username);
+			Assert.Equal(expected: "guest", actual: config.Password);
+			Assert.Equal(expected: "/", actual: config.VirtualHost);
+			Assert.Equal(expected: "host", actual: config.Hostnames[0]);
+			Assert.Equal(expected: 5672, actual: config.Port);
 		}
 
 		[Fact]
@@ -33,11 +33,11 @@ namespace RawRabbit.Tests.Common
 			var config = ConnectionStringParser.Parse(connectionString);
 
 			/* Assert */
-			Assert.Equal("guest", config.Username);
-			Assert.Equal("guest", config.Password);
-			Assert.Equal("/", config.VirtualHost);
-			Assert.Equal("host", config.Hostnames[0]);
-			Assert.Equal(1234, config.Port);
+			Assert.Equal(expected: "guest", actual: config.Username);
+			Assert.Equal(expected: "guest", actual: config.Password);
+			Assert.Equal(expected: "/", actual: config.VirtualHost);
+			Assert.Equal(expected: "host", actual: config.Hostnames[0]);
+			Assert.Equal(expected: 1234, actual: config.Port);
 		}
 
 		[Fact]
@@ -50,11 +50,11 @@ namespace RawRabbit.Tests.Common
 			var config = ConnectionStringParser.Parse(connectionString);
 
 			/* Assert */
-			Assert.Equal("guest", config.Username);
-			Assert.Equal("guest", config.Password);
-			Assert.Equal("/virtualHost", config.VirtualHost);
-			Assert.Equal("host", config.Hostnames[0]);
-			Assert.Equal(5672, config.Port);
+			Assert.Equal(expected: "guest", actual: config.Username);
+			Assert.Equal(expected: "guest", actual: config.Password);
+			Assert.Equal(expected: "/virtualHost", actual: config.VirtualHost);
+			Assert.Equal(expected: "host", actual: config.Hostnames[0]);
+			Assert.Equal(expected: 5672, actual: config.Port);
 		}
 
 		[Fact]
@@ -74,19 +74,19 @@ namespace RawRabbit.Tests.Common
 			var config = ConnectionStringParser.Parse(connectionString);
 
 			/* Assert */
-			Assert.Equal("guest", config.Username);
-			Assert.Equal("guest", config.Password);
-			Assert.Equal("/", config.VirtualHost);
-			Assert.Equal("host1", config.Hostnames[0]);
-			Assert.Equal("host2", config.Hostnames[1]);
-			Assert.Equal(5672, config.Port);
-			Assert.Equal(TimeSpan.FromSeconds(10), config.RequestTimeout);
-			Assert.Equal(TimeSpan.FromSeconds(20), config.PublishConfirmTimeout);
-			Assert.Equal(TimeSpan.FromSeconds(30), config.RecoveryInterval);
-			Assert.Equal(false, config.AutoCloseConnection);
-			Assert.Equal(false, config.PersistentDeliveryMode);
-			Assert.Equal(false, config.AutomaticRecovery);
-			Assert.Equal(false, config.TopologyRecovery);
+			Assert.Equal(expected: "guest", actual: config.Username);
+			Assert.Equal(expected: "guest", actual: config.Password);
+			Assert.Equal(expected: "/", actual: config.VirtualHost);
+			Assert.Equal(expected: "host1", actual: config.Hostnames[0]);
+			Assert.Equal(expected: "host2", actual: config.Hostnames[1]);
+			Assert.Equal(expected: 5672, actual: config.Port);
+			Assert.Equal(expected: TimeSpan.FromSeconds(10), actual: config.RequestTimeout);
+			Assert.Equal(expected: TimeSpan.FromSeconds(20), actual: config.PublishConfirmTimeout);
+			Assert.Equal(expected: TimeSpan.FromSeconds(30), actual: config.RecoveryInterval);
+			Assert.Equal(expected: false, actual: config.AutoCloseConnection);
+			Assert.Equal(expected: false, actual: config.PersistentDeliveryMode);
+			Assert.Equal(expected: false, actual: config.AutomaticRecovery);
+			Assert.Equal(expected: false, actual: config.TopologyRecovery);
 		}
 
 		[Fact]
@@ -99,11 +99,11 @@ namespace RawRabbit.Tests.Common
 			var config = ConnectionStringParser.Parse(connectionString);
 
 			/* Assert */
-			Assert.Equal("guest", config.Username);
-			Assert.Equal("guest", config.Password);
-			Assert.Equal("/virtualHost", config.VirtualHost);
-			Assert.Equal("host", config.Hostnames[0]);
-			Assert.Equal(1234, config.Port);
+			Assert.Equal(expected: "guest", actual: config.Username);
+			Assert.Equal(expected: "guest", actual: config.Password);
+			Assert.Equal(expected: "/virtualHost", actual: config.VirtualHost);
+			Assert.Equal(expected: "host", actual: config.Hostnames[0]);
+			Assert.Equal(expected: 1234, actual: config.Port);
 		}
 
 		[Fact]
@@ -116,12 +116,12 @@ namespace RawRabbit.Tests.Common
 			var config = ConnectionStringParser.Parse(connectionString);
 
 			/* Assert */
-			Assert.Equal("username", config.Username);
-			Assert.Equal("password", config.Password);
-			Assert.Equal("/", config.VirtualHost);
-			Assert.Equal("host1", config.Hostnames[0]);
-			Assert.Equal("host2", config.Hostnames[1]);
-			Assert.Equal(5672, config.Port);
+			Assert.Equal(expected: "username", actual: config.Username);
+			Assert.Equal(expected: "password", actual: config.Password);
+			Assert.Equal(expected: "/", actual: config.VirtualHost);
+			Assert.Equal(expected: "host1", actual: config.Hostnames[0]);
+			Assert.Equal(expected: "host2", actual: config.Hostnames[1]);
+			Assert.Equal(expected: 5672, actual: config.Port);
 		}
 
 		[Fact]
@@ -134,12 +134,12 @@ namespace RawRabbit.Tests.Common
 			var config = ConnectionStringParser.Parse(connectionString);
 
 			/* Assert */
-			Assert.Equal("username", config.Username);
-			Assert.Equal("password", config.Password);
-			Assert.Equal("/virtualHost", config.VirtualHost);
-			Assert.Equal("host1", config.Hostnames[0]);
-			Assert.Equal("host2", config.Hostnames[1]);
-			Assert.Equal(5672, config.Port);
+			Assert.Equal(expected: "username", actual: config.Username);
+			Assert.Equal(expected: "password", actual: config.Password);
+			Assert.Equal(expected: "/virtualHost", actual: config.VirtualHost);
+			Assert.Equal(expected: "host1", actual: config.Hostnames[0]);
+			Assert.Equal(expected: "host2", actual: config.Hostnames[1]);
+			Assert.Equal(expected: 5672, actual: config.Port);
 		}
 
 		[Fact]
@@ -152,12 +152,12 @@ namespace RawRabbit.Tests.Common
 			var config = ConnectionStringParser.Parse(connectionString);
 
 			/* Assert */
-			Assert.Equal("username", config.Username);
-			Assert.Equal("password", config.Password);
-			Assert.Equal("/", config.VirtualHost);
-			Assert.Equal("host1", config.Hostnames[0]);
-			Assert.Equal("host2", config.Hostnames[1]);
-			Assert.Equal(1234, config.Port);
+			Assert.Equal(expected: "username", actual: config.Username);
+			Assert.Equal(expected: "password", actual: config.Password);
+			Assert.Equal(expected: "/", actual: config.VirtualHost);
+			Assert.Equal(expected: "host1", actual: config.Hostnames[0]);
+			Assert.Equal(expected: "host2", actual: config.Hostnames[1]);
+			Assert.Equal(expected: 1234, actual: config.Port);
 		}
 
 		[Fact]
@@ -170,12 +170,12 @@ namespace RawRabbit.Tests.Common
 			var config = ConnectionStringParser.Parse(connectionString);
 
 			/* Assert */
-			Assert.Equal("username", config.Username);
-			Assert.Equal("password", config.Password);
-			Assert.Equal("/virtualHost", config.VirtualHost);
-			Assert.Equal("host1", config.Hostnames[0]);
-			Assert.Equal("host2", config.Hostnames[1]);
-			Assert.Equal(1234, config.Port);
+			Assert.Equal(expected: "username", actual: config.Username);
+			Assert.Equal(expected: "password", actual: config.Password);
+			Assert.Equal(expected: "/virtualHost", actual: config.VirtualHost);
+			Assert.Equal(expected: "host1", actual: config.Hostnames[0]);
+			Assert.Equal(expected: "host2", actual: config.Hostnames[1]);
+			Assert.Equal(expected: 1234, actual: config.Port);
 		}
 
 		[Fact]
@@ -195,19 +195,19 @@ namespace RawRabbit.Tests.Common
 			var config = ConnectionStringParser.Parse(connectionString);
 
 			/* Assert */
-			Assert.Equal("username", config.Username);
-			Assert.Equal("password", config.Password);
-			Assert.Equal("/virtualHost", config.VirtualHost);
-			Assert.Equal("host1", config.Hostnames[0]);
-			Assert.Equal("host2", config.Hostnames[1]);
-			Assert.Equal(1234, config.Port);
-			Assert.Equal(TimeSpan.FromSeconds(10), config.RequestTimeout);
-			Assert.Equal(TimeSpan.FromSeconds(20), config.PublishConfirmTimeout);
-			Assert.Equal(TimeSpan.FromSeconds(30), config.RecoveryInterval);
-			Assert.Equal(false, config.AutoCloseConnection);
-			Assert.Equal(false, config.PersistentDeliveryMode);
-			Assert.Equal(false, config.AutomaticRecovery);
-			Assert.Equal(false, config.TopologyRecovery);
+			Assert.Equal(expected: "username", actual: config.Username);
+			Assert.Equal(expected: "password", actual: config.Password);
+			Assert.Equal(expected: "/virtualHost", actual: config.VirtualHost);
+			Assert.Equal(expected: "host1", actual: config.Hostnames[0]);
+			Assert.Equal(expected: "host2", actual: config.Hostnames[1]);
+			Assert.Equal(expected: 1234, actual: config.Port);
+			Assert.Equal(expected: TimeSpan.FromSeconds(10), actual: config.RequestTimeout);
+			Assert.Equal(expected: TimeSpan.FromSeconds(20), actual: config.PublishConfirmTimeout);
+			Assert.Equal(expected: TimeSpan.FromSeconds(30), actual: config.RecoveryInterval);
+			Assert.Equal(expected: false, actual: config.AutoCloseConnection);
+			Assert.Equal(expected: false, actual: config.PersistentDeliveryMode);
+			Assert.Equal(expected: false, actual: config.AutomaticRecovery);
+			Assert.Equal(expected: false, actual: config.TopologyRecovery);
 		}
 
 		[Fact]
@@ -227,19 +227,19 @@ namespace RawRabbit.Tests.Common
 			var config = ConnectionStringParser.Parse(connectionString);
 
 			/* Assert */
-			Assert.Equal("username", config.Username);
-			Assert.Equal("password", config.Password);
-			Assert.Equal("/", config.VirtualHost);
-			Assert.Equal("host1", config.Hostnames[0]);
-			Assert.Equal("host2", config.Hostnames[1]);
-			Assert.Equal(1234, config.Port);
-			Assert.Equal(TimeSpan.FromSeconds(10), config.RequestTimeout);
-			Assert.Equal(TimeSpan.FromSeconds(20), config.PublishConfirmTimeout);
-			Assert.Equal(TimeSpan.FromSeconds(30), config.RecoveryInterval);
-			Assert.Equal(false, config.AutoCloseConnection);
-			Assert.Equal(false, config.PersistentDeliveryMode);
-			Assert.Equal(false, config.AutomaticRecovery);
-			Assert.Equal(false, config.TopologyRecovery);
+			Assert.Equal(expected: "username", actual: config.Username);
+			Assert.Equal(expected: "password", actual: config.Password);
+			Assert.Equal(expected: "/", actual: config.VirtualHost);
+			Assert.Equal(expected: "host1", actual: config.Hostnames[0]);
+			Assert.Equal(expected: "host2", actual: config.Hostnames[1]);
+			Assert.Equal(expected: 1234, actual: config.Port);
+			Assert.Equal(expected: TimeSpan.FromSeconds(10), actual: config.RequestTimeout);
+			Assert.Equal(expected: TimeSpan.FromSeconds(20), actual: config.PublishConfirmTimeout);
+			Assert.Equal(expected: TimeSpan.FromSeconds(30), actual: config.RecoveryInterval);
+			Assert.Equal(expected: false, actual: config.AutoCloseConnection);
+			Assert.Equal(expected: false, actual: config.PersistentDeliveryMode);
+			Assert.Equal(expected: false, actual: config.AutomaticRecovery);
+			Assert.Equal(expected: false, actual: config.TopologyRecovery);
 		}
 
 		[Fact]
@@ -259,19 +259,19 @@ namespace RawRabbit.Tests.Common
 			var config = ConnectionStringParser.Parse(connectionString);
 
 			/* Assert */
-			Assert.Equal("guest", config.Username);
-			Assert.Equal("guest", config.Password);
-			Assert.Equal("/virtualHost", config.VirtualHost);
-			Assert.Equal("host1", config.Hostnames[0]);
-			Assert.Equal("host2", config.Hostnames[1]);
-			Assert.Equal(1234, config.Port);
-			Assert.Equal(TimeSpan.FromSeconds(10), config.RequestTimeout);
-			Assert.Equal(TimeSpan.FromSeconds(20), config.PublishConfirmTimeout);
-			Assert.Equal(TimeSpan.FromSeconds(30), config.RecoveryInterval);
-			Assert.Equal(false, config.AutoCloseConnection);
-			Assert.Equal(false, config.PersistentDeliveryMode);
-			Assert.Equal(false, config.AutomaticRecovery);
-			Assert.Equal(false, config.TopologyRecovery);
+			Assert.Equal(expected: "guest", actual: config.Username);
+			Assert.Equal(expected: "guest", actual: config.Password);
+			Assert.Equal(expected: "/virtualHost", actual: config.VirtualHost);
+			Assert.Equal(expected: "host1", actual: config.Hostnames[0]);
+			Assert.Equal(expected: "host2", actual: config.Hostnames[1]);
+			Assert.Equal(expected: 1234, actual: config.Port);
+			Assert.Equal(expected: TimeSpan.FromSeconds(10), actual: config.RequestTimeout);
+			Assert.Equal(expected: TimeSpan.FromSeconds(20), actual: config.PublishConfirmTimeout);
+			Assert.Equal(expected: TimeSpan.FromSeconds(30), actual: config.RecoveryInterval);
+			Assert.Equal(expected: false, actual: config.AutoCloseConnection);
+			Assert.Equal(expected: false, actual: config.PersistentDeliveryMode);
+			Assert.Equal(expected: false, actual: config.AutomaticRecovery);
+			Assert.Equal(expected: false, actual: config.TopologyRecovery);
 		}
 
 		[Fact]
@@ -291,19 +291,19 @@ namespace RawRabbit.Tests.Common
 			var config = ConnectionStringParser.Parse(connectionString);
 
 			/* Assert */
-			Assert.Equal("username", config.Username);
-			Assert.Equal("password", config.Password);
-			Assert.Equal("/", config.VirtualHost);
-			Assert.Equal("host1", config.Hostnames[0]);
-			Assert.Equal("host2", config.Hostnames[1]);
-			Assert.Equal(5672, config.Port);
-			Assert.Equal(TimeSpan.FromSeconds(10), config.RequestTimeout);
-			Assert.Equal(TimeSpan.FromSeconds(20), config.PublishConfirmTimeout);
-			Assert.Equal(TimeSpan.FromSeconds(30), config.RecoveryInterval);
-			Assert.Equal(false, config.AutoCloseConnection);
-			Assert.Equal(false, config.PersistentDeliveryMode);
-			Assert.Equal(false, config.AutomaticRecovery);
-			Assert.Equal(false, config.TopologyRecovery);
+			Assert.Equal(expected: "username", actual: config.Username);
+			Assert.Equal(expected: "password", actual: config.Password);
+			Assert.Equal(expected: "/", actual: config.VirtualHost);
+			Assert.Equal(expected: "host1", actual: config.Hostnames[0]);
+			Assert.Equal(expected: "host2", actual: config.Hostnames[1]);
+			Assert.Equal(expected: 5672, actual: config.Port);
+			Assert.Equal(expected: TimeSpan.FromSeconds(10), actual: config.RequestTimeout);
+			Assert.Equal(expected: TimeSpan.FromSeconds(20), actual: config.PublishConfirmTimeout);
+			Assert.Equal(expected: TimeSpan.FromSeconds(30), actual: config.RecoveryInterval);
+			Assert.Equal(expected: false, actual: config.AutoCloseConnection);
+			Assert.Equal(expected: false, actual: config.PersistentDeliveryMode);
+			Assert.Equal(expected: false, actual: config.AutomaticRecovery);
+			Assert.Equal(expected: false, actual: config.TopologyRecovery);
 		}
 
 		[Fact]
@@ -326,7 +326,7 @@ namespace RawRabbit.Tests.Common
 			/* Assert */
 			Assert.NotNull(exception);
 			Assert.IsType(typeof(FormatException), exception);
-			Assert.Equal("The supplied port 'port' in the connection string is not a number", exception.Message);
+			Assert.Equal(expected: "The supplied port 'port' in the connection string is not a number", actual: exception.Message);
 		}
 
 		[Fact]
@@ -349,7 +349,7 @@ namespace RawRabbit.Tests.Common
 			/* Assert */
 			Assert.NotNull(exception);
 			Assert.IsType(typeof(ArgumentException), exception);
-			Assert.Equal("No configuration property named 'badproperty'", exception.Message);
+			Assert.Equal(expected: "No configuration property named 'badproperty'", actual: exception.Message);
 		}
 
 	}

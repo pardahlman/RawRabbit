@@ -43,7 +43,7 @@ namespace RawRabbit.IntegrationTests.Features
 			var actualDelay = secondRecieved - firstRecieved;
 			
 			/* Assert */
-			Assert.Equal(actualDelay.Seconds, deplay.Seconds);
+			Assert.Equal(expected: deplay.Seconds, actual: actualDelay.Seconds);
 		}
 
 		[Fact]
@@ -75,7 +75,7 @@ namespace RawRabbit.IntegrationTests.Features
 			var actualDelay = secondRecieved - firstRecieved;
 
 			/* Assert */
-			Assert.Equal(actualDelay.Seconds, delay.Seconds);
+			Assert.Equal(expected: delay.Seconds, actual: actualDelay.Seconds);
 		}
 	}
 }

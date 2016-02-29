@@ -31,7 +31,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			var recieved = await requester.RequestAsync<BasicRequest, BasicResponse>();
 
 			/* Assert */
-			Assert.Equal(recieved.Prop, response.Prop);
+			Assert.Equal(expected: response.Prop, actual: recieved.Prop);
 		}
 
 		[Fact]
@@ -57,7 +57,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			);
 
 			/* Assert */
-			Assert.Equal(recieved.Prop, response.Prop);
+			Assert.Equal(expected: response.Prop, actual: recieved.Prop);
 		}
 
 		[Fact]
@@ -116,7 +116,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			var response = await requester.RequestAsync<FirstRequest, FirstResponse>(new FirstRequest());
 
 			/* Assert */
-			Assert.Equal(response.Infered, payload);
+			Assert.Equal(expected: payload, actual: response.Infered);
 		}
 
 		[Fact]
@@ -133,7 +133,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			var recieved = await requester.RequestAsync<BasicRequest, BasicResponse>();
 
 			/* Assert */
-			Assert.Equal(recieved.Prop, response.Prop);
+			Assert.Equal(expected: response.Prop, actual: recieved.Prop);
 		}
 
 		[Fact]
@@ -180,7 +180,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 				.ToList();
 
 			/* Assert */
-			Assert.Equal(ids.Count, numberOfCalls);
+			Assert.Equal(expected: numberOfCalls, actual: ids.Count);
 		}
 	}
 }

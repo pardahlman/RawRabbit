@@ -100,7 +100,7 @@ namespace RawRabbit.IntegrationTests.Features
 
 			TestChannel.QueueDelete("basicmessage");
 
-			Assert.Equal(callcount, 1);
+			Assert.Equal(expected: 1, actual: callcount);
 		}
 	}
 }

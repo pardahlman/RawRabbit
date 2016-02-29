@@ -42,7 +42,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 				.ToList();
 
 			/* Assert */
-			Assert.Equal(numberOfCalls, ids.Count);
+			Assert.Equal(expected: numberOfCalls, actual: ids.Count);
 		}
 
 		[Fact]
@@ -83,8 +83,8 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 				.Distinct()
 				.ToList();
 			/* Assert */
-			Assert.Equal(numberOfCalls, firstIds.Count);
-			Assert.Equal(numberOfCalls, secondIds.Count);
+			Assert.Equal(expected: numberOfCalls, actual: firstIds.Count);
+			Assert.Equal(expected: numberOfCalls, actual: secondIds.Count);
 		}
 	}
 }
