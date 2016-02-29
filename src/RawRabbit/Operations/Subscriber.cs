@@ -29,15 +29,11 @@ namespace RawRabbit.Operations
 
 		public void SubscribeAsync<T>(Func<T, TMessageContext, Task> subscribeMethod, SubscriptionConfiguration config)
 		{
-			DeclareQueue(config.Queue);
-			DeclareExchange(config.Exchange);
-			BindQueue(config.Queue, config.Exchange, config.RoutingKey);
-			SubscribeAsync(config, subscribeMethod);
-		}
-
-		private void SubscribeAsync<T>(SubscriptionConfiguration cfg, Func<T, TMessageContext, Task> subscribeMethod)
-		{
-			var consumer = _consumerFactory.CreateConsumer(cfg, ChannelFactory.CreateChannel());
+			var channel = ChannelFactory.CreateChannel();
+			DeclareQueue(config.Queue, channel);
+			DeclareExchange(config.Exchange, channel);
+			BindQueue(config.Queue, config.Exchange, config.RoutingKey, channel);
+			var consumer = _consumerFactory.CreateConsumer(config, channel);
 			consumer.OnMessageAsync = (o, args) =>
 			{
 				var body = Serializer.Deserialize<T>(args.Body);
@@ -45,9 +41,9 @@ namespace RawRabbit.Operations
 				_contextEnhancer.WireUpContextFeatures(context, consumer, args);
 				return subscribeMethod(body, context);
 			};
-			consumer.Model.BasicConsume(cfg.Queue.FullQueueName, cfg.NoAck, consumer);
+			consumer.Model.BasicConsume(config.Queue.FullQueueName, config.NoAck, consumer);
 
-			_logger.LogDebug($"Setting up a consumer on queue {cfg.Queue.QueueName} with NoAck set to {cfg.NoAck}.");
+			_logger.LogDebug($"Setting up a consumer on queue {config.Queue.QueueName} with NoAck set to {config.NoAck}.");
 		}
 
 		public override void Dispose()
