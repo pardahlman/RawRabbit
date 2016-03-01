@@ -11,7 +11,7 @@ namespace RawRabbit.Configuration.Request
 
 		/* Response Queue Configuration*/
 		public bool NoAck { get; set; }
-		public ushort PrefetchCount { get; }
+		public ushort PrefetchCount => 1; // Only expect one response
 		public QueueConfiguration Queue => ReplyQueue;
 		public QueueConfiguration ReplyQueue { get; set; }
 		public string ReplyQueueRoutingKey { get; set; }
