@@ -1,3 +1,11 @@
+# 1.8.11
+
+ - [#61](https://github.com/pardahlman/RawRabbit/issues/61) - Improve extraction of Application Name (contributed by ([Originalutter](https://github.com/Originalutter)))
+ - [#41](https://github.com/pardahlman/RawRabbit/issues/41) - Correct order of arguments passed to Assert.Equal (contributed by ([Originalutter](https://github.com/Originalutter)))
+
+Commits: e9a1693a0e...8cef898373
+
+
 # 1.8.10
 
 Improving invokation of Response handler.
