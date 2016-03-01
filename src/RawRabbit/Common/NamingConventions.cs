@@ -21,9 +21,9 @@ namespace RawRabbit.Common
 
 	public class NamingConventions : INamingConventions
 	{
-		private readonly IEnumerable<string> _disallowedDirectoryNames = new[] {"bin", "debug", "release"};
 		private readonly Dictionary<Type, int> _subscriberCounter;
-		private readonly string _applicationName = GetApplicationName(Environment.CommandLine);
+		private readonly string _applicationName;
+		private const string IisWorkerProcessName = "w3wp";
 
 		public virtual Func<Type, string> ExchangeNamingConvention { get; set; }
 		public virtual Func<Type, string> QueueNamingConvention { get; set; }
@@ -37,7 +37,8 @@ namespace RawRabbit.Common
 		public NamingConventions()
 		{
 			_subscriberCounter = new Dictionary<Type,int>();
-			
+			_applicationName = GetApplicationName(Environment.CommandLine);
+
 			ExchangeNamingConvention = type => type?.Namespace?.ToLower() ?? string.Empty;
 			RpcExchangeNamingConvention = (request, response) => request?.Namespace?.ToLower() ?? "default_rpc_exchange";
 			QueueNamingConvention = type => CreateShortAfqn(type);
@@ -71,9 +72,8 @@ namespace RawRabbit.Common
 			var consoleOrServiceRegex = new Regex(@"(?<ApplicationName>[^\\]*).exe");
 			var match = consoleOrServiceRegex.Match(commandLine);
 			var applicationName = string.Empty;
-			const string iisWorkerProcessName = "w3wp";
 
-			if (match.Success && match.Groups["ApplicationName"].Value != iisWorkerProcessName)
+			if (match.Success && match.Groups["ApplicationName"].Value != IisWorkerProcessName)
 			{
 				applicationName = match.Groups["ApplicationName"].Value;
 				if (applicationName.EndsWith(".vshost"))
