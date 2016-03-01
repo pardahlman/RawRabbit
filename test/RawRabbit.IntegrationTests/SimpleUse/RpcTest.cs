@@ -35,6 +35,25 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		}
 
 		[Fact]
+		public async Task Should_Perform_Basic_Rpc_For_Generic_Message_Types()
+		{
+			/* Setup */
+			var response = new GenericResponse<First, Second> { Prop = "This is the response." };
+			var requester = BusClientFactory.CreateDefault();
+			var responder = BusClientFactory.CreateDefault();
+			responder.RespondAsync<GenericRequest<First,Second>, GenericResponse<First,Second>>((req, i) =>
+			{
+				return Task.FromResult(response);
+			});
+
+			/* Test */
+			var recieved = await requester.RequestAsync<GenericRequest<First, Second>, GenericResponse<First, Second>>();
+
+			/* Assert */
+			Assert.Equal(expected: response.Prop, actual: recieved.Prop);
+		}
+
+		[Fact]
 		public async Task Should_Perform_Rpc_Without_Direct_Reply_To()
 		{
 			/* Setup */

@@ -26,11 +26,11 @@ namespace RawRabbit.Common
 			{
 				MessageId = Guid.NewGuid().ToString(),
 				Headers = new Dictionary<string, object>(),
-				Persistent = _config.PersistentDeliveryMode,
-				Type = typeof(TMessage).FullName
+				Persistent = _config.PersistentDeliveryMode
 			};
 			custom?.Invoke(properties);
 			properties.Headers.Add(PropertyHeaders.Sent, DateTime.UtcNow.ToString("u"));
+			properties.Headers.Add(PropertyHeaders.MessageType, $"{typeof(TMessage).FullName}, {typeof(TMessage).Assembly.GetName().Name}");
 			return properties;
 		}
 	}

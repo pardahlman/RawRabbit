@@ -4,6 +4,8 @@ using System.Runtime.Serialization.Formatters;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using RabbitMQ.Client.Events;
+using RawRabbit.Common;
 
 namespace RawRabbit.Serialization
 {
@@ -37,6 +39,18 @@ namespace RawRabbit.Serialization
 			}
 			var msgBytes = Encoding.UTF8.GetBytes(msgStr);
 			return msgBytes;
+		}
+
+		public object Deserialize(BasicDeliverEventArgs args)
+		{
+			object typeBytes;
+			if (args.BasicProperties.Headers.TryGetValue(PropertyHeaders.MessageType, out typeBytes))
+			{
+				var typeName = Encoding.UTF8.GetString(typeBytes as byte[] ?? new byte[0]);
+				var type = Type.GetType(typeName, false);
+				return Deserialize(args.Body, type);
+			}
+			return null;
 		}
 
 		public T Deserialize<T>(byte[] bytes)

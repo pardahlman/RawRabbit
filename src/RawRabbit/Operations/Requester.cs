@@ -166,7 +166,7 @@ namespace RawRabbit.Operations
 					{
 						return Task.FromResult(true);
 					}
-					var response = Serializer.Deserialize<TResponse>(args.Body);
+					var response = Serializer.Deserialize(args);
 					responseTcs.TrySetResult(response);
 					return Task.FromResult(true);
 				}

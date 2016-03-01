@@ -2,6 +2,7 @@
 {
 	public class PropertyHeaders
 	{
+		public static readonly string MessageType = "message_type";
 		public static readonly string Sent = "sent";
 		public static readonly string ApproximateRetry = "approx_retry";
 		public static readonly string Death = "x-death";
