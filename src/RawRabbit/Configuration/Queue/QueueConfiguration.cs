@@ -4,7 +4,20 @@ namespace RawRabbit.Configuration.Queue
 {
 	public class QueueConfiguration
 	{
-		public string FullQueueName => string.IsNullOrEmpty(NameSuffix) ? QueueName : $"{QueueName}_{NameSuffix}";
+		public string FullQueueName
+		{
+			get
+			{
+				var fullQueueName =  string.IsNullOrEmpty(NameSuffix)
+					? QueueName
+					: $"{QueueName}_{NameSuffix}";
+
+				return fullQueueName.Length > 254
+					? string.Concat("...", fullQueueName.Substring(fullQueueName.Length - 250))
+					: fullQueueName;
+			}
+		}
+
 		public string QueueName { get; set; }
 		public string NameSuffix { get; set; }
 		public bool Durable { get; set; }
