@@ -120,6 +120,14 @@ namespace RawRabbit.Common
 			}
 
 			_logger.LogInformation($"Channel {_threadChannels.Value.ChannelNumber} is closed.");
+			if (_threadChannels.Value.CloseReason?.Initiator == ShutdownInitiator.Application)
+			{
+				_logger.LogInformation($"Channel {_threadChannels.Value.ChannelNumber} is closed by application and will not be recovered.");
+				_threadChannels.Value.Dispose();
+				_threadChannels.Value = connection.CreateModel();
+				return Task.FromResult(_threadChannels.Value);
+			}
+
 			var recoveryChannel = _threadChannels.Value as IRecoverable;
 			if (recoveryChannel == null)
 			{
