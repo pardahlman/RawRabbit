@@ -161,7 +161,7 @@ namespace RawRabbit.Operations
 					{
 						_logger.LogInformation($"Unable to find request timer for message {args.BasicProperties.CorrelationId}.");
 					}
-					_errorStrategy.OnResponseRecievedAsync(args, responseTcs);
+					_errorStrategy.OnResponseRecievedAsync<TResponse>(args, responseTcs);
 					if (responseTcs?.Task?.IsFaulted ?? true)
 					{
 						return Task.FromResult(true);
