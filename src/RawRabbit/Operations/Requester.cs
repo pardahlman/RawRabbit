@@ -23,7 +23,7 @@ namespace RawRabbit.Operations
 		private readonly IBasicPropertiesProvider _propertiesProvider;
 		private readonly TimeSpan _requestTimeout;
 		private readonly ConcurrentDictionary<Type, IRawConsumer> _typeToConsumer;
-		private readonly ConcurrentDictionary<string, object> _responseTcsDictionary;
+		private readonly ConcurrentDictionary<string, TaskCompletionSource<object>> _responseTcsDictionary;
 		private readonly ConcurrentDictionary<string, Timer> _requestTimerDictionary;
 		private Timer _disposeConsumerTimer;
 		private readonly ILogger _logger = LogManager.GetLogger<Requester<TMessageContext>>();
@@ -45,7 +45,7 @@ namespace RawRabbit.Operations
 			_propertiesProvider = propertiesProvider;
 			_requestTimeout = requestTimeout;
 			_typeToConsumer = new ConcurrentDictionary<Type, IRawConsumer>();
-			_responseTcsDictionary = new ConcurrentDictionary<string, object>();
+			_responseTcsDictionary = new ConcurrentDictionary<string, TaskCompletionSource<object>>();
 			_requestTimerDictionary = new ConcurrentDictionary<string, Timer>();
 		}
 
@@ -63,7 +63,7 @@ namespace RawRabbit.Operations
 
 			Task.Run(() => CreateOrUpdateDisposeTimer());
 
-			var responseTcs = new TaskCompletionSource<TResponse>();
+			var responseTcs = new TaskCompletionSource<object>();
 			_responseTcsDictionary.TryAdd(props.CorrelationId, responseTcs);
 
 			_requestTimerDictionary.TryAdd(
@@ -85,7 +85,7 @@ namespace RawRabbit.Operations
 				basicProperties: props,
 				body: body
 			);
-			return responseTcs.Task;
+			return responseTcs.Task.ContinueWith(tResponse => (TResponse) tResponse.Result);
 		}
 
 		private void CreateOrUpdateDisposeTimer()
@@ -146,10 +146,9 @@ namespace RawRabbit.Operations
 			DeclareExchange(cfg.Exchange, consumer.Model);
 			consumer.OnMessageAsync = (o, args) =>
 			{
-				object tcsAsObj;
-				if (_responseTcsDictionary.TryRemove(args.BasicProperties.CorrelationId, out tcsAsObj))
+				TaskCompletionSource<object> responseTcs;
+				if (_responseTcsDictionary.TryRemove(args.BasicProperties.CorrelationId, out responseTcs))
 				{
-					var tcs = tcsAsObj as TaskCompletionSource<TResponse>;
 					_logger.LogDebug($"Recived response with correlationId {args.BasicProperties.CorrelationId}.");
 
 					Timer timer;
@@ -161,13 +160,13 @@ namespace RawRabbit.Operations
 					{
 						_logger.LogInformation($"Unable to find request timer for message {args.BasicProperties.CorrelationId}.");
 					}
-					_errorStrategy.OnResponseRecievedAsync(args, tcs);
-					if (tcs?.Task?.IsFaulted ?? true)
+					_errorStrategy.OnResponseRecievedAsync(args, responseTcs);
+					if (responseTcs?.Task?.IsFaulted ?? true)
 					{
 						return Task.FromResult(true);
 					}
 					var response = Serializer.Deserialize<TResponse>(args.Body);
-					tcs.TrySetResult(response);
+					responseTcs.TrySetResult(response);
 					return Task.FromResult(true);
 				}
 				_logger.LogWarning($"Unable to find callback for {args.BasicProperties.CorrelationId}.");
