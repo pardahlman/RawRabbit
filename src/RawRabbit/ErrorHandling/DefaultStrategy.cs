@@ -56,13 +56,13 @@ namespace RawRabbit.ErrorHandling
 			return exception;
 		}
 
-		public Task OnResponseRecievedAsync<TResponse>(BasicDeliverEventArgs args, TaskCompletionSource<object> responseTcs)
+		public Task OnResponseRecievedAsync(BasicDeliverEventArgs args, TaskCompletionSource<object> responseTcs)
 		{
-			OnResponseRecieved<TResponse>(args, responseTcs);
+			OnResponseRecieved(args, responseTcs);
 			return Task.FromResult(true);
 		}
 
-		public void OnResponseRecieved<TResponse>(BasicDeliverEventArgs args, TaskCompletionSource<object> responseTcs)
+		public void OnResponseRecieved(BasicDeliverEventArgs args, TaskCompletionSource<object> responseTcs)
 		{
 			var containsException = args?.BasicProperties?.Headers?.ContainsKey(PropertyHeaders.ExceptionHeader) ?? false;
 

@@ -9,7 +9,7 @@ namespace RawRabbit.ErrorHandling
 	public interface IErrorHandlingStrategy
 	{
 		Task OnRequestHandlerExceptionAsync(IRawConsumer rawConsumer, IConsumerConfiguration cfg, BasicDeliverEventArgs args, Exception exception);
-		Task OnResponseRecievedAsync<TResponse>(BasicDeliverEventArgs args, TaskCompletionSource<object> responseTcs);
-		void OnResponseRecieved<TResponse>(BasicDeliverEventArgs args, TaskCompletionSource<object> responseTcs);
+		Task OnResponseRecievedAsync(BasicDeliverEventArgs args, TaskCompletionSource<object> responseTcs);
+		void OnResponseRecieved(BasicDeliverEventArgs args, TaskCompletionSource<object> responseTcs);
 	}
 }

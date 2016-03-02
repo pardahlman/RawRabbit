@@ -87,6 +87,7 @@ namespace RawRabbit.vNext
 						p.GetService<IMessageContextProvider<TMessageContext>>(),
 						p.GetService<IErrorHandlingStrategy>(),
 						p.GetService<IBasicPropertiesProvider>(),
+						p.GetService<ITopologyProvider>(),
 						p.GetService<RawRabbitConfiguration>().RequestTimeout))
 				.AddTransient<IBusClient<TMessageContext>, BaseBusClient<TMessageContext>>();
 			custom?.Invoke(collection);
