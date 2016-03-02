@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Respond;
@@ -14,78 +14,88 @@ using RawRabbit.Operations.Abstraction;
 
 namespace RawRabbit.Operations
 {
-	public class Responder<TMessageContext> : OperatorBase, IResponder<TMessageContext> where TMessageContext : IMessageContext
+	public class Responder<TMessageContext> : IResponder<TMessageContext> where TMessageContext : IMessageContext
 	{
+		private readonly IChannelFactory _channelFactory;
+		private readonly ITopologyProvider _topologyProvider;
 		private readonly IConsumerFactory _consumerFactory;
+		private readonly IMessageSerializer _serializer;
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
 		private readonly IContextEnhancer _contextEnhancer;
 		private readonly IBasicPropertiesProvider _propertyProvider;
+		private readonly List<IRawConsumer> _consumers;
 		private readonly ILogger _logger = LogManager.GetLogger<Responder<TMessageContext>>();
-		private IModel _responseChannel;
 
-		public Responder(IChannelFactory channelFactory, IConsumerFactory consumerFactory, IMessageSerializer serializer, IMessageContextProvider<TMessageContext> contextProvider, IContextEnhancer contextEnhancer, IBasicPropertiesProvider propertyProvider)
-			: base(channelFactory, serializer)
+		public Responder(
+			IChannelFactory channelFactory,
+			ITopologyProvider topologyProvider,
+			IConsumerFactory consumerFactory,
+			IMessageSerializer serializer,
+			IMessageContextProvider<TMessageContext> contextProvider,
+			IContextEnhancer contextEnhancer,
+			IBasicPropertiesProvider propertyProvider)
 		{
+			_channelFactory = channelFactory;
+			_topologyProvider = topologyProvider;
 			_consumerFactory = consumerFactory;
+			_serializer = serializer;
 			_contextProvider = contextProvider;
 			_contextEnhancer = contextEnhancer;
 			_propertyProvider = propertyProvider;
+			_consumers = new List<IRawConsumer>();
 		}
 
 		public void RespondAsync<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, ResponderConfiguration cfg)
 		{
-			var channel = ChannelFactory.CreateChannel();
-			DeclareQueue(cfg.Queue, channel);
-			DeclareExchange(cfg.Exchange, channel);
-			BindQueue(cfg.Queue, cfg.Exchange, cfg.RoutingKey, channel);
-			var consumer = _consumerFactory.CreateConsumer(cfg, channel);
-			consumer.OnMessageAsync = (o, args) =>
-			{
-				var body = Serializer.Deserialize<TRequest>(args.Body);
-				var context = _contextProvider.ExtractContext(args.BasicProperties.Headers[PropertyHeaders.Context]);
-				_contextEnhancer.WireUpContextFeatures(context, consumer, args);
+			var topologyTask = _topologyProvider.BindQueueAsync(cfg.Queue, cfg.Exchange, cfg.RoutingKey);
+			var channelTask = _channelFactory.CreateChannelAsync();
 
-				return onMessage(body, context)
-					.ContinueWith(responseTask =>
+			var respondTask = Task.WhenAll(topologyTask, channelTask)
+				.ContinueWith(t =>
+				{
+					var consumer = _consumerFactory.CreateConsumer(cfg, channelTask.Result);
+					_consumers.Add(consumer);
+					consumer.OnMessageAsync = (o, args) =>
 					{
-						if (responseTask.IsFaulted)
-						{
-							throw responseTask.Exception ?? new Exception();
-						}
-						if (consumer.NackedDeliveryTags.Contains(args.DeliveryTag))
-						{
-							return;
-						}
-						if (responseTask.Result == null)
-						{
-							return;
-						}
-						SendResponse(responseTask.Result, args);
-					});
-			};
-			consumer.Model.BasicConsume(cfg.Queue.QueueName, cfg.NoAck, consumer);
+						var body = _serializer.Deserialize<TRequest>(args.Body);
+						var context = _contextProvider.ExtractContext(args.BasicProperties.Headers[PropertyHeaders.Context]);
+						_contextEnhancer.WireUpContextFeatures(context, consumer, args);
+
+						return onMessage(body, context)
+							.ContinueWith(tResponse =>
+							{
+								if (tResponse.IsFaulted)
+								{
+									throw tResponse.Exception ?? new Exception();
+								}
+								if (consumer.NackedDeliveryTags.Contains(args.DeliveryTag))
+								{
+									return;
+								}
+								if (tResponse.Result == null)
+								{
+									return;
+								}
+								_logger.LogDebug($"Sending response to request with correlation '{args.BasicProperties.CorrelationId}'.");
+								consumer.Model.BasicPublish(
+									exchange: "",
+									routingKey: args.BasicProperties.ReplyTo,
+									basicProperties:
+										_propertyProvider.GetProperties<TResponse>(p => p.CorrelationId = args.BasicProperties.CorrelationId),
+									body: _serializer.Serialize(tResponse.Result)
+								);
+							});
+					};
+					consumer.Model.BasicConsume(cfg.Queue.QueueName, cfg.NoAck, consumer);
+				});
+
+			Task.WaitAll(respondTask);
 		}
 
-		private void SendResponse<TResponse>(TResponse request, BasicDeliverEventArgs requestPayload)
-		{
-			_responseChannel = (_responseChannel?.IsOpen ?? false)
-				? _responseChannel
-				: ChannelFactory.CreateChannel();
-			_logger.LogDebug($"Sending response to request with correlation '{requestPayload.BasicProperties.CorrelationId}'.");
-			_responseChannel.BasicPublish(
-				exchange: "",
-				routingKey: requestPayload.BasicProperties.ReplyTo,
-				basicProperties: _propertyProvider.GetProperties<TResponse>(p => p.CorrelationId = requestPayload.BasicProperties.CorrelationId),
-				body: Serializer.Serialize(request)
-			);
-		}
-
-		public override void Dispose()
+		public void Dispose()
 		{
 			_logger.LogDebug("Disposing Responder.");
-			base.Dispose();
 			(_consumerFactory as IDisposable)?.Dispose();
-			_responseChannel?.Dispose();
 		}
 	}
 }
