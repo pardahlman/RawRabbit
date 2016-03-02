@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
+using RabbitMQ.Client;
+using RabbitMQ.Util;
 using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Queue;
 
@@ -17,55 +20,80 @@ namespace RawRabbit.Common
 	public class TopologyProvider : ITopologyProvider, IDisposable
 	{
 		private readonly IChannelFactory _channelFactory;
-		private readonly Task _completed = Task.FromResult(true);
-		private readonly ConcurrentDictionary<string, Task> _initExchanges; 
-		private readonly ConcurrentDictionary<string, Task> _initQueues; 
+		private IModel _channel;
+		private bool _processing;
+		private readonly object _processLock = new object();
+		private readonly Timer _disposeTimer;
+		private readonly List<string> _initExchanges;
+		private readonly List<string> _initQueues;
+		private readonly List<string> _queueBinds;
+		private readonly ConcurrentQueue<ScheduledTopologyTask> _topologyTasks;
 
 		public TopologyProvider(IChannelFactory channelFactory)
 		{
 			_channelFactory = channelFactory;
-			_initExchanges = new ConcurrentDictionary<string, Task>();
-			_initQueues = new ConcurrentDictionary<string, Task>();
+			_initExchanges = new List<string>();
+			_initQueues = new List<string>();
+			_queueBinds = new List<string>();
+			_topologyTasks = new ConcurrentQueue<ScheduledTopologyTask>();
+			_disposeTimer = new Timer(state =>
+			{
+				_channel?.Dispose();
+				_disposeTimer.Change(new TimeSpan(-1), new TimeSpan(-1));
+			}, null, TimeSpan.FromSeconds(2), new TimeSpan(-1));
 		}
 
 		public Task DeclareExchangeAsync(ExchangeConfiguration exchange)
 		{
-			Task existingTask;
-			if (_initExchanges.TryGetValue(exchange.ExchangeName, out existingTask))
-			{
-				return existingTask;
-			}
-			
-			if (exchange.IsDefaultExchange() || exchange.AssumeInitialized)
-			{
-				_initExchanges.TryAdd(exchange.ExchangeName, _completed);
-				return _completed;
-			}
-
-			var exchangeTask = _channelFactory
-					.GetChannelAsync()
-					.ContinueWith(tChannel =>
-					{
-						tChannel.Result.ExchangeDeclare(
-							exchange.ExchangeName,
-							exchange.ExchangeType,
-							exchange.Durable,
-							exchange.AutoDelete,
-							exchange.Arguments);
-					});
-			_initExchanges.TryAdd(exchange.ExchangeName, exchangeTask);
-			return exchangeTask;
+			var scheduled = new ScheduledExchangeTask(exchange);
+			_topologyTasks.Enqueue(scheduled);
+			EnsureWorker();
+			return scheduled.TaskCompletionSource.Task;
 		}
 
 		public Task DeclareQueueAsync(QueueConfiguration queue)
 		{
-			Task existingTask;
-			if (_initQueues.TryGetValue(queue.FullQueueName, out existingTask))
-			{
-				return existingTask;
-			}
-			
+			var scheduled = new ScheduledQueueTask(queue);
+			_topologyTasks.Enqueue(scheduled);
+			EnsureWorker();
+			return scheduled.TaskCompletionSource.Task;
+		}
 
+		public Task BindQueueAsync(QueueConfiguration queue, ExchangeConfiguration exchange, string routingKey)
+		{
+			var scheduled = new ScheduledBindQueueTask
+			{
+				Queue = queue,
+				Exchange = exchange,
+				RoutingKey = routingKey
+			};
+			_topologyTasks.Enqueue(scheduled);
+			EnsureWorker();
+			return scheduled.TaskCompletionSource.Task;
+		}
+
+		private void BindQueueToExchange(ScheduledBindQueueTask bind)
+		{
+			var bindKey = $"{bind.Queue.FullQueueName}_{bind.Exchange.ExchangeName}_{bind.RoutingKey}";
+			if (_queueBinds.Contains(bindKey))
+			{
+				return;
+			}
+
+			DeclareQueue(bind.Queue);
+			DeclareExchange(bind.Exchange);
+
+			var channel = GetOrCreateChannel();
+			channel.QueueBind(
+				queue: bind.Queue.FullQueueName,
+				exchange: bind.Exchange.ExchangeName,
+				routingKey: bind.RoutingKey
+				);
+			_queueBinds.Add(bindKey);
+		}
+
+		private void DeclareQueue(QueueConfiguration queue)
+		{
 			if (queue.IsDirectReplyTo())
 			{
 				/*
@@ -73,47 +101,148 @@ namespace RawRabbit.Common
 					declare this "queue" first, although the client can do so if it wants."
 					- https://www.rabbitmq.com/direct-reply-to.html
 				*/
-				_initQueues.TryAdd(queue.FullQueueName, _completed);
-				return _completed;
 			}
+			else if (!_initQueues.Contains(queue.FullQueueName))
+			{
+				var channel = GetOrCreateChannel();
+				channel.QueueDeclare(
+							queue.FullQueueName,
+							queue.Durable,
+							queue.Exclusive,
+							queue.AutoDelete,
+							queue.Arguments);
 
-			var queueTask = _channelFactory
-				.GetChannelAsync()
-				.ContinueWith(tChannel =>
-				{
-					tChannel.Result.QueueDeclare(
-						queue.FullQueueName,
-						queue.Durable,
-						queue.Exclusive,
-						queue.AutoDelete,
-						queue.Arguments);
-				});
-			_initQueues.TryAdd(queue.FullQueueName, queueTask);
-			return queueTask;
+				_initQueues.Add(queue.FullQueueName);
+			}
 		}
 
-		public Task BindQueueAsync(QueueConfiguration queue, ExchangeConfiguration exchange, string routingKey)
+		private void DeclareExchange(ExchangeConfiguration exchange)
 		{
-			var queueTask = DeclareQueueAsync(queue);
-			var exchangeTask = DeclareExchangeAsync(exchange);
-			var channelTask = _channelFactory.CreateChannelAsync();
+			if (exchange.IsDefaultExchange() || exchange.AssumeInitialized)
+			{
+				/*
+					"The default exchange is a direct exchange with no name (empty string) pre-declared by the broker"
+				*/
+				return;
+			}
 
-			return Task
-				.WhenAll(queueTask, exchangeTask, channelTask)
-				.ContinueWith(t =>
+			if (_initExchanges.Contains(exchange.ExchangeName))
+			{
+				return;
+				
+			}
+
+			var channel = GetOrCreateChannel();
+			channel.ExchangeDeclare(
+					exchange.ExchangeName,
+					exchange.ExchangeType,
+					exchange.Durable,
+					exchange.AutoDelete,
+					exchange.Arguments);
+			_initExchanges.Add(exchange.ExchangeName);
+		}
+
+
+		private void EnsureWorker()
+		{
+			if (_processing)
+			{
+				return;
+			}
+			lock (_processLock)
+			{
+				if (_processing)
 				{
-					channelTask.Result
-						.QueueBind(
-							queue: queue.FullQueueName,
-							exchange: exchange.ExchangeName,
-							routingKey: routingKey
-						);
-				});
+					return;
+				}
+				_processing = true;
+			}
+
+			ScheduledTopologyTask topologyTask;
+			while (_topologyTasks.TryDequeue(out topologyTask))
+			{
+				var exchange = topologyTask as ScheduledExchangeTask;
+				if (exchange != null)
+				{
+					DeclareExchange(exchange.Configuration);
+					exchange.TaskCompletionSource.TrySetResult(true);
+					continue;
+				}
+
+				var queue = topologyTask as ScheduledQueueTask;
+				if (queue != null)
+				{
+					DeclareQueue(queue.Configuration);
+					queue.TaskCompletionSource.TrySetResult(true);
+					continue;
+				}
+
+				var bind = topologyTask as ScheduledBindQueueTask;
+				if (bind != null)
+				{
+					BindQueueToExchange(bind);
+					bind.TaskCompletionSource.TrySetResult(true);
+					continue;
+				}
+
+				throw new Exception("Unable to cast topology task.");
+			}
+			_processing = false;
+		}
+
+		private IModel GetOrCreateChannel()
+		{
+			_disposeTimer.Change(TimeSpan.FromSeconds(2), new TimeSpan(-1));
+			if (_channel?.IsOpen ?? false)
+			{
+				return _channel;
+			}
+
+			var channelTask = _channelFactory.CreateChannelAsync();
+			channelTask.Wait();
+			_channel = channelTask.Result;
+			return _channel;
 		}
 
 		public void Dispose()
 		{
 			_channelFactory?.Dispose();
 		}
+
+		#region Classes for Scheduled Tasks
+		private abstract class ScheduledTopologyTask
+		{
+			protected ScheduledTopologyTask()
+			{
+				TaskCompletionSource = new TaskCompletionSource<bool>();
+			}
+			public TaskCompletionSource<bool> TaskCompletionSource { get; }
+		}
+
+		private class ScheduledQueueTask : ScheduledTopologyTask
+		{
+			public ScheduledQueueTask(QueueConfiguration queue)
+			{
+				Configuration = queue;
+			}
+			public QueueConfiguration Configuration { get; }
+		}
+
+		private class ScheduledExchangeTask : ScheduledTopologyTask
+		{
+			public ScheduledExchangeTask(ExchangeConfiguration exchange)
+			{
+				Configuration = exchange;
+			}
+			public ExchangeConfiguration Configuration { get; }
+		}
+
+		private class ScheduledBindQueueTask : ScheduledTopologyTask
+		{
+			public ExchangeConfiguration Exchange { get; set; }
+			public QueueConfiguration Queue { get; set; }
+			public string RoutingKey { get; set; }
+		}
+		#endregion
 	}
 }
