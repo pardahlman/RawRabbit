@@ -50,7 +50,12 @@ namespace RawRabbit.Serialization
 				var type = Type.GetType(typeName, false);
 				return Deserialize(args.Body, type);
 			}
-			return null;
+			else
+			{
+				var typeName = args.BasicProperties.Type;
+				var type = Type.GetType(typeName, false);
+				return Deserialize(args.Body, type);
+			}
 		}
 
 		public T Deserialize<T>(byte[] bytes)
