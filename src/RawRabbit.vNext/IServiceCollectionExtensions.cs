@@ -68,7 +68,8 @@ namespace RawRabbit.vNext
 				.AddSingleton<IMessageContextProvider<TMessageContext>, MessageContextProvider<TMessageContext>>()
 				.AddSingleton<IContextEnhancer, ContextEnhancer>()
 				.AddSingleton<IBasicPropertiesProvider, BasicPropertiesProvider>()
-				.AddSingleton<IChannelFactory, ChannelFactory>()
+				.AddSingleton<IChannelFactory, DynamicChannelFactory>()
+				.AddSingleton(c => ChannelFactoryConfiguration.Default)
 				.AddSingleton<ITopologyProvider, TopologyProvider>()
 				.AddTransient<IConfigurationEvaluator, ConfigurationEvaluator>()
 				.AddTransient<IPublishAcknowledger, PublishAcknowledger>(
