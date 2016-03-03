@@ -34,7 +34,7 @@ namespace RawRabbit.Common
 			return properties;
 		}
 
-		public string GetTypeName(Type type)
+		private string GetTypeName(Type type)
 		{
 			var name = $"{type.Namespace}.{type.Name}";
 			if (type.GenericTypeArguments.Length > 0)
