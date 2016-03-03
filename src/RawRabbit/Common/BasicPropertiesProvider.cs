@@ -27,11 +27,31 @@ namespace RawRabbit.Common
 				MessageId = Guid.NewGuid().ToString(),
 				Headers = new Dictionary<string, object>(),
 				Persistent = _config.PersistentDeliveryMode,
-				Type = typeof(TMessage).FullName
+				Type = GetTypeName(typeof(TMessage))
 			};
 			custom?.Invoke(properties);
 			properties.Headers.Add(PropertyHeaders.Sent, DateTime.UtcNow.ToString("u"));
 			return properties;
+		}
+
+		public string GetTypeName(Type type)
+		{
+			var name = $"{type.Namespace}.{type.Name}";
+			if (type.GenericTypeArguments.Length > 0)
+			{
+				var shouldInsertComma = false;
+				name += '[';
+				foreach (var genericType in type.GenericTypeArguments)
+				{
+					if (shouldInsertComma)
+						name += ",";
+					name += $"[{GetTypeName(genericType)}]";
+					shouldInsertComma = true;
+				}
+				name += ']';
+			}
+			name += $", {type.Assembly.GetName().Name}";
+			return name;
 		}
 	}
 }
