@@ -128,7 +128,7 @@ namespace RawRabbit.Common
 			{
 				return;
 			}
-			if (!_channels.Any())
+			if (!_channels.Any() && _channelConfig.InitialChannelCount > 0)
 			{
 				_logger.LogInformation("Currently no available channels.");
 				return;
@@ -148,6 +148,11 @@ namespace RawRabbit.Common
 			{
 				lock (_channelLock)
 				{
+					if (_current == null && _channelConfig.InitialChannelCount == 0)
+					{
+						CreateAndWireupAsync().Wait();
+						_current = _channels.First;
+					}
 					_current = _current.Next ?? _channels.First;
 
 					if (_current.Value.IsOpen)
@@ -284,7 +289,7 @@ namespace RawRabbit.Common
 
 		public static ChannelFactoryConfiguration Default => new ChannelFactoryConfiguration
 		{
-			InitialChannelCount = 1,
+			InitialChannelCount = 0,
 			MaxChannelCount = 1,
 			GracefulCloseInterval = TimeSpan.FromMinutes(30),
 			WorkThreshold = 20000,
