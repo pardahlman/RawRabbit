@@ -80,8 +80,7 @@ namespace RawRabbit.Operations
 								consumer.Model.BasicPublish(
 									exchange: "",
 									routingKey: args.BasicProperties.ReplyTo,
-									basicProperties:
-										_propertyProvider.GetProperties<TResponse>(p => p.CorrelationId = args.BasicProperties.CorrelationId),
+									basicProperties: _propertyProvider.GetProperties<TResponse>(p => p.CorrelationId = args.BasicProperties.CorrelationId),
 									body: _serializer.Serialize(tResponse.Result)
 								);
 							});

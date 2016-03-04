@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
@@ -27,13 +26,10 @@ namespace RawRabbit.Operations
 		private readonly IBasicPropertiesProvider _propertiesProvider;
 		private readonly ITopologyProvider _topologyProvider;
 		private readonly TimeSpan _requestTimeout;
-		private readonly ConcurrentDictionary<string, TaskCompletionSource<object>> _responseTcsDictionary;
-		private readonly ConcurrentDictionary<string, Timer> _requestTimerDictionary;
-		private readonly ConcurrentDictionary<IModel, IRawConsumer> _channelToConsumer;
-		private readonly ConcurrentDictionary<IRawConsumer, List<string>> _consumerToQueue;
+		private readonly ConcurrentDictionary<string, ResponseCompletionSource> _responseDictionary;
+		private readonly ConcurrentDictionary<IModel, ConsumerCompletionSource> _consumerCompletionSources;
 		private readonly ILogger _logger = LogManager.GetLogger<Requester<TMessageContext>>();
-		private readonly object _topologyLock = new object();
-		private readonly object _consumerLock = new object();
+		private ConsumerCompletionSource _currentConsumer;
 
 		public Requester(
 			IChannelFactory channelFactory,
@@ -53,65 +49,62 @@ namespace RawRabbit.Operations
 			_propertiesProvider = propertiesProvider;
 			_topologyProvider = topologyProvider;
 			_requestTimeout = requestTimeout;
-			_responseTcsDictionary = new ConcurrentDictionary<string, TaskCompletionSource<object>>();
-			_requestTimerDictionary = new ConcurrentDictionary<string, Timer>();
-			_channelToConsumer = new ConcurrentDictionary<IModel, IRawConsumer>();
-			_consumerToQueue = new ConcurrentDictionary<IRawConsumer, List<string>>();
+			_responseDictionary = new ConcurrentDictionary<string, ResponseCompletionSource>();
+			_consumerCompletionSources = new ConcurrentDictionary<IModel, ConsumerCompletionSource>();
 		}
 
 		public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest message, Guid globalMessageId, RequestConfiguration cfg)
 		{
-			var queueTask = _topologyProvider.DeclareQueueAsync(cfg.Queue);
-			var exchangeTask = _topologyProvider.DeclareExchangeAsync(cfg.Exchange);
-			var consumerTask = GetOrCreateConsumerAsync(cfg);
+			if (!_topologyProvider.IsInitialized(cfg.Queue) || !_topologyProvider.IsInitialized(cfg.Exchange))
+			{
+				var queueTask = _topologyProvider.DeclareQueueAsync(cfg.Queue);
+				var exchangeTask = _topologyProvider.DeclareExchangeAsync(cfg.Exchange);
+				Task.WaitAll(queueTask, exchangeTask);
+			}
 
-			return Task
-				.WhenAll(consumerTask, queueTask, exchangeTask)
-				.ContinueWith(t =>
+			if (_currentConsumer!= null && _currentConsumer.ConsumerQueues.ContainsKey(cfg.Queue.FullQueueName) && _currentConsumer.IsCompletedAndOpen())
+			{
+				return SendRequestAsync<TRequest, TResponse>(message, globalMessageId, cfg, _currentConsumer.Consumer);
+			}
+
+			return GetOrCreateConsumerAsync(cfg)
+				.ContinueWith(tConsumer => SendRequestAsync<TRequest, TResponse>(message, globalMessageId, cfg, tConsumer.Result))
+				.Unwrap();
+		}
+
+		private Task<TResponse> SendRequestAsync<TRequest, TResponse>(TRequest message, Guid globalMessageId, RequestConfiguration cfg, IRawConsumer consumer)
+		{
+			var correlationId = Guid.NewGuid().ToString();
+			var responseSource = new ResponseCompletionSource
+			{
+				RequestTimer = new Timer(state =>
 				{
-					var consumer = consumerTask.Result;
-					lock (consumer)
+					ResponseCompletionSource rcs;
+					if (_responseDictionary.TryRemove(correlationId, out rcs))
 					{
-						if (!_consumerToQueue[consumer].Contains(cfg.Queue.QueueName))
-						{
-							consumer.Model.BasicConsume(cfg.Queue.QueueName, cfg.NoAck, consumer);
-							_consumerToQueue[consumer].Add(cfg.Queue.QueueName);
-						}
+						_logger.LogWarning($"Unable to find request timer for {correlationId}.");
 					}
-					
-					var props = _propertiesProvider.GetProperties<TResponse>(p =>
+					rcs.RequestTimer?.Dispose();
+					rcs.TrySetException(
+						new TimeoutException($"The request '{correlationId}' timed out after {_requestTimeout.ToString("g")}."));
+				}, null, _requestTimeout, new TimeSpan(-1))
+			};
+
+			_responseDictionary.TryAdd(correlationId, responseSource);
+
+			consumer.Model.BasicPublish(
+				exchange: cfg.Exchange.ExchangeName,
+				routingKey: cfg.RoutingKey,
+				basicProperties: _propertiesProvider.GetProperties<TResponse>(p =>
 					{
 						p.ReplyTo = cfg.ReplyQueue.QueueName;
-						p.CorrelationId = Guid.NewGuid().ToString();
+						p.CorrelationId = correlationId;
 						p.Expiration = _requestTimeout.TotalMilliseconds.ToString();
 						p.Headers.Add(PropertyHeaders.Context, _contextProvider.GetMessageContext(globalMessageId));
-					});
-					var body = _serializer.Serialize(message);
-					var responseTcs = new TaskCompletionSource<object>();
-					_responseTcsDictionary.TryAdd(props.CorrelationId, responseTcs);
-
-					_requestTimerDictionary.TryAdd(
-						props.CorrelationId,
-						new Timer(state =>
-						{
-							Timer timer;
-							if (!_requestTimerDictionary.TryRemove(props.CorrelationId, out timer))
-							{
-								_logger.LogWarning($"Unable to find request timer for {props.CorrelationId}.");
-							}
-							timer?.Dispose();
-							responseTcs.TrySetException(new TimeoutException($"The request '{props.CorrelationId}' timed out after {_requestTimeout.ToString("g")}."));
-						}, null, _requestTimeout, new TimeSpan(-1)));
-
-					consumer.Model.BasicPublish(
-						exchange: cfg.Exchange.ExchangeName,
-						routingKey: cfg.RoutingKey,
-						basicProperties: props,
-						body: body
-					);
-					return responseTcs.Task.ContinueWith(tResponse => (TResponse) tResponse.Result);
-				})
-				.Unwrap();
+					}),
+				body: _serializer.Serialize(message)
+			);
+			return responseSource.Task.ContinueWith(tResponse => (TResponse)tResponse.Result);
 		}
 
 		private Task<IRawConsumer> GetOrCreateConsumerAsync(IConsumerConfiguration cfg)
@@ -119,47 +112,56 @@ namespace RawRabbit.Operations
 			return _channelFactory
 				.GetChannelAsync()
 				.ContinueWith(tChannel =>
-				{
-					IRawConsumer existingConsumer;
-					if (_channelToConsumer.TryGetValue(tChannel.Result, out existingConsumer))
 					{
-						return existingConsumer;
-					}
-					lock (_consumerLock)
-					{
-						if (_channelToConsumer.TryGetValue(tChannel.Result, out existingConsumer))
+						var consumerCs = new ConsumerCompletionSource();
+						if (_consumerCompletionSources.TryAdd(tChannel.Result, consumerCs))
 						{
-							return existingConsumer;
+							var newConsumer = _consumerFactory.CreateConsumer(cfg, tChannel.Result);
+							WireUpConsumer(newConsumer);
+							consumerCs.ConsumerQueues.TryAdd(
+								key: cfg.Queue.FullQueueName,
+								value: newConsumer.Model.BasicConsume(cfg.Queue.FullQueueName, cfg.NoAck, newConsumer)
+							);
+							_currentConsumer = consumerCs;
+							consumerCs.TrySetResult(newConsumer);
+							return consumerCs.Task;
 						}
-						var newConsumer = _consumerFactory.CreateConsumer(cfg, tChannel.Result);
-						WireUpConsumer(newConsumer);
-						_channelToConsumer.TryAdd(tChannel.Result, newConsumer);
-						_consumerToQueue.TryAdd(newConsumer, new List<string>());
-						return newConsumer;
-					}
-				});
+						consumerCs = _consumerCompletionSources[tChannel.Result];
+						if (consumerCs.ConsumerQueues.ContainsKey(cfg.Queue.FullQueueName))
+						{
+							return consumerCs.Task;
+						}
+						return consumerCs.Task.ContinueWith(t =>
+						{
+							lock (consumerCs.Consumer)
+							{
+								if (consumerCs.ConsumerQueues.ContainsKey(cfg.Queue.FullQueueName))
+								{
+									return t.Result;
+								}
+								consumerCs.ConsumerQueues.TryAdd(
+									key: cfg.Queue.FullQueueName,
+									value: consumerCs.Consumer.Model.BasicConsume(cfg.Queue.FullQueueName, cfg.NoAck, consumerCs.Consumer)
+								);
+								return t.Result;
+							}
+						});
+					})
+				.Unwrap();
 		}
 
 		private void WireUpConsumer(IRawConsumer consumer)
 		{
 			consumer.OnMessageAsync = (o, args) =>
 			{
-				TaskCompletionSource<object> responseTcs;
-				if (_responseTcsDictionary.TryRemove(args.BasicProperties.CorrelationId, out responseTcs))
+				ResponseCompletionSource responseTcs;
+				if (_responseDictionary.TryRemove(args.BasicProperties.CorrelationId, out responseTcs))
 				{
 					_logger.LogDebug($"Recived response with correlationId {args.BasicProperties.CorrelationId}.");
+					responseTcs.RequestTimer.Dispose();
 
-					Timer timer;
-					if (_requestTimerDictionary.TryRemove(args.BasicProperties.CorrelationId, out timer))
-					{
-						timer?.Dispose();
-					}
-					else
-					{
-						_logger.LogInformation($"Unable to find request timer for message {args.BasicProperties.CorrelationId}.");
-					}
 					_errorStrategy.OnResponseRecievedAsync(args, responseTcs);
-					if (responseTcs?.Task?.IsFaulted ?? true)
+					if (responseTcs.Task.IsFaulted)
 					{
 						return Task.FromResult(true);
 					}
@@ -170,6 +172,27 @@ namespace RawRabbit.Operations
 				_logger.LogWarning($"Unable to find callback for {args.BasicProperties.CorrelationId}.");
 				throw new Exception($"Can not find callback for {args.BasicProperties.CorrelationId}");
 			};
+		}
+
+		private class ResponseCompletionSource : TaskCompletionSource<object>
+		{
+			public Timer RequestTimer { get; set; }
+		}
+
+		private class ConsumerCompletionSource : TaskCompletionSource<IRawConsumer>
+		{
+			public ConcurrentDictionary<string,string> ConsumerQueues { get; }
+			public IRawConsumer Consumer => Task.IsCompleted ? Task.Result : null;
+
+			public ConsumerCompletionSource()
+			{
+				ConsumerQueues = new ConcurrentDictionary<string, string>();
+			}
+
+			public bool IsCompletedAndOpen()
+			{
+				return Task.IsCompleted && Task.Result.Model.IsOpen;
+			}
 		}
 	}
 }

@@ -66,17 +66,25 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			});
 
 			/* Test */
-			var recieved = await requester.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest(),
+			var firstRecieved = await requester.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest(),
 				configuration: cfg => cfg
 					.WithReplyQueue(
 						q => q
 							.WithName("special_reply_queue")
 							.WithAutoDelete())
+					.WithNoAck(false));
+			var secondRecieved = await requester.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest(),
+				configuration: cfg => cfg
+					.WithReplyQueue(
+						q => q
+							.WithName("another_special_reply_queue")
+							.WithAutoDelete())
 					.WithNoAck(false)
 			);
 
 			/* Assert */
-			Assert.Equal(expected: response.Prop, actual: recieved.Prop);
+			Assert.Equal(expected: response.Prop, actual: firstRecieved.Prop);
+			Assert.Equal(expected: response.Prop, actual: secondRecieved.Prop);
 		}
 
 		[Fact]
