@@ -15,6 +15,8 @@ namespace RawRabbit.Common
 		Task DeclareExchangeAsync(ExchangeConfiguration exchange);
 		Task DeclareQueueAsync(QueueConfiguration queue);
 		Task BindQueueAsync(QueueConfiguration queue, ExchangeConfiguration exchange, string routingKey);
+		bool IsInitialized(ExchangeConfiguration exchange);
+		bool IsInitialized(QueueConfiguration exchange);
 	}
 
 	public class TopologyProvider : ITopologyProvider, IDisposable
@@ -23,6 +25,7 @@ namespace RawRabbit.Common
 		private IModel _channel;
 		private bool _processing;
 		private readonly object _processLock = new object();
+		private readonly Task _completed = Task.FromResult(true);
 		private readonly Timer _disposeTimer;
 		private readonly List<string> _initExchanges;
 		private readonly List<string> _initQueues;
@@ -39,12 +42,17 @@ namespace RawRabbit.Common
 			_disposeTimer = new Timer(state =>
 			{
 				_channel?.Dispose();
-				_disposeTimer.Change(new TimeSpan(-1), new TimeSpan(-1));
+				_disposeTimer.Change(TimeSpan.FromHours(1), new TimeSpan(-1));
 			}, null, TimeSpan.FromSeconds(2), new TimeSpan(-1));
 		}
 
 		public Task DeclareExchangeAsync(ExchangeConfiguration exchange)
 		{
+			if(IsInitialized(exchange))
+			{
+				return _completed;
+			}
+
 			var scheduled = new ScheduledExchangeTask(exchange);
 			_topologyTasks.Enqueue(scheduled);
 			EnsureWorker();
@@ -53,6 +61,11 @@ namespace RawRabbit.Common
 
 		public Task DeclareQueueAsync(QueueConfiguration queue)
 		{
+			if (IsInitialized(queue))
+			{
+				return _completed;
+			}
+
 			var scheduled = new ScheduledQueueTask(queue);
 			_topologyTasks.Enqueue(scheduled);
 			EnsureWorker();
@@ -61,6 +74,29 @@ namespace RawRabbit.Common
 
 		public Task BindQueueAsync(QueueConfiguration queue, ExchangeConfiguration exchange, string routingKey)
 		{
+			if (exchange.IsDefaultExchange())
+			{
+				/*
+					"The default exchange is implicitly bound to every queue,
+					with a routing key equal to the queue name. It it not possible
+					to explicitly bind to, or unbind from the default exchange."
+				*/
+				return _completed;
+			}
+			if (queue.IsDirectReplyTo())
+			{
+				/*
+					"Consume from the pseudo-queue amq.rabbitmq.reply-to in no-ack mode. There is no need to
+					declare this "queue" first, although the client can do so if it wants."
+					- https://www.rabbitmq.com/direct-reply-to.html
+				*/
+				return _completed;
+			}
+			var bindKey = $"{queue.FullQueueName}_{exchange.ExchangeName}_{routingKey}";
+			if (_queueBinds.Contains(bindKey))
+			{
+				return _completed;
+			}
 			var scheduled = new ScheduledBindQueueTask
 			{
 				Queue = queue,
@@ -70,6 +106,16 @@ namespace RawRabbit.Common
 			_topologyTasks.Enqueue(scheduled);
 			EnsureWorker();
 			return scheduled.TaskCompletionSource.Task;
+		}
+
+		public bool IsInitialized(ExchangeConfiguration exchange)
+		{
+			return exchange.IsDefaultExchange() || exchange.AssumeInitialized || _initExchanges.Contains(exchange.ExchangeName);
+		}
+
+		public bool IsInitialized(QueueConfiguration queue)
+		{
+			return queue.IsDirectReplyTo() || _initExchanges.Contains(queue.FullQueueName);
 		}
 
 		private void BindQueueToExchange(ScheduledBindQueueTask bind)
@@ -94,42 +140,27 @@ namespace RawRabbit.Common
 
 		private void DeclareQueue(QueueConfiguration queue)
 		{
-			if (queue.IsDirectReplyTo())
+			if (IsInitialized(queue))
 			{
-				/*
-					"Consume from the pseudo-queue amq.rabbitmq.reply-to in no-ack mode. There is no need to
-					declare this "queue" first, although the client can do so if it wants."
-					- https://www.rabbitmq.com/direct-reply-to.html
-				*/
+				return;
 			}
-			else if (!_initQueues.Contains(queue.FullQueueName))
-			{
-				var channel = GetOrCreateChannel();
-				channel.QueueDeclare(
-							queue.FullQueueName,
-							queue.Durable,
-							queue.Exclusive,
-							queue.AutoDelete,
-							queue.Arguments);
 
-				_initQueues.Add(queue.FullQueueName);
-			}
+			var channel = GetOrCreateChannel();
+			channel.QueueDeclare(
+				queue.FullQueueName,
+				queue.Durable,
+				queue.Exclusive,
+				queue.AutoDelete,
+				queue.Arguments);
+
+			_initQueues.Add(queue.FullQueueName);
 		}
 
 		private void DeclareExchange(ExchangeConfiguration exchange)
 		{
-			if (exchange.IsDefaultExchange() || exchange.AssumeInitialized)
-			{
-				/*
-					"The default exchange is a direct exchange with no name (empty string) pre-declared by the broker"
-				*/
-				return;
-			}
-
-			if (_initExchanges.Contains(exchange.ExchangeName))
+			if (IsInitialized(exchange))
 			{
 				return;
-				
 			}
 
 			var channel = GetOrCreateChannel();
@@ -141,7 +172,6 @@ namespace RawRabbit.Common
 					exchange.Arguments);
 			_initExchanges.Add(exchange.ExchangeName);
 		}
-
 
 		private void EnsureWorker()
 		{
