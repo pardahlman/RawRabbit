@@ -30,6 +30,7 @@ namespace RawRabbit.Operations
 		private readonly ConcurrentDictionary<IModel, ConsumerCompletionSource> _consumerCompletionSources;
 		private readonly ILogger _logger = LogManager.GetLogger<Requester<TMessageContext>>();
 		private ConsumerCompletionSource _currentConsumer;
+		private readonly Task _completed = Task.FromResult(true);
 
 		public Requester(
 			IChannelFactory channelFactory,
@@ -83,6 +84,7 @@ namespace RawRabbit.Operations
 					if (_responseDictionary.TryRemove(correlationId, out rcs))
 					{
 						_logger.LogWarning($"Unable to find request timer for {correlationId}.");
+						return;
 					}
 					rcs.RequestTimer?.Dispose();
 					rcs.TrySetException(
@@ -123,9 +125,11 @@ namespace RawRabbit.Operations
 								value: newConsumer.Model.BasicConsume(cfg.Queue.FullQueueName, cfg.NoAck, newConsumer)
 							);
 							_currentConsumer = consumerCs;
+							_logger.LogInformation($"Created consumer on channel '{tChannel.Result.ChannelNumber}' that consumes messages from '{cfg.Queue.FullQueueName}'.");
 							consumerCs.TrySetResult(newConsumer);
 							return consumerCs.Task;
 						}
+						_logger.LogDebug($"Consumer for channel '{tChannel.Result.ChannelNumber}' exists. Using it.");
 						consumerCs = _consumerCompletionSources[tChannel.Result];
 						if (consumerCs.ConsumerQueues.ContainsKey(cfg.Queue.FullQueueName))
 						{
@@ -143,6 +147,7 @@ namespace RawRabbit.Operations
 									key: cfg.Queue.FullQueueName,
 									value: consumerCs.Consumer.Model.BasicConsume(cfg.Queue.FullQueueName, cfg.NoAck, consumerCs.Consumer)
 								);
+								_logger.LogDebug($"Existign consumer for channel '{tChannel.Result.ChannelNumber}' consumes '{cfg.Queue.FullQueueName}'.");
 								return t.Result;
 							}
 						});
@@ -163,14 +168,14 @@ namespace RawRabbit.Operations
 					_errorStrategy.OnResponseRecievedAsync(args, responseTcs);
 					if (responseTcs.Task.IsFaulted)
 					{
-						return Task.FromResult(true);
+						return _completed;
 					}
 					var response = _serializer.Deserialize(args);
 					responseTcs.TrySetResult(response);
-					return Task.FromResult(true);
+					return _completed;
 				}
 				_logger.LogWarning($"Unable to find callback for {args.BasicProperties.CorrelationId}.");
-				throw new Exception($"Can not find callback for {args.BasicProperties.CorrelationId}");
+				return _completed;
 			};
 		}
 

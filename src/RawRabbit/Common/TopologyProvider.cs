@@ -7,6 +7,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Util;
 using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Queue;
+using RawRabbit.Logging;
 
 namespace RawRabbit.Common
 {
@@ -31,6 +32,7 @@ namespace RawRabbit.Common
 		private readonly List<string> _initQueues;
 		private readonly List<string> _queueBinds;
 		private readonly ConcurrentQueue<ScheduledTopologyTask> _topologyTasks;
+		private readonly ILogger _logger = LogManager.GetLogger<TopologyProvider>();
 
 		public TopologyProvider(IChannelFactory channelFactory)
 		{
@@ -41,6 +43,7 @@ namespace RawRabbit.Common
 			_topologyTasks = new ConcurrentQueue<ScheduledTopologyTask>();
 			_disposeTimer = new Timer(state =>
 			{
+				_logger.LogInformation("Disposing topology channel (if exists).");
 				_channel?.Dispose();
 				_disposeTimer.Change(TimeSpan.FromHours(1), new TimeSpan(-1));
 			}, null, TimeSpan.FromSeconds(2), new TimeSpan(-1));
@@ -129,6 +132,8 @@ namespace RawRabbit.Common
 			DeclareQueue(bind.Queue);
 			DeclareExchange(bind.Exchange);
 
+			_logger.LogInformation($"Binding queue '{bind.Queue.FullQueueName}' to exchange '{bind.Exchange.ExchangeName}' with routing key '{bind.RoutingKey}'");
+
 			var channel = GetOrCreateChannel();
 			channel.QueueBind(
 				queue: bind.Queue.FullQueueName,
@@ -144,6 +149,8 @@ namespace RawRabbit.Common
 			{
 				return;
 			}
+
+			_logger.LogInformation($"Declaring queue '{queue.FullQueueName}'.");
 
 			var channel = GetOrCreateChannel();
 			channel.QueueDeclare(
@@ -163,6 +170,7 @@ namespace RawRabbit.Common
 				return;
 			}
 
+			_logger.LogInformation($"Declaring exchange '{exchange.ExchangeName}'.");
 			var channel = GetOrCreateChannel();
 			channel.ExchangeDeclare(
 					exchange.ExchangeName,
@@ -186,6 +194,7 @@ namespace RawRabbit.Common
 					return;
 				}
 				_processing = true;
+				_logger.LogDebug($"Start processing topology work.");
 			}
 
 			ScheduledTopologyTask topologyTask;
@@ -218,6 +227,7 @@ namespace RawRabbit.Common
 				throw new Exception("Unable to cast topology task.");
 			}
 			_processing = false;
+			_logger.LogDebug($"Done processing topology work.");
 		}
 
 		private IModel GetOrCreateChannel()
