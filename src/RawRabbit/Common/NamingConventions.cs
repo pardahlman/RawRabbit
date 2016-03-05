@@ -11,7 +11,6 @@ namespace RawRabbit.Common
 	{
 		Func<Type, string> ExchangeNamingConvention { get; set; }
 		Func<Type, string> QueueNamingConvention { get; set; }
-		Func<Type, Type, string> RpcExchangeNamingConvention { get; set; }
 		Func<string> ErrorExchangeNamingConvention { get; set; }
 		Func<string> ErrorQueueNamingConvention { get; set; }
 		Func<string> DeadLetterExchangeNamingConvention { get; set; }
@@ -40,7 +39,6 @@ namespace RawRabbit.Common
 			_applicationName = GetApplicationName(Environment.CommandLine);
 
 			ExchangeNamingConvention = type => type?.Namespace?.ToLower() ?? string.Empty;
-			RpcExchangeNamingConvention = (request, response) => request?.Namespace?.ToLower() ?? "default_rpc_exchange";
 			QueueNamingConvention = type => CreateShortAfqn(type);
 			ErrorQueueNamingConvention = () => "default_error_queue";
 			ErrorExchangeNamingConvention = () => "default_error_exchange";
