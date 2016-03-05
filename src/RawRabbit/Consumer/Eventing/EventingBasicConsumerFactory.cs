@@ -15,23 +15,16 @@ namespace RawRabbit.Consumer.Eventing
 {
 	public class EventingBasicConsumerFactory : IConsumerFactory, IDisposable
 	{
-		private readonly IChannelFactory _channelFactory;
 		private readonly IErrorHandlingStrategy _strategy;
 		private readonly ConcurrentBag<string> _processedButNotAcked;
 		private readonly ConcurrentBag<IRawConsumer> _consumers;
 		private readonly ILogger _logger = LogManager.GetLogger<EventingBasicConsumerFactory>();
 
-		public EventingBasicConsumerFactory(IChannelFactory channelFactory, IErrorHandlingStrategy strategy)
+		public EventingBasicConsumerFactory(IErrorHandlingStrategy strategy)
 		{
-			_channelFactory = channelFactory;
 			_strategy = strategy;
 			_processedButNotAcked = new ConcurrentBag<string>();
 			_consumers = new ConcurrentBag<IRawConsumer>();
-		}
-
-		public IRawConsumer CreateConsumer(IConsumerConfiguration cfg)
-		{
-			return CreateConsumer(cfg, _channelFactory.GetChannel());
 		}
 
 		public IRawConsumer CreateConsumer(IConsumerConfiguration cfg, IModel channel)
@@ -120,7 +113,6 @@ namespace RawRabbit.Consumer.Eventing
 
 		public void Dispose()
 		{
-			_channelFactory?.Dispose();
 			foreach (var consumer in _consumers)
 			{
 				consumer?.Disconnect();

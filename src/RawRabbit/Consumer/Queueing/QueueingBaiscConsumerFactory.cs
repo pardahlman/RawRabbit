@@ -9,18 +9,11 @@ namespace RawRabbit.Consumer.Queueing
 {
 	public class QueueingBaiscConsumerFactory : IConsumerFactory
 	{
-		private readonly IChannelFactory _channelFactory;
 		private readonly ConcurrentBag<IRawConsumer> _consumers;
 		 
 		public QueueingBaiscConsumerFactory(IChannelFactory channelFactory)
 		{
-			_channelFactory = channelFactory;
 			_consumers = new ConcurrentBag<IRawConsumer>();
-		}
-
-		public IRawConsumer CreateConsumer(IConsumerConfiguration cfg)
-		{
-			return CreateConsumer(cfg, _channelFactory.GetChannel());
 		}
 	
 		public IRawConsumer CreateConsumer(IConsumerConfiguration cfg, IModel channel)
