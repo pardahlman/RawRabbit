@@ -21,7 +21,7 @@ namespace RawRabbit.Common
 		private LinkedListNode<IModel> _current;
 		private readonly object _channelLock = new object();
 		private readonly object _processLock = new object();
-		private readonly Timer _scaleTimer;
+		private Timer _scaleTimer;
 		private IConnection _connection;
 		private bool _processingRequests;
 
@@ -34,6 +34,11 @@ namespace RawRabbit.Common
 			_requestQueue = new ConcurrentQueue<TaskCompletionSource<IModel>>();
 			_channels = new LinkedList<IModel>();
 
+			Initialize();
+		}
+
+		internal virtual void Initialize()
+		{
 			var initChannelTasks = new Task[Math.Min(_channelConfig.InitialChannelCount, _channelConfig.MaxChannelCount)];
 			_logger.LogDebug($"Initiating {initChannelTasks.Length} channels.");
 			for (var i = 0; i < _channelConfig.InitialChannelCount; i++)
@@ -74,6 +79,7 @@ namespace RawRabbit.Common
 			var canCreateChannel = channelCount < _channelConfig.MaxChannelCount;
 			var canCloseChannel = channelCount > 1;
 			_logger.LogDebug($"Begining channel scaling.\n  Channel count: {channelCount}\n  Work per channel: {workPerChannel}");
+
 			if (_channelConfig.EnableScaleUp && canCreateChannel && workPerChannel > _channelConfig.WorkThreshold)
 			{
 				CreateAndWireupAsync();
@@ -82,7 +88,7 @@ namespace RawRabbit.Common
 			if (_channelConfig.EnableScaleDown && canCloseChannel && requestCount == 0)
 			{
 				var toClose = _channels.Last.Value;
-				_logger.LogInformation($"Channel '{toClose.ChannelNumber}' will be closed on {_channelConfig.GracefulCloseInterval}.");
+				_logger.LogInformation($"Channel '{toClose.ChannelNumber}' will be closed in {_channelConfig.GracefulCloseInterval}.");
 				_channels.Remove(toClose);
 
 				Timer graceful = null;
