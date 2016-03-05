@@ -19,5 +19,5 @@
 	"projectUrl": "https://github.com/pardahlman/RawRabbit",
 	"tags": [ "rabbitmq", "raw", "rawrabbit", "autfac" ],
 	"title": "RawRabbit.DependencyInjection.Autofac",
-	"version": "1.8.11-*"
+	"version": "1.8.12-*"
 }
