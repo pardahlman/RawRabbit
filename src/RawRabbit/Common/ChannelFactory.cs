@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Exceptions;
 using RawRabbit.Configuration;
 using RawRabbit.Logging;
 
@@ -12,132 +12,224 @@ namespace RawRabbit.Common
 {
 	public class ChannelFactory : IChannelFactory
 	{
+		private readonly ConcurrentQueue<TaskCompletionSource<IModel>> _requestQueue;
+		private readonly ILogger _logger = LogManager.GetLogger<ThreadBasedChannelFactory>();
+		internal readonly ChannelFactoryConfiguration _channelConfig;
 		private readonly IConnectionFactory _connectionFactory;
-		private ThreadLocal<IModel> _threadChannels; 
-		private IConnection _connection;
-		private readonly ILogger _logger = LogManager.GetLogger<ChannelFactory>();
 		private readonly RawRabbitConfiguration _config;
-		private readonly ConcurrentDictionary<IModel, DateTime> _accessDictionary;
-		private readonly System.Threading.Timer _closeTimer;
+		internal readonly LinkedList<IModel> _channels;
+		private LinkedListNode<IModel> _current;
+		private readonly object _channelLock = new object();
+		private readonly object _processLock = new object();
+		private readonly Timer _scaleTimer;
+		private IConnection _connection;
+		private bool _processingRequests;
 
-		public ChannelFactory(RawRabbitConfiguration config, IConnectionFactory connectionFactory)
+		public ChannelFactory(IConnectionFactory connectionFactory, RawRabbitConfiguration config, ChannelFactoryConfiguration channelConfig)
 		{
+			_connection = connectionFactory.CreateConnection(config.Hostnames);
 			_connectionFactory = connectionFactory;
-			_accessDictionary = new ConcurrentDictionary<IModel, DateTime>();
 			_config = config;
-			_threadChannels = new ThreadLocal<IModel>(true);
+			_channelConfig = channelConfig;
+			_requestQueue = new ConcurrentQueue<TaskCompletionSource<IModel>>();
+			_channels = new LinkedList<IModel>();
 
-			try
+			var initChannelTasks = new Task[Math.Min(_channelConfig.InitialChannelCount, _channelConfig.MaxChannelCount)];
+			_logger.LogDebug($"Initiating {initChannelTasks.Length} channels.");
+			for (var i = 0; i < _channelConfig.InitialChannelCount; i++)
 			{
-				_logger.LogDebug("Connecting to primary host.");
-				_connection = _connectionFactory.CreateConnection(_config.Hostnames);
-				_logger.LogInformation("Successfully established connection.");
-			}
-			catch (BrokerUnreachableException e)
-			{
-				_logger.LogError("Unable to connect to broker", e);
-				throw e.InnerException;
-			}
-			_closeTimer = new System.Threading.Timer(state =>
-			{
-				var enumerator = _accessDictionary.GetEnumerator();
-				while (enumerator.MoveNext())
+				if (i > _channelConfig.MaxChannelCount)
 				{
-					if (DateTime.Now - enumerator.Current.Value > _config.RequestTimeout)
-					{
-						DateTime lastUsed;
-						if (_accessDictionary.TryRemove(enumerator.Current.Key, out lastUsed))
-						{
-							_logger.LogInformation($"Channel {enumerator.Current.Key.ChannelNumber} was last used {lastUsed}. Closing...");
-							enumerator.Current.Key.Close();
-						}
-					}
+					_logger.LogDebug($"Trying to create channel number {i}, but max allowed channels are {_channelConfig.MaxChannelCount}");
+					continue;
 				}
-			}, null, _config.RequestTimeout, _config.RequestTimeout);
+				initChannelTasks[i] = CreateAndWireupAsync();
+			}
+			Task.WaitAll(initChannelTasks);
+			_current = _channels.First;
+
+			if (_channelConfig.EnableScaleDown || _channelConfig.EnableScaleUp)
+			{
+				_logger.LogInformation($"Scaling is enabled with interval set to {_channelConfig.ScaleInterval}.");
+				_scaleTimer = new Timer(state =>
+				{
+					AdjustChannelCount(_channels.Count, _requestQueue.Count);
+				}, null, _channelConfig.ScaleInterval, _channelConfig.ScaleInterval);
+			}
+			else
+			{
+				_logger.LogInformation("Channel scaling is disabled.");
+			}
+		}
+
+		internal virtual void AdjustChannelCount(int channelCount, int requestCount)
+		{
+			if (channelCount == 0)
+			{
+				_logger.LogWarning("Channel count is 0. Skipping channel scaling.");
+				return;
+			}
+
+			var workPerChannel = requestCount / channelCount;
+			var canCreateChannel = channelCount < _channelConfig.MaxChannelCount;
+			var canCloseChannel = channelCount > 1;
+			_logger.LogDebug($"Begining channel scaling.\n  Channel count: {channelCount}\n  Work per channel: {workPerChannel}");
+			if (_channelConfig.EnableScaleUp && canCreateChannel && workPerChannel > _channelConfig.WorkThreshold)
+			{
+				CreateAndWireupAsync();
+				return;
+			}
+			if (_channelConfig.EnableScaleDown && canCloseChannel && requestCount == 0)
+			{
+				var toClose = _channels.Last.Value;
+				_logger.LogInformation($"Channel '{toClose.ChannelNumber}' will be closed on {_channelConfig.GracefulCloseInterval}.");
+				_channels.Remove(toClose);
+
+				Timer graceful = null;
+				graceful = new Timer(state =>
+				{
+					graceful?.Dispose();
+					toClose.Dispose();
+				}, null, _channelConfig.GracefulCloseInterval, new TimeSpan(-1));
+			}
 		}
 
 		public void Dispose()
 		{
-			_connection?.Dispose();
-			foreach (var channel in _threadChannels?.Values ?? Enumerable.Empty<IModel>())
+			foreach (var channel in _channels)
 			{
 				channel?.Dispose();
 			}
-			_threadChannels?.Dispose();
-			_closeTimer?.Dispose();
-			_threadChannels = null;
+			_connection?.Dispose();
+			_scaleTimer?.Dispose();
+		}
+
+		public IModel GetChannel()
+		{
+			return GetChannelAsync().Result;
+		}
+
+		public IModel CreateChannel(IConnection connection = null)
+		{
+			return CreateChannelAsync(connection).Result;
 		}
 
 		public Task<IModel> GetChannelAsync()
 		{
-			if (_threadChannels.Value?.IsOpen ?? false)
-			{
-				_logger.LogDebug($"Using existing channel with id '{_threadChannels.Value.ChannelNumber}' on thread '{Thread.CurrentThread.ManagedThreadId}'");
-				_accessDictionary.AddOrUpdate(_threadChannels.Value, DateTime.Now, (model, time) => DateTime.Now);
-				return Task.FromResult(_threadChannels.Value);
-			}
-
-			return GetConnectionAsync()
-				.ContinueWith(connectionTask => GetOrCreateChannelAsync(connectionTask.Result))
-				.Unwrap()
-				.ContinueWith(tChannel =>
-				{
-					_accessDictionary.AddOrUpdate(tChannel.Result, DateTime.Now, (model, time) => DateTime.Now);
-					return tChannel.Result;
-				});
+			var tcs = new TaskCompletionSource<IModel>();
+			_requestQueue.Enqueue(tcs);
+			EnsureRequestsAreHandled();
+			return tcs.Task;
 		}
 
-		private Task<IModel> GetOrCreateChannelAsync(IConnection connection)
+		private void EnsureRequestsAreHandled()
 		{
-			if (!connection?.IsOpen ?? true)
+			if (_processingRequests)
 			{
-				_logger.LogInformation("Connection is not open or defined. Waiting for a open connection.");
-				return GetConnectionAsync()
-						.ContinueWith(c => GetOrCreateChannelAsync(c.Result))
-						.Unwrap();
+				return;
 			}
-			if (_threadChannels.Value == null)
+			if (!_channels.Any() && _channelConfig.InitialChannelCount > 0)
 			{
-				_logger.LogInformation($"Creating a new channel for thread with id '{Thread.CurrentThread.ManagedThreadId}'");
-				_threadChannels.Value = connection.CreateModel();
-				if (_config.AutoCloseConnection && !connection.AutoClose)
+				_logger.LogInformation("Currently no available channels.");
+				return;
+			}
+			lock (_processLock)
+			{
+				if (_processingRequests)
 				{
-					_logger.LogInformation($"Setting AutoClose to true for current connection");
-					connection.AutoClose = _config.AutoCloseConnection;
+					return;
 				}
-				return Task.FromResult(_threadChannels.Value);
-			}
-			if (_threadChannels.Value.IsOpen)
-			{
-				_logger.LogDebug($"Using open channel with id {_threadChannels.Value.ChannelNumber}");
-				return Task.FromResult(_threadChannels.Value);
+				_processingRequests = true;
+				_logger.LogDebug("Begining to process 'GetChannel' requests.");
 			}
 
-			_logger.LogInformation($"Channel {_threadChannels.Value.ChannelNumber} is closed.");
-			if (_threadChannels.Value.CloseReason?.Initiator == ShutdownInitiator.Application)
+			TaskCompletionSource<IModel> channelTcs;
+			while (_requestQueue.TryDequeue(out channelTcs))
 			{
-				_logger.LogInformation($"Channel {_threadChannels.Value.ChannelNumber} is closed by application and will not be recovered.");
-				_threadChannels.Value.Dispose();
-				_threadChannels.Value = connection.CreateModel();
-				return Task.FromResult(_threadChannels.Value);
-			}
+				lock (_channelLock)
+				{
+					if (_current == null && _channelConfig.InitialChannelCount == 0)
+					{
+						CreateAndWireupAsync().Wait();
+						_current = _channels.First;
+					}
+					_current = _current.Next ?? _channels.First;
 
-			var recoveryChannel = _threadChannels.Value as IRecoverable;
-			if (recoveryChannel == null)
-			{
-				_logger.LogInformation("Channel is not recoverable. Opening a new channel.");
-				_threadChannels.Value.Dispose();
-				_threadChannels.Value = connection.CreateModel();
-				return Task.FromResult(_threadChannels.Value);
-			}
+					if (_current.Value.IsOpen)
+					{
+						channelTcs.TrySetResult(_current.Value);
+						continue;
+					}
 
-			_logger.LogDebug("Channel is recoverable. Waiting for 'Recovery' event to be triggered.");
-			var recoverTcs = new TaskCompletionSource<IModel>();
-			recoveryChannel.Recovery += (sender, args) =>
-			{
-				recoverTcs.SetResult(recoveryChannel as IModel);
-			};
-			return recoverTcs.Task;
+					_logger.LogInformation($"Channel '{_current.Value.ChannelNumber}' is closed. Removing it from pool.");
+					_channels.Remove(_current);
+
+					if (_current.Value.CloseReason.Initiator == ShutdownInitiator.Application)
+					{
+						_logger.LogInformation($"Channel '{_current.Value.ChannelNumber}' is closed by application. Disposing channel.");
+						_current.Value.Dispose();
+						if (!_channels.Any())
+						{
+							var newChannelTask = CreateAndWireupAsync();
+							newChannelTask.Wait();
+							_current = _channels.Last;
+							channelTcs.TrySetResult(_current.Value);
+							continue;
+						}
+					}
+				}
+
+				var openChannel = _channels.FirstOrDefault(c => c.IsOpen);
+				if (openChannel != null)
+				{
+					_logger.LogInformation($"Using channel '{openChannel.ChannelNumber}', which is open.");
+					channelTcs.TrySetResult(openChannel);
+					continue;
+				}
+				var isRecoverable = _channels.Any(c => c is IRecoverable);
+				if (!isRecoverable)
+				{
+					throw new Exception("Unable to retreive channel. All existing channels are closed and none of them are recoverable.");
+				}
+
+				_logger.LogInformation("Unable to find an open channel. Requeue TaskCompletionSource for future process and abort execution.");
+				_requestQueue.Enqueue(channelTcs);
+				_processingRequests = false;
+				return;
+			}
+			_processingRequests = false;
+			_logger.LogDebug("'GetChannel' has been processed.");
+		}
+
+		public Task<IModel> CreateChannelAsync(IConnection connection = null)
+		{
+			return connection != null
+				? Task.FromResult(connection.CreateModel())
+				: GetConnectionAsync().ContinueWith(tConnection => tConnection.Result.CreateModel());
+		}
+
+		internal virtual Task<IModel> CreateAndWireupAsync()
+		{
+			return GetConnectionAsync()
+				.ContinueWith(tConnection =>
+				{
+					var channel = tConnection.Result.CreateModel();
+					_logger.LogInformation($"Channel '{channel.ChannelNumber}' has been created.");
+					var recoverable = channel as IRecoverable;
+					if (recoverable != null)
+					{
+						recoverable.Recovery += (sender, args) =>
+						{
+							if (!_channels.Contains(channel))
+							{
+								_logger.LogInformation($"Channel '{_current.Value.ChannelNumber}' is recovered. Adding it to pool.");
+								_channels.AddLast(channel);
+							}
+						};
+					}
+					_channels.AddLast(new LinkedListNode<IModel>(channel));
+					return channel;
+				});
 		}
 
 		private Task<IConnection> GetConnectionAsync()
@@ -152,48 +244,58 @@ namespace RawRabbit.Common
 				_logger.LogDebug("Existing connection is open and will be used.");
 				return Task.FromResult(_connection);
 			}
-
 			_logger.LogInformation("The existing connection is not open.");
+
+			if (_connection.CloseReason.Initiator == ShutdownInitiator.Application)
+			{
+				_logger.LogInformation("Connection is closed with Application as initiator. It will not be recovered.");
+				_connection.Dispose();
+				throw new Exception("Application shutdown is initiated by the Application. A new connection will not be created.");
+			}
+
 			var recoverable = _connection as IRecoverable;
 			if (recoverable == null)
 			{
 				_logger.LogInformation("Connection is not recoverable, trying to create a new connection.");
 				_connection.Dispose();
-				try
-				{
-					_connection = _connectionFactory.CreateConnection(_config.Hostnames);
-					return Task.FromResult(_connection);
-				}
-				catch (BrokerUnreachableException)
-				{
-					_logger.LogInformation("None of the hosts are reachable. Waiting five seconds and try again.");
-					return Task
-						.Delay(TimeSpan.FromSeconds(5))
-						.ContinueWith(t => _connectionFactory.CreateConnection(_config.Hostnames));
-				}
+				throw new Exception("The non recoverable connection is closed. A channel can not be obtained.");
 			}
 
 			_logger.LogDebug("Connection is recoverable. Waiting for 'Recovery' event to be triggered. ");
 			var recoverTcs = new TaskCompletionSource<IConnection>();
-			recoverable.Recovery += (sender, args) =>
+
+			EventHandler<EventArgs> completeTask = null;
+			completeTask = (sender, args) =>
 			{
 				_logger.LogDebug("Connection has been recovered!");
 				recoverTcs.TrySetResult(recoverable as IConnection);
+				recoverable.Recovery -= completeTask;
 			};
+
+			recoverable.Recovery += completeTask;
 			return recoverTcs.Task;
 		}
+	}
 
-		public IModel CreateChannel(IConnection connection = null)
-		{
-			return CreateChannelAsync(connection).Result;
-		}
+	public class ChannelFactoryConfiguration
+	{
+		public bool EnableScaleUp { get; set; }
+		public bool EnableScaleDown { get; set; }
+		public TimeSpan ScaleInterval { get; set; }
+		public TimeSpan GracefulCloseInterval { get; set; }
+		public int MaxChannelCount { get; set; }
+		public int InitialChannelCount { get; set; }
+		public int WorkThreshold { get; set; }
 
-		public Task<IModel> CreateChannelAsync(IConnection connection = null)
+		public static ChannelFactoryConfiguration Default => new ChannelFactoryConfiguration
 		{
-			var connectionTask = connection != null
-				? Task.FromResult(connection)
-				: GetConnectionAsync();
-			return connectionTask.ContinueWith(c => c.Result.CreateModel());
-		}
+			InitialChannelCount = 0,
+			MaxChannelCount = 1,
+			GracefulCloseInterval = TimeSpan.FromMinutes(30),
+			WorkThreshold = 20000,
+			ScaleInterval = TimeSpan.FromSeconds(10),
+			EnableScaleUp = false,
+			EnableScaleDown = false
+		};
 	}
 }

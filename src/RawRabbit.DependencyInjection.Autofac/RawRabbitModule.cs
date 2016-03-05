@@ -133,7 +133,7 @@ namespace RawRabbit.DependencyInjection.Autofac
 				.PreserveExistingDefaults();
 
 			builder
-				.RegisterType<ChannelFactory>()
+				.RegisterType<ThreadBasedChannelFactory>()
 				.As<IChannelFactory>()
 				.SingleInstance()
 				.PreserveExistingDefaults();
