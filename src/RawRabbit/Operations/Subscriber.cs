@@ -12,45 +12,62 @@ using RawRabbit.Serialization;
 
 namespace RawRabbit.Operations
 {
-	public class Subscriber<TMessageContext> : OperatorBase, ISubscriber<TMessageContext> where TMessageContext : IMessageContext
+	public class Subscriber<TMessageContext> : ISubscriber<TMessageContext> where TMessageContext : IMessageContext
 	{
+		private readonly IChannelFactory _channelFactory;
 		private readonly IConsumerFactory _consumerFactory;
+		private readonly ITopologyProvider _topologyProvider;
+		private readonly IMessageSerializer _serializer;
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
 		private readonly IContextEnhancer _contextEnhancer;
 		private readonly ILogger _logger = LogManager.GetLogger<Subscriber<TMessageContext>>();
 
-		public Subscriber(IChannelFactory channelFactory, IConsumerFactory consumerFactory, IMessageSerializer serializer, IMessageContextProvider<TMessageContext> contextProvider, IContextEnhancer contextEnhancer)
-			: base(channelFactory, serializer)
+		public Subscriber(
+			IChannelFactory channelFactory,
+			IConsumerFactory consumerFactory,
+			ITopologyProvider topologyProvider,
+			IMessageSerializer serializer,
+			IMessageContextProvider<TMessageContext> contextProvider,
+			IContextEnhancer contextEnhancer)
 		{
+			_channelFactory = channelFactory;
 			_consumerFactory = consumerFactory;
+			_topologyProvider = topologyProvider;
+			_serializer = serializer;
 			_contextProvider = contextProvider;
 			_contextEnhancer = contextEnhancer;
 		}
 
 		public void SubscribeAsync<T>(Func<T, TMessageContext, Task> subscribeMethod, SubscriptionConfiguration config)
 		{
-			var channel = ChannelFactory.CreateChannel();
-			DeclareQueue(config.Queue, channel);
-			DeclareExchange(config.Exchange, channel);
-			BindQueue(config.Queue, config.Exchange, config.RoutingKey, channel);
-			var consumer = _consumerFactory.CreateConsumer(config, channel);
-			consumer.OnMessageAsync = (o, args) =>
-			{
-				var body = Serializer.Deserialize<T>(args.Body);
-				var context = _contextProvider.ExtractContext(args.BasicProperties.Headers[PropertyHeaders.Context]);
-				_contextEnhancer.WireUpContextFeatures(context, consumer, args);
-				return subscribeMethod(body, context);
-			};
-			consumer.Model.BasicConsume(config.Queue.FullQueueName, config.NoAck, consumer);
+			var topologyTask = _topologyProvider.BindQueueAsync(config.Queue, config.Exchange, config.RoutingKey);
+			var channelTask = _channelFactory.CreateChannelAsync();
 
-			_logger.LogDebug($"Setting up a consumer on queue {config.Queue.QueueName} with NoAck set to {config.NoAck}.");
+			var subscriberTask = Task
+				.WhenAll(topologyTask, channelTask)
+				.ContinueWith(t =>
+				{
+					var consumer = _consumerFactory.CreateConsumer(config, channelTask.Result);
+					consumer.OnMessageAsync = (o, args) =>
+					{
+						var body = _serializer.Deserialize<T>(args.Body);
+						var context = _contextProvider.ExtractContext(args.BasicProperties.Headers[PropertyHeaders.Context]);
+						_contextEnhancer.WireUpContextFeatures(context, consumer, args);
+						return subscribeMethod(body, context);
+					};
+					consumer.Model.BasicConsume(config.Queue.FullQueueName, config.NoAck, consumer);
+
+					_logger.LogDebug($"Setting up a consumer on channel '{channelTask.Result.ChannelNumber}' for queue {config.Queue.QueueName} with NoAck set to {config.NoAck}.");
+				});
+			Task.WaitAll(subscriberTask);
 		}
 
-		public override void Dispose()
+		public void Dispose()
 		{
 			_logger.LogDebug("Disposing Subscriber.");
-			base.Dispose();
 			(_consumerFactory as IDisposable)?.Dispose();
+			(_channelFactory as IDisposable)?.Dispose();
+			(_topologyProvider as IDisposable)?.Dispose();
 		}
 	}
 }
