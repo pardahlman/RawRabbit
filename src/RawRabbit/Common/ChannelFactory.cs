@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 using RawRabbit.Configuration;
@@ -67,11 +66,6 @@ namespace RawRabbit.Common
 			_threadChannels?.Dispose();
 			_closeTimer?.Dispose();
 			_threadChannels = null;
-		}
-
-		public IModel GetChannel()
-		{
-			return GetChannelAsync().Result;
 		}
 
 		public Task<IModel> GetChannelAsync()
