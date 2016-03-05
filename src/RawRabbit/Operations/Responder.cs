@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using RabbitMQ.Client.Events;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Respond;
 using RawRabbit.Consumer.Abstraction;
@@ -78,7 +77,7 @@ namespace RawRabbit.Operations
 								}
 								_logger.LogDebug($"Sending response to request with correlation '{args.BasicProperties.CorrelationId}'.");
 								consumer.Model.BasicPublish(
-									exchange: "",
+									exchange: string.Empty,
 									routingKey: args.BasicProperties.ReplyTo,
 									basicProperties: _propertyProvider.GetProperties<TResponse>(p => p.CorrelationId = args.BasicProperties.CorrelationId),
 									body: _serializer.Serialize(tResponse.Result)
