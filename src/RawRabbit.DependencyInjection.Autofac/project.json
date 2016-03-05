@@ -2,8 +2,6 @@
 	"authors": [ "par.dahlman" ],
 	"dependencies": {
 		"RawRabbit": "",
-		"RabbitMQ.Client": "3.6.0",
-		"Newtonsoft.Json": "8.0.2",
 		"Autofac": "2.2.4.900"
 	},
 	"description": "Wire up RawRabbit with Autfac!",

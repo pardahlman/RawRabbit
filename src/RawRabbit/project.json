@@ -8,7 +8,7 @@
 	"tags": ["rabbitmq", "raw", "rawrabbit", "amqp"],
 
 	"dependencies": {
-    "RabbitMQ.Client": "3.6.0",
+    "RabbitMQ.Client": "3.6.1",
     "Newtonsoft.Json": "8.0.2"
 	},
 	"commands": {
