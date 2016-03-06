@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 
-namespace RawRabbit.Common
+namespace RawRabbit.Channel.Abstraction
 {
 	public interface IChannelFactory : IDisposable
 	{

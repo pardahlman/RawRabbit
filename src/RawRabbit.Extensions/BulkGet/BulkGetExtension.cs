@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using RabbitMQ.Client;
+using RawRabbit.Channel.Abstraction;
 using RawRabbit.Common;
 using RawRabbit.Context;
 using RawRabbit.Context.Provider;

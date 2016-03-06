@@ -5,10 +5,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
+using RawRabbit.Channel.Abstraction;
 using RawRabbit.Configuration;
 using RawRabbit.Logging;
 
-namespace RawRabbit.Common
+namespace RawRabbit.Channel
 {
 	public class ThreadBasedChannelFactory : IChannelFactory
 	{

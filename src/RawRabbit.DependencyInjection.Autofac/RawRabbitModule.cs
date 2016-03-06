@@ -2,6 +2,8 @@
 using Autofac;
 using Autofac.Core;
 using RabbitMQ.Client;
+using RawRabbit.Channel;
+using RawRabbit.Channel.Abstraction;
 using RawRabbit.Common;
 using RawRabbit.Configuration;
 using RawRabbit.Consumer.Abstraction;

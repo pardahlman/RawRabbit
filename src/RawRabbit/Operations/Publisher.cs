@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
+using RawRabbit.Channel;
+using RawRabbit.Channel.Abstraction;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Publish;
 using RawRabbit.Context;
