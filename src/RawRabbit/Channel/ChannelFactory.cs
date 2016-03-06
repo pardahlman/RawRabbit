@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Exceptions;
 using RawRabbit.Channel.Abstraction;
 using RawRabbit.Configuration;
 using RawRabbit.Logging;
@@ -28,7 +29,15 @@ namespace RawRabbit.Channel
 
 		public ChannelFactory(IConnectionFactory connectionFactory, RawRabbitConfiguration config, ChannelFactoryConfiguration channelConfig)
 		{
-			_connection = connectionFactory.CreateConnection(config.Hostnames);
+			try
+			{
+				_connection = connectionFactory.CreateConnection(config.Hostnames);
+			}
+			catch (BrokerUnreachableException e)
+			{
+				_logger.LogError("Unable to connect to broker", e);
+				throw e.InnerException;
+			}
 			_connectionFactory = connectionFactory;
 			_config = config;
 			_channelConfig = channelConfig;
