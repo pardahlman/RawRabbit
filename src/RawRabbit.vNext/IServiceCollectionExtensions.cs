@@ -26,7 +26,7 @@ namespace RawRabbit.vNext
 		public static IServiceCollection AddRawRabbit(this IServiceCollection collection, Action<IConfigurationBuilder> config = null, Action<IServiceCollection> custom = null)
 		{
 			return collection
-				.AddTransient<IBusClient,BusClient>()
+				.AddSingleton<IBusClient,BusClient>()
 				.AddRawRabbit<MessageContext>(config, custom);
 		}
 
@@ -91,7 +91,7 @@ namespace RawRabbit.vNext
 						p.GetService<IBasicPropertiesProvider>(),
 						p.GetService<ITopologyProvider>(),
 						p.GetService<RawRabbitConfiguration>().RequestTimeout))
-				.AddTransient<IBusClient<TMessageContext>, BaseBusClient<TMessageContext>>();
+				.AddSingleton<IBusClient<TMessageContext>, BaseBusClient<TMessageContext>>();
 			custom?.Invoke(collection);
 			return collection;
 		}
