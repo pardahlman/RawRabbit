@@ -49,8 +49,7 @@ namespace RawRabbit.Channel
 
 		internal virtual void Initialize()
 		{
-			var initChannelTasks = new Task[Math.Min(_channelConfig.InitialChannelCount, _channelConfig.MaxChannelCount)];
-			_logger.LogDebug($"Initiating {initChannelTasks.Length} channels.");
+			_logger.LogDebug($"Initiating {_channelConfig.InitialChannelCount} channels.");
 			for (var i = 0; i < _channelConfig.InitialChannelCount; i++)
 			{
 				if (i > _channelConfig.MaxChannelCount)
@@ -58,9 +57,8 @@ namespace RawRabbit.Channel
 					_logger.LogDebug($"Trying to create channel number {i}, but max allowed channels are {_channelConfig.MaxChannelCount}");
 					continue;
 				}
-				initChannelTasks[i] = CreateAndWireupAsync();
+				CreateAndWireupAsync().Wait();
 			}
-			Task.WaitAll(initChannelTasks);
 			_current = _channels.First;
 
 			if (_channelConfig.EnableScaleDown || _channelConfig.EnableScaleUp)

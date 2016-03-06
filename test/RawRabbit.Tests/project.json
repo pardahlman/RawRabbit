@@ -4,6 +4,7 @@
 	"dependencies": {
 		"Autofac": "2.2.4.900",
 		"Microsoft.Extensions.Configuration": "1.0.0-rc1-final",
+		"Moq" : "4.2.1510.2205",
 		"RawRabbit": "",
 		"RawRabbit.DependencyInjection.Autofac": "",
 		"RawRabbit.vNext": "",
