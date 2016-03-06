@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Runtime.Remoting.Contexts;
 using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
@@ -83,7 +84,7 @@ namespace RawRabbit.Operations
 				RequestTimer = new Timer(state =>
 				{
 					ResponseCompletionSource rcs;
-					if (_responseDictionary.TryRemove(correlationId, out rcs))
+					if (!_responseDictionary.TryRemove(correlationId, out rcs))
 					{
 						_logger.LogWarning($"Unable to find request timer for {correlationId}.");
 						return;
@@ -108,7 +109,14 @@ namespace RawRabbit.Operations
 					}),
 				body: _serializer.Serialize(message)
 			);
-			return responseSource.Task.ContinueWith(tResponse => (TResponse)tResponse.Result);
+			return responseSource.Task.ContinueWith(tResponse =>
+			{
+				if (tResponse.IsFaulted)
+				{
+					throw tResponse.Exception?.InnerException ?? new Exception("Failed to recieve response");
+				}
+				return (TResponse) tResponse.Result;
+			});
 		}
 
 		private Task<IRawConsumer> GetOrCreateConsumerAsync(IConsumerConfiguration cfg)
