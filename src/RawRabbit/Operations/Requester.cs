@@ -18,7 +18,7 @@ using RawRabbit.Serialization;
 
 namespace RawRabbit.Operations
 {
-	public class Requester<TMessageContext> : IRequester where TMessageContext : IMessageContext
+	public class Requester<TMessageContext> : IDisposable, IRequester where TMessageContext : IMessageContext
 	{
 		private readonly IChannelFactory _channelFactory;
 		private readonly IConsumerFactory _consumerFactory;
@@ -200,6 +200,12 @@ namespace RawRabbit.Operations
 			{
 				return Task.IsCompleted && Task.Result.Model.IsOpen;
 			}
+		}
+
+		public void Dispose()
+		{
+			(_channelFactory as IDisposable)?.Dispose();
+			_currentConsumer?.Consumer?.Disconnect();
 		}
 	}
 }

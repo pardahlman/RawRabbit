@@ -14,7 +14,7 @@ using RawRabbit.Serialization;
 
 namespace RawRabbit.Operations
 {
-	public class Subscriber<TMessageContext> : ISubscriber<TMessageContext> where TMessageContext : IMessageContext
+	public class Subscriber<TMessageContext> : IDisposable, ISubscriber<TMessageContext> where TMessageContext : IMessageContext
 	{
 		private readonly IChannelFactory _channelFactory;
 		private readonly IConsumerFactory _consumerFactory;

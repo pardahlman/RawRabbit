@@ -15,7 +15,7 @@ using RawRabbit.Operations.Abstraction;
 
 namespace RawRabbit.Operations
 {
-	public class Responder<TMessageContext> : IResponder<TMessageContext> where TMessageContext : IMessageContext
+	public class Responder<TMessageContext> : IDisposable, IResponder<TMessageContext> where TMessageContext : IMessageContext
 	{
 		private readonly IChannelFactory _channelFactory;
 		private readonly ITopologyProvider _topologyProvider;
