@@ -72,7 +72,7 @@ Here's a sample of how the `rawrabbit.json` configuration file could look like
 * **host** is a comma seperated lists of brokers to connect to (`string`)
 * **port** is the port used when connect to a broker (`int`)
 * **vhost** is the virtual host to use on the broker (`string`)
-* **parameters** is a query string like seperated list of parameters (`string`). Currently only supports `requestTimeout` as the number of seconds before a request times out.
+* **parameters** is a query string like seperated list of parameters (`string`). Supported parameters are the properties in the `RawRabbitConfiguration` object, such as  `requestTimeout`, `persistentDeliveryMode` etc.
 
 The `ConnectionStringParser` can be used to create a configuration object
 ```csharp

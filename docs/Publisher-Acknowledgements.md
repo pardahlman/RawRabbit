@@ -18,3 +18,6 @@ var publisher = BusClientFactory.CreateDefault(s =>
 	s.AddSingleton<IPublishAcknowledger, NoAckAcknowledger>()
 );
 ```
+
+## Avoiding PublishConfirmException
+There are a few potential reasons for `PublishConfirmException` being thrown. If the broker is in heavy use and/or the application publishes multiple concurrent publishes on the `PublishConfirmTimeout` should be increased. Another option is to register the `NoAckAcknowledger`.
