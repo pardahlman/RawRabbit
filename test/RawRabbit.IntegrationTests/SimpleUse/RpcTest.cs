@@ -3,10 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using RawRabbit.Configuration;
-using RawRabbit.Consumer.Abstraction;
-using RawRabbit.Consumer.Queueing;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.vNext;
 using Xunit;
@@ -144,42 +140,6 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 
 			/* Assert */
 			Assert.Equal(expected: payload, actual: response.Infered);
-		}
-
-		[Fact]
-		public async Task Should_Work_With_Queueing_Consumer_Factory()
-		{
-			/* Setup */
-			var response = new BasicResponse { Prop = "This is the response." };
-			var requester = BusClientFactory.CreateDefault();
-
-			var responder = BusClientFactory.CreateDefault(service => service.AddTransient<IConsumerFactory, QueueingBaiscConsumerFactory>());
-			responder.RespondAsync<BasicRequest, BasicResponse>((req, i) => Task.FromResult(response));
-
-			/* Test */
-			var recieved = await requester.RequestAsync<BasicRequest, BasicResponse>();
-
-			/* Assert */
-			Assert.Equal(expected: response.Prop, actual: recieved.Prop);
-		}
-
-		[Fact]
-		public async Task Should_Work_With_Different_Request_Types_For_Same_Responder()
-		{
-			/* Setup */
-			var requester = BusClientFactory.CreateDefault();
-			var responder = BusClientFactory.CreateDefault(service => service.AddTransient<IConsumerFactory, QueueingBaiscConsumerFactory>());
-			
-			responder.RespondAsync<FirstRequest, FirstResponse>((req, i) => Task.FromResult(new FirstResponse()));
-			responder.RespondAsync<SecondRequest, SecondResponse>((req, i) => Task.FromResult(new SecondResponse()));
-
-			/* Test */
-			var firstResponse = await requester.RequestAsync<FirstRequest, FirstResponse>();
-			var secondResponse = await requester.RequestAsync<SecondRequest, SecondResponse>();
-
-			/* Assert */
-			Assert.NotNull(firstResponse);
-			Assert.NotNull(secondResponse);
 		}
 
 		[Fact]
