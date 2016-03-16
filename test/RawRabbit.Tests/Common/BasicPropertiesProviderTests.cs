@@ -13,7 +13,7 @@ namespace RawRabbit.Tests.Common
 			var provider = new BasicPropertiesProvider(new RawRabbitConfiguration());
 
 			/* Test */
-			var type = provider.GetProperties<First>().Type;
+			var type = provider.GetProperties<First>().Headers[PropertyHeaders.MessageType];
 
 			/* Assert */
 			Assert.Equal(expected: "RawRabbit.Tests.Common.First, RawRabbit.Tests", actual: type);
@@ -26,7 +26,7 @@ namespace RawRabbit.Tests.Common
 			var provider = new BasicPropertiesProvider(new RawRabbitConfiguration());
 
 			/* Test */
-			var type = provider.GetProperties<Generic<First, Second>>().Type;
+			var type = provider.GetProperties<Generic<First, Second>>().Headers[PropertyHeaders.MessageType];
 
 			/* Assert */
 			Assert.Equal(expected: "RawRabbit.Tests.Common.Generic`2[[RawRabbit.Tests.Common.First, RawRabbit.Tests],[RawRabbit.Tests.Common.Second, RawRabbit.Tests]], RawRabbit.Tests", actual: type);
