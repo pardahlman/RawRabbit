@@ -14,6 +14,7 @@ namespace RawRabbit.Extensions.MessageSequence.Configuration
 
 		public IStepOptionBuilder AbortsExecution(bool aborts = true)
 		{
+			Configuration.Optional = true;
 			Configuration.AbortsExecution = aborts;
 			return this;
 		}
