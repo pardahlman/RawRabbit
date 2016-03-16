@@ -14,6 +14,7 @@ Contents:
    configuration
    Extending-RawRabbit
    Bulk-fetching-messages
+   message-sequence
    Publisher-Acknowledgements
    Message-Priority
    Multiple-Subscribers-for-Messages
