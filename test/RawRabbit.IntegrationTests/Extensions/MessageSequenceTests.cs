@@ -37,7 +37,7 @@ namespace RawRabbit.IntegrationTests.Extensions
 				.PublishAsync<BasicRequest>()
 				.Complete<BasicResponse>()
 			);
-			await chain.Result;
+			await chain.Task;
 
 			/* Assert */
 			Assert.True(true, "Recieed Response");
@@ -59,7 +59,7 @@ namespace RawRabbit.IntegrationTests.Extensions
 				.When<BasicMessage>((message, context) => Task.FromResult(true))
 				.Complete<BasicResponse>()
 			);
-			await chain.Result;
+			await chain.Task;
 
 			/* Assert */
 			Assert.True(true, "Recieed Response");
@@ -99,7 +99,7 @@ namespace RawRabbit.IntegrationTests.Extensions
 				.Complete<ForthMessage>()
 			);
 
-			await chain.Result;
+			await chain.Task;
 
 			/* Assert */
 			Assert.True(secondMsgDate < thirdMsgDate);
@@ -135,7 +135,7 @@ namespace RawRabbit.IntegrationTests.Extensions
 							.When<BasicMessage>((message, context) => Task.FromResult(true))
 							.Complete<BasicResponse>()
 							);
-						result.Add(chain.Result.Result);
+						result.Add(chain.Task.Result);
 					}
 				});
 			}
@@ -178,7 +178,7 @@ namespace RawRabbit.IntegrationTests.Extensions
 					})
 				.Complete<ForthMessage>()
 			);
-			await chain.Result;
+			await chain.Task;
 
 			/* Assert */
 			Assert.True(chain.Aborted, "Execution should be aborted");
@@ -217,7 +217,7 @@ namespace RawRabbit.IntegrationTests.Extensions
 					(message, context) => Task.FromResult(true))
 				.Complete<ForthMessage>()
 			);
-			await chain.Result;
+			await chain.Task;
 
 			/* Assert */
 			Assert.Equal(1, chain.Skipped.Count);
@@ -256,7 +256,7 @@ namespace RawRabbit.IntegrationTests.Extensions
 					(message, context) => Task.FromResult(true))
 				.Complete<ForthMessage>()
 			);
-			await chain.Result;
+			await chain.Task;
 
 			/* Assert */
 			Assert.Equal(0, chain.Skipped.Count);

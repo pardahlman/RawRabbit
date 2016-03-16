@@ -60,7 +60,7 @@ namespace RawRabbit.Extensions.MessageSequence.Configuration
 			var messageTcs = new TaskCompletionSource<TMessage>();
 			var sequence = new MessageSequence<TMessage>
 			{
-				Result = messageTcs.Task
+				Task = messageTcs.Task
 			};
 
 			sequenceTask.Result.TaskCompletionSource.Task.ContinueWith(tObj =>
