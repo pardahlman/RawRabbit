@@ -1,0 +1,23 @@
+﻿{
+	"authors": [ "par.dahlman", "Joshua Barron" ],
+	"dependencies": {
+		"RawRabbit": "",
+		"Ninject": "3.2.2"
+	},
+	"description": "Wire up RawRabbit with Ninject!",
+	"frameworks": {
+		"dnx45": { },
+		"dnx451": { },
+		"dnx50": { },
+		"net45": { },
+		"net451": { },
+		"net452": { },
+		"net46": { },
+		"net50": { }
+	},
+	"iconUrl": "http://pardahlman.se/raw/icon.png",
+	"projectUrl": "https://github.com/pardahlman/RawRabbit",
+	"tags": [ "rabbitmq", "raw", "rawrabbit", "autfac" ],
+	"title": "RawRabbit.DependencyInjection.Autofac",
+	"version": "1.8.12-*"
+}

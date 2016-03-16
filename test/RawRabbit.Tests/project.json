@@ -6,7 +6,8 @@
 		"Microsoft.Extensions.Configuration": "1.0.0-rc1-final",
 		"Moq" : "4.2.1510.2205",
 		"RawRabbit": "",
-		"RawRabbit.DependencyInjection.Autofac": "",
+    "RawRabbit.DependencyInjection.Autofac": "",
+    "RawRabbit.DependencyInjection.Ninject": "",
 		"RawRabbit.vNext": "",
 		"xunit": "2.1.0",
 		"xunit.runner.dnx": "2.1.0-rc1-build204"
