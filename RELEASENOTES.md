@@ -1,3 +1,14 @@
+# 1.8.13
+
+ - [#72](https://github.com/pardahlman/RawRabbit/issues/72) - Add package for Ninject, contributed by Joshua Barron ([Originalutter](https://github.com/videege))
+ - [#71](https://github.com/pardahlman/RawRabbit/issues/71) - Remove QueueingBasicConsumer
+ - [#68](https://github.com/pardahlman/RawRabbit/issues/68) - Backward compatible Message Serialization
+ - [#65](https://github.com/pardahlman/RawRabbit/issues/65) - Message Type serialization without assembly version, contributed by Marcus Utter ([Originalutter](https://github.com/Originalutter))
+ - [#19](https://github.com/pardahlman/RawRabbit/issues/19) - Extension method for message sequences +feature
+
+Commits: b928f96fc8...e1b84ef2f0
+
+
 # 1.8.12
 
 In this release, the `ChannelFactory` has been rewritten from the ground up. The old channel factory is left intact, but called `ThreadBasedChannelFactory`. One of the sync methods in the `IChannelFactory` interface is removed. It is recommended to use the async methods. All operations now use the new `ITopologyProvider` for creating topology features.
