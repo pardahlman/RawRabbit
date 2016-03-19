@@ -34,11 +34,11 @@ namespace RawRabbit.Common
 			_logger.LogInformation("BusClient initialized.");
 		}
 
-		public void SubscribeAsync<T>(Func<T, TMessageContext, Task> subscribeMethod, Action<ISubscriptionConfigurationBuilder> configuration = null)
+		public ISubscription SubscribeAsync<T>(Func<T, TMessageContext, Task> subscribeMethod, Action<ISubscriptionConfigurationBuilder> configuration = null)
 		{
 			var config = _configEval.GetConfiguration<T>(configuration);
 			_logger.LogInformation($"Subscribing to message '{typeof(T).Name}' on exchange '{config.Exchange.ExchangeName}' with routing key {config.RoutingKey}.");
-			_subscriber.SubscribeAsync(subscribeMethod, config);
+			return _subscriber.SubscribeAsync(subscribeMethod, config);
 		}
 
 		public Task PublishAsync<T>(T message = default(T), Guid globalMessageId = new Guid(), Action<IPublishConfigurationBuilder> configuration = null)
@@ -48,11 +48,11 @@ namespace RawRabbit.Common
 			return _publisher.PublishAsync(message, globalMessageId, config);
 		}
 
-		public void RespondAsync<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, Action<IResponderConfigurationBuilder> configuration = null)
+		public ISubscription RespondAsync<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, Action<IResponderConfigurationBuilder> configuration = null)
 		{
 			var config = _configEval.GetConfiguration<TRequest, TResponse>(configuration);
 			_logger.LogInformation($"Responding to to requests '{typeof(TRequest).Name}' with '{typeof(TResponse).Name}'.");
-			_responder.RespondAsync(onMessage, config);
+			return _responder.RespondAsync(onMessage, config);
 		}
 
 		public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest message = default(TRequest), Guid globalMessageId = new Guid(), Action<IRequestConfigurationBuilder> configuration = null)

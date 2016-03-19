@@ -46,7 +46,7 @@ namespace RawRabbit.Operations
 			_consumers = new List<IRawConsumer>();
 		}
 
-		public void RespondAsync<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, ResponderConfiguration cfg)
+		public ISubscription RespondAsync<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, ResponderConfiguration cfg)
 		{
 			var topologyTask = _topologyProvider.BindQueueAsync(cfg.Queue, cfg.Exchange, cfg.RoutingKey);
 			var channelTask = _channelFactory.CreateChannelAsync();
@@ -87,9 +87,10 @@ namespace RawRabbit.Operations
 							});
 					};
 					consumer.Model.BasicConsume(cfg.Queue.QueueName, cfg.NoAck, consumer);
+					return new Subscription(consumer, cfg.Queue.QueueName);
 				});
-
 			Task.WaitAll(respondTask);
+			return respondTask.Result;
 		}
 
 		public void Dispose()

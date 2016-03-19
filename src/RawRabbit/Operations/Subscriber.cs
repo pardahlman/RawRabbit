@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using RawRabbit.Channel;
 using RawRabbit.Channel.Abstraction;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Subscribe;
@@ -40,7 +39,7 @@ namespace RawRabbit.Operations
 			_contextEnhancer = contextEnhancer;
 		}
 
-		public void SubscribeAsync<T>(Func<T, TMessageContext, Task> subscribeMethod, SubscriptionConfiguration config)
+		public ISubscription SubscribeAsync<T>(Func<T, TMessageContext, Task> subscribeMethod, SubscriptionConfiguration config)
 		{
 			var topologyTask = _topologyProvider.BindQueueAsync(config.Queue, config.Exchange, config.RoutingKey);
 			var channelTask = _channelFactory.CreateChannelAsync();
@@ -58,10 +57,11 @@ namespace RawRabbit.Operations
 						return subscribeMethod(body, context);
 					};
 					consumer.Model.BasicConsume(config.Queue.FullQueueName, config.NoAck, consumer);
-
 					_logger.LogDebug($"Setting up a consumer on channel '{channelTask.Result.ChannelNumber}' for queue {config.Queue.QueueName} with NoAck set to {config.NoAck}.");
+					return new Subscription(consumer, config.Queue.QueueName);
 				});
 			Task.WaitAll(subscriberTask);
+			return subscriberTask.Result;
 		}
 
 		public void Dispose()

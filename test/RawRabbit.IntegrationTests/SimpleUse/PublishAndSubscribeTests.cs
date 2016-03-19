@@ -231,5 +231,42 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			/* Asset */
 			Assert.Equal(expected: "I am important!", actual: priorityTcs.Task.Result.Prop);
 		}
+
+		[Fact]
+		public async Task Should_Stop_Subscribe_When_Subscription_Is_Disposed()
+		{
+			/**/
+			var publisher = BusClientFactory.CreateDefault();
+			var subscriber = BusClientFactory.CreateDefault();
+			var firstMessage = new BasicMessage {Prop = "Value"};
+			var secondMessage = new BasicMessage {Prop = "AnotherValue"};
+			var  firstRecievedTcs = new TaskCompletionSource<BasicMessage>();
+			var  secondRecievedTcs = new TaskCompletionSource<BasicMessage>();
+			var recievedCount = 0;
+
+			var subscription = subscriber.SubscribeAsync<BasicMessage>((message, context) =>
+			{
+				recievedCount++;
+				firstRecievedTcs.SetResult(message);
+				return Task.FromResult(true);
+			});
+
+			await publisher.PublishAsync(firstMessage);
+			await firstRecievedTcs.Task;
+			subscription.Dispose();
+			await publisher.PublishAsync(secondMessage);
+			await Task.Delay(20);
+			publisher.SubscribeAsync<BasicMessage>((message, context) =>
+			{
+				secondRecievedTcs.SetResult(message);
+				return Task.FromResult(true);
+			});
+			await secondRecievedTcs.Task;
+
+			/* Assert */
+			Assert.Equal(1, recievedCount);
+			Assert.Equal(firstRecievedTcs.Task.Result.Prop, firstMessage.Prop);
+			Assert.Equal(secondRecievedTcs.Task.Result.Prop, secondMessage.Prop);
+		}
 	}
 }
