@@ -18,6 +18,6 @@
 	"iconUrl": "http://pardahlman.se/raw/icon.png",
 	"projectUrl": "https://github.com/pardahlman/RawRabbit",
 	"tags": [ "rabbitmq", "raw", "rawrabbit", "ninject" ],
-	"title": "RawRabbit.DependencyInjection.Autofac",
+	"title": "RawRabbit.DependencyInjection.Ninject",
 	"version": "1.8.13-*"
 }
