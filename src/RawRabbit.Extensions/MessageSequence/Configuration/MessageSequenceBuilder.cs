@@ -45,17 +45,16 @@ namespace RawRabbit.Extensions.MessageSequence.Configuration
 			var optionBuilder = new StepOptionBuilder();
 			options?.Invoke(optionBuilder);
 			_logger.LogDebug($"Registering handler for '{_globalMessageId}' of type '{typeof(TMessage).Name}'. Optional: {optionBuilder.Configuration.Optional}, Aborts: {optionBuilder.Configuration.AbortsExecution}");
-			var registerTask = _dispatcher.AddMessageHandlerAsync(_globalMessageId, func, optionBuilder.Configuration);
+			_dispatcher.AddMessageHandler(_globalMessageId, func, optionBuilder.Configuration);
 			var bindTask = _chainTopology.BindToExchange<TMessage>();
-			Task.WaitAll(registerTask, bindTask);
+			Task.WaitAll(bindTask);
 			return this;
 		}
 
 		public MessageSequence<TMessage> Complete<TMessage>()
 		{
 			_logger.LogDebug($"Message Sequence for '{_globalMessageId}' completes with '{typeof(TMessage).Name}'.");
-			var sequenceTask = _repository.GetOrCreateAsync(_globalMessageId);
-			Task.WaitAll(sequenceTask);
+			var sequenceDef = _repository.GetOrCreate(_globalMessageId);
 			
 			var messageTcs = new TaskCompletionSource<TMessage>();
 			var sequence = new MessageSequence<TMessage>
@@ -63,34 +62,30 @@ namespace RawRabbit.Extensions.MessageSequence.Configuration
 				Task = messageTcs.Task
 			};
 
-			sequenceTask.Result.TaskCompletionSource.Task.ContinueWith(tObj =>
+			sequenceDef.TaskCompletionSource.Task.ContinueWith(tObj =>
 			{
-				_repository
-					.GetAsync(_globalMessageId)
-					.ContinueWith(tFinalSequence =>
-					{
-						_logger.LogDebug($"Updating Sequence for '{_globalMessageId}'.");
-						sequence.Aborted = tFinalSequence.Result.State.Aborted;
-						sequence.Completed = tFinalSequence.Result.State.Completed;
-						sequence.Skipped = tFinalSequence.Result.State.Skipped;
-						messageTcs.TrySetResult((TMessage) tObj.Result);
-						return _repository.RemoveAsync(_globalMessageId);
-					})
-					.Unwrap();
+				var final = _repository.Get(_globalMessageId);
+				_logger.LogDebug($"Updating Sequence for '{_globalMessageId}'.");
+				sequence.Aborted = final.State.Aborted;
+				sequence.Completed = final.State.Completed;
+				sequence.Skipped = final.State.Skipped;
+				messageTcs.TrySetResult((TMessage) tObj.Result);
+				_repository.Remove(_globalMessageId);
 			});
 
 			Func<TMessage, TMessageContext, Task> func = (message, context) =>
 			{
-				sequenceTask.Result.TaskCompletionSource.TrySetResult(message);
-				_chainTopology.Unregister(context.GlobalRequestId);
+				Task
+					.WhenAll(sequenceDef.State.HandlerTasks)
+					.ContinueWith(t => sequenceDef.TaskCompletionSource.TrySetResult(message));
 				return Task.FromResult(true);
 			};
 
 			var bindTask = _chainTopology.BindToExchange<TMessage>();
-			var registerTask = _dispatcher.AddMessageHandlerAsync(_globalMessageId, func);
+			_dispatcher.AddMessageHandler(_globalMessageId, func);
 
 			Task
-				.WhenAll(bindTask, registerTask)
+				.WhenAll(bindTask)
 				.ContinueWith(t => _publishAsync())
 				.Unwrap()
 				.Wait();

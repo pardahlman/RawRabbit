@@ -9,7 +9,7 @@ using RawRabbit.Logging;
 
 namespace RawRabbit.Consumer.Eventing
 {
-	internal class EventingRawConsumer : EventingBasicConsumer, IRawConsumer
+	public class EventingRawConsumer : EventingBasicConsumer, IRawConsumer
 	{
 		private readonly ILogger _logger = LogManager.GetLogger<EventingRawConsumer>();
 		public List<ulong> NackedDeliveryTags { get; private set; } 

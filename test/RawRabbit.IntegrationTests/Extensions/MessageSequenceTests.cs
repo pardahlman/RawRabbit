@@ -31,12 +31,17 @@ namespace RawRabbit.IntegrationTests.Extensions
 			_client.SubscribeAsync<BasicRequest>((request, context) =>
 				_client.PublishAsync(new BasicResponse(), context.GlobalRequestId)
 			);
+			_client.SubscribeAsync<BasicResponse>((response, context) =>
+			{
+				return Task.FromResult(true);
+			});
 
 			/* Test */
 			var chain = _client.ExecuteSequence(c => c
 				.PublishAsync<BasicRequest>()
 				.Complete<BasicResponse>()
 			);
+			
 			await chain.Task;
 
 			/* Assert */
@@ -195,10 +200,6 @@ namespace RawRabbit.IntegrationTests.Extensions
 				await _client.PublishAsync(new ThirdMessage(), context.GlobalRequestId);
 			});
 			_client.SubscribeAsync<ThirdMessage>(async (request, context) =>
-			{
-				await _client.PublishAsync(new SecondMessage(), context.GlobalRequestId);
-			});
-			_client.SubscribeAsync<SecondMessage>(async (request, context) =>
 			{
 				await _client.PublishAsync(new ForthMessage(), context.GlobalRequestId);
 			});

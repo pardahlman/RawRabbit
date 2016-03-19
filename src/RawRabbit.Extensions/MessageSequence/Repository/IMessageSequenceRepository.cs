@@ -5,9 +5,9 @@ namespace RawRabbit.Extensions.MessageSequence.Repository
 {
 	public interface IMessageSequenceRepository
 	{
-		Task<SequenceDefinition> GetAsync(Guid globalMessageId);
-		Task<SequenceDefinition> GetOrCreateAsync(Guid globalMessageId);
-		Task RemoveAsync(Guid globalMessageId);
-		Task UpdateAsync(SequenceDefinition definition);
+		SequenceDefinition Get(Guid globalMessageId);
+		SequenceDefinition GetOrCreate(Guid globalMessageId);
+		void Remove(Guid globalMessageId);
+		void Update(SequenceDefinition definition);
 	}
 }

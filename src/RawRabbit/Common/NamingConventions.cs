@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -20,7 +21,7 @@ namespace RawRabbit.Common
 
 	public class NamingConventions : INamingConventions
 	{
-		private readonly Dictionary<Type, int> _subscriberCounter;
+		private readonly ConcurrentDictionary<Type, int> _subscriberCounter;
 		private readonly string _applicationName;
 		private const string IisWorkerProcessName = "w3wp";
 
@@ -35,7 +36,7 @@ namespace RawRabbit.Common
 
 		public NamingConventions()
 		{
-			_subscriberCounter = new Dictionary<Type,int>();
+			_subscriberCounter = new ConcurrentDictionary<Type,int>();
 			_applicationName = GetApplicationName(Environment.CommandLine);
 
 			ExchangeNamingConvention = type => type?.Namespace?.ToLower() ?? string.Empty;
@@ -49,18 +50,21 @@ namespace RawRabbit.Common
 
 		private string GetSubscriberQueueSuffix(Type messageType)
 		{
-			if (!_subscriberCounter.ContainsKey(messageType))
-			{
-				_subscriberCounter.Add(messageType,0);
-			}
-			var subscriberIndex = ++_subscriberCounter[messageType];
-			_subscriberCounter[messageType] = subscriberIndex;
-
 			var sb = new StringBuilder(_applicationName);
-			if (subscriberIndex > 1)
-			{
-				sb.Append($"_{subscriberIndex}");
-			}
+
+			_subscriberCounter.AddOrUpdate(
+				key: messageType,
+				addValueFactory: type =>
+				{
+					var next = 0;
+					return next;
+				},
+				updateValueFactory:(type, i) =>
+				{
+					var next = i+1;
+					sb.Append($"_{next}");
+					return next;
+				});
 
 			return sb.ToString();
 		}

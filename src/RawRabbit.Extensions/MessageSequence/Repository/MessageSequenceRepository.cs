@@ -15,37 +15,32 @@ namespace RawRabbit.Extensions.MessageSequence.Repository
 			_sequenceDictionary = new ConcurrentDictionary<Guid, SequenceDefinition>();
 		}
 
-		public Task<SequenceDefinition> GetAsync(Guid globalMessageId)
+		public SequenceDefinition Get(Guid globalMessageId)
 		{
 			SequenceDefinition sequence;
 			_sequenceDictionary.TryGetValue(globalMessageId, out sequence);
-			return Task.FromResult(sequence);
+			return sequence;
 		}
 
-		public Task<SequenceDefinition> GetOrCreateAsync(Guid globalMessageId)
+		public SequenceDefinition GetOrCreate(Guid globalMessageId)
 		{
 			SequenceDefinition sequence;
 			if (_sequenceDictionary.TryGetValue(globalMessageId, out sequence))
 			{
-				return Task.FromResult(sequence);
+				return sequence;
 			}
-			sequence = new SequenceDefinition() { GlobalMessageId = globalMessageId };
-			return !_sequenceDictionary.TryAdd(globalMessageId, sequence)
-				? GetAsync(globalMessageId)
-				: Task.FromResult(sequence);
+			return _sequenceDictionary.GetOrAdd(globalMessageId, new SequenceDefinition {GlobalMessageId = globalMessageId});
 		}
 
-		public Task RemoveAsync(Guid globalMessageId)
+		public void Remove(Guid globalMessageId)
 		{
 			SequenceDefinition removed;
 			_sequenceDictionary.TryRemove(globalMessageId, out removed);
-			return Task.FromResult(true);
 		}
 
-		public Task UpdateAsync(SequenceDefinition definition)
+		public void Update(SequenceDefinition definition)
 		{
 			/* Do noting in this in-memory implementation */
-			return Task.FromResult(true);
 		}
 	}
 

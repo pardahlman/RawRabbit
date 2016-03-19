@@ -19,58 +19,51 @@ namespace RawRabbit.Extensions.MessageSequence.Core
 			_sequenceRepository = sequenceRepository;
 		}
 
-		public Task AddMessageHandlerAsync<TMessage, TMessageContext>(Guid globalMessageId, Func<TMessage, TMessageContext, Task> func, StepOption configuration) where TMessageContext : IMessageContext
+		public void AddMessageHandler<TMessage, TMessageContext>(Guid globalMessageId, Func<TMessage, TMessageContext, Task> func, StepOption configuration) where TMessageContext : IMessageContext
 		{
-			return _sequenceRepository
-				.GetOrCreateAsync(globalMessageId)
-				.ContinueWith(tSequence =>
-				{
-					tSequence.Result.StepDefinitions.Add(new StepDefinition
-					{
-						Handler = (o, context) => func((TMessage)o, (TMessageContext)context),
-						Type = typeof(TMessage),
-						Optional = configuration?.Optional ?? false,
-						AbortsExecution = configuration?.AbortsExecution ?? false
-					});
-					return _sequenceRepository.UpdateAsync(tSequence.Result);
-				})
-				.Unwrap();
+			var sequence = _sequenceRepository.GetOrCreate(globalMessageId);
+			sequence.StepDefinitions.Add(new StepDefinition
+			{
+				Handler = (o, context) => func((TMessage) o, (TMessageContext) context),
+				Type = typeof(TMessage),
+				Optional = configuration?.Optional ?? false,
+				AbortsExecution = configuration?.AbortsExecution ?? false
+			});
+			_sequenceRepository.Update(sequence);
 		}
 
-		public async Task InvokeMessageHandlerAsync(Guid globalMessageId, object body, IMessageContext context)
+		public void InvokeMessageHandler(Guid globalMessageId, object body, IMessageContext context)
 		{
-			var sequence = await _sequenceRepository.GetAsync(globalMessageId);
+			var sequence = _sequenceRepository.Get(globalMessageId);
 			if (sequence?.State.Aborted ?? true)
 			{
 				_logger.LogInformation($"Sequence for '{globalMessageId}' is either not found or aborted.");
 				return;
 			}
-
 			var bodyType = body.GetType();
-			var processedCount = sequence.State.Skipped.Count + sequence.State.Completed.Count;
-			var unprocessedHandlers = sequence.StepDefinitions
-				.Skip(processedCount)
+			var invokedIds = Enumerable
+				.Concat(sequence.State.Completed, sequence.State.Skipped)
+				.Select(s => s.StepId);
+			var last = sequence.StepDefinitions.LastOrDefault();
+			var notInvoked = sequence.StepDefinitions
+				.Where(s => !invokedIds.Contains(s.Id))
+				.Except(new [] {last})
 				.ToList();
-			var potentialOptional = unprocessedHandlers
-				.TakeWhile(h => h.Optional);
-			var firstMandatory = unprocessedHandlers
-				.SkipWhile(h => h.Optional)
-				.Take(1);
-			var optionalFirst = unprocessedHandlers.FirstOrDefault()?.Optional ?? false;
-
-			var potential = optionalFirst
-				? potentialOptional.Concat(firstMandatory)
-				: firstMandatory.Concat(potentialOptional);
-
-			var match = potential.FirstOrDefault(p => p.Type == bodyType);
-			if (match != null)
+			if (notInvoked.All(s => s.Optional))
 			{
-				var skipped = potential
+				notInvoked.Add(last);
+			}
+			
+			var match = notInvoked.FirstOrDefault(p => p.Type == bodyType);
+			if (match == last)
+			{
+				var skipped = notInvoked
 					.TakeWhile(p => p != match)
 					.Select(s => new ExecutionResult
 						{
 							Time = DateTime.Now,
-							Type = s.Type
+							Type = s.Type,
+							StepId = s.Id
 						})
 					.ToList();
 				sequence.State.Skipped.AddRange(skipped);
@@ -84,17 +77,13 @@ namespace RawRabbit.Extensions.MessageSequence.Core
 					return;
 				}
 				_logger.LogInformation($"Invoking message handler of type '{bodyType.Name}' for '{globalMessageId}'");
-				await match.Handler(body, context).ContinueWith(t =>
+				sequence.State.Completed.Add(new ExecutionResult
 				{
-					if (t.IsCompleted)
-					{
-						sequence.State.Completed.Add(new ExecutionResult
-						{
-							Type = bodyType,
-							Time = DateTime.Now
-						});
-					}
+					Type = bodyType,
+					Time = DateTime.Now,
+					StepId = match.Id
 				});
+				sequence.State.HandlerTasks.Add(match.Handler(body, context));
 			}
 			catch (Exception e)
 			{
