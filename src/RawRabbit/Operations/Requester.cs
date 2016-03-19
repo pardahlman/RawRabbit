@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Runtime.Remoting.Contexts;
 using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
-using RawRabbit.Channel;
 using RawRabbit.Channel.Abstraction;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Request;
@@ -19,7 +17,7 @@ using RawRabbit.Serialization;
 
 namespace RawRabbit.Operations
 {
-	public class Requester<TMessageContext> : IDisposable, IRequester where TMessageContext : IMessageContext
+	public class Requester<TMessageContext> : IDisposable, IShutdown, IRequester where TMessageContext : IMessageContext
 	{
 		private readonly IChannelFactory _channelFactory;
 		private readonly IConsumerFactory _consumerFactory;
@@ -213,7 +211,24 @@ namespace RawRabbit.Operations
 		public void Dispose()
 		{
 			(_channelFactory as IDisposable)?.Dispose();
-			_currentConsumer?.Consumer?.Disconnect();
+		}
+
+		public async Task ShutdownAsync()
+		{
+			_logger.LogDebug("Shutting down Requester.");
+			foreach (var ccS in _consumerCompletionSources)
+			{
+				if (!ccS.Value.IsCompletedAndOpen())
+				{
+					continue;
+				}
+				ccS.Value.Consumer.Disconnect();
+			}
+			if (!_responseDictionary.IsEmpty)
+			{
+				await Task.Delay(_requestTimeout);
+			}
+			Dispose();
 		}
 	}
 }

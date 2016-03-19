@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using RawRabbit.Channel;
 using RawRabbit.Channel.Abstraction;
 using RawRabbit.Common;
+using RawRabbit.Configuration;
 using RawRabbit.Configuration.Respond;
 using RawRabbit.Consumer.Abstraction;
 using RawRabbit.Context;
@@ -15,7 +15,7 @@ using RawRabbit.Operations.Abstraction;
 
 namespace RawRabbit.Operations
 {
-	public class Responder<TMessageContext> : IDisposable, IResponder<TMessageContext> where TMessageContext : IMessageContext
+	public class Responder<TMessageContext> : IDisposable, IShutdown, IResponder<TMessageContext> where TMessageContext : IMessageContext
 	{
 		private readonly IChannelFactory _channelFactory;
 		private readonly ITopologyProvider _topologyProvider;
@@ -24,8 +24,9 @@ namespace RawRabbit.Operations
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
 		private readonly IContextEnhancer _contextEnhancer;
 		private readonly IBasicPropertiesProvider _propertyProvider;
-		private readonly List<IRawConsumer> _consumers;
+		private readonly RawRabbitConfiguration _config;
 		private readonly ILogger _logger = LogManager.GetLogger<Responder<TMessageContext>>();
+		private readonly List<ISubscription> _subscriptions;
 
 		public Responder(
 			IChannelFactory channelFactory,
@@ -34,7 +35,8 @@ namespace RawRabbit.Operations
 			IMessageSerializer serializer,
 			IMessageContextProvider<TMessageContext> contextProvider,
 			IContextEnhancer contextEnhancer,
-			IBasicPropertiesProvider propertyProvider)
+			IBasicPropertiesProvider propertyProvider,
+			RawRabbitConfiguration config)
 		{
 			_channelFactory = channelFactory;
 			_topologyProvider = topologyProvider;
@@ -43,7 +45,8 @@ namespace RawRabbit.Operations
 			_contextProvider = contextProvider;
 			_contextEnhancer = contextEnhancer;
 			_propertyProvider = propertyProvider;
-			_consumers = new List<IRawConsumer>();
+			_config = config;
+			_subscriptions = new List<ISubscription>();
 		}
 
 		public ISubscription RespondAsync<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, ResponderConfiguration cfg)
@@ -55,7 +58,6 @@ namespace RawRabbit.Operations
 				.ContinueWith(t =>
 				{
 					var consumer = _consumerFactory.CreateConsumer(cfg, channelTask.Result);
-					_consumers.Add(consumer);
 					consumer.OnMessageAsync = (o, args) =>
 					{
 						var body = _serializer.Deserialize<TRequest>(args.Body);
@@ -90,6 +92,7 @@ namespace RawRabbit.Operations
 					return new Subscription(consumer, cfg.Queue.QueueName);
 				});
 			Task.WaitAll(respondTask);
+			_subscriptions.Add(respondTask.Result);
 			return respondTask.Result;
 		}
 
@@ -97,6 +100,17 @@ namespace RawRabbit.Operations
 		{
 			_logger.LogDebug("Disposing Responder.");
 			(_consumerFactory as IDisposable)?.Dispose();
+		}
+
+		public async Task ShutdownAsync()
+		{
+			_logger.LogDebug("Shutting down Responder.");
+			foreach (var subscription in _subscriptions)
+			{
+				subscription.Dispose();
+			}
+			await Task.Delay(_config.GracefulShutdown);
+			Dispose();
 		}
 	}
 }

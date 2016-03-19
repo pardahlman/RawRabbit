@@ -19,6 +19,12 @@ namespace RawRabbit.Configuration
 		public TimeSpan PublishConfirmTimeout { get; set; }
 
 		/// <summary>
+		/// The amount of time to wait for message handlers to process message before
+		/// shutting down.
+		/// </summary>
+		public TimeSpan GracefulShutdown { get; set; }
+
+		/// <summary>
 		/// Indicates if automatic recovery (reconnect, re-open channels, restore QoS) should be enabled
 		/// Defaults to true.
 		/// </summary>
@@ -68,6 +74,7 @@ namespace RawRabbit.Configuration
 			AutomaticRecovery = true;
 			TopologyRecovery = true;
 			RecoveryInterval = TimeSpan.FromSeconds(10);
+			GracefulShutdown = TimeSpan.FromSeconds(10);
 			Ssl = new SslOption {Enabled = false};
 			Hostnames = new List<string>();
 			Exchange = new GeneralExchangeConfiguration
@@ -83,6 +90,7 @@ namespace RawRabbit.Configuration
 				Durable = true
 			};
 		}
+
 
 		public static RawRabbitConfiguration Local => new RawRabbitConfiguration
 		{

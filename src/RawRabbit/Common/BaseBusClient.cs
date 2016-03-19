@@ -70,5 +70,14 @@ namespace RawRabbit.Common
 			(_requester as IDisposable)?.Dispose();
 			(_responder as IDisposable)?.Dispose();
 		}
+
+		public Task ShutdownAsync()
+		{
+			var subTask = (_subscriber as IShutdown)?.ShutdownAsync() ?? Task.FromResult(true);
+			var pubTask = (_publisher as IShutdown)?.ShutdownAsync() ?? Task.FromResult(true);
+			var reqTask = (_requester as IShutdown)?.ShutdownAsync() ?? Task.FromResult(true);
+			var respTask = (_responder as IShutdown)?.ShutdownAsync() ?? Task.FromResult(true);
+			return Task.WhenAll(subTask, pubTask, reqTask, respTask);
+		}
 	}
 }

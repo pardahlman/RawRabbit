@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using RawRabbit.Channel.Abstraction;
 using RawRabbit.Common;
+using RawRabbit.Configuration;
 using RawRabbit.Configuration.Subscribe;
 using RawRabbit.Consumer.Abstraction;
 using RawRabbit.Context;
@@ -13,7 +15,7 @@ using RawRabbit.Serialization;
 
 namespace RawRabbit.Operations
 {
-	public class Subscriber<TMessageContext> : IDisposable, ISubscriber<TMessageContext> where TMessageContext : IMessageContext
+	public class Subscriber<TMessageContext> : IDisposable, IShutdown, ISubscriber<TMessageContext> where TMessageContext : IMessageContext
 	{
 		private readonly IChannelFactory _channelFactory;
 		private readonly IConsumerFactory _consumerFactory;
@@ -21,6 +23,8 @@ namespace RawRabbit.Operations
 		private readonly IMessageSerializer _serializer;
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
 		private readonly IContextEnhancer _contextEnhancer;
+		private readonly RawRabbitConfiguration _config;
+		private readonly List<ISubscription> _subscriptions;
 		private readonly ILogger _logger = LogManager.GetLogger<Subscriber<TMessageContext>>();
 
 		public Subscriber(
@@ -29,7 +33,8 @@ namespace RawRabbit.Operations
 			ITopologyProvider topologyProvider,
 			IMessageSerializer serializer,
 			IMessageContextProvider<TMessageContext> contextProvider,
-			IContextEnhancer contextEnhancer)
+			IContextEnhancer contextEnhancer,
+			RawRabbitConfiguration config)
 		{
 			_channelFactory = channelFactory;
 			_consumerFactory = consumerFactory;
@@ -37,6 +42,8 @@ namespace RawRabbit.Operations
 			_serializer = serializer;
 			_contextProvider = contextProvider;
 			_contextEnhancer = contextEnhancer;
+			_config = config;
+			_subscriptions = new List<ISubscription>();
 		}
 
 		public ISubscription SubscribeAsync<T>(Func<T, TMessageContext, Task> subscribeMethod, SubscriptionConfiguration config)
@@ -61,6 +68,7 @@ namespace RawRabbit.Operations
 					return new Subscription(consumer, config.Queue.QueueName);
 				});
 			Task.WaitAll(subscriberTask);
+			_subscriptions.Add(subscriberTask.Result);
 			return subscriberTask.Result;
 		}
 
@@ -70,6 +78,17 @@ namespace RawRabbit.Operations
 			(_consumerFactory as IDisposable)?.Dispose();
 			(_channelFactory as IDisposable)?.Dispose();
 			(_topologyProvider as IDisposable)?.Dispose();
+		}
+
+		public async Task ShutdownAsync()
+		{
+			_logger.LogDebug("Shutting down Subscriber.");
+			foreach (var subscription in _subscriptions)
+			{
+				subscription.Dispose();
+			}
+			await Task.Delay(_config.GracefulShutdown);
+			Dispose();
 		}
 	}
 }

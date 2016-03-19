@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
-using RawRabbit.Common;
 using RawRabbit.Configuration.Respond;
 using RawRabbit.Consumer.Abstraction;
 using RawRabbit.ErrorHandling;
@@ -13,26 +12,22 @@ using RawRabbit.Logging;
 
 namespace RawRabbit.Consumer.Eventing
 {
-	public class EventingBasicConsumerFactory : IConsumerFactory, IDisposable
+	public class EventingBasicConsumerFactory : IConsumerFactory
 	{
 		private readonly IErrorHandlingStrategy _strategy;
 		private readonly ConcurrentBag<string> _processedButNotAcked;
-		private readonly ConcurrentBag<IRawConsumer> _consumers;
 		private readonly ILogger _logger = LogManager.GetLogger<EventingBasicConsumerFactory>();
 
 		public EventingBasicConsumerFactory(IErrorHandlingStrategy strategy)
 		{
 			_strategy = strategy;
 			_processedButNotAcked = new ConcurrentBag<string>();
-			_consumers = new ConcurrentBag<IRawConsumer>();
 		}
 
 		public IRawConsumer CreateConsumer(IConsumerConfiguration cfg, IModel channel)
 		{
 			ConfigureQos(channel, cfg.PrefetchCount);
 			var rawConsumer = new EventingRawConsumer(channel);
-			
-			_consumers.Add(rawConsumer);
 
 			rawConsumer.Received += (sender, args) =>
 			{
@@ -63,10 +58,6 @@ namespace RawRabbit.Consumer.Eventing
 								}
 								if (cfg.NoAck || rawConsumer.NackedDeliveryTags.Contains(args.DeliveryTag))
 								{
-								/*
-									The consumer has stated that 'ack'-ing is not required, so
-									now that the message is handled, the consumer is done.
-								*/
 									return;
 								}
 
@@ -108,14 +99,6 @@ namespace RawRabbit.Consumer.Eventing
 			{
 				_logger.LogWarning("Unable to ack message, channel is allready closed.");
 				_processedButNotAcked.Add(args.BasicProperties.MessageId);
-			}
-		}
-
-		public void Dispose()
-		{
-			foreach (var consumer in _consumers)
-			{
-				consumer?.Disconnect();
 			}
 		}
 	}
