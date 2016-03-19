@@ -1,9 +1,12 @@
 # Contributing Guidelines
 
-You are more than welcome to contribute to `RawRabbit`. Here are some guildlines for the process.
+You are more than welcome to contribute to `RawRabbit`. Here are some guidelines for the process.
 
 ## Create issue
 With a few exceptions, every commits should be connected to an issue. That means that if you've found a bug or implemented a feature, it should be reported in the [issue section](https://github.com/pardahlman/RawRabbit/issues).
+
+## Write code
+Write as beautiful code as possible! `RawRabbit` is indented with [tabs and not spaces](http://ryanseddon.github.io/spaces-talk/images/batman-slap.jpg).
 
 ## Commit Code
 Make sure that all commits start with `(#issue-number)`, like `(#19) Invoke message handlers in sync manner`. This way, the commits will appear in the issue and is easier found from the console `git log --grep #19`.
@@ -19,4 +22,4 @@ Follow the [official guide lines](https://www.git-scm.com/book/en/v2/Distributed
 7. Use the body to explain what and why vs. how
 
 ## Create Pull Request
-Once the feature is develped, create a pull to `stable`.
+Once the feature is developed, create a pull to `stable`.
