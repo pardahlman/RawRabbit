@@ -45,9 +45,6 @@ namespace RawRabbit.DependencyInjection.Autofac
 
 			builder
 				.RegisterType<Requester<TMessageContext>>()
-				.WithParameter(new ResolvedParameter(
-					(info, context) => info.Name == "requestTimeout",
-					(info, context) => context.Resolve<RawRabbitConfiguration>().RequestTimeout))
 				.As<IRequester>()
 				.SingleInstance()
 				.PreserveExistingDefaults();

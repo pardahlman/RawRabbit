@@ -46,9 +46,7 @@ namespace RawRabbit.DependencyInjection.Ninject
 			Kernel
 				.Bind<IRequester>()
 				.To<Requester<TMessageContext>>()
-				.InSingletonScope()
-				.WithConstructorArgument("requestTimeout", (context) =>
-					context.Kernel.Get<RawRabbitConfiguration>().RequestTimeout);
+				.InSingletonScope();
 
 			Kernel
 				.Bind<IMessageContextProvider<TMessageContext>>()

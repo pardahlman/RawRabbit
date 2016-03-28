@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RawRabbit.Channel.Abstraction;
 using RawRabbit.Common;
+using RawRabbit.Configuration;
 using RawRabbit.Configuration.Request;
 using RawRabbit.Configuration.Respond;
 using RawRabbit.Consumer.Abstraction;
@@ -26,7 +27,7 @@ namespace RawRabbit.Operations
 		private readonly IErrorHandlingStrategy _errorStrategy;
 		private readonly IBasicPropertiesProvider _propertiesProvider;
 		private readonly ITopologyProvider _topologyProvider;
-		private readonly TimeSpan _requestTimeout;
+		private readonly RawRabbitConfiguration _config;
 		private readonly ConcurrentDictionary<string, ResponseCompletionSource> _responseDictionary;
 		private readonly ConcurrentDictionary<IModel, ConsumerCompletionSource> _consumerCompletionSources;
 		private readonly ILogger _logger = LogManager.GetLogger<Requester<TMessageContext>>();
@@ -41,7 +42,7 @@ namespace RawRabbit.Operations
 			IErrorHandlingStrategy errorStrategy,
 			IBasicPropertiesProvider propertiesProvider,
 			ITopologyProvider topologyProvider,
-			TimeSpan requestTimeout)
+			RawRabbitConfiguration config)
 		{
 			_channelFactory = channelFactory;
 			_consumerFactory = consumerFactory;
@@ -50,7 +51,7 @@ namespace RawRabbit.Operations
 			_errorStrategy = errorStrategy;
 			_propertiesProvider = propertiesProvider;
 			_topologyProvider = topologyProvider;
-			_requestTimeout = requestTimeout;
+			_config = config;
 			_responseDictionary = new ConcurrentDictionary<string, ResponseCompletionSource>();
 			_consumerCompletionSources = new ConcurrentDictionary<IModel, ConsumerCompletionSource>();
 		}
@@ -89,8 +90,8 @@ namespace RawRabbit.Operations
 					}
 					rcs.RequestTimer?.Dispose();
 					rcs.TrySetException(
-						new TimeoutException($"The request '{correlationId}' timed out after {_requestTimeout.ToString("g")}."));
-				}, null, _requestTimeout, new TimeSpan(-1))
+						new TimeoutException($"The request '{correlationId}' timed out after {_config.RequestTimeout.ToString("g")}."));
+				}, null, _config.RequestTimeout, new TimeSpan(-1))
 			};
 
 			_responseDictionary.TryAdd(correlationId, responseSource);
@@ -102,7 +103,7 @@ namespace RawRabbit.Operations
 					{
 						p.ReplyTo = cfg.ReplyQueue.QueueName;
 						p.CorrelationId = correlationId;
-						p.Expiration = _requestTimeout.TotalMilliseconds.ToString();
+						p.Expiration = _config.RequestTimeout.TotalMilliseconds.ToString();
 						p.Headers.Add(PropertyHeaders.Context, _contextProvider.GetMessageContext(globalMessageId));
 					}),
 				body: _serializer.Serialize(message)
@@ -226,7 +227,7 @@ namespace RawRabbit.Operations
 			}
 			if (!_responseDictionary.IsEmpty)
 			{
-				await Task.Delay(_requestTimeout);
+				await Task.Delay(_config.RequestTimeout);
 			}
 			Dispose();
 		}
