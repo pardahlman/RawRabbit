@@ -51,7 +51,8 @@ namespace RawRabbit.Operations
 
 		public ISubscription RespondAsync<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, ResponderConfiguration cfg)
 		{
-			var topologyTask = _topologyProvider.BindQueueAsync(cfg.Queue, cfg.Exchange, cfg.RoutingKey);
+			var routingKey = _config.RouteWithGlobalId ? $"{cfg.RoutingKey}.#" : cfg.RoutingKey;
+			var topologyTask = _topologyProvider.BindQueueAsync(cfg.Queue, cfg.Exchange, routingKey);
 			var channelTask = _channelFactory.CreateChannelAsync();
 
 			var respondTask = Task.WhenAll(topologyTask, channelTask)

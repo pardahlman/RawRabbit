@@ -81,16 +81,7 @@ namespace RawRabbit.vNext
 				.AddTransient<ISubscriber<TMessageContext>, Subscriber<TMessageContext>>()
 				.AddTransient<IPublisher, Publisher<TMessageContext>>()
 				.AddTransient<IResponder<TMessageContext>, Responder<TMessageContext>>()
-				.AddTransient<IRequester, Requester<TMessageContext>>(
-					p => new Requester<TMessageContext>(
-						p.GetService<IChannelFactory>(),
-						p.GetService<IConsumerFactory>(),
-						p.GetService<IMessageSerializer>(),
-						p.GetService<IMessageContextProvider<TMessageContext>>(),
-						p.GetService<IErrorHandlingStrategy>(),
-						p.GetService<IBasicPropertiesProvider>(),
-						p.GetService<ITopologyProvider>(),
-						p.GetService<RawRabbitConfiguration>().RequestTimeout))
+				.AddTransient<IRequester, Requester<TMessageContext>>()
 				.AddSingleton<IBusClient<TMessageContext>, BaseBusClient<TMessageContext>>();
 			custom?.Invoke(collection);
 			return collection;

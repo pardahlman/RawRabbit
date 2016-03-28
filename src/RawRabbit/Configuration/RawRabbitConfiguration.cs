@@ -25,6 +25,12 @@ namespace RawRabbit.Configuration
 		public TimeSpan GracefulShutdown { get; set; }
 
 		/// <summary>
+		/// Appends the message's global id to the publish routing key and wild cards (#)
+		/// to subscribers routing key.
+		/// </summary>
+		public bool RouteWithGlobalId { get; set; }
+
+		/// <summary>
 		/// Indicates if automatic recovery (reconnect, re-open channels, restore QoS) should be enabled
 		/// Defaults to true.
 		/// </summary>

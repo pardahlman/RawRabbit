@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using RawRabbit.Channel.Abstraction;
 using RawRabbit.Common;
+using RawRabbit.Configuration;
 using RawRabbit.Configuration.Publish;
 using RawRabbit.Context;
 using RawRabbit.Context.Provider;
@@ -19,11 +20,12 @@ namespace RawRabbit.Operations
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
 		private readonly IPublishAcknowledger _acknowledger;
 		private readonly IBasicPropertiesProvider _propertiesProvider;
+		private readonly RawRabbitConfiguration _config;
 		private readonly ILogger _logger = LogManager.GetLogger<Publisher<TMessageContext>>();
 		private readonly object _publishLock = new object();
 		private readonly object _topologyLock = new object();
 
-		public Publisher(IChannelFactory channelFactory, ITopologyProvider topologyProvider, IMessageSerializer serializer, IMessageContextProvider<TMessageContext> contextProvider, IPublishAcknowledger acknowledger, IBasicPropertiesProvider propertiesProvider)
+		public Publisher(IChannelFactory channelFactory, ITopologyProvider topologyProvider, IMessageSerializer serializer, IMessageContextProvider<TMessageContext> contextProvider, IPublishAcknowledger acknowledger, IBasicPropertiesProvider propertiesProvider, RawRabbitConfiguration config)
 		{
 			_channelFactory = channelFactory;
 			_topologyProvider = topologyProvider;
@@ -31,6 +33,7 @@ namespace RawRabbit.Operations
 			_contextProvider = contextProvider;
 			_acknowledger = acknowledger;
 			_propertiesProvider = propertiesProvider;
+			_config = config;
 		}
 
 		public Task PublishAsync<TMessage>(TMessage message, Guid globalMessageId, PublishConfiguration config)
@@ -54,7 +57,7 @@ namespace RawRabbit.Operations
 							var ackTask = _acknowledger.GetAckTask(channelTask.Result);
 							channelTask.Result.BasicPublish(
 								exchange: config.Exchange.ExchangeName,
-								routingKey: config.RoutingKey,
+								routingKey: _config.RouteWithGlobalId ? $"{config.RoutingKey}.{globalMessageId}" : config.RoutingKey,
 								basicProperties: props,
 								body: _serializer.Serialize(message)
 								);

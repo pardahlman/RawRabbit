@@ -65,7 +65,7 @@ namespace RawRabbit.Operations
 				Task.WaitAll(queueTask, exchangeTask);
 			}
 
-			if (_currentConsumer!= null && _currentConsumer.ConsumerQueues.ContainsKey(cfg.Queue.FullQueueName) && _currentConsumer.IsCompletedAndOpen())
+			if (_currentConsumer != null && _currentConsumer.ConsumerQueues.ContainsKey(cfg.Queue.FullQueueName) && _currentConsumer.IsCompletedAndOpen())
 			{
 				return SendRequestAsync<TRequest, TResponse>(message, globalMessageId, cfg, _currentConsumer.Consumer);
 			}
@@ -98,7 +98,7 @@ namespace RawRabbit.Operations
 
 			consumer.Model.BasicPublish(
 				exchange: cfg.Exchange.ExchangeName,
-				routingKey: cfg.RoutingKey,
+				routingKey: _config.RouteWithGlobalId ? $"{cfg.RoutingKey}.{globalMessageId}" : cfg.RoutingKey,
 				basicProperties: _propertiesProvider.GetProperties<TResponse>(p =>
 					{
 						p.ReplyTo = cfg.ReplyQueue.QueueName;
@@ -114,7 +114,7 @@ namespace RawRabbit.Operations
 				{
 					throw tResponse.Exception?.InnerException ?? new Exception("Failed to recieve response");
 				}
-				return (TResponse) tResponse.Result;
+				return (TResponse)tResponse.Result;
 			});
 		}
 
@@ -195,7 +195,7 @@ namespace RawRabbit.Operations
 
 		private class ConsumerCompletionSource : TaskCompletionSource<IRawConsumer>
 		{
-			public ConcurrentDictionary<string,string> ConsumerQueues { get; }
+			public ConcurrentDictionary<string, string> ConsumerQueues { get; }
 			public IRawConsumer Consumer => Task.IsCompleted ? Task.Result : null;
 
 			public ConsumerCompletionSource()
