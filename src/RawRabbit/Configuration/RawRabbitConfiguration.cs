@@ -79,6 +79,7 @@ namespace RawRabbit.Configuration
 			AutoCloseConnection = true;
 			AutomaticRecovery = true;
 			TopologyRecovery = true;
+			RouteWithGlobalId = true;
 			RecoveryInterval = TimeSpan.FromSeconds(10);
 			GracefulShutdown = TimeSpan.FromSeconds(10);
 			Ssl = new SslOption {Enabled = false};
@@ -87,7 +88,7 @@ namespace RawRabbit.Configuration
 			{
 				AutoDelete = false,
 				Durable = true,
-				Type = ExchangeType.Direct
+				Type = ExchangeType.Topic
 			};
 			Queue = new GeneralQueueConfiguration
 			{
@@ -96,7 +97,6 @@ namespace RawRabbit.Configuration
 				Durable = true
 			};
 		}
-
 
 		public static RawRabbitConfiguration Local => new RawRabbitConfiguration
 		{
@@ -163,5 +163,36 @@ namespace RawRabbit.Configuration
 		/// There are four different types of exchanges see <see cref="RawRabbit.Configuration.Exchange"/> for more info.
 		/// </summary>
 		public ExchangeType Type { get; set; }
+	}
+
+	public static class RawRabbitConfigurationExtensions
+	{
+		/// <summary>
+		/// Changes the configuration so that it does not use PersistentDeliveryMode. Also,
+		/// it sets the exchange type to Direct to increase performance, however that
+		/// disables the ability to use the MessageSequence extension.
+		/// </summary>
+		/// <param name="config">The RawRabbit configuration object</param>
+		/// <returns></returns>
+		public static RawRabbitConfiguration AsHighPerformance(this RawRabbitConfiguration config)
+		{
+			config.PersistentDeliveryMode = false;
+			config.RouteWithGlobalId = false;
+			config.Exchange.Type = ExchangeType.Direct;
+			return config;
+		}
+
+		/// <summary>
+		/// Disables RouteWithGlobalId to keep routing keys intact with older versions of
+		/// RawRabbit and sets exchange type to Direct.
+		/// </summary>
+		/// <param name="config"></param>
+		/// <returns></returns>
+		public static RawRabbitConfiguration AsLegacy(this RawRabbitConfiguration config)
+		{
+			config.Exchange.Type = ExchangeType.Direct;
+			config.RouteWithGlobalId = false;
+			return config;
+		}
 	}
 }
