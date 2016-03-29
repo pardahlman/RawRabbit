@@ -115,12 +115,6 @@ namespace RawRabbit.Common
 
 		public Task UnbindQueueAsync(QueueConfiguration queue, ExchangeConfiguration exchange, string routingKey)
 		{
-			var bindKey = $"{queue.FullQueueName}_{exchange.ExchangeName}_{routingKey}";
-			if (_queueBinds.Contains(bindKey))
-			{
-				_queueBinds.Remove(bindKey);
-			}
-
 			var scheduled = new ScheduledUnbindQueueTask
 			{
 				Queue = queue,
@@ -175,6 +169,11 @@ namespace RawRabbit.Common
 				routingKey: bind.RoutingKey,
 				arguments: null
 			);
+			var bindKey = $"{bind.Queue.FullQueueName}_{bind.Exchange.ExchangeName}_{bind.RoutingKey}";
+			if (_queueBinds.Contains(bindKey))
+			{
+				_queueBinds.Remove(bindKey);
+			}
 		}
 
 		private void DeclareQueue(QueueConfiguration queue)
