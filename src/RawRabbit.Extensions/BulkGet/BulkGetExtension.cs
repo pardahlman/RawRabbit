@@ -24,7 +24,7 @@ namespace RawRabbit.Extensions.BulkGet
 			}
 			var channel = extended.GetService<IChannelFactory>().CreateChannel();
 			var contextProvider = extended.GetService<IMessageContextProvider<TContextType>>();
-			var serialier = extended.GetService<IMessageSerializer>();
+			var serializer = extended.GetService<IMessageSerializer>();
 
 			var result = new Dictionary<Type, List<IBulkMessage>>();
 			var msgConfigs = GetMessageConfigurations(cfg);
@@ -47,7 +47,7 @@ namespace RawRabbit.Extensions.BulkGet
 						object message;
 						try
 						{
-							message = serialier.Deserialize(getResult.Body, msgConfig.MessageType);
+							message = serializer.Deserialize(getResult.Body, msgConfig.MessageType);
 						}
 						catch (Exception)
 						{
