@@ -17,6 +17,7 @@ namespace RawRabbit.Common
 		Task DeclareExchangeAsync(ExchangeConfiguration exchange);
 		Task DeclareQueueAsync(QueueConfiguration queue);
 		Task BindQueueAsync(QueueConfiguration queue, ExchangeConfiguration exchange, string routingKey);
+		Task UnbindQueueAsync(QueueConfiguration queue, ExchangeConfiguration exchange, string routingKey);
 		bool IsInitialized(ExchangeConfiguration exchange);
 		bool IsInitialized(QueueConfiguration exchange);
 	}
@@ -112,6 +113,25 @@ namespace RawRabbit.Common
 			return scheduled.TaskCompletionSource.Task;
 		}
 
+		public Task UnbindQueueAsync(QueueConfiguration queue, ExchangeConfiguration exchange, string routingKey)
+		{
+			var bindKey = $"{queue.FullQueueName}_{exchange.ExchangeName}_{routingKey}";
+			if (_queueBinds.Contains(bindKey))
+			{
+				_queueBinds.Remove(bindKey);
+			}
+
+			var scheduled = new ScheduledUnbindQueueTask
+			{
+				Queue = queue,
+				Exchange = exchange,
+				RoutingKey = routingKey
+			};
+			_topologyTasks.Enqueue(scheduled);
+			EnsureWorker();
+			return scheduled.TaskCompletionSource.Task;
+		}
+
 		public bool IsInitialized(ExchangeConfiguration exchange)
 		{
 			return exchange.IsDefaultExchange() || exchange.AssumeInitialized || _initExchanges.Contains(exchange.ExchangeName);
@@ -142,6 +162,19 @@ namespace RawRabbit.Common
 				routingKey: bind.RoutingKey
 				);
 			_queueBinds.Add(bindKey);
+		}
+
+		private void UnbindQueueFromExchange(ScheduledUnbindQueueTask bind)
+		{
+			_logger.LogInformation($"Unbinding queue '{bind.Queue.FullQueueName}' from exchange '{bind.Exchange.ExchangeName}' with routing key '{bind.RoutingKey}'");
+
+			var channel = GetOrCreateChannel();
+			channel.QueueUnbind(
+				queue: bind.Queue.FullQueueName,
+				exchange: bind.Exchange.ExchangeName,
+				routingKey: bind.RoutingKey,
+				arguments: null
+			);
 		}
 
 		private void DeclareQueue(QueueConfiguration queue)
@@ -225,6 +258,14 @@ namespace RawRabbit.Common
 					continue;
 				}
 
+				var unbind = topologyTask as ScheduledUnbindQueueTask;
+				if (unbind != null)
+				{
+					UnbindQueueFromExchange(unbind);
+					unbind.TaskCompletionSource.TrySetResult(true);
+					continue;
+				}
+
 				throw new Exception("Unable to cast topology task.");
 			}
 			_processing = false;
@@ -279,6 +320,13 @@ namespace RawRabbit.Common
 		}
 
 		private class ScheduledBindQueueTask : ScheduledTopologyTask
+		{
+			public ExchangeConfiguration Exchange { get; set; }
+			public QueueConfiguration Queue { get; set; }
+			public string RoutingKey { get; set; }
+		}
+
+		private class ScheduledUnbindQueueTask : ScheduledTopologyTask
 		{
 			public ExchangeConfiguration Exchange { get; set; }
 			public QueueConfiguration Queue { get; set; }
