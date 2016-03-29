@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using RawRabbit.Context;
 using RawRabbit.Extensions.MessageSequence.Configuration.Abstraction;
@@ -46,7 +47,7 @@ namespace RawRabbit.Extensions.MessageSequence.Configuration
 			options?.Invoke(optionBuilder);
 			_logger.LogDebug($"Registering handler for '{_globalMessageId}' of type '{typeof(TMessage).Name}'. Optional: {optionBuilder.Configuration.Optional}, Aborts: {optionBuilder.Configuration.AbortsExecution}");
 			_dispatcher.AddMessageHandler(_globalMessageId, func, optionBuilder.Configuration);
-			var bindTask = _chainTopology.BindToExchange<TMessage>();
+			var bindTask = _chainTopology.BindToExchange<TMessage>(_globalMessageId);
 			Task.WaitAll(bindTask);
 			return this;
 		}
@@ -69,6 +70,10 @@ namespace RawRabbit.Extensions.MessageSequence.Configuration
 				sequence.Aborted = final.State.Aborted;
 				sequence.Completed = final.State.Completed;
 				sequence.Skipped = final.State.Skipped;
+				foreach (var step in Enumerable.Concat(final.State.Completed, final.State.Skipped))
+				{
+					_chainTopology.UnbindFromExchange(step.Type, _globalMessageId);
+				}
 				messageTcs.TrySetResult((TMessage) tObj.Result);
 				_repository.Remove(_globalMessageId);
 			});
@@ -81,7 +86,7 @@ namespace RawRabbit.Extensions.MessageSequence.Configuration
 				return Task.FromResult(true);
 			};
 
-			var bindTask = _chainTopology.BindToExchange<TMessage>();
+			var bindTask = _chainTopology.BindToExchange<TMessage>(_globalMessageId);
 			_dispatcher.AddMessageHandler(_globalMessageId, func);
 
 			Task

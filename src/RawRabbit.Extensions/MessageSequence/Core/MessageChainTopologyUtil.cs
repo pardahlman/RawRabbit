@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using RabbitMQ.Client.Events;
 using RawRabbit.Channel.Abstraction;
@@ -21,8 +20,6 @@ namespace RawRabbit.Extensions.MessageSequence.Core
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
 		private readonly IMessageChainDispatcher _messageDispatcher;
 		private readonly QueueConfiguration _queueConfig;
-		private readonly List<Type> _boundExchanges;
-		private readonly Task _completed = Task.FromResult(true);
 		private EventingBasicConsumer _consumer;
 
 		public MessageChainTopologyUtil(
@@ -41,19 +38,37 @@ namespace RawRabbit.Extensions.MessageSequence.Core
 			_messageDispatcher = messageDispatcher;
 			_contextProvider = contextProvider;
 			_serializer = serializer;
-			_boundExchanges = new List<Type>();
 			InitializeConsumer();
 		}
 
-		public Task BindToExchange<TMessage>()
+		public Task BindToExchange<TMessage>(Guid globalMessaegId)
 		{
-			var chainConfig = _configEvaluator.GetConfiguration<TMessage>();
-			if (_boundExchanges.Contains(typeof(TMessage)))
-			{
-				return _completed;
-			}
-			_boundExchanges.Add(typeof(TMessage));
-			return _topologyProvider.BindQueueAsync(_queueConfig, chainConfig.Exchange, chainConfig.RoutingKey);
+			return BindToExchange(typeof(TMessage), globalMessaegId);
+		}
+
+		public Task BindToExchange(Type messageType, Guid globalMessaegId)
+		{
+			var chainConfig = _configEvaluator.GetConfiguration(messageType);
+			return _topologyProvider.BindQueueAsync(
+				_queueConfig,
+				chainConfig.Exchange,
+				$"{chainConfig.RoutingKey}.{globalMessaegId}"
+			);
+		}
+
+		public Task UnbindFromExchange<TMessage>(Guid globalMessaegId)
+		{
+			return UnbindFromExchange(typeof(TMessage), globalMessaegId);
+		}
+
+		public Task UnbindFromExchange(Type messageType, Guid globalMessaegId)
+		{
+			var chainConfig = _configEvaluator.GetConfiguration(messageType);
+			return _topologyProvider.UnbindQueueAsync(
+				_queueConfig,
+				chainConfig.Exchange,
+				$"{chainConfig.RoutingKey}.{globalMessaegId}"
+			);
 		}
 
 		private void InitializeConsumer()
