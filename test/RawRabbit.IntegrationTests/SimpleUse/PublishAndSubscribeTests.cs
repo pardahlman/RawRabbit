@@ -235,7 +235,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		[Fact]
 		public async Task Should_Stop_Subscribe_When_Subscription_Is_Disposed()
 		{
-			/**/
+			/* Setup */
 			var publisher = BusClientFactory.CreateDefault();
 			var subscriber = BusClientFactory.CreateDefault();
 			var firstMessage = new BasicMessage {Prop = "Value"};
@@ -251,9 +251,11 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 				return Task.FromResult(true);
 			});
 
+			/* Test */
 			await publisher.PublishAsync(firstMessage);
 			await firstRecievedTcs.Task;
 			subscription.Dispose();
+			var recievedAfterFirstPublish = recievedCount;
 			await publisher.PublishAsync(secondMessage);
 			await Task.Delay(20);
 			publisher.SubscribeAsync<BasicMessage>((message, context) =>
@@ -264,7 +266,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			await secondRecievedTcs.Task;
 
 			/* Assert */
-			Assert.Equal(1, recievedCount);
+			Assert.Equal(recievedAfterFirstPublish, recievedCount);
 			Assert.Equal(firstRecievedTcs.Task.Result.Prop, firstMessage.Prop);
 			Assert.Equal(secondRecievedTcs.Task.Result.Prop, secondMessage.Prop);
 		}
