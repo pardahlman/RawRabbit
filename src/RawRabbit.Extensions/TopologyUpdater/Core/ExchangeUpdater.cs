@@ -34,13 +34,12 @@ namespace RawRabbit.Extensions.TopologyUpdater.Core
 					var channel = channelTask.Result;
 					var stopWatch = Stopwatch.StartNew();
 					channel.ExchangeDelete(config.ExchangeName);
-					channel.ExchangeDeclare(config.ExchangeName, config.ExchangeType.ToString(), config.Durable, config.AutoDelete,
-						config.Arguments);
-					foreach (var binding in bindingsTask.Result)
+					channel.ExchangeDeclare(config.ExchangeName, config.ExchangeType.ToString(), config.Durable, config.AutoDelete, config.Arguments);
+					foreach (var binding in bindingsTask.Result ?? Enumerable.Empty<Binding>())
 					{
 						if (string.Equals(binding.DestinationType, QueueDestination, StringComparison.InvariantCultureIgnoreCase))
 						{
-							channel.QueueBind(binding.Destination, config.ExchangeName, binding.RoutingKey, binding.Arguments as IDictionary<string, object>);
+							channel.QueueBind(binding.Destination, config.ExchangeName, binding.RoutingKey);
 						}
 					}
 					stopWatch.Stop();
