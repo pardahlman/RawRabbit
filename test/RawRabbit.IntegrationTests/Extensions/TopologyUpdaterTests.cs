@@ -119,7 +119,7 @@ namespace RawRabbit.IntegrationTests.Extensions
 			await firstTcs.Task;
 
 			// 2. Change Type
-			await client.UpdateTopologyAsync(c => c
+			var result = await client.UpdateTopologyAsync(c => c
 				.UseConventionForExchange<BasicMessage>()
 			);
 
