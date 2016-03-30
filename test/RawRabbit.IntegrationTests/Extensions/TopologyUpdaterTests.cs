@@ -1,8 +1,6 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client.Exceptions;
-using RawRabbit.Common;
 using RawRabbit.Configuration;
 using RawRabbit.Configuration.Exchange;
 using RawRabbit.Context;
