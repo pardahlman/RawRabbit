@@ -28,8 +28,11 @@ namespace RawRabbit.Extensions.TopologyUpdater
 
 			var configBuilder = new TopologyUpdateBuilder(conventions, clientConfig);
 			config(configBuilder);
+			var exchangeConfig = configBuilder.Exchanges
+				.GroupBy(x => x.ExchangeName)
+				.Select(g => g.LastOrDefault());
 
-			var exchangesTask =  exchangeUpdater.UpdateExchangesAsync(configBuilder.Exchanges);
+			var exchangesTask =  exchangeUpdater.UpdateExchangesAsync(exchangeConfig);
 
 			return Task
 				.WhenAll(exchangesTask)

@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client.Exceptions;
+using RawRabbit.Common;
 using RawRabbit.Configuration;
 using RawRabbit.Configuration.Exchange;
 using RawRabbit.Context;
@@ -129,6 +130,29 @@ namespace RawRabbit.IntegrationTests.Extensions
 
 			/* Assert */
 			Assert.True(true, "First and second message was delivered.");
+		}
+
+		[Fact]
+		public async Task Should_Honor_Last_Configuration()
+		{
+			/* Setup */
+			var client = RawRabbitFactory.GetExtendableClient();
+			const string exchangeName = "topology";
+			TestChannel.ExchangeDelete(exchangeName);
+
+			/* Test */
+			var result = await client.UpdateTopologyAsync(c => c
+				.ForExchange(exchangeName)
+				.UseConfiguration(e => e.WithType(ExchangeType.Headers))
+				.ForExchange(exchangeName)
+				.UseConfiguration(e => e.WithType(ExchangeType.Topic))
+				.ForExchange(exchangeName)
+				.UseConfiguration(e => e.WithType(ExchangeType.Direct))
+				.ForExchange(exchangeName)
+				.UseConfiguration(e => e.WithType(ExchangeType.Fanout)));
+
+			/* Assert */
+			Assert.Equal(result.Exchanges[0].Exchange.ExchangeType, ExchangeType.Fanout.ToString().ToLower());
 		}
 	}
 }
