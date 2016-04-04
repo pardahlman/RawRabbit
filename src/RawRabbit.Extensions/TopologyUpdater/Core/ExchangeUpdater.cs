@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using RawRabbit.Channel.Abstraction;
-using RawRabbit.Configuration.Exchange;
 using RawRabbit.Extensions.TopologyUpdater.Core.Abstraction;
 using RawRabbit.Extensions.TopologyUpdater.Model;
 
@@ -22,7 +21,7 @@ namespace RawRabbit.Extensions.TopologyUpdater.Core
 			_channelFactory = channelFactory;
 		}
 
-		public Task<ExchangeUpdateResult> UpdateExchangeAsync(ExchangeConfiguration config)
+		public Task<ExchangeUpdateResult> UpdateExchangeAsync(ExchangeUpdateConfiguration config)
 		{
 			var channelTask = _channelFactory.GetChannelAsync();
 			var bindingsTask = _bindingProvider.GetBindingsAsync(config.ExchangeName);
@@ -37,6 +36,7 @@ namespace RawRabbit.Extensions.TopologyUpdater.Core
 					channel.ExchangeDeclare(config.ExchangeName, config.ExchangeType.ToString(), config.Durable, config.AutoDelete, config.Arguments);
 					foreach (var binding in bindingsTask.Result ?? Enumerable.Empty<Binding>())
 					{
+						binding.RoutingKey = config.BindingTransformer(binding.RoutingKey);
 						if (string.Equals(binding.DestinationType, QueueDestination, StringComparison.InvariantCultureIgnoreCase))
 						{
 							channel.QueueBind(binding.Destination, config.ExchangeName, binding.RoutingKey);
@@ -52,7 +52,7 @@ namespace RawRabbit.Extensions.TopologyUpdater.Core
 				});
 		}
 
-		public Task<IEnumerable<ExchangeUpdateResult>>  UpdateExchangesAsync(IEnumerable<ExchangeConfiguration> configs)
+		public Task<IEnumerable<ExchangeUpdateResult>>  UpdateExchangesAsync(IEnumerable<ExchangeUpdateConfiguration> configs)
 		{
 			var updateTasks = configs
 				.Select(UpdateExchangeAsync)

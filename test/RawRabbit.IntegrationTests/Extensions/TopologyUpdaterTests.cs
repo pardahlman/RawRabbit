@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client.Exceptions;
 using RawRabbit.Configuration;
@@ -20,7 +21,8 @@ namespace RawRabbit.IntegrationTests.Extensions
 
 		public override void Dispose()
 		{
-			TestChannel.ExchangeDelete("rawrabbit.integrationtests.testmessages");
+			try { TestChannel.ExchangeDelete("rawrabbit.integrationtests.testmessages"); }
+			catch (Exception) { }
 			base.Dispose();
 		}
 
@@ -151,6 +153,51 @@ namespace RawRabbit.IntegrationTests.Extensions
 
 			/* Assert */
 			Assert.Equal(result.Exchanges[0].Exchange.ExchangeType, ExchangeType.Fanout.ToString().ToLower());
+		}
+
+		[Fact]
+		public async Task Should_Use_Routing_Key_Transformer_If_Present()
+		{
+			/* Setup */
+			var legacyClient = RawRabbitFactory.GetExtendableClient(ioc => ioc.AddSingleton(s => RawRabbitConfiguration.Local.AsLegacy()));
+			var currentClient = RawRabbitFactory.GetExtendableClient();
+			var legacyTcs = new TaskCompletionSource<BasicMessage>();
+			var currentTcs = new TaskCompletionSource<BasicMessage>();
+
+			currentClient.SubscribeAsync<BasicMessage>((message, context) =>
+			{
+				if (!currentTcs.Task.IsCompleted)
+				{
+					currentTcs.SetResult(message);
+					return currentTcs.Task;
+				}
+				if (!legacyTcs.Task.IsCompleted)
+				{
+					legacyTcs.SetResult(message);
+					return legacyTcs.Task;
+				}
+				return Task.FromResult(true);
+			});
+
+			/* Test */
+			// 1. Verify subscriber
+			currentClient.PublishAsync<BasicMessage>();
+			await currentTcs.Task;
+
+			// 2. Change Type
+			await currentClient.UpdateTopologyAsync(c => c
+				.ExchangeForMessage<BasicMessage>()
+				.UseConfiguration(
+					exchange => exchange.WithType(ExchangeType.Direct),
+					bindingKey => bindingKey.Replace(".*", string.Empty))
+			);
+
+			// 3. Verify subscriber
+			legacyClient.PublishAsync<BasicMessage>();
+			await legacyTcs.Task;
+
+			/* Assert */
+			Assert.True(true);
 		}
 	}
 }
