@@ -49,7 +49,7 @@ namespace RawRabbit.Operations
 		public ISubscription SubscribeAsync<T>(Func<T, TMessageContext, Task> subscribeMethod, SubscriptionConfiguration config)
 		{
 			var routingKey = _config.RouteWithGlobalId
-				? $"{config.RoutingKey}.*"
+				? $"{config.RoutingKey}.#"
 				: config.RoutingKey;
 
 			var topologyTask = _topologyProvider.BindQueueAsync(config.Queue, config.Exchange, routingKey);
