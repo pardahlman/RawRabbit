@@ -14,6 +14,7 @@ Contents:
    configuration
    Extending-RawRabbit
    Bulk-fetching-messages
+   update-topology
    message-sequence
    Publisher-Acknowledgements
    Message-Priority
