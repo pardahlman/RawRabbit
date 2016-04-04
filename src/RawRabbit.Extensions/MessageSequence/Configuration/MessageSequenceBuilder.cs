@@ -70,7 +70,7 @@ namespace RawRabbit.Extensions.MessageSequence.Configuration
 				sequence.Aborted = final.State.Aborted;
 				sequence.Completed = final.State.Completed;
 				sequence.Skipped = final.State.Skipped;
-				foreach (var step in Enumerable.Concat(final.State.Completed, final.State.Skipped))
+				foreach (var step in final.StepDefinitions)
 				{
 					_chainTopology.UnbindFromExchange(step.Type, _globalMessageId);
 				}
