@@ -52,7 +52,7 @@ namespace RawRabbit.Tests.Common
 			/* Assert */
 			Assert.Equal(expected: "guest", actual: config.Username);
 			Assert.Equal(expected: "guest", actual: config.Password);
-			Assert.Equal(expected: "/virtualHost", actual: config.VirtualHost);
+			Assert.Equal(expected: "virtualHost", actual: config.VirtualHost);
 			Assert.Equal(expected: "host", actual: config.Hostnames[0]);
 			Assert.Equal(expected: 5672, actual: config.Port);
 		}
@@ -101,7 +101,7 @@ namespace RawRabbit.Tests.Common
 			/* Assert */
 			Assert.Equal(expected: "guest", actual: config.Username);
 			Assert.Equal(expected: "guest", actual: config.Password);
-			Assert.Equal(expected: "/virtualHost", actual: config.VirtualHost);
+			Assert.Equal(expected: "virtualHost", actual: config.VirtualHost);
 			Assert.Equal(expected: "host", actual: config.Hostnames[0]);
 			Assert.Equal(expected: 1234, actual: config.Port);
 		}
@@ -136,7 +136,7 @@ namespace RawRabbit.Tests.Common
 			/* Assert */
 			Assert.Equal(expected: "username", actual: config.Username);
 			Assert.Equal(expected: "password", actual: config.Password);
-			Assert.Equal(expected: "/virtualHost", actual: config.VirtualHost);
+			Assert.Equal(expected: "virtualHost", actual: config.VirtualHost);
 			Assert.Equal(expected: "host1", actual: config.Hostnames[0]);
 			Assert.Equal(expected: "host2", actual: config.Hostnames[1]);
 			Assert.Equal(expected: 5672, actual: config.Port);
@@ -172,7 +172,7 @@ namespace RawRabbit.Tests.Common
 			/* Assert */
 			Assert.Equal(expected: "username", actual: config.Username);
 			Assert.Equal(expected: "password", actual: config.Password);
-			Assert.Equal(expected: "/virtualHost", actual: config.VirtualHost);
+			Assert.Equal(expected: "virtualHost", actual: config.VirtualHost);
 			Assert.Equal(expected: "host1", actual: config.Hostnames[0]);
 			Assert.Equal(expected: "host2", actual: config.Hostnames[1]);
 			Assert.Equal(expected: 1234, actual: config.Port);
@@ -197,7 +197,7 @@ namespace RawRabbit.Tests.Common
 			/* Assert */
 			Assert.Equal(expected: "username", actual: config.Username);
 			Assert.Equal(expected: "password", actual: config.Password);
-			Assert.Equal(expected: "/virtualHost", actual: config.VirtualHost);
+			Assert.Equal(expected: "virtualHost", actual: config.VirtualHost);
 			Assert.Equal(expected: "host1", actual: config.Hostnames[0]);
 			Assert.Equal(expected: "host2", actual: config.Hostnames[1]);
 			Assert.Equal(expected: 1234, actual: config.Port);
@@ -261,7 +261,7 @@ namespace RawRabbit.Tests.Common
 			/* Assert */
 			Assert.Equal(expected: "guest", actual: config.Username);
 			Assert.Equal(expected: "guest", actual: config.Password);
-			Assert.Equal(expected: "/virtualHost", actual: config.VirtualHost);
+			Assert.Equal(expected: "virtualHost", actual: config.VirtualHost);
 			Assert.Equal(expected: "host1", actual: config.Hostnames[0]);
 			Assert.Equal(expected: "host2", actual: config.Hostnames[1]);
 			Assert.Equal(expected: 1234, actual: config.Port);

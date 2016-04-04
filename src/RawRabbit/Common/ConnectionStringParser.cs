@@ -31,7 +31,7 @@ namespace RawRabbit.Common
 				Password = RegexMatchGroupIsNonEmpty(mainMatch, "password") ? mainMatch.Groups["password"].Value : Defaults.Password,
 				Hostnames = mainMatch.Groups["hosts"].Value.Split(',').ToList(),
 				Port = port,
-				VirtualHost = RegexMatchGroupIsNonEmpty(mainMatch, "vhost") ? mainMatch.Groups["vhost"].Value : Defaults.VirtualHost
+				VirtualHost = ExctractVirutalHost(mainMatch)
 			};
 
 			var parametersMatches = ParametersRegex.Matches(mainMatch.Groups["parameters"].Value);
@@ -60,6 +60,14 @@ namespace RawRabbit.Common
 			}
 
 			return cfg;
+		}
+
+		private static string ExctractVirutalHost(Match mainMatch)
+		{
+			var vhost = RegexMatchGroupIsNonEmpty(mainMatch, "vhost") ? mainMatch.Groups["vhost"].Value : Defaults.VirtualHost;
+			return string.Equals(vhost, Defaults.VirtualHost, StringComparison.CurrentCultureIgnoreCase)
+				? vhost
+				: vhost.Substring(1);
 		}
 
 		private static bool RegexMatchGroupIsNonEmpty(Match match, string groupName)
