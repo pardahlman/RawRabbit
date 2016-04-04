@@ -120,7 +120,7 @@ namespace RawRabbit.IntegrationTests.Extensions
 			await firstTcs.Task;
 
 			// 2. Change Type
-			var result = await client.UpdateTopologyAsync(c => c
+			await client.UpdateTopologyAsync(c => c
 				.UseConventionForExchange<BasicMessage>()
 			);
 
@@ -189,7 +189,7 @@ namespace RawRabbit.IntegrationTests.Extensions
 				.ExchangeForMessage<BasicMessage>()
 				.UseConfiguration(
 					exchange => exchange.WithType(ExchangeType.Direct),
-					bindingKey => bindingKey.Replace(".*", string.Empty))
+					bindingKey => bindingKey.Replace(".#", string.Empty))
 			);
 
 			// 3. Verify subscriber
