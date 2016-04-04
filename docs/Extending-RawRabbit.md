@@ -35,4 +35,6 @@ public static class RawRabbitExtensionExample
 ```
 
 ## List of extensions
-The [BulkGet extension](Bulk-fetching-message.html) can be used to fetch multiple messages from multiple queues and `ACK`/`NACK` them in bulk.
+* The [BulkGet extension](Bulk-fetching-message.html) can be used to fetch multiple messages from multiple queues and `ACK`/`NACK` them in bulk.
+* The [Message Sequence Extension](message-sequence.html) can be used to get a RPC like behaviour, but allows for multiple subscribers to act on the message
+* The [Update Topology Extension](update-topology.html) can be used to change topologic features.
