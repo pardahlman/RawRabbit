@@ -1,0 +1,23 @@
+﻿{
+	"version": "1.8.13-rc1-final",
+	"description": "Write RawRabbit's logs with NLog",
+	"authors": [ "par.dahlman" ],
+	"tags": [ "raw", "rabbit", "rawrabbit", "rabbitmq", "logger", "nlog" ],
+	"iconUrl": "http://pardahlman.se/raw/icon.png",
+	"projectUrl": "https://github.com/pardahlman/RawRabbit",
+	"title": "RawRabbit.Logging.NLog",
+
+	"dependencies": {
+		"RawRabbit": "",
+		"NLog": "4.2.3"
+	},
+
+	"frameworks": {
+		"dnx451": { },
+		"dnx50": { },
+		"net451": { },
+		"net452": { },
+		"net46": { },
+		"net50": { }
+	}
+}

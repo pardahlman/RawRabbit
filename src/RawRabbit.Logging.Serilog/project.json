@@ -1,0 +1,25 @@
+{
+	"version": "1.8.13-rc1-final",
+	"description": "Write RawRabbit's logs with Serilog",
+	"authors": [ "par.dahlman" ],
+	"tags": [ "raw", "rabbit", "rawrabbit", "rabbitmq", "logger", "serilog" ],
+	"iconUrl": "http://pardahlman.se/raw/icon.png",
+	"projectUrl": "https://github.com/pardahlman/RawRabbit",
+	"title": "RawRabbit.Logging.Serilog",
+
+  "dependencies": {
+    "Moq": "4.2.1510.2205",
+    "RawRabbit": "",
+    "Serilog": "1.5.11",
+    "System.Runtime": "4.0.0"
+  },
+
+	"frameworks": {
+		"dnx451": { },
+		"dnx50": { },
+		"net451": { },
+		"net452": { },
+		"net46": { },
+		"net50": { }
+	}
+}
