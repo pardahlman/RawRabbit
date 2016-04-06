@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Security.AccessControl;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -26,7 +27,11 @@ namespace RawRabbit.vNext
 		public static IServiceCollection AddRawRabbit(this IServiceCollection collection, Action<IConfigurationBuilder> config = null, Action<IServiceCollection> custom = null)
 		{
 			return collection
-				.AddSingleton<IBusClient,BusClient>()
+				.AddSingleton<IBusClient>(provider =>
+					{
+						LogManager.CurrentFactory = provider.GetService<ILoggerFactory>();
+						return ActivatorUtilities.CreateInstance<BusClient>(provider);
+					})
 				.AddRawRabbit<MessageContext>(config, custom);
 		}
 
@@ -42,7 +47,6 @@ namespace RawRabbit.vNext
 			{
 				collection.TryAddSingleton(typeof(RawRabbitConfiguration), c => RawRabbitConfiguration.Local);
 			}
-			
 
 			collection
 				.AddSingleton< IConnectionFactory, ConnectionFactory>(provider =>
@@ -82,8 +86,13 @@ namespace RawRabbit.vNext
 				.AddTransient<IPublisher, Publisher<TMessageContext>>()
 				.AddTransient<IResponder<TMessageContext>, Responder<TMessageContext>>()
 				.AddTransient<IRequester, Requester<TMessageContext>>()
-				.AddSingleton<IBusClient<TMessageContext>, BaseBusClient<TMessageContext>>();
+				.AddSingleton<IBusClient<TMessageContext>>(provider =>
+				{
+					LogManager.CurrentFactory = provider.GetService<ILoggerFactory>();
+					return ActivatorUtilities.CreateInstance<BaseBusClient<TMessageContext>>(provider);
+				});
 			custom?.Invoke(collection);
+
 			return collection;
 		}
 	}

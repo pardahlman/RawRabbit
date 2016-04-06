@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using RawRabbit.Common;
 using RawRabbit.Configuration;
 using RawRabbit.Context;
-using RawRabbit.Logging;
 
 namespace RawRabbit.vNext
 {
@@ -39,9 +38,6 @@ namespace RawRabbit.vNext
 		public static IBusClient CreateDefault(IServiceCollection services)
 		{
 			var serviceProvider = services.BuildServiceProvider();
-
-			LogManager.CurrentFactory = serviceProvider.GetService<ILoggerFactory>();
-
 			return serviceProvider.GetService<IBusClient>();
 		}
 
