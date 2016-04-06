@@ -1,3 +1,21 @@
+# 1.9.0
+
+In this minor release, a breaking change in topology features in introduced, namely the default type for exchanges is `Topic` rather than `Direct`. Read through the [client upgrade](http://rawrabbit.readthedocs.org/en/master/client-upgrade.html) page for more information.
+
+Thanks to [videege](https://github.com/videege), there is now a package for Ninject. We've also added logging adapters for the major logging frameworks (Serilog, NLog and log4net).
+
+ - [#77](https://github.com/pardahlman/RawRabbit/issues/77) - Add logger packages
+ - [#76](https://github.com/pardahlman/RawRabbit/issues/76) - Omit slash if virtual host is anything other than default
+ - [#75](https://github.com/pardahlman/RawRabbit/issues/75) - Add extension for re-defining topology featuers
+ - [#74](https://github.com/pardahlman/RawRabbit/issues/74) - Update MessageSequence Extension
+ - [#73](https://github.com/pardahlman/RawRabbit/issues/73) - Append GlobalMessageId to routingkey
+ - [#70](https://github.com/pardahlman/RawRabbit/pull/70) - RawRabbit.DependencyInjection.Ninject extension contributed by ([videege](https://github.com/videege))
+ - [#69](https://github.com/pardahlman/RawRabbit/issues/69) - Add method to gracefully shut down client
+ - [#35](https://github.com/pardahlman/RawRabbit/issues/35) - Return "subscription informaiton" on Subscribe/Respond
+
+Commits: 0207aa75f2...2dc733c28e
+
+
 # 1.8.13
 
  - [#72](https://github.com/pardahlman/RawRabbit/issues/72) - Add package for Ninject, contributed by Joshua Barron ([Originalutter](https://github.com/videege))
