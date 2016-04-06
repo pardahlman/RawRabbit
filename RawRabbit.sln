@@ -31,6 +31,8 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.Logging.NLog", "s
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.Logging.Serilog", "src\RawRabbit.Logging.Serilog\RawRabbit.Logging.Serilog.xproj", "{1D15516B-603F-48FE-BDD9-EC4A2C039326}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.Logging.Log4Net", "src\RawRabbit.Logging.Log4Net\RawRabbit.Logging.Log4Net.xproj", "{9385228C-444E-443E-B1E8-BD88CAFA508B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,6 +75,10 @@ Global
 		{1D15516B-603F-48FE-BDD9-EC4A2C039326}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1D15516B-603F-48FE-BDD9-EC4A2C039326}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1D15516B-603F-48FE-BDD9-EC4A2C039326}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9385228C-444E-443E-B1E8-BD88CAFA508B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9385228C-444E-443E-B1E8-BD88CAFA508B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9385228C-444E-443E-B1E8-BD88CAFA508B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9385228C-444E-443E-B1E8-BD88CAFA508B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -87,5 +93,6 @@ Global
 		{F756087B-0F11-4524-B6D7-342B632F0255} = {7FCF8D3B-BA55-4C47-AC60-5CEF75418BEB}
 		{D44822DE-FF26-4972-8D46-7BDDCB790CFC} = {7FCF8D3B-BA55-4C47-AC60-5CEF75418BEB}
 		{1D15516B-603F-48FE-BDD9-EC4A2C039326} = {7FCF8D3B-BA55-4C47-AC60-5CEF75418BEB}
+		{9385228C-444E-443E-B1E8-BD88CAFA508B} = {7FCF8D3B-BA55-4C47-AC60-5CEF75418BEB}
 	EndGlobalSection
 EndGlobal

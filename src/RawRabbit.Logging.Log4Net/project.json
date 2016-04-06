@@ -1,0 +1,23 @@
+﻿{
+	"version": "1.8.13-rc1-update2",
+	"description": "Write RawRabbit's logs with Serilog",
+	"authors": [ "par.dahlman" ],
+	"tags": [ "raw", "rabbit", "rawrabbit", "rabbitmq", "logger", "log4net" ],
+	"iconUrl": "http://pardahlman.se/raw/icon.png",
+	"projectUrl": "https://github.com/pardahlman/RawRabbit",
+	"title": "RawRabbit.Logging.Log4Net",
+
+  "dependencies": {
+		"RawRabbit": "",
+		"log4net": "2.0.5"
+  },
+
+	"frameworks": {
+		"dnx451": { },
+		"dnx50": { },
+		"net451": { },
+		"net452": { },
+		"net46": { },
+		"net50": { }
+	}
+}
