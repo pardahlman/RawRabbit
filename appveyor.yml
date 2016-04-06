@@ -7,9 +7,10 @@ assembly_info:
 init:
   choco install -y rabbitmq
 before_build: 
-  ps: "dnu restore"
+   - ps: "dnvm upgrade"
+   - ps: "dnu restore"
 build: 
   verbosity: minimal
 test_script: 
   ps: "dnx -p test/RawRabbit.Tests test"
-version: "1.8.1.{build}"
+version: "1.9.0.{build}"
