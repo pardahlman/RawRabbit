@@ -22,6 +22,7 @@ Contents:
    Delayed-requeue-of-messages
    inner-workings
    rabbitmq-features
+   logging
    client-upgrade
    contributing-guidelines
 
