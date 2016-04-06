@@ -1,5 +1,5 @@
 {
-	"version": "1.8.13",
+	"version": "1.8.14",
 	"description": "Write RawRabbit's logs with Serilog",
 	"authors": [ "par.dahlman" ],
 	"tags": [ "raw", "rabbit", "rawrabbit", "rabbitmq", "logger", "serilog" ],
@@ -8,18 +8,40 @@
 	"title": "RawRabbit.Logging.Serilog",
 
 	"dependencies": {
-		"Moq": "4.2.1510.2205",
 		"RawRabbit": "",
-		"Serilog": "1.5.11",
-		"System.Runtime": "4.0.0"
+		"Serilog": "1.5.11"
 	},
 
 	"frameworks": {
-		"dnx451": { },
-		"dnx50": { },
-		"net451": { },
-		"net452": { },
-		"net46": { },
-		"net50": { }
+		"dnx451": {
+			"frameworkAssemblies": {
+				"System.Runtime": "4.0.0.0"
+			}
+		},
+		"dnx50": {
+			"frameworkAssemblies": {
+				"System.Runtime": "4.0.0.0"
+			}
+		},
+		"net451": {
+			"frameworkAssemblies": {
+				"System.Runtime": "4.0.0.0"
+			}
+		},
+		"net452": {
+			"frameworkAssemblies": {
+				"System.Runtime": "4.0.0.0"
+			}
+		},
+		"net46": {
+			"frameworkAssemblies": {
+				"System.Runtime": "4.0.0.0"
+			}
+		},
+		"net50": {
+			"frameworkAssemblies": {
+				"System.Runtime": "4.0.0.0"
+			}
+		}
 	}
 }
