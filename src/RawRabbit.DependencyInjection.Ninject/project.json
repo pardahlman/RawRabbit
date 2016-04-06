@@ -19,5 +19,5 @@
 	"projectUrl": "https://github.com/pardahlman/RawRabbit",
 	"tags": [ "rabbitmq", "raw", "rawrabbit", "ninject" ],
 	"title": "RawRabbit.DependencyInjection.Ninject",
-	"version": "1.8.13-*"
+	"version": "1.9.0-*"
 }
