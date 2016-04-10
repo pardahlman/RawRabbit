@@ -9,6 +9,7 @@ using RawRabbit.Consumer.Abstraction;
 using RawRabbit.Context;
 using RawRabbit.Context.Enhancer;
 using RawRabbit.Context.Provider;
+using RawRabbit.ErrorHandling;
 using RawRabbit.Logging;
 using RawRabbit.Operations.Abstraction;
 using RawRabbit.Serialization;
@@ -23,6 +24,7 @@ namespace RawRabbit.Operations
 		private readonly IMessageSerializer _serializer;
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
 		private readonly IContextEnhancer _contextEnhancer;
+		private readonly IErrorHandlingStrategy _errorHandling;
 		private readonly RawRabbitConfiguration _config;
 		private readonly List<ISubscription> _subscriptions;
 		private readonly ILogger _logger = LogManager.GetLogger<Subscriber<TMessageContext>>();
@@ -34,6 +36,7 @@ namespace RawRabbit.Operations
 			IMessageSerializer serializer,
 			IMessageContextProvider<TMessageContext> contextProvider,
 			IContextEnhancer contextEnhancer,
+			IErrorHandlingStrategy errorHandling,
 			RawRabbitConfiguration config)
 		{
 			_channelFactory = channelFactory;
@@ -42,6 +45,7 @@ namespace RawRabbit.Operations
 			_serializer = serializer;
 			_contextProvider = contextProvider;
 			_contextEnhancer = contextEnhancer;
+			_errorHandling = errorHandling;
 			_config = config;
 			_subscriptions = new List<ISubscription>();
 		}
@@ -60,13 +64,13 @@ namespace RawRabbit.Operations
 				.ContinueWith(t =>
 				{
 					var consumer = _consumerFactory.CreateConsumer(config, channelTask.Result);
-					consumer.OnMessageAsync = (o, args) =>
+					consumer.OnMessageAsync = (o, args) => _errorHandling.ExecuteAsync(() =>
 					{
 						var body = _serializer.Deserialize<T>(args.Body);
 						var context = _contextProvider.ExtractContext(args.BasicProperties.Headers[PropertyHeaders.Context]);
 						_contextEnhancer.WireUpContextFeatures(context, consumer, args);
 						return subscribeMethod(body, context);
-					};
+					}, exception => _errorHandling.OnSubscriberExceptionAsync(consumer, config, args, exception));
 					consumer.Model.BasicConsume(config.Queue.FullQueueName, config.NoAck, consumer);
 					_logger.LogDebug($"Setting up a consumer on channel '{channelTask.Result.ChannelNumber}' for queue {config.Queue.QueueName} with NoAck set to {config.NoAck}.");
 					return new Subscription(consumer, config.Queue.QueueName);

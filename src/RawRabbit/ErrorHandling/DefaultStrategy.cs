@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using RabbitMQ.Client.Events;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Respond;
+using RawRabbit.Configuration.Subscribe;
 using RawRabbit.Consumer.Abstraction;
 using RawRabbit.Exceptions;
 using RawRabbit.Serialization;
@@ -21,7 +22,7 @@ namespace RawRabbit.ErrorHandling
 			_propertiesProvider = propertiesProvider;
 		}
 
-		public Task OnRequestHandlerExceptionAsync(IRawConsumer rawConsumer, IConsumerConfiguration cfg, BasicDeliverEventArgs args, Exception exception)
+		public virtual Task OnResponseHandlerExceptionAsync(IRawConsumer rawConsumer, IConsumerConfiguration cfg, BasicDeliverEventArgs args, Exception exception)
 		{
 			var innerException = UnwrapInnerException(exception);
 			var rawException = new MessageHandlerException(
@@ -56,23 +57,48 @@ namespace RawRabbit.ErrorHandling
 			return exception;
 		}
 
-		public Task OnResponseRecievedAsync(BasicDeliverEventArgs args, TaskCompletionSource<object> responseTcs)
-		{
-			OnResponseRecieved(args, responseTcs);
-			return Task.FromResult(true);
-		}
-
-		public void OnResponseRecieved(BasicDeliverEventArgs args, TaskCompletionSource<object> responseTcs)
+		public virtual Task OnResponseRecievedAsync(BasicDeliverEventArgs args, TaskCompletionSource<object> responseTcs)
 		{
 			var containsException = args?.BasicProperties?.Headers?.ContainsKey(PropertyHeaders.ExceptionHeader) ?? false;
 
-			if (!containsException)
+			if (containsException)
 			{
-				return;
+				var exception = _serializer.Deserialize<MessageHandlerException>(args.Body);
+				responseTcs.TrySetException(exception);
 			}
 
-			var exception = _serializer.Deserialize<MessageHandlerException>(args.Body);
+			return Task.FromResult(true);
+		}
+
+		public virtual Task OnResponseRecievedException(IRawConsumer rawConsumer, IConsumerConfiguration cfg, BasicDeliverEventArgs args, TaskCompletionSource<object> responseTcs, Exception exception)
+		{
 			responseTcs.TrySetException(exception);
+			return Task.FromResult(true);
+		}
+
+		public virtual Task ExecuteAsync(Func<Task> messageHandler, Func<Exception, Task> errorHandler)
+		{
+			try
+			{
+				return messageHandler()
+					.ContinueWith(tHandler => tHandler.IsFaulted
+							? errorHandler(tHandler.Exception)
+							: tHandler
+						);
+			}
+			catch (Exception e)
+			{
+				return errorHandler(e);
+			}
+		}
+
+		public virtual Task OnSubscriberExceptionAsync(IRawConsumer consumer, SubscriptionConfiguration config, BasicDeliverEventArgs args, Exception exception)
+		{
+			if (!config.NoAck)
+			{
+				consumer.Model.BasicAck(args.DeliveryTag, false);
+			}
+			return Task.FromResult(true);
 		}
 	}
 }

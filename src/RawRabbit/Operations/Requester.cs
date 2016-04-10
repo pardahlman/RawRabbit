@@ -128,7 +128,7 @@ namespace RawRabbit.Operations
 						if (_consumerCompletionSources.TryAdd(tChannel.Result, consumerCs))
 						{
 							var newConsumer = _consumerFactory.CreateConsumer(cfg, tChannel.Result);
-							WireUpConsumer(newConsumer);
+							WireUpConsumer(newConsumer, cfg);
 							consumerCs.ConsumerQueues.TryAdd(
 								key: cfg.Queue.FullQueueName,
 								value: newConsumer.Model.BasicConsume(cfg.Queue.FullQueueName, cfg.NoAck, newConsumer)
@@ -164,11 +164,11 @@ namespace RawRabbit.Operations
 				.Unwrap();
 		}
 
-		private void WireUpConsumer(IRawConsumer consumer)
+		private void WireUpConsumer(IRawConsumer consumer, IConsumerConfiguration cfg) 
 		{
-			consumer.OnMessageAsync = (o, args) =>
+			ResponseCompletionSource responseTcs = null;
+			consumer.OnMessageAsync = (o, args) => _errorStrategy.ExecuteAsync(() =>
 			{
-				ResponseCompletionSource responseTcs;
 				if (_responseDictionary.TryRemove(args.BasicProperties.CorrelationId, out responseTcs))
 				{
 					_logger.LogDebug($"Recived response with correlationId {args.BasicProperties.CorrelationId}.");
@@ -185,7 +185,7 @@ namespace RawRabbit.Operations
 				}
 				_logger.LogWarning($"Unable to find callback for {args.BasicProperties.CorrelationId}.");
 				return _completed;
-			};
+			}, exception => _errorStrategy.OnResponseRecievedException(consumer, cfg, args, responseTcs, exception));
 		}
 
 		private class ResponseCompletionSource : TaskCompletionSource<object>

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
@@ -7,20 +6,17 @@ using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
 using RawRabbit.Configuration.Respond;
 using RawRabbit.Consumer.Abstraction;
-using RawRabbit.ErrorHandling;
 using RawRabbit.Logging;
 
 namespace RawRabbit.Consumer.Eventing
 {
 	public class EventingBasicConsumerFactory : IConsumerFactory
 	{
-		private readonly IErrorHandlingStrategy _strategy;
 		private readonly ConcurrentBag<string> _processedButNotAcked;
 		private readonly ILogger _logger = LogManager.GetLogger<EventingBasicConsumerFactory>();
 
-		public EventingBasicConsumerFactory(IErrorHandlingStrategy strategy)
+		public EventingBasicConsumerFactory()
 		{
-			_strategy = strategy;
 			_processedButNotAcked = new ConcurrentBag<string>();
 		}
 
@@ -44,31 +40,7 @@ namespace RawRabbit.Consumer.Eventing
 						return;
 					}
 					_logger.LogInformation($"Message recived: MessageId: {args.BasicProperties.MessageId}");
-					try
-					{
-						rawConsumer
-							.OnMessageAsync(sender, args)
-							.ContinueWith(t =>
-							{
-								if (t.IsFaulted)
-								{
-									_logger.LogError($"An unhandled exception was caught for message {args.BasicProperties.MessageId}.\n", t.Exception);
-									_strategy.OnRequestHandlerExceptionAsync(rawConsumer, cfg, args, t.Exception);
-									return;
-								}
-								if (cfg.NoAck || rawConsumer.NackedDeliveryTags.Contains(args.DeliveryTag))
-								{
-									return;
-								}
-
-								BasicAck(channel, args);
-						});
-					}
-					catch (Exception e)
-					{
-						_logger.LogError($"An unhandled exception was caught for message {args.BasicProperties.MessageId}.\n", e);
-						_strategy.OnRequestHandlerExceptionAsync(rawConsumer, cfg, args, e);
-					}
+					rawConsumer.OnMessageAsync(sender, args);
 				});
 			};
 

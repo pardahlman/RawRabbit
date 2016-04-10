@@ -10,6 +10,7 @@ using RawRabbit.Context;
 using RawRabbit.Context.Provider;
 using RawRabbit.Serialization;
 using RawRabbit.Context.Enhancer;
+using RawRabbit.ErrorHandling;
 using RawRabbit.Logging;
 using RawRabbit.Operations.Abstraction;
 
@@ -24,6 +25,7 @@ namespace RawRabbit.Operations
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
 		private readonly IContextEnhancer _contextEnhancer;
 		private readonly IBasicPropertiesProvider _propertyProvider;
+		private readonly IErrorHandlingStrategy _errorHandling;
 		private readonly RawRabbitConfiguration _config;
 		private readonly ILogger _logger = LogManager.GetLogger<Responder<TMessageContext>>();
 		private readonly List<ISubscription> _subscriptions;
@@ -36,6 +38,7 @@ namespace RawRabbit.Operations
 			IMessageContextProvider<TMessageContext> contextProvider,
 			IContextEnhancer contextEnhancer,
 			IBasicPropertiesProvider propertyProvider,
+			IErrorHandlingStrategy errorHandling,
 			RawRabbitConfiguration config)
 		{
 			_channelFactory = channelFactory;
@@ -45,6 +48,7 @@ namespace RawRabbit.Operations
 			_contextProvider = contextProvider;
 			_contextEnhancer = contextEnhancer;
 			_propertyProvider = propertyProvider;
+			_errorHandling = errorHandling;
 			_config = config;
 			_subscriptions = new List<ISubscription>();
 		}
@@ -59,7 +63,7 @@ namespace RawRabbit.Operations
 				.ContinueWith(t =>
 				{
 					var consumer = _consumerFactory.CreateConsumer(cfg, channelTask.Result);
-					consumer.OnMessageAsync = (o, args) =>
+					consumer.OnMessageAsync = (o, args) => _errorHandling.ExecuteAsync(() =>
 					{
 						var body = _serializer.Deserialize<TRequest>(args.Body);
 						var context = _contextProvider.ExtractContext(args.BasicProperties.Headers[PropertyHeaders.Context]);
@@ -88,7 +92,7 @@ namespace RawRabbit.Operations
 									body: _serializer.Serialize(tResponse.Result)
 								);
 							});
-					};
+					}, exception => _errorHandling.OnResponseHandlerExceptionAsync(consumer, cfg, args, exception)); 
 					consumer.Model.BasicConsume(cfg.Queue.QueueName, cfg.NoAck, consumer);
 					return new Subscription(consumer, cfg.Queue.QueueName);
 				});
