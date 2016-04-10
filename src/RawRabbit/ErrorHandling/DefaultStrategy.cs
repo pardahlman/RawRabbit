@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using RabbitMQ.Client.Events;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Respond;
 using RawRabbit.Configuration.Subscribe;
 using RawRabbit.Consumer.Abstraction;
-using RawRabbit.Context;
 using RawRabbit.Exceptions;
 using RawRabbit.Logging;
 using RawRabbit.Serialization;
