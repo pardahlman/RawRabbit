@@ -1,6 +1,9 @@
 ﻿using System.Linq;
+using System.Runtime.Serialization.Formatters;
 using Autofac;
 using Autofac.Core;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using RabbitMQ.Client;
 using RawRabbit.Channel;
 using RawRabbit.Channel.Abstraction;
@@ -53,6 +56,16 @@ namespace RawRabbit.DependencyInjection.Autofac
 				.RegisterType<MessageContextProvider<TMessageContext>>()
 				.As<IMessageContextProvider<TMessageContext>>()
 				.SingleInstance()
+				.PreserveExistingDefaults();
+
+			builder
+				.Register(c => new JsonSerializer
+				{
+					ContractResolver = new CamelCasePropertyNamesContractResolver(),
+					ObjectCreationHandling = ObjectCreationHandling.Auto,
+					TypeNameHandling = TypeNameHandling.Objects,
+					TypeNameAssemblyFormat = FormatterAssemblyStyle.Simple
+				})
 				.PreserveExistingDefaults();
 
 			builder

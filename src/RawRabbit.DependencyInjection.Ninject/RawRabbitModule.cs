@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime.Serialization.Formatters;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Ninject;
 using Ninject.Modules;
 using RabbitMQ.Client;
@@ -53,6 +55,17 @@ namespace RawRabbit.DependencyInjection.Ninject
 				.To<MessageContextProvider<TMessageContext>>()
 				.InSingletonScope()
 				.WithConstructorArgument("createContextAsync", (Func<Task<TMessageContext>>)null);
+
+			Kernel
+				.Bind<JsonSerializer>()
+				.ToMethod(context => new JsonSerializer
+				{
+					ContractResolver = new CamelCasePropertyNamesContractResolver(),
+					ObjectCreationHandling = ObjectCreationHandling.Auto,
+					TypeNameHandling = TypeNameHandling.Objects,
+					TypeNameAssemblyFormat = FormatterAssemblyStyle.Simple
+				})
+				.InSingletonScope();
 
 			Kernel
 				.Bind<IContextEnhancer>()
