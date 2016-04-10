@@ -40,7 +40,16 @@ namespace RawRabbit.Consumer.Eventing
 						return;
 					}
 					_logger.LogInformation($"Message recived: MessageId: {args.BasicProperties.MessageId}");
-					rawConsumer.OnMessageAsync(sender, args);
+					rawConsumer
+						.OnMessageAsync(sender, args)
+						.ContinueWith(t =>
+						{
+							if (cfg.NoAck || rawConsumer.NackedDeliveryTags.Contains(args.DeliveryTag))
+							{
+								return;
+							}
+							BasicAck(channel, args);
+						});
 				});
 			};
 
