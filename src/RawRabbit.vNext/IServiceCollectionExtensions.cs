@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime.Serialization.Formatters;
 using System.Security.AccessControl;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using RabbitMQ.Client;
 using RawRabbit.Channel;
 using RawRabbit.Channel.Abstraction;
@@ -69,6 +72,13 @@ namespace RawRabbit.vNext
 				.AddSingleton<IClientPropertyProvider, ClientPropertyProvider>()
 				.AddSingleton<ILoggerFactory, LoggerFactory>()
 				.AddTransient<IMessageSerializer, JsonMessageSerializer>()
+				.AddTransient(c => new JsonSerializer
+				{
+					ContractResolver = new CamelCasePropertyNamesContractResolver(),
+					ObjectCreationHandling = ObjectCreationHandling.Auto,
+					TypeNameHandling = TypeNameHandling.Objects,
+					TypeNameAssemblyFormat = FormatterAssemblyStyle.Simple
+				})
 				.AddTransient<IConsumerFactory, EventingBasicConsumerFactory>()
 				.AddTransient<IErrorHandlingStrategy, DefaultStrategy>()
 				.AddSingleton<IMessageContextProvider<TMessageContext>, MessageContextProvider<TMessageContext>>()

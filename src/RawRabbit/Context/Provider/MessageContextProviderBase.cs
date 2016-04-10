@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -8,10 +9,12 @@ namespace RawRabbit.Context.Provider
 {
 	public abstract class MessageContextProviderBase<TMessageContext> : IMessageContextProvider<TMessageContext> where TMessageContext : IMessageContext
 	{
+		private readonly JsonSerializer _serializer;
 		protected ConcurrentDictionary<Guid, TMessageContext> ContextDictionary;
 
-		protected MessageContextProviderBase()
+		protected MessageContextProviderBase(JsonSerializer serializer)
 		{
+			_serializer = serializer;
 			ContextDictionary = new ConcurrentDictionary<Guid, TMessageContext>();
 		}
 
@@ -19,7 +22,11 @@ namespace RawRabbit.Context.Provider
 		{
 			var bytes = (byte[])o;
 			var jsonHeader = Encoding.UTF8.GetString(bytes);
-			var context = JsonConvert.DeserializeObject<TMessageContext>(jsonHeader);
+			TMessageContext context;
+			using (var jsonReader = new JsonTextReader(new StringReader(jsonHeader)))
+			{
+				context = _serializer.Deserialize<TMessageContext>(jsonReader);
+			}
 			ContextDictionary.TryAdd(context.GlobalRequestId, context);
 			return context;
 		}
@@ -35,7 +42,7 @@ namespace RawRabbit.Context.Provider
 			var context = globalMessageId != Guid.Empty && ContextDictionary.ContainsKey(globalMessageId)
 				? ContextDictionary[globalMessageId]
 				: CreateMessageContext(globalMessageId);
-			var contextAsJson = JsonConvert.SerializeObject(context);
+			var contextAsJson = SerializeContext(context);
 			var contextAsBytes = (object) Encoding.UTF8.GetBytes(contextAsJson);
 			return contextAsBytes;
 		}
@@ -47,8 +54,17 @@ namespace RawRabbit.Context.Provider
 				: CreateMessageContextAsync();
 
 			return ctxTask
-				.ContinueWith(contextTask => JsonConvert.SerializeObject(contextTask.Result))
+				.ContinueWith(contextTask => SerializeContext(contextTask.Result))
 				.ContinueWith(jsonTask => (object)Encoding.UTF8.GetBytes(jsonTask.Result));
+		}
+
+		private string SerializeContext(TMessageContext messageContext)
+		{
+			using (var sw = new StringWriter())
+			{
+				_serializer.Serialize(sw, messageContext);
+				return sw.GetStringBuilder().ToString();
+			}
 		}
 
 		protected virtual Task<TMessageContext> CreateMessageContextAsync()

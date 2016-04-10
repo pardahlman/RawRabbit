@@ -1,9 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Runtime.Serialization.Formatters;
 using System.Text;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using RabbitMQ.Client.Events;
 using RawRabbit.Common;
 
@@ -11,18 +9,12 @@ namespace RawRabbit.Serialization
 {
 	public class JsonMessageSerializer : IMessageSerializer
 	{
-		private readonly JsonSerializer _converter;
+		private readonly JsonSerializer _serializer;
 
-		public JsonMessageSerializer(Action<JsonSerializer> config = null)
+		public JsonMessageSerializer(JsonSerializer serializer, Action<JsonSerializer> config = null)
 		{
-			_converter = new JsonSerializer
-			{
-				ContractResolver = new CamelCasePropertyNamesContractResolver(),
-				ObjectCreationHandling = ObjectCreationHandling.Auto,
-				TypeNameHandling = TypeNameHandling.Objects,
-				TypeNameAssemblyFormat = FormatterAssemblyStyle.Simple
-			};
-			config?.Invoke(_converter);
+			_serializer = serializer;
+			config?.Invoke(_serializer);
 		}
 
 		public byte[] Serialize<T>(T obj)
@@ -34,7 +26,7 @@ namespace RawRabbit.Serialization
 			string msgStr;
 			using (var sw = new StringWriter())
 			{
-				_converter.Serialize(sw, obj);
+				_serializer.Serialize(sw, obj);
 				msgStr = sw.GetStringBuilder().ToString();
 			}
 			var msgBytes = Encoding.UTF8.GetBytes(msgStr);
@@ -70,7 +62,7 @@ namespace RawRabbit.Serialization
 			var msgStr = Encoding.UTF8.GetString(bytes);
 			using (var jsonReader = new JsonTextReader(new StringReader(msgStr)))
 			{
-				obj = _converter.Deserialize(jsonReader, messageType);
+				obj = _serializer.Deserialize(jsonReader, messageType);
 			}
 			return obj;
 		}
