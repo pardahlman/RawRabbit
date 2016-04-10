@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using RabbitMQ.Client.Events;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Respond;
 using RawRabbit.Configuration.Subscribe;
 using RawRabbit.Consumer.Abstraction;
+using RawRabbit.Context;
 using RawRabbit.Exceptions;
 using RawRabbit.Logging;
 using RawRabbit.Serialization;
@@ -14,13 +17,15 @@ namespace RawRabbit.ErrorHandling
 	public class DefaultStrategy : IErrorHandlingStrategy
 	{
 		private readonly IMessageSerializer _serializer;
+		private readonly INamingConventions _conventions;
 		private readonly IBasicPropertiesProvider _propertiesProvider;
 		private readonly ILogger _logger = LogManager.GetLogger<DefaultStrategy>();
 		private readonly string _messageExceptionName = typeof(MessageHandlerException).Name;
 
-		public DefaultStrategy(IMessageSerializer serializer, IBasicPropertiesProvider propertiesProvider)
+		public DefaultStrategy(IMessageSerializer serializer, INamingConventions conventions, IBasicPropertiesProvider propertiesProvider)
 		{
 			_serializer = serializer;
+			_conventions = conventions;
 			_propertiesProvider = propertiesProvider;
 		}
 
@@ -105,6 +110,29 @@ namespace RawRabbit.ErrorHandling
 			{
 				consumer.Model.BasicAck(args.DeliveryTag, false);
 			}
+			try
+			{
+				_logger.LogDebug($"Attempting to publish message '{args.BasicProperties.MessageId}' to error exchange.");
+				var msg = _serializer.Deserialize(args);
+				var errorMsg = new HandlerExceptionMessage
+				{
+					Exception = exception,
+					Time = DateTime.Now,
+					Host = Environment.MachineName,
+					Message = msg,
+				};
+				consumer.Model.BasicPublish(
+					exchange: _conventions.ErrorExchangeNamingConvention(),
+					routingKey: args.RoutingKey,
+					basicProperties:args.BasicProperties,
+					body: _serializer.Serialize(errorMsg)
+				);
+			}
+			catch (Exception e)
+			{
+				_logger.LogWarning($"Unable to publish message '{args.BasicProperties.MessageId}' to default error queue", e);
+			}
+			
 			return Task.FromResult(true);
 		}
 	}

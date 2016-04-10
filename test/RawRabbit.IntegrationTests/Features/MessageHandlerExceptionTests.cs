@@ -4,8 +4,10 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using RabbitMQ.Client.Events;
+using RawRabbit.Common;
 using RawRabbit.Configuration.Subscribe;
 using RawRabbit.Consumer.Abstraction;
+using RawRabbit.Context;
 using RawRabbit.ErrorHandling;
 using RawRabbit.Exceptions;
 using RawRabbit.IntegrationTests.TestMessages;
@@ -31,7 +33,7 @@ namespace RawRabbit.IntegrationTests.Features
 		{
 			/* Setup */
 			var exception = new Exception("Oh oh, something when wrong!");
-			var realHandler = new DefaultStrategy(null, null);
+			var realHandler = new DefaultStrategy(null, null, null);
 			_errorHandler
 				.Setup(e => e.ExecuteAsync(
 						It.IsAny<Func<Task>>(),
@@ -115,6 +117,42 @@ namespace RawRabbit.IntegrationTests.Features
 			/* Assert */
 			var e = await Assert.ThrowsAsync<Exception>(() => brokenClient.RequestAsync<BasicRequest, BasicResponse>());
 			Assert.Equal(e, exception);
+		}
+
+		[Fact]
+		public async Task Should_Publish_Message_On_Error_Exchange_If_Subscribe_Throws_Exception()
+		{
+			/* Setup */
+			var conventions = new NamingConventions();
+			var client = BusClientFactory.CreateDefault(null, ioc => ioc.AddSingleton(c => conventions));
+			var recieveTcs = new TaskCompletionSource<HandlerExceptionMessage>();
+			MessageContext firstRecieved = null;
+			MessageContext secondRecieved = null;
+			client.SubscribeAsync<HandlerExceptionMessage>((message, context) =>
+			{
+				secondRecieved = context;
+				recieveTcs.TrySetResult(message);
+				return Task.FromResult(true);
+			}, c => c
+				.WithExchange(e => e.WithName(conventions.ErrorExchangeNamingConvention()))
+				.WithQueue(q => q.WithArgument(QueueArgument.MessageTtl, (int)TimeSpan.FromSeconds(1).TotalMilliseconds))
+				.WithRoutingKey("#"));
+			client.SubscribeAsync<BasicMessage>((message, context) =>
+			{
+				firstRecieved = context;
+				throw new Exception("Oh oh!");
+			});
+			var originalMsg = new BasicMessage { Prop = "Hello, world" };
+
+			/* Test */
+			client.PublishAsync(originalMsg);
+			await recieveTcs.Task;
+
+			/* Assert */
+			Assert.Equal(((BasicMessage)recieveTcs.Task.Result.Message).Prop, originalMsg.Prop);
+			Assert.NotNull(firstRecieved);
+			Assert.NotNull(secondRecieved);
+			Assert.Equal(firstRecieved.GlobalRequestId, secondRecieved.GlobalRequestId);
 		}
 	}
 }
