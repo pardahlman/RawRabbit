@@ -1,5 +1,5 @@
 ﻿{
-	"version": "1.9.0",
+	"version": "1.9.1",
 	"description": "Write RawRabbit's logs with Serilog",
 	"authors": [ "par.dahlman" ],
 	"tags": [ "raw", "rabbit", "rawrabbit", "rabbitmq", "logger", "log4net" ],
