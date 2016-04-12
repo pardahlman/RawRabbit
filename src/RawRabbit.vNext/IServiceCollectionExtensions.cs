@@ -74,10 +74,18 @@ namespace RawRabbit.vNext
 				.AddTransient<IMessageSerializer, JsonMessageSerializer>()
 				.AddTransient(c => new JsonSerializer
 				{
+					TypeNameAssemblyFormat = FormatterAssemblyStyle.Simple,
+					Formatting = Formatting.None,
+					CheckAdditionalContent = true,
 					ContractResolver = new CamelCasePropertyNamesContractResolver(),
 					ObjectCreationHandling = ObjectCreationHandling.Auto,
-					TypeNameHandling = TypeNameHandling.Objects,
-					TypeNameAssemblyFormat = FormatterAssemblyStyle.Simple
+					DefaultValueHandling = DefaultValueHandling.Ignore,
+					TypeNameHandling = TypeNameHandling.All,
+					ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
+					MissingMemberHandling = MissingMemberHandling.Ignore,
+					PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+					NullValueHandling = NullValueHandling.Ignore
+
 				})
 				.AddTransient<IConsumerFactory, EventingBasicConsumerFactory>()
 				.AddTransient<IErrorHandlingStrategy, DefaultStrategy>()
