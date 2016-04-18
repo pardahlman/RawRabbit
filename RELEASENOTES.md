@@ -1,3 +1,11 @@
+# 1.9.1
+
+ - [#80](https://github.com/pardahlman/RawRabbit/issues/80) - Use same JsonSerializer throughout the client
+ - [#79](https://github.com/pardahlman/RawRabbit/issues/79) - Improve error handling
+
+Commits: 5188354f20...a497734611
+
+
 # 1.9.0
 
 In this minor release, a breaking change in topology features in introduced, namely the default type for exchanges is `Topic` rather than `Direct`. Read through the [client upgrade](http://rawrabbit.readthedocs.org/en/master/client-upgrade.html) page for more information.
