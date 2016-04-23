@@ -3,6 +3,7 @@
 
 	"dependencies": {
 		"RawRabbit": "",
+		"RawRabbit.Attributes": "",
 		"RawRabbit.vNext": "",
 		"RawRabbit.Extensions": "",
 		"xunit": "2.1.0",

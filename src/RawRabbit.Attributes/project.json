@@ -1,0 +1,35 @@
+﻿{
+	"version": "1.9.1-*",
+	"authors": ["pardahlman"],
+	"description": "Configure messages and topology with attributes.",
+	"iconUrl": "http://pardahlman.se/raw/icon.png",
+	"projectUrl": "https://github.com/pardahlman/RawRabbit",
+	"title": "RawRabbit.Attributes",
+	"tags": ["rabbitmq", "raw", "rawrabbit", "attributes"],
+
+	"dependencies": {
+    "RawRabbit": ""
+	},
+	"commands": {
+		"test": "xunit.runner.dnx"
+	},
+	"frameworks": {
+		"dnx45": { },
+		"dnx451": { },
+		"dnx50": { },
+		"net45": { },
+		"net451": { },
+		"net452": { },
+		"net46": { },
+		"net50": { }
+	},
+
+	"publishExclude": [
+		"**.xproj",
+		"**.user",
+		"**.vspscc"
+	],
+
+	"exclude": [
+	]
+}
