@@ -24,6 +24,7 @@ Contents:
    rabbitmq-features
    error-handling
    logging
+   configure-with-attributes
    client-upgrade
    contributing-guidelines
 
