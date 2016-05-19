@@ -33,7 +33,7 @@ namespace RawRabbit.IntegrationTests.Features
 		{
 			/* Setup */
 			var exception = new Exception("Oh oh, something when wrong!");
-			var realHandler = new DefaultStrategy(null, null, null);
+			var realHandler = new DefaultStrategy(null, new NamingConventions(), null, null, null);
 			_errorHandler
 				.Setup(e => e.ExecuteAsync(
 						It.IsAny<Func<Task>>(),
@@ -128,16 +128,15 @@ namespace RawRabbit.IntegrationTests.Features
 			var recieveTcs = new TaskCompletionSource<HandlerExceptionMessage>();
 			MessageContext firstRecieved = null;
 			MessageContext secondRecieved = null;
-client.SubscribeAsync<HandlerExceptionMessage>((message, context) =>
-{
-	var originalContext = context;
-	secondRecieved = context;
-	recieveTcs.TrySetResult(message);
-	return Task.FromResult(true);
-}, c => c
-	.WithExchange(e => e.WithName(conventions.ErrorExchangeNamingConvention()))
-	.WithQueue(q => q.WithArgument(QueueArgument.MessageTtl, (int)TimeSpan.FromSeconds(1).TotalMilliseconds))
-	.WithRoutingKey("#"));
+			client.SubscribeAsync<HandlerExceptionMessage>((message, context) =>
+			{
+				secondRecieved = context;
+				recieveTcs.TrySetResult(message);
+				return Task.FromResult(true);
+			}, c => c
+				.WithExchange(e => e.WithName(conventions.ErrorExchangeNamingConvention()))
+				.WithQueue(q => q.WithArgument(QueueArgument.MessageTtl, (int)TimeSpan.FromSeconds(1).TotalMilliseconds))
+				.WithRoutingKey("#"));
 			client.SubscribeAsync<BasicMessage>((message, context) =>
 			{
 				firstRecieved = context;

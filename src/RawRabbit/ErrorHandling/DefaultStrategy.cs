@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 using RabbitMQ.Client.Events;
+using RawRabbit.Channel.Abstraction;
 using RawRabbit.Common;
+using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Respond;
 using RawRabbit.Configuration.Subscribe;
 using RawRabbit.Consumer.Abstraction;
@@ -14,16 +16,21 @@ namespace RawRabbit.ErrorHandling
 	public class DefaultStrategy : IErrorHandlingStrategy
 	{
 		private readonly IMessageSerializer _serializer;
-		private readonly INamingConventions _conventions;
 		private readonly IBasicPropertiesProvider _propertiesProvider;
+		private readonly ITopologyProvider _topologyProvider;
+		private readonly IChannelFactory _channelFactory;
 		private readonly ILogger _logger = LogManager.GetLogger<DefaultStrategy>();
 		private readonly string _messageExceptionName = typeof(MessageHandlerException).Name;
+		private readonly ExchangeConfiguration _errorExchangeCfg;
 
-		public DefaultStrategy(IMessageSerializer serializer, INamingConventions conventions, IBasicPropertiesProvider propertiesProvider)
+		public DefaultStrategy(IMessageSerializer serializer, INamingConventions conventions, IBasicPropertiesProvider propertiesProvider, ITopologyProvider topologyProvider, IChannelFactory channelFactory)
 		{
 			_serializer = serializer;
-			_conventions = conventions;
 			_propertiesProvider = propertiesProvider;
+			_topologyProvider = topologyProvider;
+			_channelFactory = channelFactory;
+			_errorExchangeCfg = ExchangeConfiguration.Default;
+			_errorExchangeCfg.ExchangeName = conventions.ErrorExchangeNamingConvention();
 		}
 
 		public virtual Task OnResponseHandlerExceptionAsync(IRawConsumer rawConsumer, IConsumerConfiguration cfg, BasicDeliverEventArgs args, Exception exception)
@@ -110,27 +117,34 @@ namespace RawRabbit.ErrorHandling
 			try
 			{
 				_logger.LogDebug($"Attempting to publish message '{args.BasicProperties.MessageId}' to error exchange.");
-				var msg = _serializer.Deserialize(args);
-				var errorMsg = new HandlerExceptionMessage
-				{
-					Exception = exception,
-					Time = DateTime.Now,
-					Host = Environment.MachineName,
-					Message = msg,
-				};
-				consumer.Model.BasicPublish(
-					exchange: _conventions.ErrorExchangeNamingConvention(),
-					routingKey: args.RoutingKey,
-					basicProperties:args.BasicProperties,
-					body: _serializer.Serialize(errorMsg)
-				);
+
+				var topologyTask = _topologyProvider.DeclareExchangeAsync(_errorExchangeCfg);
+				var channelTask = _channelFactory.GetChannelAsync();
+				return Task
+					.WhenAll(topologyTask, channelTask)
+					.ContinueWith(t =>
+					{
+						var msg = _serializer.Deserialize(args);
+						var errorMsg = new HandlerExceptionMessage
+						{
+							Exception = exception,
+							Time = DateTime.Now,
+							Host = Environment.MachineName,
+							Message = msg,
+						};
+						consumer.Model.BasicPublish(
+							exchange: _errorExchangeCfg.ExchangeName,
+							routingKey: args.RoutingKey,
+							basicProperties: args.BasicProperties,
+							body: _serializer.Serialize(errorMsg)
+							);
+					});
 			}
 			catch (Exception e)
 			{
-				_logger.LogWarning($"Unable to publish message '{args.BasicProperties.MessageId}' to default error queue", e);
+				_logger.LogWarning($"Unable to publish message '{args.BasicProperties.MessageId}' to default error exchange.", e);
+				return Task.FromResult(true);
 			}
-			
-			return Task.FromResult(true);
 		}
 	}
 }
