@@ -1,0 +1,24 @@
+﻿{
+	"version": "1.0.0-*",
+	"buildOptions": {
+		"emitEntryPoint": true
+	},
+
+	"dependencies": {
+		"RawRabbit": { "target": "project" },
+		"RawRabbit.Extensions": { "target": "project" },
+		"RawRabbit.vNext": { "target": "project" },
+		"RawRabbit.Messages.Sample": { "target": "project" },
+		"Microsoft.Extensions.Configuration.Json": "1.0.0-rc2-final"
+	},
+
+	"frameworks": {
+		"net46": { }
+	},
+
+	"publishOptions": {
+		"include": [
+			"rawrabbit.json"
+		]
+	}
+}
