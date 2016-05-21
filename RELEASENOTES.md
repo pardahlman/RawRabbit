@@ -1,3 +1,8 @@
+
+.NET Core came a step closer to completion With the [announcement of the release of RC2](https://blogs.msdn.microsoft.com/webdev/2016/05/16/announcing-asp-net-core-rc2/). The new releases of Logging, Dependecy Injection and Configuration had a few breaking changes was handled. `RawRabbit` is now fully migrated to the new project structure. There are [new sample projects](https://github.com/pardahlman/RawRabbit/tree/master/sample) that combines .NET Core with RawRabbit (including Attributed Routing, Message Sequence etc.).
+
+The underlying dependecy `RabbitMQ.Client` was updated, as it  [ 3.6.2 was released earlier this week](https://groups.google.com/forum/#!topic/rabbitmq-users/KCtezCXs1l8). While at it, all other NuGet dependencies was updated to its latest version.
+
 # 1.9.1
 
  - [#80](https://github.com/pardahlman/RawRabbit/issues/80) - Use same JsonSerializer throughout the client
