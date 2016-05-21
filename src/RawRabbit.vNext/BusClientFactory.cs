@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using RawRabbit.Common;
 using RawRabbit.Configuration;
 using RawRabbit.Context;
 

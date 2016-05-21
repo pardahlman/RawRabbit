@@ -1,31 +1,26 @@
 ﻿{
-	"version": "1.9.1-rc1-update2",
+	"version": "1.9.2-rc2-final",
 	"authors": [ "pardahlman", "enrique-avalon" ],
 	"description": "Take advantage of vNext for your RawRabbit setup. Extension for IServiceCollection, IConfiguration support and much more!",
-	"iconUrl": "http://pardahlman.se/raw/icon.png",
-	"projectUrl": "https://github.com/pardahlman/RawRabbit",
-	"title": "RawRabbit.vNext",
-	"tags": [ "rabbitmq", "raw", "rawrabbit", "amqp" ],
+	"packOptions": {
+		"iconUrl": "http://pardahlman.se/raw/icon.png",
+		"projectUrl": "https://github.com/pardahlman/RawRabbit",
+		"tags": [ "rabbitmq", "raw", "rawrabbit", "attributes" ],
+		"publishExclude": [ "**.xproj", "**.user", "**.vspscc" ]
+	},
 
 	"dependencies": {
-		"RawRabbit": "",
-		"Microsoft.Extensions.DependencyInjection": "1.0.0-rc1-final",
-		"Microsoft.Extensions.Logging": "1.0.0-rc1-final",
-		"Microsoft.Extensions.Configuration": "1.0.0-rc1-final",
-		"Microsoft.Extensions.Configuration.Binder": "1.0.0-rc1-final"
+		"RawRabbit": {"target": "project"},
+		"Microsoft.Extensions.DependencyInjection": "1.0.0-rc2-final",
+		"Microsoft.Extensions.Logging": "1.0.0-rc2-final",
+		"Microsoft.Extensions.Configuration": "1.0.0-rc2-final",
+		"Microsoft.Extensions.Configuration.Binder": "1.0.0-rc2-final"
 	},
 
 	"frameworks": {
 		"dnx451": { },
-		"dnx50": { },
 		"net451": { },
 		"net452": { },
-		"net46": { },
-		"net50": { }
-	},
-
-	"publishExclude": [
-	],
-	"exclude": [
-	]
+		"net46": { }
+	}
 }

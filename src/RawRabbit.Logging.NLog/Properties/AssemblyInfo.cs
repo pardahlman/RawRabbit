@@ -8,9 +8,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("RawRabbit.Logging.NLog")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Valtech AB")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("RawRabbit.Logging.NLog")]
-[assembly: AssemblyCopyright("Copyright © Valtech AB 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,4 +19,4 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("d44822de-ff26-4972-8d46-7bddcb790cfc")]
+[assembly: Guid("38383e3a-84d6-45a2-be38-e848be436587")]

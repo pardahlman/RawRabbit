@@ -1,14 +1,10 @@
 ﻿using System;
+using System.Collections.Concurrent;
 
 namespace RawRabbit.Logging
 {
 	public interface ILoggerFactory : IDisposable
 	{
-		/// <summary>
-		/// The minimum level of log messages sent to loggers.
-		/// </summary>
-		LogLevel MinimumLevel { get; set; }
-
 		/// <summary>
 		/// Creates a new <see cref="ILogger"/> instance.
 		/// </summary>
@@ -19,26 +15,29 @@ namespace RawRabbit.Logging
 
 	public class LoggerFactory : ILoggerFactory
 	{
-		private readonly Func<LogLevel, string, ILogger> _createFn;
+		private readonly Func<string, ILogger> _createFn;
+		private readonly ConcurrentDictionary<string, ILogger> _categoryToLogger;
 
-		public LoggerFactory() : this((level, s) => new ConsoleLogger(level, s))
+		public LoggerFactory() : this(s => new ConsoleLogger(LogLevel.Debug, s))
 		{
 			
 		}
-		public LoggerFactory(Func<LogLevel, string, ILogger> createFn)
+		public LoggerFactory(Func<string, ILogger> createFn)
 		{
 			_createFn = createFn;
+			_categoryToLogger = new ConcurrentDictionary<string, ILogger>();
 		}
 
-		public void Dispose()
-		{
-		}
-
-		public LogLevel MinimumLevel { get; set; }
+		public void Dispose() { }
 
 		public ILogger CreateLogger(string categoryName)
 		{
-			return _createFn(MinimumLevel, categoryName);
+			ILogger logger;
+			if (!_categoryToLogger.TryGetValue(categoryName, out logger))
+			{
+				logger = _categoryToLogger.GetOrAdd(categoryName, _createFn);
+			}
+			return logger;
 		}
 	}
 

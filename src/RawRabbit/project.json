@@ -1,36 +1,24 @@
 {
-	"version": "1.9.1-*",
-	"authors": ["pardahlman", "enrique-avalon"],
-	"description": "A modern framework for communication over RabbitMq.",
-	"iconUrl": "http://pardahlman.se/raw/icon.png",
-	"projectUrl": "https://github.com/pardahlman/RawRabbit",
 	"title": "RawRabbit",
-	"tags": ["rabbitmq", "raw", "rawrabbit", "amqp"],
+	"version": "1.9.2-*",
+	"authors": [ "pardahlman", "enrique-avalon" ],
+	"description": "A modern framework for communication over RabbitMq.",
+	"packOptions": {
+		"iconUrl": "http://pardahlman.se/raw/icon.png",
+		"projectUrl": "https://github.com/pardahlman/RawRabbit",
+		"tags": [ "rabbitmq", "raw", "rawrabbit", "attributes" ],
+		"publishExclude": [ "**.xproj", "**.user", "**.vspscc" ]
+	},
 
 	"dependencies": {
-    "RabbitMQ.Client": "3.6.2",
-    "Newtonsoft.Json": "8.0.2"
+		"RabbitMQ.Client": "3.6.2",
+		"Newtonsoft.Json": "8.0.3"
 	},
-	"commands": {
-		"test": "xunit.runner.dnx"
-	},
+
 	"frameworks": {
-		"dnx45": { },
 		"dnx451": { },
-		"dnx50": { },
-		"net45": { },
 		"net451": { },
 		"net452": { },
-		"net46": { },
-		"net50": { }
-	},
-
-	"publishExclude": [
-		"**.xproj",
-		"**.user",
-		"**.vspscc"
-	],
-
-	"exclude": [
-	]
+		"net46": { }
+	}
 }

@@ -1,23 +1,25 @@
 ﻿{
-	"version": "1.9.1",
-	"description": "Write RawRabbit's logs with NLog",
-	"authors": [ "par.dahlman" ],
-	"tags": [ "raw", "rabbit", "rawrabbit", "rabbitmq", "logger", "nlog" ],
-	"iconUrl": "http://pardahlman.se/raw/icon.png",
-	"projectUrl": "https://github.com/pardahlman/RawRabbit",
 	"title": "RawRabbit.Logging.NLog",
+	"version": "1.9.2-*",
+	"authors": [ "par.dahlman" ],
+	"description": "Write RawRabbit's logs with NLog",
+
+	"packOptions": {
+		"iconUrl": "http://pardahlman.se/raw/icon.png",
+		"projectUrl": "https://github.com/pardahlman/RawRabbit",
+		"tags": [ "raw", "rabbit", "rawrabbit", "rabbitmq", "logger", "nlog" ],
+		"publishExclude": [ "**.xproj", "**.user", "**.vspscc" ]
+	},
 
 	"dependencies": {
-		"RawRabbit": "",
-		"NLog": "4.2.3"
+		"RawRabbit": { "target": "project" },
+		"NLog": "4.3.4"
 	},
 
 	"frameworks": {
 		"dnx451": { },
-		"dnx50": { },
 		"net451": { },
 		"net452": { },
-		"net46": { },
-		"net50": { }
+		"net46": { }
 	}
 }

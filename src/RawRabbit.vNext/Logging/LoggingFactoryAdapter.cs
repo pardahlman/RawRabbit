@@ -1,5 +1,4 @@
-﻿using System;
-using RawRabbit.Logging;
+﻿using RawRabbit.Logging;
 
 namespace RawRabbit.vNext.Logging
 {
@@ -15,18 +14,6 @@ namespace RawRabbit.vNext.Logging
 		public void Dispose()
 		{
 			_vNextFactory.Dispose();
-		}
-
-		public LogLevel MinimumLevel
-		{
-			get
-			{
-				return (LogLevel)Enum.Parse(typeof(Microsoft.Extensions.Logging.LogLevel), _vNextFactory.MinimumLevel.ToString(), true);
-			}
-			set
-			{
-				_vNextFactory.MinimumLevel = (Microsoft.Extensions.Logging.LogLevel)Enum.Parse(typeof(LogLevel), value.ToString(), true);
-			}
 		}
 
 		public ILogger CreateLogger(string categoryName)

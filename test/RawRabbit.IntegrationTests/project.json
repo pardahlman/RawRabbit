@@ -1,27 +1,24 @@
 ﻿{
 	"version": "1.0.0-*",
-
+	"authors": [ "par.dahlman" ],
+	"testRunner": "xunit",
+	
 	"dependencies": {
-		"RawRabbit": "",
-		"RawRabbit.Attributes": "",
-		"RawRabbit.vNext": "",
-		"RawRabbit.Extensions": "",
+		"RawRabbit": { "target": "project" },
+		"RawRabbit.DependencyInjection.Autofac": { "target": "project" },
+		"RawRabbit.DependencyInjection.Ninject": { "target": "project" },
+		"RawRabbit.Attributes": { "target": "project" },
+		"RawRabbit.Extensions": { "target": "project" },
+		"RawRabbit.vNext": { "target": "project" },
+		"Moq": "4.2.1510.2205",
 		"xunit": "2.1.0",
-		"xunit.runner.dnx": "2.1.0-rc1-build204",
-		"Moq": "4.2.1510.2205"
+		"dotnet-test-xunit": "1.0.0-rc3-*"
 	},
-
-	"commands": {
-		"test": "xunit.runner.dnx"
-	},
-
 	"frameworks": {
-		"dnx451": { }
-	},
-
-	"publishExclude": [
-	],
-
-	"exclude": [
-	]
+			"net46": {
+				"dependencies": {
+					"Microsoft.NETCore.Platforms": "1.0.1-rc2-24027"
+				}
+			}
+	}
 }

@@ -44,7 +44,7 @@ namespace RawRabbit.vNext
 			{
 				var builder = new ConfigurationBuilder();
 				config(builder);
-				collection.AddSingleton(c => builder.Build().Get<RawRabbitConfiguration>());
+				collection.AddSingleton(c => builder.Build().GetValue<RawRabbitConfiguration>(string.Empty));
 			}
 			else
 			{

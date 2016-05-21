@@ -1,26 +1,24 @@
 ﻿{
-	"version": "1.9.1-rc1-update2",
+	"title": "RawRabbit.Extensions",
+	"version": "1.9.2-rc2-final",
 	"description": "Make the most of RawRabbit with these extensions",
 	"authors": [ "par.dahlman" ],
-	"tags": [ "raw", "rabbit", "rawrabbit", "rabbitmq", "extensions" ],
-	"iconUrl": "http://pardahlman.se/raw/icon.png",
-	"projectUrl": "https://github.com/pardahlman/RawRabbit",
-	"title": "RawRabbit.Extensions",
+	"packOptions": {
+		"iconUrl": "http://pardahlman.se/raw/icon.png",
+		"projectUrl": "https://github.com/pardahlman/RawRabbit",
+		"tags": [ "rabbitmq", "raw", "rawrabbit", "extensions" ],
+		"publishExclude": [ "**.xproj", "**.user", "**.vspscc" ]
+	},
 
 	"dependencies": {
-		"RawRabbit": "",
-		"RawRabbit.vNext": "",
-		"Microsoft.Extensions.DependencyInjection": "1.0.0-rc1-final",
-		"Microsoft.Extensions.Configuration.Abstractions": "1.0.0-rc1-final",
-		"Microsoft.Extensions.Logging.Abstractions": "1.0.0-rc1-final"
+		"RawRabbit": { "target": "project" },
+		"RawRabbit.vNext": { "target": "project" }
 	},
 
 	"frameworks": {
 		"dnx451": { },
-		"dnx50": { },
 		"net451": { },
 		"net452": { },
-		"net46": { },
-		"net50": { }
+		"net46": { }
 	}
 }

@@ -1,24 +1,23 @@
 {
-	"version": "1.9.1",
-	"description": "Write RawRabbit's logs with Serilog",
-	"authors": [ "par.dahlman" ],
-	"tags": [ "raw", "rabbit", "rawrabbit", "rabbitmq", "logger", "serilog" ],
-	"iconUrl": "http://pardahlman.se/raw/icon.png",
-	"projectUrl": "https://github.com/pardahlman/RawRabbit",
 	"title": "RawRabbit.Logging.Serilog",
+	"version": "1.9.2-*",
+	"authors": [ "par.dahlman" ],
+	"description": "Write RawRabbit's logs with Serilog",
 
-	"dependencies": {
-		"RawRabbit": "",
-		"Serilog": "1.5.11"
+	"packOptions": {
+		"iconUrl": "http://pardahlman.se/raw/icon.png",
+		"projectUrl": "https://github.com/pardahlman/RawRabbit",
+		"tags": [ "raw", "rabbit", "rawrabbit", "rabbitmq", "logger", "serilog" ],
+		"publishExclude": [ "**.xproj", "**.user", "**.vspscc" ]
 	},
 
+	"dependencies": {
+		"RawRabbit": { "target": "project" },
+		"Serilog": "1.5.14"
+
+	},
 	"frameworks": {
 		"dnx451": {
-			"frameworkAssemblies": {
-				"System.Runtime": "4.0.0.0"
-			}
-		},
-		"dnx50": {
 			"frameworkAssemblies": {
 				"System.Runtime": "4.0.0.0"
 			}
@@ -34,11 +33,6 @@
 			}
 		},
 		"net46": {
-			"frameworkAssemblies": {
-				"System.Runtime": "4.0.0.0"
-			}
-		},
-		"net50": {
 			"frameworkAssemblies": {
 				"System.Runtime": "4.0.0.0"
 			}

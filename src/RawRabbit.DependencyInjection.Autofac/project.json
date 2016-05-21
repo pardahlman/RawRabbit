@@ -1,23 +1,24 @@
 ﻿{
+	"title": "RawRabbit.DependencyInjection.Autofac",
+	"version": "1.9.2-*",
 	"authors": [ "par.dahlman" ],
-	"dependencies": {
-		"RawRabbit": "",
-		"Autofac": "2.2.4.900"
-	},
 	"description": "Wire up RawRabbit with Autfac!",
+
+	"packOptions": {
+		"iconUrl": "http://pardahlman.se/raw/icon.png",
+		"projectUrl": "https://github.com/pardahlman/RawRabbit",
+		"tags": [ "rabbitmq", "raw", "rawrabbit", "autofac" ],
+		"publishExclude": [ "**.xproj", "**.user", "**.vspscc" ]
+	},
+
+	"dependencies": {
+		"RawRabbit": { "target": "project" },
+		"Autofac": "3.5.2"
+	},
 	"frameworks": {
-		"dnx45": { },
 		"dnx451": { },
-		"dnx50": { },
-		"net45": { },
 		"net451": { },
 		"net452": { },
-		"net46": { },
-		"net50": { }
-	},
-	"iconUrl": "http://pardahlman.se/raw/icon.png",
-	"projectUrl": "https://github.com/pardahlman/RawRabbit",
-	"tags": [ "rabbitmq", "raw", "rawrabbit", "autofac" ],
-	"title": "RawRabbit.DependencyInjection.Autofac",
-	"version": "1.9.1-*"
+		"net46": { }
+	}
 }

@@ -5,12 +5,9 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("RawRabbit.Logging.Log4Net")]
-[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Valtech AB")]
 [assembly: AssemblyProduct("RawRabbit.Logging.Log4Net")]
-[assembly: AssemblyCopyright("Copyright © Valtech AB 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,4 +17,4 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("9385228c-444e-443e-b1e8-bd88cafa508b")]
+[assembly: Guid("fa7f9725-dc41-425d-b6ea-beaf6ba1ba4a")]
