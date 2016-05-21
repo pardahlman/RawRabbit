@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using RawRabbit.Configuration;
 using RawRabbit.Context;
 using RawRabbit.Extensions.MessageSequence.Configuration.Abstraction;
 using RawRabbit.Extensions.MessageSequence.Core.Abstraction;
@@ -19,16 +21,18 @@ namespace RawRabbit.Extensions.MessageSequence.Configuration
 		private readonly IMessageChainTopologyUtil _chainTopology;
 		private readonly IMessageChainDispatcher _dispatcher;
 		private readonly IMessageSequenceRepository _repository;
+		private readonly RawRabbitConfiguration _mainCfg;
 
 		private Func<Task> _publishAsync;
 		private Guid _globalMessageId ;
 
-		public MessageSequenceBuilder(IBusClient<TMessageContext> busClient, IMessageChainTopologyUtil chainTopology, IMessageChainDispatcher dispatcher, IMessageSequenceRepository repository)
+		public MessageSequenceBuilder(IBusClient<TMessageContext> busClient, IMessageChainTopologyUtil chainTopology, IMessageChainDispatcher dispatcher, IMessageSequenceRepository repository, RawRabbitConfiguration mainCfg)
 		{
 			_busClient = busClient;
 			_chainTopology = chainTopology;
 			_dispatcher = dispatcher;
 			_repository = repository;
+			_mainCfg = mainCfg;
 		}
 
 		public IMessageSequenceBuilder<TMessageContext> PublishAsync<TMessage>(TMessage message = default(TMessage), Guid globalMessageId = new Guid()) where TMessage : new()
@@ -74,8 +78,8 @@ namespace RawRabbit.Extensions.MessageSequence.Configuration
 				{
 					_chainTopology.UnbindFromExchange(step.Type, _globalMessageId);
 				}
-				messageTcs.TrySetResult((TMessage) tObj.Result);
 				_repository.Remove(_globalMessageId);
+				messageTcs.TrySetResult((TMessage) tObj.Result);
 			});
 
 			Func<TMessage, TMessageContext, Task> func = (message, context) =>
@@ -94,6 +98,15 @@ namespace RawRabbit.Extensions.MessageSequence.Configuration
 				.ContinueWith(t => _publishAsync())
 				.Unwrap()
 				.Wait();
+
+			Timer timeoutTimer = null;
+			timeoutTimer = new Timer(state =>
+			{
+				timeoutTimer?.Dispose();
+				messageTcs.TrySetException(
+					new TimeoutException(
+						$"Unable to complete sequence {_globalMessageId} in {_mainCfg.RequestTimeout.ToString("g")}. Operation Timed out."));
+			}, null, _mainCfg.RequestTimeout, new TimeSpan(-1));
 
 			return sequence;
 		}

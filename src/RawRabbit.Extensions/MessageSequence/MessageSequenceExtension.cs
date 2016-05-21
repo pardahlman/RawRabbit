@@ -1,4 +1,5 @@
 ﻿using System;
+using RawRabbit.Configuration;
 using RawRabbit.Context;
 using RawRabbit.Extensions.Client;
 using RawRabbit.Extensions.MessageSequence.Configuration;
@@ -29,8 +30,9 @@ namespace RawRabbit.Extensions.MessageSequence
 			var chainTopology = extended.GetService<IMessageChainTopologyUtil>();
 			var messageDispather = extended.GetService<IMessageChainDispatcher>();
 			var repo = extended.GetService<IMessageSequenceRepository>();
+			var mainCfg = extended.GetService<RawRabbitConfiguration>();
 			
-			var configBuilder = new MessageSequenceBuilder<TMessageContext>(extended, chainTopology, messageDispather, repo);
+			var configBuilder = new MessageSequenceBuilder<TMessageContext>(extended, chainTopology, messageDispather, repo, mainCfg);
 			return cfg(configBuilder);
 		}
 	}

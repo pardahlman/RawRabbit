@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using RawRabbit.Configuration;
 using RawRabbit.Context;
 using RawRabbit.Extensions.CleanEverything;
 using RawRabbit.Extensions.Client;
@@ -262,6 +264,24 @@ namespace RawRabbit.IntegrationTests.Extensions
 			/* Assert */
 			Assert.Equal(0, chain.Skipped.Count);
 			Assert.True(secondHandlerCalled, "Handler should be called");
+		}
+
+		[Fact]
+		public async Task Should_Honor_Timeout()
+		{
+			/* Setup */
+			var cfg = RawRabbitConfiguration.Local;
+			cfg.RequestTimeout = TimeSpan.FromMilliseconds(200);
+			var client = RawRabbitFactory.GetExtendableClient(ioc => ioc.AddSingleton(c => cfg));
+
+			/* Test */
+			var chain = client.ExecuteSequence(c => c
+				.PublishAsync<FirstMessage>()
+				.Complete<SecondMessage>()
+			);
+
+			/* Assert */
+			await Assert.ThrowsAsync<TimeoutException>(async () => await chain.Task);
 		}
 	}
 }
