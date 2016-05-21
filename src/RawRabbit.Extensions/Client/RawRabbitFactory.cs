@@ -10,7 +10,7 @@ namespace RawRabbit.Extensions.Client
 		public static IBusClient<MessageContext> GetExtendableClient(Action<IServiceCollection> custom = null)
 		{
 			var provider = new ServiceCollection()
-				.AddRawRabbit(null, custom)
+				.AddRawRabbit(config: null, custom: custom)
 				.AddRawRabbitExtensions<MessageContext>()
 				.BuildServiceProvider();
 			return new ExtendableBusClient(provider);

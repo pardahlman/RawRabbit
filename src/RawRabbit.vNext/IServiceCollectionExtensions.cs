@@ -43,8 +43,12 @@ namespace RawRabbit.vNext
 			if (config != null)
 			{
 				var builder = new ConfigurationBuilder();
-				config(builder);
-				collection.AddSingleton(c => builder.Build().GetValue<RawRabbitConfiguration>(string.Empty));
+				config?.Invoke(builder);
+				var mainCfg = RawRabbitConfiguration.Local;
+				builder.Build().Bind(mainCfg);
+				mainCfg.Hostnames = mainCfg.Hostnames.Distinct(StringComparer.InvariantCultureIgnoreCase).ToList();
+
+				collection.AddSingleton(c => mainCfg);
 			}
 			else
 			{

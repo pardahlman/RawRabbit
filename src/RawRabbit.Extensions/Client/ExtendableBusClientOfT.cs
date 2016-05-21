@@ -6,7 +6,9 @@ using RawRabbit.Operations.Abstraction;
 
 namespace RawRabbit.Extensions.Client
 {
-	public class ExtendableBusClient<TMessageContext> : BaseBusClient<TMessageContext> where TMessageContext : IMessageContext
+	public interface IBusClient<out TMessageContext> : RawRabbit.IBusClient<TMessageContext> where TMessageContext : IMessageContext { 
+	}
+	public class ExtendableBusClient<TMessageContext> : BaseBusClient<TMessageContext>, IBusClient<TMessageContext> where TMessageContext : IMessageContext
 	{
 		private readonly IServiceProvider _serviceProvider;
 
