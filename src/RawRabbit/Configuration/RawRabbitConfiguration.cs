@@ -71,6 +71,13 @@ namespace RawRabbit.Configuration
 		/// </summary>
 		public SslOption Ssl { get; set; }
 
+		public string VirtualHost { get; set; }
+		public string Username { get; set; }
+		public string Password { get; set; }
+		public int Port { get; set; }
+		public List<string> Hostnames { get; set; }
+		public TimeSpan RecoveryInterval { get; set; }
+
 		public RawRabbitConfiguration()
 		{
 			RequestTimeout = TimeSpan.FromSeconds(10);
@@ -106,12 +113,7 @@ namespace RawRabbit.Configuration
 			Port = 5672,
 			Hostnames = new List<string> { "localhost" }
 		};
-		public string VirtualHost { get; set; }
-		public string Username { get; set; }
-		public string Password { get; set; }
-		public int Port { get; set; }
-		public List<string> Hostnames { get; set; }
-		public TimeSpan RecoveryInterval { get; set; }
+		
 	}
 
 	public class GeneralQueueConfiguration
