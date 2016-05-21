@@ -69,16 +69,7 @@ namespace RawRabbit.Extensions.MessageSequence.Configuration
 
 			sequenceDef.TaskCompletionSource.Task.ContinueWith(tObj =>
 			{
-				var final = _repository.Get(_globalMessageId);
-				_logger.LogDebug($"Updating Sequence for '{_globalMessageId}'.");
-				sequence.Aborted = final.State.Aborted;
-				sequence.Completed = final.State.Completed;
-				sequence.Skipped = final.State.Skipped;
-				foreach (var step in final.StepDefinitions)
-				{
-					_chainTopology.UnbindFromExchange(step.Type, _globalMessageId);
-				}
-				_repository.Remove(_globalMessageId);
+				UpdateSequenceFinalState(sequence);
 				messageTcs.TrySetResult((TMessage) tObj.Result);
 			});
 
@@ -103,12 +94,38 @@ namespace RawRabbit.Extensions.MessageSequence.Configuration
 			timeoutTimer = new Timer(state =>
 			{
 				timeoutTimer?.Dispose();
+				var seq = _repository.Get(_globalMessageId);
+				if (seq != null)
+				{
+					seq.State.Aborted = true;
+					_repository.Update(seq);
+					UpdateSequenceFinalState(sequence);
+				}
+				
 				messageTcs.TrySetException(
 					new TimeoutException(
 						$"Unable to complete sequence {_globalMessageId} in {_mainCfg.RequestTimeout.ToString("g")}. Operation Timed out."));
 			}, null, _mainCfg.RequestTimeout, new TimeSpan(-1));
 
 			return sequence;
+		}
+
+		private void UpdateSequenceFinalState<TMessage>(MessageSequence<TMessage> sequence)
+		{
+			var final = _repository.Get(_globalMessageId);
+			if (final == null)
+			{
+				return;
+			}
+			_logger.LogDebug($"Updating Sequence for '{_globalMessageId}'.");
+			sequence.Aborted = final.State.Aborted;
+			sequence.Completed = final.State.Completed;
+			sequence.Skipped = final.State.Skipped;
+			foreach (var step in final.StepDefinitions)
+			{
+				_chainTopology.UnbindFromExchange(step.Type, _globalMessageId);
+			}
+			_repository.Remove(_globalMessageId);
 		}
 	}
 }
