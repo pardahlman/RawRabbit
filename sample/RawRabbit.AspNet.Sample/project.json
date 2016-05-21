@@ -9,11 +9,12 @@
 		"Microsoft.Extensions.Configuration.Json": "1.0.0-rc2-final",
 		"Microsoft.Extensions.Logging": "1.0.0-rc2-final",
 		"Microsoft.Extensions.Logging.Console": "1.0.0-rc2-final",
-		"Microsoft.Extensions.Logging.Debug": "1.0.0-rc2-final",
 		"RawRabbit": { "target": "project" },
 		"RawRabbit.Extensions": { "target": "project" },
 		"RawRabbit.vNext": { "target": "project" },
-		"RawRabbit.Messages.Sample": { "target": "project" }
+		"RawRabbit.Messages.Sample": { "target": "project" },
+		"Serilog.Extensions.Logging": "1.0.0-rc2-*",
+		"Serilog.Sinks.File": "2.0.0-rc-706"
 	},
 
 	"tools": {

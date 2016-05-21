@@ -7,17 +7,22 @@ using RawRabbit.Attributes;
 using RawRabbit.Common;
 using RawRabbit.Extensions.Client;
 using RawRabbit.vNext.Logging;
+using Serilog;
+using Serilog.Events;
+using ILogger = Serilog.ILogger;
 
 namespace RawRabbit.AspNet.Sample
 {
 	public class Startup
 	{
+		private readonly string _rootPath;
+
 		public Startup(IHostingEnvironment env)
 		{
+			_rootPath = env.ContentRootPath;
 			var builder = new ConfigurationBuilder()
-				.SetBasePath(env.ContentRootPath)
-				.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-				.AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+				.SetBasePath(_rootPath)
+				.AddJsonFile("appsettings.json")
 				.AddEnvironmentVariables();
 			Configuration = builder.Build();
 		}
@@ -30,17 +35,25 @@ namespace RawRabbit.AspNet.Sample
 				.AddRawRabbit(
 					Configuration.GetSection("RawRabbit"),
 					ioc => ioc
-						.AddSingleton(c => new LoggingFactoryAdapter(c.GetService<ILoggerFactory>())))
+						.AddSingleton(LoggingFactory.ApplicationLogger))
 						.AddSingleton<IConfigurationEvaluator, AttributeConfigEvaluator>()
 				.AddMvc();
 		}
 
 		public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
 		{
-			loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-			loggerFactory.AddDebug();
+			loggerFactory
+				.AddSerilog(GetConfiguredSerilogger())
+				.AddConsole(Configuration.GetSection("Logging"));
 
 			app.UseMvc();
+		}
+
+		private ILogger GetConfiguredSerilogger()
+		{
+			return new LoggerConfiguration()
+				.WriteTo.File($"{_rootPath}/Logs/serilog.log", LogEventLevel.Debug)
+				.CreateLogger();
 		}
 	}
 }
