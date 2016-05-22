@@ -18,6 +18,7 @@ namespace RawRabbit.Tests.DependencyInjection
 			
 			/* Test */
 			var client = container.Resolve<IBusClient>();
+			client.Dispose();
 
 			/* Assert */
 			Assert.True(true, "Could resolve");
@@ -33,6 +34,7 @@ namespace RawRabbit.Tests.DependencyInjection
 
 			/* Test */
 			var client = container.Resolve<IBusClient<AdvancedMessageContext>>();
+			client.Dispose();
 
 			/* Assert */
 			Assert.True(true, "Could resolve");
