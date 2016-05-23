@@ -10,6 +10,7 @@ using RawRabbit.Extensions.MessageSequence.Core.Abstraction;
 using RawRabbit.Extensions.MessageSequence.Repository;
 using RawRabbit.Extensions.TopologyUpdater.Core;
 using RawRabbit.Extensions.TopologyUpdater.Core.Abstraction;
+using RawRabbit.Logging;
 
 namespace RawRabbit.Extensions.Client
 {
@@ -42,13 +43,21 @@ namespace RawRabbit.Extensions.Client
 			return vNext.IServiceCollectionExtensions
 				.AddRawRabbit(collection, config, custom)
 				.AddRawRabbitExtensions<TMessageContext>()
-				.AddSingleton<IBusClient>(c => new ExtendableBusClient(collection.BuildServiceProvider()));
+				.AddSingleton<IBusClient>(c =>
+				{
+					LogManager.CurrentFactory = c.GetService<ILoggerFactory>();
+					return new ExtendableBusClient(collection.BuildServiceProvider());
+				});
 		}
 
 		public static IServiceCollection AddRawRabbit(this IServiceCollection collection, Action<IConfigurationBuilder> config = null, Action<IServiceCollection> custom = null)
 		{
 			return AddRawRabbit<MessageContext>(collection, config, custom)
-				.AddSingleton<IBusClient>(provider => new ExtendableBusClient(collection.BuildServiceProvider()));
+				.AddSingleton<IBusClient>(provider =>
+				{
+					LogManager.CurrentFactory = provider.GetService<ILoggerFactory>();
+					return new ExtendableBusClient(collection.BuildServiceProvider());
+				});
 		}
 
 		public static IServiceCollection AddRawRabbit(this IServiceCollection collection, IConfigurationSection section, Action<IServiceCollection> custom = null)
