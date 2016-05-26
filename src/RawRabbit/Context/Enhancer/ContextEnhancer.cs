@@ -36,7 +36,7 @@ namespace RawRabbit.Context.Enhancer
 
 			advancedCtx.Nack = () =>
 			{
-				consumer.NackedDeliveryTags.Add(args.DeliveryTag);
+				consumer.AcknowledgedTags.Add(args.DeliveryTag);
 				consumer.Model.BasicNack(args.DeliveryTag, false, true);
 			};
 

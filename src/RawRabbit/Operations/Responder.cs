@@ -76,7 +76,7 @@ namespace RawRabbit.Operations
 								{
 									throw tResponse.Exception ?? new Exception();
 								}
-								if (consumer.NackedDeliveryTags.Contains(args.DeliveryTag))
+								if (consumer.AcknowledgedTags.Contains(args.DeliveryTag))
 								{
 									return;
 								}

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -153,6 +154,42 @@ namespace RawRabbit.IntegrationTests.Features
 			Assert.NotNull(firstRecieved);
 			Assert.NotNull(secondRecieved);
 			Assert.Equal(firstRecieved.GlobalRequestId, secondRecieved.GlobalRequestId);
+		}
+
+		[Fact]
+		public async Task Should_Keep_Consumer_Open_After_Publish_Exception()
+		{
+			/* Setup */
+			var hasThrownTcs = new TaskCompletionSource<bool>();
+			var hasRecievedTcs = new TaskCompletionSource<bool>();
+			var client = BusClientFactory.CreateDefault();
+			client.SubscribeAsync<BasicMessage>((message, context) =>
+			{
+				if (!hasThrownTcs.Task.IsCompleted)
+				{
+					Timer timer = null;
+					timer = new Timer(state =>
+					{
+						timer?.Dispose();
+						hasThrownTcs.SetResult(true);
+					}, null, TimeSpan.FromMilliseconds(100), new TimeSpan(-1));
+					throw new Exception("Uh uh!");
+				}
+				else
+				{
+					hasRecievedTcs.SetResult(true);
+				}
+				return Task.FromResult(true);
+			});
+
+			/* Test */
+			client.PublishAsync(new BasicMessage());
+			await hasThrownTcs.Task;
+			client.PublishAsync(new BasicMessage());
+			await hasRecievedTcs.Task;
+
+			/* Assert */
+			Assert.True(true);
 		}
 	}
 }

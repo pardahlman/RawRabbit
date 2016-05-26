@@ -44,7 +44,7 @@ namespace RawRabbit.Consumer.Eventing
 						.OnMessageAsync(sender, args)
 						.ContinueWith(t =>
 						{
-							if (cfg.NoAck || rawConsumer.NackedDeliveryTags.Contains(args.DeliveryTag))
+							if (cfg.NoAck || rawConsumer.AcknowledgedTags.Contains(args.DeliveryTag))
 							{
 								return;
 							}

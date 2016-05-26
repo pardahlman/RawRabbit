@@ -113,6 +113,7 @@ namespace RawRabbit.ErrorHandling
 			if (!config.NoAck)
 			{
 				consumer.Model.BasicAck(args.DeliveryTag, false);
+				consumer.AcknowledgedTags.Add(args.DeliveryTag);
 			}
 			try
 			{

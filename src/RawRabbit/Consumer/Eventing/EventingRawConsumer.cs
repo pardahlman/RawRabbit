@@ -12,11 +12,11 @@ namespace RawRabbit.Consumer.Eventing
 	public class EventingRawConsumer : EventingBasicConsumer, IRawConsumer
 	{
 		private readonly ILogger _logger = LogManager.GetLogger<EventingRawConsumer>();
-		public List<ulong> NackedDeliveryTags { get; private set; } 
+		public List<ulong> AcknowledgedTags { get; }
 
 		public EventingRawConsumer(IModel channel) : base(channel)
 		{
-			NackedDeliveryTags = new List<ulong>();
+			AcknowledgedTags = new List<ulong>();
 			SetupLogging(this);
 		}
 
