@@ -1,6 +1,6 @@
 ﻿{
 	"title": "RawRabbit.DependencyInjection.Autofac",
-	"version": "1.9.2-*",
+	"version": "1.9.3-*",
 	"authors": [ "par.dahlman" ],
 	"description": "Wire up RawRabbit with Autfac!",
 
