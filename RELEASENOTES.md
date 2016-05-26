@@ -1,3 +1,10 @@
+# 1.9.3
+
+ - [#90](https://github.com/pardahlman/RawRabbit/issues/90) - Default Error Strategy tries to Ack Message twice +fix
+
+Commits: e92022aa6f...186e67157b
+
+
 # 1.9.2
 
 .NET Core came a step closer to completion With the [announcement of the release of RC2](https://blogs.msdn.microsoft.com/webdev/2016/05/16/announcing-asp-net-core-rc2/). The new releases of Logging, Dependecy Injection and Configuration had a few breaking changes was handled. `RawRabbit` is now fully migrated to the new project structure. There are [new sample projects](https://github.com/pardahlman/RawRabbit/tree/master/sample) that combines .NET Core with RawRabbit (including Attributed Routing, Message Sequence etc.) and Serilog.
@@ -15,6 +22,7 @@ The underlying dependecy `RabbitMQ.Client` was updated, as it  [ 3.6.2 was relea
  - [#81](https://github.com/pardahlman/RawRabbit/issues/81) - Attributes for Routing/Queue/Exchange
 
 Commits: b68cf973fa...e92022aa6f
+
 
 # 1.9.1
 
