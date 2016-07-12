@@ -13,7 +13,7 @@
 
 	"dependencies": {
 		"RawRabbit": { "target": "project" },
-		"NLog": "4.3.4"
+			"NLog": "4.3.5"
 	},
 
 	"frameworks": {

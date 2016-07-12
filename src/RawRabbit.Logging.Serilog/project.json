@@ -13,29 +13,12 @@
 
 	"dependencies": {
 		"RawRabbit": { "target": "project" },
-		"Serilog": "1.5.14"
-
+			"Serilog": "2.0.0"
 	},
 	"frameworks": {
-		"dnx451": {
-			"frameworkAssemblies": {
-				"System.Runtime": "4.0.0.0"
-			}
-		},
-		"net451": {
-			"frameworkAssemblies": {
-				"System.Runtime": "4.0.0.0"
-			}
-		},
-		"net452": {
-			"frameworkAssemblies": {
-				"System.Runtime": "4.0.0.0"
-			}
-		},
-		"net46": {
-			"frameworkAssemblies": {
-				"System.Runtime": "4.0.0.0"
-			}
-		}
+		"dnx451": {},
+		"net451": {},
+		"net452": {},
+		"net46": {}
 	}
 }
