@@ -1,5 +1,5 @@
 ﻿{
-	"version": "1.9.3-rc2-final",
+	"version": "1.9.4",
 	"authors": [ "pardahlman", "enrique-avalon" ],
 	"description": "Take advantage of vNext for your RawRabbit setup. Extension for IServiceCollection, IConfiguration support and much more!",
 	"packOptions": {
@@ -11,10 +11,10 @@
 
 	"dependencies": {
 		"RawRabbit": {"target": "project"},
-		"Microsoft.Extensions.DependencyInjection": "1.0.0-rc2-final",
-		"Microsoft.Extensions.Logging": "1.0.0-rc2-final",
-		"Microsoft.Extensions.Configuration": "1.0.0-rc2-final",
-		"Microsoft.Extensions.Configuration.Binder": "1.0.0-rc2-final"
+		"Microsoft.Extensions.DependencyInjection": "1.0.0",
+		"Microsoft.Extensions.Logging": "1.0.0",
+		"Microsoft.Extensions.Configuration": "1.0.0",
+		"Microsoft.Extensions.Configuration.Binder": "1.0.0"
 	},
 
 	"frameworks": {

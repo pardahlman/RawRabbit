@@ -1,6 +1,6 @@
 ﻿{
 	"title": "RawRabbit.Attributes",
-	"version": "1.9.3-*",
+	"version": "1.9.4-*",
 	"authors": [ "pardahlman" ],
 	"description": "Configure messages and topology with attributes.",
 	"packOptions": {
