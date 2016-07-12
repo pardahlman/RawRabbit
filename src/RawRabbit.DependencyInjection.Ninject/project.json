@@ -1,13 +1,13 @@
 ﻿{
 	"title": "RawRabbit.DependencyInjection.Ninject",
-	"version": "1.9.4-*",
+	"version": "1.9.4-dotnetcore",
 	"authors": [ "par.dahlman", "Joshua Barron" ],
 	"description": "Wire up RawRabbit with Ninject!",
 
 	"packOptions": {
 		"iconUrl": "http://pardahlman.se/raw/icon.png",
 		"projectUrl": "https://github.com/pardahlman/RawRabbit",
-			"tags": [ "rabbitmq", "raw", "rawrabbit", "ninject" ],
+		"tags": [ "rabbitmq", "raw", "rawrabbit", "ninject" ],
 		"publishExclude": [ "**.xproj", "**.user", "**.vspscc" ]
 	},
 
@@ -16,9 +16,6 @@
 		"Ninject": "3.2.2"
 	},
 	"frameworks": {
-		"dnx451": { },
-		"net451": { },
-		"net452": { },
-		"net46": { }
+		"net451": {}
 	}
 }

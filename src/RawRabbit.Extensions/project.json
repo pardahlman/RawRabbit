@@ -1,6 +1,6 @@
 ﻿{
 	"title": "RawRabbit.Extensions",
-	"version": "1.9.4",
+	"version": "1.9.4-dotnetcore",
 	"description": "Make the most of RawRabbit with these extensions",
 	"authors": [ "par.dahlman" ],
 	"packOptions": {
@@ -16,9 +16,11 @@
 	},
 
 	"frameworks": {
-		"dnx451": { },
-		"net451": { },
-		"net452": { },
-		"net46": { }
+		"netstandard1.5": {
+			"dependencies": {
+				"System.Net.Requests": "4.0.11"
+			}
+		},
+		"net451": {}
 	}
 }

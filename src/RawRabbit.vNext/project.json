@@ -1,5 +1,5 @@
 ﻿{
-	"version": "1.9.4",
+	"version": "1.9.4-dotnetcore",
 	"authors": [ "pardahlman", "enrique-avalon" ],
 	"description": "Take advantage of vNext for your RawRabbit setup. Extension for IServiceCollection, IConfiguration support and much more!",
 	"packOptions": {
@@ -10,7 +10,7 @@
 	},
 
 	"dependencies": {
-		"RawRabbit": {"target": "project"},
+		"RawRabbit": { "target": "project" },
 		"Microsoft.Extensions.DependencyInjection": "1.0.0",
 		"Microsoft.Extensions.Logging": "1.0.0",
 		"Microsoft.Extensions.Configuration": "1.0.0",
@@ -18,9 +18,7 @@
 	},
 
 	"frameworks": {
-		"dnx451": { },
-		"net451": { },
-		"net452": { },
-		"net46": { }
+		"netstandard1.5": {},
+		"net451": {}
 	}
 }

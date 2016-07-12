@@ -1,6 +1,6 @@
 ﻿{
 	"title": "RawRabbit.Logging.NLog",
-	"version": "1.9.4-*",
+	"version": "1.9.4-dotnetcore",
 	"authors": [ "par.dahlman" ],
 	"description": "Write RawRabbit's logs with NLog",
 
@@ -13,13 +13,11 @@
 
 	"dependencies": {
 		"RawRabbit": { "target": "project" },
-			"NLog": "4.3.5"
+		"NLog": "4.4.0-betaV14"
 	},
 
 	"frameworks": {
-		"dnx451": { },
-		"net451": { },
-		"net452": { },
-		"net46": { }
+		"netstandard1.5": {},
+		"net451": {}
 	}
 }

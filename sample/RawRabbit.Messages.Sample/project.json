@@ -2,10 +2,11 @@
 	"version": "1.0.0-*",
 
 	"dependencies": {
-		"RawRabbit.Attributes": {"target": "project"}
+		"RawRabbit.Attributes": { "target": "project" }
 	},
 
 	"frameworks": {
-		"net46": { }
+		"netstandard1.5": {},
+		"net451": {}
 	}
 }

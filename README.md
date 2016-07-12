@@ -1,6 +1,14 @@
 # RawRabbit
 
 [![Build Status](https://img.shields.io/appveyor/ci/pardahlman/rawrabbit.svg?style=flat-square)](https://ci.appveyor.com/project/pardahlman/rawrabbit) [![Documentation Status](https://readthedocs.org/projects/rawrabbit/badge/?version=latest&style=flat-square)](http://rawrabbit.readthedocs.org/) [![NuGet](https://img.shields.io/nuget/v/RawRabbit.svg?style=flat-square)](https://www.nuget.org/packages/RawRabbit) [![GitHub release](https://img.shields.io/github/release/pardahlman/rawrabbit.svg?style=flat-square)](https://github.com/pardahlman/rawrabbit/releases/latest)
+
+## Support for .NET Core 1.0
+The branch `dotnet-core` uses [RabbitMQ's preview of `RabbitMQ.Client` 4.0.0](https://groups.google.com/forum/#!topic/rabbitmq-users/hyJLlXCbocY), which is built for `netstandard1.5` and `net451`. This means that `RawRabbit` now can run on any platform. To Install, first make sure that you have added [RabbitMq's AppVeyor Feed](https://ci.appveyor.com/nuget/rabbitmq-dotnet-client-ci) to your NuGet feeds, then run
+
+```
+PM> Install-Package RawRabbit -Version 1.9.4-dotnetcore -Pre 
+```
+
 ## Quick introduction
 `RawRabbit` is a modern .NET client for communication over [RabbitMq](http://rabbitmq.com/). It is written for [`vNext`](http://www.asp.net/vnext) and is uses Microsoft’s new frameworks for [logging](https://github.com/aspnet/Logging), [configuration](https://github.com/aspnet/Configuration) and [dependecy injection](https://github.com/aspnet/DependencyInjection). It targets traditional `NET` runtimes, [`DNX` runtimes](https://github.com/aspnet/dnx) and has all the ground work done for [`.NET Core`](https://github.com/dotnet/core). Full documentation available at [`rawrabbit.readthedocs.org`](http://rawrabbit.readthedocs.org/).
 

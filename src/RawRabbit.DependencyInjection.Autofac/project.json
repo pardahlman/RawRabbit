@@ -1,6 +1,6 @@
 ﻿{
 	"title": "RawRabbit.DependencyInjection.Autofac",
-	"version": "1.9.4-*",
+	"version": "1.9.4-dotnetcore",
 	"authors": [ "par.dahlman" ],
 	"description": "Wire up RawRabbit with Autfac!",
 
@@ -13,12 +13,10 @@
 
 	"dependencies": {
 		"RawRabbit": { "target": "project" },
-		"Autofac": "3.5.2"
+		"Autofac": "4.0.0-rc3-293"
 	},
 	"frameworks": {
-		"dnx451": { },
-		"net451": { },
-		"net452": { },
-		"net46": { }
+		"netstandard1.5": {},
+		"net451": {}
 	}
 }

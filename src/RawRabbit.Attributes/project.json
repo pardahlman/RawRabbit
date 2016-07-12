@@ -1,6 +1,6 @@
 ﻿{
 	"title": "RawRabbit.Attributes",
-	"version": "1.9.4-*",
+	"version": "1.9.4-dotnetcore",
 	"authors": [ "pardahlman" ],
 	"description": "Configure messages and topology with attributes.",
 	"packOptions": {
@@ -11,13 +11,11 @@
 	},
 
 	"dependencies": {
-		"RawRabbit": {"target": "project" }
+		"RawRabbit": { "target": "project" }
 	},
 
 	"frameworks": {
-		"dnx451": { },
-		"net451": { },
-		"net452": { },
-		"net46": { }
+		"netstandard1.5": {},
+		"net451": {}
 	}
 }
