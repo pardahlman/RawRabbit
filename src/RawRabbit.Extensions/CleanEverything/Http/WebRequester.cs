@@ -64,11 +64,9 @@ namespace RawRabbit.Extensions.CleanEverything.Http
 		private HttpWebRequest PrepareRequest()
 		{
 			var req = _requestInit();
-			req.PreAuthenticate = true;
 			req.Accept = ContentType.ApplicationJson;
 			_credentialModifier(req);
 			_methodModifier(req);
-			req.UserAgent = "RawRabbit";
 			return req;
 		}
 	}

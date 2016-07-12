@@ -65,7 +65,6 @@ namespace RawRabbit.Extensions.TopologyUpdater.Core
 		{
 			var request = (HttpWebRequest)WebRequest.Create(requestUrl);
 			request.Method = HttpGet;
-			request.PreAuthenticate = true;
 			request.Credentials = new NetworkCredential(_config.Username, _config.Password);
 			request.Accept = ApplicationJson;
 			return request;
