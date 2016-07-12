@@ -45,7 +45,7 @@ namespace RawRabbit.vNext
 				config?.Invoke(builder);
 				var mainCfg = RawRabbitConfiguration.Local;
 				builder.Build().Bind(mainCfg);
-				mainCfg.Hostnames = mainCfg.Hostnames.Distinct(StringComparer.InvariantCultureIgnoreCase).ToList();
+				mainCfg.Hostnames = mainCfg.Hostnames.Distinct().ToList();
 
 				collection.AddSingleton(c => mainCfg);
 			}

@@ -67,7 +67,7 @@ namespace RawRabbit.Extensions.Client
 			{
 				var mainCfg = RawRabbitConfiguration.Local;
 				section.Bind(mainCfg);
-				mainCfg.Hostnames = mainCfg.Hostnames.Distinct(StringComparer.InvariantCultureIgnoreCase).ToList();
+				mainCfg.Hostnames = mainCfg.Hostnames.Distinct().ToList();
 				return mainCfg;
 			});
 

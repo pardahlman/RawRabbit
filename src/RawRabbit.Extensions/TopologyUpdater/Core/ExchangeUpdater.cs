@@ -37,7 +37,7 @@ namespace RawRabbit.Extensions.TopologyUpdater.Core
 					foreach (var binding in bindingsTask.Result ?? Enumerable.Empty<Binding>())
 					{
 						binding.RoutingKey = config.BindingTransformer(binding.RoutingKey);
-						if (string.Equals(binding.DestinationType, QueueDestination, StringComparison.InvariantCultureIgnoreCase))
+						if (string.Equals(binding.DestinationType, QueueDestination))
 						{
 							channel.QueueBind(binding.Destination, config.ExchangeName, binding.RoutingKey);
 						}
