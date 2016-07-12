@@ -18,9 +18,5 @@ namespace RawRabbit.Exceptions
 		public MessageHandlerException(string message, Exception inner)
 			: base(message, inner)
 		{ }
-
-
-		public MessageHandlerException(SerializationInfo info, StreamingContext context) : base(info, context)
-		{ }
 	}
 }
