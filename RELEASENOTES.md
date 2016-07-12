@@ -1,3 +1,10 @@
+# 1.9.4
+
+ - [#95](https://github.com/pardahlman/RawRabbit/issues/95) - Upgrade to .NET Core 1.0
+
+Commits: b051f0938d...794dc48506
+
+
 # 1.9.3
 
  - [#90](https://github.com/pardahlman/RawRabbit/issues/90) - Default Error Strategy tries to Ack Message twice +fix
