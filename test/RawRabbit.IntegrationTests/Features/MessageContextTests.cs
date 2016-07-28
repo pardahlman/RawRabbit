@@ -71,6 +71,35 @@ namespace RawRabbit.IntegrationTests.Features
 		}
 
 		[Fact]
+		public async Task Should_Implicit_Forward_Context_On_Publish()
+		{
+			/* Setup */
+			var firstCtxTcs = new TaskCompletionSource<MessageContext>();
+			var secondCtxTcs = new TaskCompletionSource<MessageContext>();
+			var publisher = BusClientFactory.CreateDefault();
+			var firstSubscriber = BusClientFactory.CreateDefault();
+			var secondSubscriber = BusClientFactory.CreateDefault();
+			firstSubscriber.SubscribeAsync<BasicMessage>((msg, i) =>
+			{
+				firstCtxTcs.SetResult(i);
+				firstSubscriber.PublishAsync(new SimpleMessage());
+				return firstCtxTcs.Task;
+			});
+			secondSubscriber.SubscribeAsync<SimpleMessage>((msg, i) =>
+			{
+				secondCtxTcs.SetResult(i);
+				return secondCtxTcs.Task;
+			});
+
+			/* Test */
+			publisher.PublishAsync<BasicMessage>();
+			Task.WaitAll(firstCtxTcs.Task, secondCtxTcs.Task);
+
+			/* Assert */
+			Assert.Equal(firstCtxTcs.Task.Result.GlobalRequestId, secondCtxTcs.Task.Result.GlobalRequestId);
+		}
+
+		[Fact]
 		public async Task Should_Forward_Context_On_Rpc()
 		{
 			/* Setup */

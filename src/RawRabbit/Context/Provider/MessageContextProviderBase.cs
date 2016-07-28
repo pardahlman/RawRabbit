@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.IO;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -11,6 +12,7 @@ namespace RawRabbit.Context.Provider
 	{
 		private readonly JsonSerializer _serializer;
 		protected ConcurrentDictionary<Guid, TMessageContext> ContextDictionary;
+		private const string GlobalMsgId = "RawRabbit:GlobalMessageId";
 
 		protected MessageContextProviderBase(JsonSerializer serializer)
 		{
@@ -27,6 +29,7 @@ namespace RawRabbit.Context.Provider
 			{
 				context = _serializer.Deserialize<TMessageContext>(jsonReader);
 			}
+			CallContext.LogicalSetData(GlobalMsgId, context.GlobalRequestId);
 			ContextDictionary.TryAdd(context.GlobalRequestId, context);
 			return context;
 		}
@@ -39,6 +42,10 @@ namespace RawRabbit.Context.Provider
 
 		public object GetMessageContext(Guid globalMessageId)
 		{
+			if (globalMessageId == Guid.Empty)
+			{
+				globalMessageId = (Guid?)CallContext.LogicalGetData(GlobalMsgId) ?? globalMessageId;
+			}
 			var context = globalMessageId != Guid.Empty && ContextDictionary.ContainsKey(globalMessageId)
 				? ContextDictionary[globalMessageId]
 				: CreateMessageContext(globalMessageId);
