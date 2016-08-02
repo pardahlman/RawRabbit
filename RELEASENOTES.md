@@ -1,3 +1,12 @@
+# 1.9.5
+
+ - [#96](https://github.com/pardahlman/RawRabbit/issues/96) - Use RabbitMQ.Client 3.6.4
+ - [#92](https://github.com/pardahlman/RawRabbit/issues/92) - Pass GlobalMessageId from Local CallContext +feature
+ - [#91](https://github.com/pardahlman/RawRabbit/issues/91) - Update Lifetime Management / Disposal of BusClient +feature
+
+Commits: 494e69ba85...c45a2910c6
+
+
 # 1.9.4
 
  - [#95](https://github.com/pardahlman/RawRabbit/issues/95) - Upgrade to .NET Core 1.0
