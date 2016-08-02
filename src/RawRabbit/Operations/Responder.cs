@@ -16,7 +16,7 @@ using RawRabbit.Operations.Abstraction;
 
 namespace RawRabbit.Operations
 {
-	public class Responder<TMessageContext> : IDisposable, IShutdown, IResponder<TMessageContext> where TMessageContext : IMessageContext
+	public class Responder<TMessageContext> : IShutdown, IResponder<TMessageContext> where TMessageContext : IMessageContext
 	{
 		private readonly IChannelFactory _channelFactory;
 		private readonly ITopologyProvider _topologyProvider;
@@ -101,21 +101,16 @@ namespace RawRabbit.Operations
 			return respondTask.Result;
 		}
 
-		public void Dispose()
-		{
-			_logger.LogDebug("Disposing Responder.");
-			(_consumerFactory as IDisposable)?.Dispose();
-		}
-
-		public async Task ShutdownAsync()
+		public async Task ShutdownAsync(TimeSpan? graceful = null)
 		{
 			_logger.LogDebug("Shutting down Responder.");
 			foreach (var subscription in _subscriptions)
 			{
 				subscription.Dispose();
 			}
-			await Task.Delay(_config.GracefulShutdown);
-			Dispose();
+			graceful = graceful ?? _config.GracefulShutdown;
+			await Task.Delay(graceful.Value);
+			(_consumerFactory as IDisposable)?.Dispose();
 		}
 	}
 }

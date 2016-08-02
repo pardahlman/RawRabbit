@@ -16,7 +16,7 @@ using RawRabbit.Serialization;
 
 namespace RawRabbit.Operations
 {
-	public class Subscriber<TMessageContext> : IDisposable, IShutdown, ISubscriber<TMessageContext> where TMessageContext : IMessageContext
+	public class Subscriber<TMessageContext> : IShutdown, ISubscriber<TMessageContext> where TMessageContext : IMessageContext
 	{
 		private readonly IChannelFactory _channelFactory;
 		private readonly IConsumerFactory _consumerFactory;
@@ -80,23 +80,18 @@ namespace RawRabbit.Operations
 			return subscriberTask.Result;
 		}
 
-		public void Dispose()
-		{
-			_logger.LogDebug("Disposing Subscriber.");
-			(_consumerFactory as IDisposable)?.Dispose();
-			(_channelFactory as IDisposable)?.Dispose();
-			(_topologyProvider as IDisposable)?.Dispose();
-		}
-
-		public async Task ShutdownAsync()
+		public async Task ShutdownAsync(TimeSpan? graceful = null)
 		{
 			_logger.LogDebug("Shutting down Subscriber.");
 			foreach (var subscription in _subscriptions)
 			{
 				subscription.Dispose();
 			}
-			await Task.Delay(_config.GracefulShutdown);
-			Dispose();
+			graceful = graceful ?? _config.GracefulShutdown;
+			await Task.Delay(graceful.Value);
+			(_consumerFactory as IDisposable)?.Dispose();
+			(_channelFactory as IDisposable)?.Dispose();
+			(_topologyProvider as IDisposable)?.Dispose();
 		}
 	}
 }

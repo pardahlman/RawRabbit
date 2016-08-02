@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Configuration;
 using RawRabbit.Context;
-using RawRabbit.Extensions.Client;
 using RawRabbit.Extensions.TopologyUpdater.Configuration;
 using RawRabbit.Extensions.TopologyUpdater.Configuration.Abstraction;
 using RawRabbit.Extensions.TopologyUpdater.Core.Abstraction;
@@ -16,7 +15,7 @@ namespace RawRabbit.Extensions.TopologyUpdater
 	{
 		public static Task<TopologyUpdateResult> UpdateTopologyAsync<TMessageContext>(this IBusClient<TMessageContext> client, Action<ITopologySelector> config) where TMessageContext : IMessageContext
 		{
-			var extended = (client as ExtendableBusClient<TMessageContext>);
+			var extended = (client as Client.IBusClient<TMessageContext>);
 			if (extended == null)
 			{
 				throw new InvalidOperationException("Extensions is only available for ExtendableBusClient");

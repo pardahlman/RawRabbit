@@ -7,7 +7,6 @@ using RawRabbit.Context;
 using RawRabbit.Extensions.CleanEverything.Configuration;
 using RawRabbit.Extensions.CleanEverything.Http;
 using RawRabbit.Extensions.CleanEverything.Model;
-using RawRabbit.Extensions.Client;
 
 namespace RawRabbit.Extensions.CleanEverything
 {
@@ -16,7 +15,7 @@ namespace RawRabbit.Extensions.CleanEverything
 		public static Task CleanAsync<TMessageContext>(this IBusClient<TMessageContext> busClient, Action<ICleanConfigurationBuilder> cfg = null)
 			where TMessageContext : IMessageContext
 		{
-			var extended = (busClient as ExtendableBusClient<TMessageContext>);
+			var extended = (busClient as Client.IBusClient<TMessageContext>);
 			if (extended == null)
 			{
 				throw new InvalidOperationException("Bus client does not support extensions. Make sure that the client is of type ExtendableBusClient.");

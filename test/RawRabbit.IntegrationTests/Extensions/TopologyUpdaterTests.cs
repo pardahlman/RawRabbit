@@ -34,7 +34,7 @@ namespace RawRabbit.IntegrationTests.Extensions
 			TestChannel.ExchangeDelete(exchangeName);
 			TestChannel.ExchangeDeclare(exchangeName, RabbitMQ.Client.ExchangeType.Direct);
 
-			var client = RawRabbitFactory.GetExtendableClient() as ExtendableBusClient<MessageContext>;
+			var client = RawRabbitFactory.Create();
 
 			/* Test */
 			await client.UpdateTopologyAsync(t => t
@@ -55,7 +55,7 @@ namespace RawRabbit.IntegrationTests.Extensions
 		{
 			/* Setup */
 			var cfg = RawRabbitConfiguration.Local.AsLegacy();
-			var client = RawRabbitFactory.GetExtendableClient(ioc => ioc.AddSingleton(s => cfg));
+			var client = RawRabbitFactory.Create(ioc => ioc.AddSingleton(s => cfg));
 			var firstTcs = new TaskCompletionSource<BasicMessage>();
 			var secondTcs = new TaskCompletionSource<BasicMessage>();
 			client.SubscribeAsync<BasicMessage>((message, context) =>
@@ -96,7 +96,7 @@ namespace RawRabbit.IntegrationTests.Extensions
 		{
 			/* Setup */
 			var cfg = RawRabbitConfiguration.Local.AsLegacy();
-			var client = RawRabbitFactory.GetExtendableClient(ioc => ioc.AddSingleton(s => cfg));
+			var client = RawRabbitFactory.Create(ioc => ioc.AddSingleton(s => cfg));
 			var firstTcs = new TaskCompletionSource<BasicMessage>();
 			var secondTcs = new TaskCompletionSource<BasicMessage>();
 			client.SubscribeAsync<BasicMessage>((message, context) =>
@@ -136,7 +136,7 @@ namespace RawRabbit.IntegrationTests.Extensions
 		public async Task Should_Honor_Last_Configuration()
 		{
 			/* Setup */
-			var client = RawRabbitFactory.GetExtendableClient();
+			var client = RawRabbitFactory.Create();
 			const string exchangeName = "topology";
 			TestChannel.ExchangeDelete(exchangeName);
 
@@ -159,8 +159,8 @@ namespace RawRabbit.IntegrationTests.Extensions
 		public async Task Should_Use_Routing_Key_Transformer_If_Present()
 		{
 			/* Setup */
-			var legacyClient = RawRabbitFactory.GetExtendableClient(ioc => ioc.AddSingleton(s => RawRabbitConfiguration.Local.AsLegacy()));
-			var currentClient = RawRabbitFactory.GetExtendableClient();
+			var legacyClient = RawRabbitFactory.Create(ioc => ioc.AddSingleton(s => RawRabbitConfiguration.Local.AsLegacy()));
+			var currentClient = RawRabbitFactory.Create();
 			var legacyTcs = new TaskCompletionSource<BasicMessage>();
 			var currentTcs = new TaskCompletionSource<BasicMessage>();
 

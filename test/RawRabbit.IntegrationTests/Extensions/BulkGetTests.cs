@@ -41,7 +41,7 @@ namespace RawRabbit.IntegrationTests.Extensions
 			var thridBasicMsg = new BasicMessage { Prop = "This is the thrid message" };
 			var firstSimpleMsg = new SimpleMessage { IsSimple = true };
 
-			var client = RawRabbitFactory.GetExtendableClient() as ExtendableBusClient<MessageContext>;
+			var client = RawRabbitFactory.Create();
 			await client.PublishAsync(secondBasicMsg);
 			await client.PublishAsync(firstBasicMsg);
 			await client.PublishAsync(thridBasicMsg);

@@ -22,7 +22,7 @@ namespace RawRabbit.IntegrationTests.Extensions
 			var channel = connection.CreateModel();
 			channel.QueueDeclare("my_queue", true, false, false, null);
 			channel.ExchangeDeclare("my_exchange", ExchangeType.Direct, true);
-			var client = RawRabbitFactory.GetExtendableClient();
+			var client = RawRabbitFactory.Create();
 
 			/* Test */
 			await client.CleanAsync(cfg => cfg

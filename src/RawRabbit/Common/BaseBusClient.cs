@@ -62,21 +62,14 @@ namespace RawRabbit.Common
 			return _requester.RequestAsync<TRequest, TResponse>(message, globalMessageId, config);
 		}
 
-		public void Dispose()
+		public Task ShutdownAsync(TimeSpan? graceful = null)
 		{
-			_logger.LogDebug("Disposing BaseBusClient.");
-			(_subscriber as IDisposable)?.Dispose();
-			(_publisher as IDisposable)?.Dispose();
-			(_requester as IDisposable)?.Dispose();
-			(_responder as IDisposable)?.Dispose();
-		}
+			_logger.LogDebug("Shutting Down BusClient and its dependencies.");
 
-		public Task ShutdownAsync()
-		{
-			var subTask = (_subscriber as IShutdown)?.ShutdownAsync() ?? Task.FromResult(true);
-			var pubTask = (_publisher as IShutdown)?.ShutdownAsync() ?? Task.FromResult(true);
-			var reqTask = (_requester as IShutdown)?.ShutdownAsync() ?? Task.FromResult(true);
-			var respTask = (_responder as IShutdown)?.ShutdownAsync() ?? Task.FromResult(true);
+			var subTask = (_subscriber as IShutdown)?.ShutdownAsync(graceful) ?? Task.FromResult(true);
+			var pubTask = (_publisher as IShutdown)?.ShutdownAsync(graceful) ?? Task.FromResult(true);
+			var reqTask = (_requester as IShutdown)?.ShutdownAsync(graceful) ?? Task.FromResult(true);
+			var respTask = (_responder as IShutdown)?.ShutdownAsync(graceful) ?? Task.FromResult(true);
 			return Task.WhenAll(subTask, pubTask, reqTask, respTask);
 		}
 	}

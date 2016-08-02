@@ -66,12 +66,5 @@ namespace RawRabbit.Operations
 					})
 				.Unwrap();
 		}
-
-		public void Dispose()
-		{
-			_logger.LogDebug("Disposing Publisher");
-			_channelFactory?.Dispose();
-			(_topologyProvider as IDisposable)?.Dispose();
-		}
 	}
 }

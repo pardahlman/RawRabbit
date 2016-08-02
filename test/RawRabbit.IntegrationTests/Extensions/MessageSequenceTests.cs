@@ -15,11 +15,11 @@ namespace RawRabbit.IntegrationTests.Extensions
 {
 	public class MessageSequenceTests : IntegrationTestBase
 	{
-		private readonly ExtendableBusClient<MessageContext> _client;
+		private readonly RawRabbit.Extensions.Client.IBusClient _client;
 
 		public MessageSequenceTests()
 		{
-			_client = RawRabbitFactory.GetExtendableClient() as ExtendableBusClient<MessageContext>;
+			_client = RawRabbitFactory.Create();
 			TestChannel.QueueDelete("basicrequest_dnx");
 			TestChannel.QueueDelete("firstmessage_dnx");
 			TestChannel.QueueDelete("secondmessage_dnx");
@@ -272,7 +272,7 @@ namespace RawRabbit.IntegrationTests.Extensions
 			/* Setup */
 			var cfg = RawRabbitConfiguration.Local;
 			cfg.RequestTimeout = TimeSpan.FromMilliseconds(200);
-			var client = RawRabbitFactory.GetExtendableClient(ioc => ioc.AddSingleton(c => cfg));
+			var client = RawRabbitFactory.Create(ioc => ioc.AddSingleton(c => cfg));
 
 			/* Test */
 			var chain = client.ExecuteSequence(c => c

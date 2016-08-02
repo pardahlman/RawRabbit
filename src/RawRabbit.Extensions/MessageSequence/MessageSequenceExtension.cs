@@ -1,7 +1,6 @@
 ﻿using System;
 using RawRabbit.Configuration;
 using RawRabbit.Context;
-using RawRabbit.Extensions.Client;
 using RawRabbit.Extensions.MessageSequence.Configuration;
 using RawRabbit.Extensions.MessageSequence.Configuration.Abstraction;
 using RawRabbit.Extensions.MessageSequence.Core.Abstraction;
@@ -17,7 +16,7 @@ namespace RawRabbit.Extensions.MessageSequence
 			Func<IMessageChainPublisher<TMessageContext>, MessageSequence<TCompleteType>> cfg
 			) where TMessageContext : IMessageContext
 		{
-			var extended = (client as ExtendableBusClient<TMessageContext>);
+			var extended = (client as Client.IBusClient<TMessageContext>);
 			if (extended == null)
 			{
 				throw new InvalidOperationException("Extensions is only available for ExtendableBusClient");

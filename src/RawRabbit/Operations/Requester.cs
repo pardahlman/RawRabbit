@@ -18,7 +18,7 @@ using RawRabbit.Serialization;
 
 namespace RawRabbit.Operations
 {
-	public class Requester<TMessageContext> : IDisposable, IShutdown, IRequester where TMessageContext : IMessageContext
+	public class Requester<TMessageContext> : IShutdown, IRequester where TMessageContext : IMessageContext
 	{
 		private readonly IChannelFactory _channelFactory;
 		private readonly IConsumerFactory _consumerFactory;
@@ -212,12 +212,7 @@ namespace RawRabbit.Operations
 			}
 		}
 
-		public void Dispose()
-		{
-			(_channelFactory as IDisposable)?.Dispose();
-		}
-
-		public async Task ShutdownAsync()
+		public async Task ShutdownAsync(TimeSpan? graceful = null)
 		{
 			_logger.LogDebug("Shutting down Requester.");
 			foreach (var ccS in _consumerCompletionSources)
@@ -232,7 +227,7 @@ namespace RawRabbit.Operations
 			{
 				await Task.Delay(_config.RequestTimeout);
 			}
-			Dispose();
+			(_channelFactory as IDisposable)?.Dispose();
 		}
 	}
 }

@@ -7,23 +7,22 @@ using RawRabbit.Context;
 using RawRabbit.Context.Provider;
 using RawRabbit.Extensions.BulkGet.Configuration;
 using RawRabbit.Extensions.BulkGet.Model;
-using RawRabbit.Extensions.Client;
 using RawRabbit.Serialization;
 
 namespace RawRabbit.Extensions.BulkGet
 {
 	public static class BulkGetExtension
 	{
-		public static BulkResult<TContextType> GetMessages<TContextType>(this IBusClient<TContextType> client, Action<IBulkGetConfigurationBuilder> cfg)
-			where TContextType : IMessageContext
+		public static BulkResult<TMessageContext> GetMessages<TMessageContext>(this IBusClient<TMessageContext> client, Action<IBulkGetConfigurationBuilder> cfg)
+			where TMessageContext : IMessageContext
 		{
-			var extended = (client as ExtendableBusClient<TContextType>);
+			var extended = (client as Client.IBusClient<TMessageContext>);
 			if (extended == null)
 			{
 				throw new InvalidOperationException("Bus client does not support extensions. Make sure that the client is of type ExtendableBusClient.");
 			}
 			var channel = extended.GetService<IChannelFactory>().CreateChannel();
-			var contextProvider = extended.GetService<IMessageContextProvider<TContextType>>();
+			var contextProvider = extended.GetService<IMessageContextProvider<TMessageContext>>();
 			var serializer = extended.GetService<IMessageSerializer>();
 
 			var result = new Dictionary<Type, List<IBulkMessage>>();
@@ -62,7 +61,7 @@ namespace RawRabbit.Extensions.BulkGet
 				result.Add(msgConfig.MessageType, rawMsgs);
 			}
 
-			return new BulkResult<TContextType>(result);
+			return new BulkResult<TMessageContext>(result);
 		}
 
 		private static IEnumerable<MessageConfiguration> GetMessageConfigurations(Action<IBulkGetConfigurationBuilder> cfg)

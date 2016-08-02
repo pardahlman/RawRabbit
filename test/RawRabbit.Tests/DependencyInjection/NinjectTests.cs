@@ -12,7 +12,7 @@ namespace RawRabbit.Tests.DependencyInjection
 	public class NinjectTests
 	{
 		[Fact]
-		public void Should_Be_Able_To_Resolve_IBusClient()
+		public async Task Should_Be_Able_To_Resolve_IBusClient()
 		{
 			/* Setup */
 			var kernel = new StandardKernel();
@@ -20,14 +20,14 @@ namespace RawRabbit.Tests.DependencyInjection
 
 			/* Test */
 			var client = kernel.Get<IBusClient>();
-			client.Dispose();
+			await client.ShutdownAsync(TimeSpan.Zero);
 
 			/* Assert */
 			Assert.True(true, "Could resolve");
 		}
 
 		[Fact]
-		public void Should_Be_Able_To_Resolve_BusClient_With_Advanced_Context()
+		public async Task Should_Be_Able_To_Resolve_BusClient_With_Advanced_Context()
 		{
 			/* Setup */
 			var kernel = new StandardKernel();
@@ -35,7 +35,7 @@ namespace RawRabbit.Tests.DependencyInjection
 
 			/* Test */
 			var client = kernel.Get<IBusClient<AdvancedMessageContext>>();
-			client.Dispose();
+			await client.ShutdownAsync(TimeSpan.Zero);
 
 			/* Assert */
 			Assert.True(true, "Could resolve");
