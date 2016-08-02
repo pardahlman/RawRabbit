@@ -1,6 +1,5 @@
-﻿{
+{
 	"dependencies": {
-
 		"Microsoft.AspNetCore.Mvc": "1.0.0",
 		"Microsoft.AspNetCore.Server.IISIntegration": "1.0.0",
 		"Microsoft.AspNetCore.Server.Kestrel": "1.0.0",
@@ -14,7 +13,7 @@
 		"RawRabbit.vNext": { "target": "project" },
 		"RawRabbit.Messages.Sample": { "target": "project" },
 		"Serilog.Extensions.Logging": "1.0.0",
-		"Serilog.Sinks.File": "2.1.0"
+    "Serilog.Sinks.File": "2.2.0"
 	},
 
 	"tools": {

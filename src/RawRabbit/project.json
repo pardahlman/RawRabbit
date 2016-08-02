@@ -11,14 +11,14 @@
 	},
 
 	"dependencies": {
-			"RabbitMQ.Client": "3.6.3",
-			"Newtonsoft.Json": "9.0.1"
+		"RabbitMQ.Client": "3.6.4",
+		"Newtonsoft.Json": "9.0.1"
 	},
 
 	"frameworks": {
-		"dnx451": { },
-		"net451": { },
-		"net452": { },
-		"net46": { }
+		"dnx451": {},
+		"net451": {},
+		"net452": {},
+		"net46": {}
 	}
 }

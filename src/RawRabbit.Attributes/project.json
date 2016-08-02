@@ -11,13 +11,13 @@
 	},
 
 	"dependencies": {
-		"RawRabbit": {"target": "project" }
+		"RawRabbit": { "target": "project" }
 	},
 
 	"frameworks": {
-		"dnx451": { },
-		"net451": { },
-		"net452": { },
-		"net46": { }
+		"dnx451": {},
+		"net451": {},
+		"net452": {},
+		"net46": {}
 	}
 }

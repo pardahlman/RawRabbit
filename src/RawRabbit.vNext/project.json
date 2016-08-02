@@ -10,7 +10,7 @@
 	},
 
 	"dependencies": {
-		"RawRabbit": {"target": "project"},
+		"RawRabbit": { "target": "project" },
 		"Microsoft.Extensions.DependencyInjection": "1.0.0",
 		"Microsoft.Extensions.Logging": "1.0.0",
 		"Microsoft.Extensions.Configuration": "1.0.0",
@@ -18,9 +18,9 @@
 	},
 
 	"frameworks": {
-		"dnx451": { },
-		"net451": { },
-		"net452": { },
-		"net46": { }
+		"dnx451": {},
+		"net451": {},
+		"net452": {},
+		"net46": {}
 	}
 }

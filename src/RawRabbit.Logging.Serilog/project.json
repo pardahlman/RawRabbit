@@ -13,7 +13,7 @@
 
 	"dependencies": {
 		"RawRabbit": { "target": "project" },
-			"Serilog": "2.0.0"
+		"Serilog": "2.1.0"
 	},
 	"frameworks": {
 		"dnx451": {},
