@@ -31,31 +31,26 @@ namespace RawRabbit.DependencyInjection.Autofac
 			builder
 				.RegisterType<Subscriber<TMessageContext>>()
 				.As<ISubscriber<TMessageContext>>()
-				.SingleInstance()
 				.PreserveExistingDefaults();
 
 			builder
 				.RegisterType<Publisher<TMessageContext>>()
 				.As<IPublisher>()
-				.SingleInstance()
 				.PreserveExistingDefaults();
 
 			builder
 				.RegisterType<Responder<TMessageContext>>()
 				.As<IResponder<TMessageContext>>()
-				.SingleInstance()
 				.PreserveExistingDefaults();
 
 			builder
 				.RegisterType<Requester<TMessageContext>>()
 				.As<IRequester>()
-				.SingleInstance()
 				.PreserveExistingDefaults();
 
 			builder
 				.RegisterType<MessageContextProvider<TMessageContext>>()
 				.As<IMessageContextProvider<TMessageContext>>()
-				.SingleInstance()
 				.PreserveExistingDefaults();
 
 			builder
@@ -77,12 +72,6 @@ namespace RawRabbit.DependencyInjection.Autofac
 			builder
 				.RegisterType<TopologyProvider>()
 				.As<ITopologyProvider>()
-				.SingleInstance()
-				.PreserveExistingDefaults();
-
-			builder
-				.RegisterType<ContextEnhancer>()
-				.As<IContextEnhancer>()
 				.SingleInstance()
 				.PreserveExistingDefaults();
 
