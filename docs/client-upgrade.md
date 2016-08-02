@@ -29,3 +29,16 @@ await client.UpdateTopologyAsync(c => c
 ```
 
 By adding the `#` wildcard, the consumer matches zero or more words in the routing key, making it compatible with clients that use the old configuration.
+
+## 1.9.5
+
+With `1.9.5`, the life time management has been looked over thoroughly. Previously, the base client implemented the `IDisposable` interface, that in turn disposed all of its own resoruces, all the way down the `IChannelFactory`. This is wanted behaviour in applications where the busclient is registered as a single instance with the same life time as the applications. However, in web applications, we might want to build the bus client for each request, customizing dependencies based on the `HttpContext`. Disposing everything in that scenario will lead to a unneccesary performance hit.
+
+To address this, the `IDisposable` interface was removed from the base client, and added to derived clientes in the `Disposable` namespace. This is the client that is returned from the `BusClientFactory` (and the `RawRabbitFactory` for extendable bus clients).
+
+### Updraging to 1.9.5
+
+There should be no major problems with this update. If you are using the factory classes for creating bus clients and somehow misses any references in your class, make sure to use
+
+* `RawRabbit.vNext.Disposable.IBusClient` where your previously used `RawRabbit.IBusClient`
+* `RawRabbit.Extensions.Disposable.IBusClient` where your previously used `RawRabbit.IBusClient` for extensions.
