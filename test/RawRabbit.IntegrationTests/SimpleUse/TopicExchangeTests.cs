@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using RabbitMQ.Client;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Exchange;
 using RawRabbit.IntegrationTests.TestMessages;
