@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 using RawRabbit.Configuration;
 using RawRabbit.Configuration.Exchange;
-using RawRabbit.Context;
 using RawRabbit.Extensions.Client;
 using RawRabbit.Extensions.TopologyUpdater;
 using RawRabbit.IntegrationTests.TestMessages;
 using Xunit;
+using ExchangeType = RawRabbit.Configuration.Exchange.ExchangeType;
 
 namespace RawRabbit.IntegrationTests.Extensions
 {

@@ -1,14 +1,8 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using RawRabbit.Common;
-using RawRabbit.Configuration;
+using RabbitMQ.Client;
 using RawRabbit.Context;
-using RawRabbit.Context.Provider;
 using RawRabbit.IntegrationTests.TestMessages;
-using RawRabbit.Operations;
-using RawRabbit.Serialization;
 using RawRabbit.vNext;
 using Xunit;
 

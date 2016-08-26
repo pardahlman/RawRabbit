@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using RabbitMQ.Client;
 using RawRabbit.Channel.Abstraction;
 using RawRabbit.Extensions.TopologyUpdater.Core.Abstraction;
 using RawRabbit.Extensions.TopologyUpdater.Model;

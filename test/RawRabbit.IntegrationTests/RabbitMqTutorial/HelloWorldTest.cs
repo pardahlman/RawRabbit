@@ -1,7 +1,5 @@
-﻿using System;
-using System.Threading.Tasks;
-using RawRabbit.Common;
-using RawRabbit.Configuration.Exchange;
+﻿using System.Threading.Tasks;
+using RabbitMQ.Client;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.vNext;
 using Xunit;

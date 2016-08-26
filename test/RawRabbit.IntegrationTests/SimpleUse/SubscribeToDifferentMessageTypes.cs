@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using RawRabbit.Common;
+using RabbitMQ.Client;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.vNext;
 using Xunit;

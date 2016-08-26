@@ -1,9 +1,9 @@
 ﻿using System.Threading.Tasks;
-using RawRabbit.Common;
-using RawRabbit.Configuration.Exchange;
+using RabbitMQ.Client;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.vNext;
 using Xunit;
+using ExchangeType = RawRabbit.Configuration.Exchange.ExchangeType;
 
 namespace RawRabbit.IntegrationTests.SimpleUse
 {
