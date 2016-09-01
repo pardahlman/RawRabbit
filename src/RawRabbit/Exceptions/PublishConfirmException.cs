@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.Serialization;
 
 namespace RawRabbit.Exceptions
 {
@@ -13,10 +12,6 @@ namespace RawRabbit.Exceptions
 
 		public PublishConfirmException(string message, Exception inner)
 			: base(message, inner)
-		{ }
-
-
-		public PublishConfirmException(SerializationInfo info, StreamingContext context) : base(info, context)
 		{ }
 	}
 }

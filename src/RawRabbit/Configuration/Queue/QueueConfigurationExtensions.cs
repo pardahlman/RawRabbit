@@ -8,7 +8,7 @@ namespace RawRabbit.Configuration.Queue
 
 		public static bool IsDirectReplyTo(this QueueConfiguration queue)
 		{
-			return string.Equals(queue.QueueName, _directQueueName, StringComparison.InvariantCultureIgnoreCase);
+			return string.Equals(queue.QueueName, _directQueueName, StringComparison.CurrentCultureIgnoreCase);
 		}
 	}
 }

@@ -39,7 +39,7 @@ namespace RawRabbit.Operations
 
 		public Task PublishAsync<TMessage>(TMessage message, Guid globalMessageId, PublishConfiguration config)
 		{
-			var context = _contextProvider.GetMessageContext(globalMessageId);
+			var context = _contextProvider.GetMessageContext(out globalMessageId);
 			var props = _propertiesProvider.GetProperties<TMessage>(config.PropertyModifier + (p => p.Headers.Add(PropertyHeaders.Context, context)));
 
 			Task exchangeTask;

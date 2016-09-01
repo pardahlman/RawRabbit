@@ -9,5 +9,6 @@ namespace RawRabbit.Context.Provider
 		Task<TMessageContext> ExtractContextAsync(object o);
 		TMessageContext ExtractContext(object o);
 		object GetMessageContext(Guid globalMessageId);
+		object GetMessageContext(out Guid globalMessageId);
 	}
 }

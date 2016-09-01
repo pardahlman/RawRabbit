@@ -16,9 +16,7 @@
 		"Serilog": "2.1.0"
 	},
 	"frameworks": {
-		"dnx451": {},
-		"net451": {},
-		"net452": {},
-		"net46": {}
+		"netstandard1.5": {},
+		"net451": {}
 	}
 }

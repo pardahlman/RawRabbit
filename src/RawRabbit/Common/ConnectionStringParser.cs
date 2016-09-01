@@ -41,6 +41,7 @@ namespace RawRabbit.Common
 				var val = match.Groups["value"].Value.ToLower();
 				var propertyInfo = cfg
 					.GetType()
+					.GetTypeInfo()
 					.GetProperty(name, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
 
 				if (propertyInfo == null)

@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -37,7 +38,7 @@ namespace RawRabbit.Common
 		public NamingConventions()
 		{
 			_subscriberCounter = new ConcurrentDictionary<Type,int>();
-			_applicationName = GetApplicationName(Environment.CommandLine);
+			_applicationName = GetApplicationName(string.Join(" ", Environment.GetCommandLineArgs()));
 
 			ExchangeNamingConvention = type => type?.Namespace?.ToLower() ?? string.Empty;
 			QueueNamingConvention = type => CreateShortAfqn(type);
@@ -107,7 +108,7 @@ namespace RawRabbit.Common
 		{
 			var t = $"{path}{(string.IsNullOrEmpty(path) ? string.Empty : delimeter)}{GetNonGenericTypeName(type)}";
 
-			if (type.IsGenericType)
+			if (type.GetTypeInfo().IsGenericType)
 			{
 				t += "[";
 				foreach (var argument in type.GenericTypeArguments)
@@ -124,7 +125,7 @@ namespace RawRabbit.Common
 
 		public static string GetNonGenericTypeName(Type type)
 		{
-			var name = !type.IsGenericType
+			var name = !type.GetTypeInfo().IsGenericType
 				? new[] { type.Name }
 				: type.Name.Split('`');
 

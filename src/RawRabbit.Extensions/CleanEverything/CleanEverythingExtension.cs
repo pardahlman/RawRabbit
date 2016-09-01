@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using RawRabbit.Configuration;
 using RawRabbit.Context;
 using RawRabbit.Extensions.CleanEverything.Configuration;
-using RawRabbit.Extensions.CleanEverything.Http;
 using RawRabbit.Extensions.CleanEverything.Model;
 
 namespace RawRabbit.Extensions.CleanEverything
@@ -20,12 +21,11 @@ namespace RawRabbit.Extensions.CleanEverything
 			{
 				throw new InvalidOperationException("Bus client does not support extensions. Make sure that the client is of type ExtendableBusClient.");
 			}
-
+			var rawConfig = extended.GetService<RawRabbitConfiguration>();
 			var config = GetCleanConfiguration(cfg);
 			Task removeQueueTask = Task.FromResult(true);
 			Task removeExchangesTask = Task.FromResult(true);
 			Task closeConnectionsTask = Task.FromResult(true);
-			var rawConfig = extended.GetService<RawRabbitConfiguration>();
 			if (config.RemoveQueues)
 			{
 				removeQueueTask = RemoveEntities<Exchange>("queues", rawConfig);
@@ -37,44 +37,38 @@ namespace RawRabbit.Extensions.CleanEverything
 			if (config.CloseConnections)
 			{
 				throw new NotImplementedException("Removal of connection is not implemented.");
-				closeConnectionsTask = RemoveEntities<Connection>("connections", rawConfig);
 			}
 			return Task.WhenAll(removeQueueTask, removeExchangesTask, closeConnectionsTask);
 		}
 
-		private static Task RemoveEntities<TEntity>(string entityName, RawRabbitConfiguration config) where TEntity : IRabbtMqEntity
+		private static async Task RemoveEntities<TEntity>(string entityName, RawRabbitConfiguration config) where TEntity : IRabbtMqEntity
 		{
 			var tasks = new List<Task>();
-			foreach (var hostname in config.Hostnames)
+
+			using (var handler = new HttpClientHandler { Credentials = new NetworkCredential(config.Username, config.Password) })
+			using (var httpClient = new HttpClient(handler))
 			{
-				var credentials = new NetworkCredential(config.Username, config.Password);
-				var queuesTask = new WebRequester()
-					.WithUrl($"http://{hostname}:15672/api/{entityName}")
-					.WithMethod(HttpMethod.Get)
-					.WithCredentials(credentials)
-					.PerformAsync<List<TEntity>>()
-					.ContinueWith(entitiesTask =>
+				foreach (var hostname in config.Hostnames)
+				{
+					var response = await httpClient.GetAsync($"http://{hostname}:15672/api/{entityName}");
+					var entityStr = await response.Content.ReadAsStringAsync();
+					var entites = JsonConvert.DeserializeObject<List<TEntity>>(entityStr);
+					foreach (var entity in entites)
 					{
-						var removeTask = new List<Task>();
-						foreach (var entity in entitiesTask.Result)
+						if (string.IsNullOrEmpty(entity.Name) || entity.Name.StartsWith("amq."))
 						{
-							if (string.IsNullOrEmpty(entity.Name) ||entity.Name.StartsWith("amq."))
-							{
-								continue;
-							}
-							var removeEntityTask = new WebRequester()
-								.WithUrl($"http://{hostname}:15672/api/{entityName}/{Uri.EscapeDataString(entity.Vhost)}/{Uri.EscapeUriString(entity.Name)}")
-								.WithMethod(HttpMethod.Delete)
-								.WithCredentials(credentials)
-								.GetResponseAsync();
-							removeTask.Add(removeEntityTask);
+							continue;
 						}
-						return Task.WhenAll(removeTask);
-					});
-				tasks.Add(queuesTask);
+						var removeEntityTask = httpClient
+							.DeleteAsync(new Uri($"http://{hostname}:15672/api/{entityName}/{Uri.EscapeDataString(entity.Vhost)}/{Uri.EscapeUriString(entity.Name)}"));
+
+						tasks.Add(removeEntityTask);
+					}
+				}
 			}
-			return Task.WhenAll(tasks);
+			await Task.WhenAll(tasks);
 		}
+
 
 		private static CleanConfiguration GetCleanConfiguration(Action<ICleanConfigurationBuilder> cfg)
 		{

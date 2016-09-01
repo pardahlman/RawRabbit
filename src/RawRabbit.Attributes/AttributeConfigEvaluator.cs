@@ -139,7 +139,7 @@ namespace RawRabbit.Attributes
 			return cfg;
 		}
 
-		private static Action<IExchangeConfigurationBuilder> ExchangeAction(MemberInfo messageType)
+		private static Action<IExchangeConfigurationBuilder> ExchangeAction(Type messageType)
 		{
 			var exchangeAttr = GetAttribute<ExchangeAttribute>(messageType);
 			if (exchangeAttr == null)
@@ -167,7 +167,7 @@ namespace RawRabbit.Attributes
 			};
 		}
 
-		private static Action<IQueueConfigurationBuilder> QueueAction(MemberInfo messageType)
+		private static Action<IQueueConfigurationBuilder> QueueAction(Type messageType)
 		{
 			var queueAttr = GetAttribute<QueueAttribute>(messageType);
 			if (queueAttr == null)
@@ -211,10 +211,10 @@ namespace RawRabbit.Attributes
 			};
 		}
 
-		private static TAttribute GetAttribute<TAttribute>(MemberInfo type) where TAttribute : Attribute
+		private static TAttribute GetAttribute<TAttribute>(Type type) where TAttribute : Attribute
 		{
-			var attr = Attribute.GetCustomAttribute(type, typeof(TAttribute));
-			return attr as TAttribute;
+			var attr = type.GetTypeInfo().GetCustomAttribute<TAttribute>();
+			return attr;
 		}
 	}
 }

@@ -15,9 +15,7 @@
 	},
 
 	"frameworks": {
-		"dnx451": {},
-		"net451": {},
-		"net452": {},
-		"net46": {}
+		"netstandard1.5": {},
+		"net451": {}
 	}
 }

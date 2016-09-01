@@ -12,13 +12,18 @@
 	},
 
 	"dependencies": {
-		"RawRabbit": { "target": "project" },
-		"Ninject": "3.2.2"
+		"RawRabbit": { "target": "project" }
 	},
 	"frameworks": {
-		"dnx451": {},
-		"net451": {},
-		"net452": {},
-		"net46": {}
+		"netstandard1.5": {
+			"dependencies": {
+				"Ninject": "4.0.0-beta-0134"
+			}
+		},
+		"net451": {
+			"dependencies": {
+				"Ninject": "3.2.2"
+			}
+		}
 	}
 }

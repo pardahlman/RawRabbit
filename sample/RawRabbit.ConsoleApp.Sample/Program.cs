@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,7 +21,7 @@ namespace RawRabbit.ConsoleApp.Sample
 		{
 			_client = BusClientFactory.CreateDefault(
 				cfg => cfg
-					.SetBasePath(Environment.CurrentDirectory)
+					.SetBasePath(Directory.GetCurrentDirectory())
 					.AddJsonFile("rawrabbit.json"),
 				ioc => ioc
 					.AddSingleton<IConfigurationEvaluator, AttributeConfigEvaluator>()
@@ -44,7 +46,7 @@ namespace RawRabbit.ConsoleApp.Sample
 			{
 				values.Add($"value{i}");
 			}
-			return _client.PublishAsync(new ValuesCalculated {Values = values}, context.GlobalRequestId);
+			return _client.PublishAsync(new ValuesCalculated {Values = values});
 		}
 	}
 }

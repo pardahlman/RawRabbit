@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
 using RawRabbit.Configuration;
@@ -50,7 +51,7 @@ namespace RawRabbit.Common
 				}
 				name += ']';
 			}
-			name += $", {type.Assembly.GetName().Name}";
+			name += $", {type.GetTypeInfo().Assembly.GetName().Name}";
 			return name;
 		}
 	}

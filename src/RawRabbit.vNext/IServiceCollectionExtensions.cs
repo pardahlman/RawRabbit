@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Runtime.Serialization.Formatters;
-using System.Security.AccessControl;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -46,7 +45,7 @@ namespace RawRabbit.vNext
 				config?.Invoke(builder);
 				var mainCfg = RawRabbitConfiguration.Local;
 				builder.Build().Bind(mainCfg);
-				mainCfg.Hostnames = mainCfg.Hostnames.Distinct(StringComparer.InvariantCultureIgnoreCase).ToList();
+				mainCfg.Hostnames = mainCfg.Hostnames.Distinct(StringComparer.CurrentCultureIgnoreCase).ToList();
 
 				collection.AddSingleton(c => mainCfg);
 			}

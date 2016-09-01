@@ -13,12 +13,10 @@
 
 	"dependencies": {
 		"RawRabbit": { "target": "project" },
-		"Autofac": "3.5.2"
+		"Autofac": "4.1.0"
 	},
 	"frameworks": {
-		"dnx451": {},
-		"net451": {},
-		"net452": {},
-		"net46": {}
+		"netstandard1.5": {},
+		"net451": {}
 	}
 }

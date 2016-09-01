@@ -12,7 +12,6 @@ namespace RawRabbit.AspNet.Sample.Controllers
 {
 	using IBusClient = Extensions.Client.IBusClient;
 
-	[Route("api/[controller]")]
 	public class ValuesController : Controller
 	{
 		private readonly IBusClient _busClient;
@@ -27,6 +26,7 @@ namespace RawRabbit.AspNet.Sample.Controllers
 		}
 
 		[HttpGet]
+		[Route("api/values")]
 		public Task<List<string>> GetAsync()
 		{
 			_logger.LogDebug("Recieved Value Request.");
@@ -39,7 +39,7 @@ namespace RawRabbit.AspNet.Sample.Controllers
 					(failed, context) =>
 					{
 						_logger.LogWarning("Unable to create Values. Exception: {0}", failed.Exception);
-						return Task.CompletedTask;
+						return Task.FromResult(true);
 					}, it => it.AbortsExecution())
 				.Complete<ValuesCalculated>()
 			);
