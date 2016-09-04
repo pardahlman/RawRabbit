@@ -56,5 +56,26 @@ namespace RawRabbit.Tests.Common
 			/* Assert */
 			Assert.Equal(expected: "application_name", actual: iisHostedAppRes);
 		}
+
+		[Fact]
+		public void Should_Be_Able_To_Get_Appllication_Name_From_Dot_Net_Core_Hosted_Apps()
+		{
+			/* Setup */
+			var commandLime = new[]
+			{
+				"C:\\PathToNuget\\packages\\dotnet-test-xunit\\2.2.0-preview2-build1029\\lib\\netcoreapp1.0\\dotnet-test-xunit.dll",
+				"C:\\ProjectPath\\RawRabbit\\test\\RawRabbit.IntegrationTests\\bin\\Debug\\netcoreapp1.0\\RawRabbit.IntegrationTests.dll",
+				"--designtime",
+				"--port",
+				"55821",
+				"--wait-command"
+			};
+
+			/* Test */
+			var appName = NamingConventions.GetApplicationName(commandLime);
+
+			/* Assert */
+			Assert.Equal("rawrabbit_integrationtests", appName);
+		}
 	}
 }

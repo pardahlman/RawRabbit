@@ -35,20 +35,21 @@ namespace RawRabbit.IntegrationTests.Extensions
 			TestChannel.ExchangeDelete(exchangeName);
 			TestChannel.ExchangeDeclare(exchangeName, RabbitMQ.Client.ExchangeType.Direct);
 
-			var client = RawRabbitFactory.Create();
+			using (var client = RawRabbitFactory.Create())
+			{
+				/* Test */
+				await client.UpdateTopologyAsync(t => t
+					.ForExchange(exchangeName)
+					.UseConfiguration(e => e
+						.WithType(ExchangeType.Topic)
+						.WithDurability(false))
+				);
 
-			/* Test */
-			await client.UpdateTopologyAsync(t => t
-				.ForExchange(exchangeName)
-				.UseConfiguration(e => e
-					.WithType(ExchangeType.Topic)
-					.WithDurability(false))
-			);
-
-			/* Assert */
-			TestChannel.ExchangeDeclare(exchangeName, RabbitMQ.Client.ExchangeType.Topic);
-			Assert.True(true, "Did not throw");
-			Assert.Throws<OperationInterruptedException>(() => TestChannel.ExchangeDeclare(exchangeName, RabbitMQ.Client.ExchangeType.Direct));
+				/* Assert */
+				TestChannel.ExchangeDeclare(exchangeName, RabbitMQ.Client.ExchangeType.Topic);
+				Assert.True(true, "Did not throw");
+				Assert.Throws<OperationInterruptedException>(() => TestChannel.ExchangeDeclare(exchangeName, RabbitMQ.Client.ExchangeType.Direct));
+			}
 		}
 
 		[Fact]
@@ -56,40 +57,42 @@ namespace RawRabbit.IntegrationTests.Extensions
 		{
 			/* Setup */
 			var cfg = RawRabbitConfiguration.Local.AsLegacy();
-			var client = RawRabbitFactory.Create(ioc => ioc.AddSingleton(s => cfg));
-			var firstTcs = new TaskCompletionSource<BasicMessage>();
-			var secondTcs = new TaskCompletionSource<BasicMessage>();
-			client.SubscribeAsync<BasicMessage>((message, context) =>
+			using (var client = RawRabbitFactory.Create(ioc => ioc.AddSingleton(s => cfg)))
 			{
-				if (!firstTcs.Task.IsCompleted)
+				var firstTcs = new TaskCompletionSource<BasicMessage>();
+				var secondTcs = new TaskCompletionSource<BasicMessage>();
+				client.SubscribeAsync<BasicMessage>((message, context) =>
 				{
-					firstTcs.SetResult(message);
-					return firstTcs.Task;
-				}
-				if (!secondTcs.Task.IsCompleted)
-				{
-					secondTcs.SetResult(message);
-					return secondTcs.Task;
-				}
-				return Task.FromResult(true);
-			});
-			
-			/* Test */
-			// 1. Verify subscriber
-			client.PublishAsync<BasicMessage>();
-			await firstTcs.Task;
+					if (!firstTcs.Task.IsCompleted)
+					{
+						firstTcs.SetResult(message);
+						return firstTcs.Task;
+					}
+					if (!secondTcs.Task.IsCompleted)
+					{
+						secondTcs.SetResult(message);
+						return secondTcs.Task;
+					}
+					return Task.FromResult(true);
+				}, c => c.WithQueue(q => q.WithAutoDelete()));
 
-			// 2. Change Type
-			await client.UpdateTopologyAsync(c => c
-				.ExchangeForMessage<BasicMessage>()
-				.UseConfiguration(e => e.WithType(ExchangeType.Topic)));
+				/* Test */
+				// 1. Verify subscriber
+				client.PublishAsync<BasicMessage>();
+				await firstTcs.Task;
 
-			// 3. Verify subscriber
-			client.PublishAsync<BasicMessage>();
-			await secondTcs.Task;
+				// 2. Change Type
+				await client.UpdateTopologyAsync(c => c
+					.ExchangeForMessage<BasicMessage>()
+					.UseConfiguration(e => e.WithType(ExchangeType.Topic)));
 
-			/* Assert */
-			Assert.True(true, "First and second message was delivered.");
+				// 3. Verify subscriber
+				client.PublishAsync<BasicMessage>();
+				await secondTcs.Task;
+
+				/* Assert */
+				Assert.True(true, "First and second message was delivered.");
+			}
 		}
 
 		[Fact]
@@ -97,108 +100,114 @@ namespace RawRabbit.IntegrationTests.Extensions
 		{
 			/* Setup */
 			var cfg = RawRabbitConfiguration.Local.AsLegacy();
-			var client = RawRabbitFactory.Create(ioc => ioc.AddSingleton(s => cfg));
-			var firstTcs = new TaskCompletionSource<BasicMessage>();
-			var secondTcs = new TaskCompletionSource<BasicMessage>();
-			client.SubscribeAsync<BasicMessage>((message, context) =>
+			using (var client = RawRabbitFactory.Create(ioc => ioc.AddSingleton(s => cfg)))
 			{
-				if (!firstTcs.Task.IsCompleted)
+				var firstTcs = new TaskCompletionSource<BasicMessage>();
+				var secondTcs = new TaskCompletionSource<BasicMessage>();
+				client.SubscribeAsync<BasicMessage>((message, context) =>
 				{
-					firstTcs.SetResult(message);
-					return firstTcs.Task;
-				}
-				if (!secondTcs.Task.IsCompleted)
-				{
-					secondTcs.SetResult(message);
-					return secondTcs.Task;
-				}
-				return Task.FromResult(true);
-			});
+					if (!firstTcs.Task.IsCompleted)
+					{
+						firstTcs.SetResult(message);
+						return firstTcs.Task;
+					}
+					if (!secondTcs.Task.IsCompleted)
+					{
+						secondTcs.SetResult(message);
+						return secondTcs.Task;
+					}
+					return Task.FromResult(true);
+				}, c => c.WithQueue(q => q.WithAutoDelete()));
 
-			/* Test */
-			// 1. Verify subscriber
-			client.PublishAsync<BasicMessage>();
-			await firstTcs.Task;
+				/* Test */
+				// 1. Verify subscriber
+				client.PublishAsync<BasicMessage>();
+				await firstTcs.Task;
 
-			// 2. Change Type
-			await client.UpdateTopologyAsync(c => c
-				.UseConventionForExchange<BasicMessage>()
-			);
+				// 2. Change Type
+				await client.UpdateTopologyAsync(c => c
+					.UseConventionForExchange<BasicMessage>()
+				);
 
-			// 3. Verify subscriber
-			client.PublishAsync<BasicMessage>();
-			await secondTcs.Task;
+				// 3. Verify subscriber
+				client.PublishAsync<BasicMessage>();
+				await secondTcs.Task;
 
-			/* Assert */
-			Assert.True(true, "First and second message was delivered.");
+				/* Assert */
+				Assert.True(true, "First and second message was delivered.");
+			}
 		}
 
 		[Fact]
 		public async Task Should_Honor_Last_Configuration()
 		{
 			/* Setup */
-			var client = RawRabbitFactory.Create();
-			const string exchangeName = "topology";
-			TestChannel.ExchangeDelete(exchangeName);
+			using (var client = RawRabbitFactory.Create())
+			{
+				const string exchangeName = "topology";
+				TestChannel.ExchangeDelete(exchangeName);
 
-			/* Test */
-			var result = await client.UpdateTopologyAsync(c => c
-				.ForExchange(exchangeName)
-				.UseConfiguration(e => e.WithType(ExchangeType.Headers))
-				.ForExchange(exchangeName)
-				.UseConfiguration(e => e.WithType(ExchangeType.Topic))
-				.ForExchange(exchangeName)
-				.UseConfiguration(e => e.WithType(ExchangeType.Direct))
-				.ForExchange(exchangeName)
-				.UseConfiguration(e => e.WithType(ExchangeType.Fanout)));
+				/* Test */
+				var result = await client.UpdateTopologyAsync(c => c
+					.ForExchange(exchangeName)
+					.UseConfiguration(e => e.WithType(ExchangeType.Headers))
+					.ForExchange(exchangeName)
+					.UseConfiguration(e => e.WithType(ExchangeType.Topic))
+					.ForExchange(exchangeName)
+					.UseConfiguration(e => e.WithType(ExchangeType.Direct))
+					.ForExchange(exchangeName)
+					.UseConfiguration(e => e.WithType(ExchangeType.Fanout)));
 
-			/* Assert */
-			Assert.Equal(result.Exchanges[0].Exchange.ExchangeType, ExchangeType.Fanout.ToString().ToLower());
+				/* Assert */
+				Assert.Equal(result.Exchanges[0].Exchange.ExchangeType, ExchangeType.Fanout.ToString().ToLower());
+			}
 		}
 
 		[Fact]
 		public async Task Should_Use_Routing_Key_Transformer_If_Present()
 		{
 			/* Setup */
-			var legacyClient = RawRabbitFactory.Create(ioc => ioc.AddSingleton(s => RawRabbitConfiguration.Local.AsLegacy()));
-			var currentClient = RawRabbitFactory.Create();
-			var legacyTcs = new TaskCompletionSource<BasicMessage>();
-			var currentTcs = new TaskCompletionSource<BasicMessage>();
-
-			currentClient.SubscribeAsync<BasicMessage>((message, context) =>
+			using (var legacyClient = RawRabbitFactory.Create(ioc => ioc.AddSingleton(s => RawRabbitConfiguration.Local.AsLegacy())))
+			using (var currentClient = RawRabbitFactory.Create())
 			{
-				if (!currentTcs.Task.IsCompleted)
+				var legacyTcs = new TaskCompletionSource<BasicMessage>();
+				var currentTcs = new TaskCompletionSource<BasicMessage>();
+
+				currentClient.SubscribeAsync<BasicMessage>((message, context) =>
 				{
-					currentTcs.SetResult(message);
-					return currentTcs.Task;
-				}
-				if (!legacyTcs.Task.IsCompleted)
-				{
-					legacyTcs.SetResult(message);
-					return legacyTcs.Task;
-				}
-				return Task.FromResult(true);
-			});
+					if (!currentTcs.Task.IsCompleted)
+					{
+						currentTcs.SetResult(message);
+						return currentTcs.Task;
+					}
+					if (!legacyTcs.Task.IsCompleted)
+					{
+						legacyTcs.SetResult(message);
+						return legacyTcs.Task;
+					}
+					return Task.FromResult(true);
+				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
 
-			/* Test */
-			// 1. Verify subscriber
-			currentClient.PublishAsync<BasicMessage>();
-			await currentTcs.Task;
+				/* Test */
+				// 1. Verify subscriber
+				currentClient.PublishAsync<BasicMessage>();
+				await currentTcs.Task;
 
-			// 2. Change Type
-			await currentClient.UpdateTopologyAsync(c => c
-				.ExchangeForMessage<BasicMessage>()
-				.UseConfiguration(
-					exchange => exchange.WithType(ExchangeType.Direct),
-					bindingKey => bindingKey.Replace(".#", string.Empty))
-			);
+				// 2. Change Type
+				await currentClient.UpdateTopologyAsync(c => c
+					.ExchangeForMessage<BasicMessage>()
+					.UseConfiguration(
+						exchange => exchange.WithType(ExchangeType.Direct),
+						bindingKey => bindingKey.Replace(".#", string.Empty))
+				);
 
-			// 3. Verify subscriber
-			legacyClient.PublishAsync<BasicMessage>();
-			await legacyTcs.Task;
+				// 3. Verify subscriber
+				legacyClient.PublishAsync<BasicMessage>();
+				await legacyTcs.Task;
 
-			/* Assert */
-			Assert.True(true);
+				/* Assert */
+				Assert.True(true);
+			}
 		}
 	}
 }

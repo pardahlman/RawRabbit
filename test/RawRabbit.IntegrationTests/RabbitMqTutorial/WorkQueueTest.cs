@@ -24,33 +24,37 @@ namespace RawRabbit.IntegrationTests.RabbitMqTutorial
 		public async Task Should_Support_The_Worker_Queues_Tutorial()
 		{
 			/* Setup */
-			var sent = new BasicMessage { Prop = "Hello, world!" };
-			var recieved = new TaskCompletionSource<BasicMessage>();
-			var sender = BusClientFactory.CreateDefault();
-			var reciever = BusClientFactory.CreateDefault();
-			reciever.SubscribeAsync<BasicMessage>((message, info) =>
+			using (var sender = BusClientFactory.CreateDefault())
+			using (var reciever = BusClientFactory.CreateDefault())
 			{
-				recieved.SetResult(message);
-				return Task.FromResult(true);
-			}, configuration => configuration
-					.WithPrefetchCount(1)
-					.WithQueue(queue =>
-						queue
-							.WithName("task_queue")
-							.WithDurability()
-						)
-					.WithRoutingKey("task_queue")
-			);
+				var sent = new BasicMessage { Prop = "Hello, world!" };
+				var recieved = new TaskCompletionSource<BasicMessage>();
 
-			/* Test */
-			await sender.PublishAsync(sent,
-				configuration: builder => builder
-					.WithRoutingKey("task_queue")
-			);
-			await recieved.Task;
+				reciever.SubscribeAsync<BasicMessage>((message, info) =>
+				{
+					recieved.SetResult(message);
+					return Task.FromResult(true);
+				}, configuration => configuration
+						.WithPrefetchCount(1)
+						.WithQueue(queue =>
+							queue
+								.WithName("task_queue")
+								.WithDurability()
+								.WithAutoDelete()
+							)
+						.WithRoutingKey("task_queue")
+				);
 
-			/* Assert */
-			Assert.Equal(expected: sent.Prop, actual: recieved.Task.Result.Prop);
+				/* Test */
+				await sender.PublishAsync(sent,
+					configuration: builder => builder
+						.WithRoutingKey("task_queue")
+				);
+				await recieved.Task;
+
+				/* Assert */
+				Assert.Equal(expected: sent.Prop, actual: recieved.Task.Result.Prop);
+			}
 		}
 	}
 }

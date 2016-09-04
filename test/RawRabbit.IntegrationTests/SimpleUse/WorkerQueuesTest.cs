@@ -12,45 +12,46 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		public async Task Should_Call_Handle_Method_Just_As_Many_Times_As_Published()
 		{
 			/* Setup */
-			var firstWorker = BusClientFactory.CreateDefault();
-			var secondWorker = BusClientFactory.CreateDefault();
-			var publisher = BusClientFactory.CreateDefault();
-
-			var allCallTcs = new TaskCompletionSource<int>();
-			const int noOfPublishes = 8;
-			var firstWorkerCalls = 0;
-			var secondWorkerCalls = 0;
-
-			firstWorker.SubscribeAsync<BasicMessage>((msg, i) =>
+			using (var firstWorker = BusClientFactory.CreateDefault())
+			using (var secondWorker = BusClientFactory.CreateDefault())
+			using (var publisher = BusClientFactory.CreateDefault())
 			{
-				firstWorkerCalls++;
-				if (firstWorkerCalls + secondWorkerCalls == noOfPublishes)
+				var allCallTcs = new TaskCompletionSource<int>();
+				const int noOfPublishes = 8;
+				var firstWorkerCalls = 0;
+				var secondWorkerCalls = 0;
+
+				firstWorker.SubscribeAsync<BasicMessage>((msg, i) =>
 				{
-					allCallTcs.SetResult(noOfPublishes);
-				}
-				return Task.FromResult(true);
-			}, cfg => cfg.WithPrefetchCount(1));
-			secondWorker.SubscribeAsync<BasicMessage>((msg, i) =>
-			{
-				secondWorkerCalls++;
-				if (firstWorkerCalls + secondWorkerCalls == noOfPublishes)
+					firstWorkerCalls++;
+					if (firstWorkerCalls + secondWorkerCalls == noOfPublishes)
+					{
+						allCallTcs.SetResult(noOfPublishes);
+					}
+					return Task.FromResult(true);
+				}, cfg => cfg.WithPrefetchCount(1).WithQueue(q =>q.WithAutoDelete()));
+				secondWorker.SubscribeAsync<BasicMessage>((msg, i) =>
 				{
-					allCallTcs.SetResult(noOfPublishes);
-				}
-				return allCallTcs.Task;
-			}, cfg => cfg.WithPrefetchCount(1));
+					secondWorkerCalls++;
+					if (firstWorkerCalls + secondWorkerCalls == noOfPublishes)
+					{
+						allCallTcs.SetResult(noOfPublishes);
+					}
+					return allCallTcs.Task;
+				}, cfg => cfg.WithPrefetchCount(1).WithQueue(q => q.WithAutoDelete()));
 
-			/* Test */
-			for (var i = 0; i < noOfPublishes; i++)
-			{
-				publisher.PublishAsync(new BasicMessage());
+				/* Test */
+				for (var i = 0; i < noOfPublishes; i++)
+				{
+					publisher.PublishAsync(new BasicMessage());
+				}
+				await allCallTcs.Task;
+
+				/* Assert */
+				Assert.Equal(expected: noOfPublishes, actual: firstWorkerCalls + secondWorkerCalls);
+				Assert.NotEqual(firstWorkerCalls, 0);
+				Assert.NotEqual(secondWorkerCalls, 0);
 			}
-			await allCallTcs.Task;
-
-			/* Assert */
-			Assert.Equal(expected: noOfPublishes, actual: firstWorkerCalls + secondWorkerCalls);
-			Assert.NotEqual(firstWorkerCalls, 0);
-			Assert.NotEqual(secondWorkerCalls, 0);
 		}
 
 		public override void Dispose()

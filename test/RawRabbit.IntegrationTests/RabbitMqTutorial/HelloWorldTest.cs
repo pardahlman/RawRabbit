@@ -8,49 +8,41 @@ namespace RawRabbit.IntegrationTests.RabbitMqTutorial
 {
 	public class HelloWorldTest : IntegrationTestBase
 	{
-		public HelloWorldTest()
-		{
-			TestChannel.QueueDelete("hello");
-		}
-
-		public override void Dispose() 
-		{
-			TestChannel.QueueDelete("hello");
-			base.Dispose();
-		}
-
 		[Fact]
 		public async Task Should_Support_The_Hello_World_Tutorial()
 		{
 			/* Setup */
-			var sent = new BasicMessage { Prop = "Hello, world!" };
-			var recieved = new TaskCompletionSource<BasicMessage>();
-			var sender = BusClientFactory.CreateDefault();
-			var reciever = BusClientFactory.CreateDefault();
-			reciever.SubscribeAsync<BasicMessage>((message, info) =>
+			using (var sender = BusClientFactory.CreateDefault())
+			using (var reciever = BusClientFactory.CreateDefault())
 			{
-				recieved.SetResult(message);
-				return Task.FromResult(true);
-			}, configuration => configuration
-					.WithQueue(queue =>
-						queue
-							.WithName("hello")
-							.WithDurability(false)
-							.WithExclusivity(false)
-							.WithAutoDelete(false)
-						)
-					.WithRoutingKey("hello")
-			);
+				var sent = new BasicMessage { Prop = "Hello, world!" };
+				var recieved = new TaskCompletionSource<BasicMessage>();
 
-			/* Test */
-			await sender.PublishAsync(sent,
-				configuration: builder => builder
-					.WithRoutingKey("hello")
-			);
-			await recieved.Task;
+				reciever.SubscribeAsync<BasicMessage>((message, info) =>
+				{
+					recieved.SetResult(message);
+					return Task.FromResult(true);
+				}, configuration => configuration
+						.WithQueue(queue =>
+							queue
+								.WithName("hello")
+								.WithExclusivity(false)
+								.WithAutoDelete(false)
+								.WithAutoDelete()
+							)
+						.WithRoutingKey("hello")
+				);
 
-			/* Assert */
-			Assert.Equal(expected: sent.Prop, actual: recieved.Task.Result.Prop);
+				/* Test */
+				await sender.PublishAsync(sent,
+					configuration: builder => builder
+						.WithRoutingKey("hello")
+				);
+				await recieved.Task;
+
+				/* Assert */
+				Assert.Equal(expected: sent.Prop, actual: recieved.Task.Result.Prop);
+			}
 		}
 	}
 }

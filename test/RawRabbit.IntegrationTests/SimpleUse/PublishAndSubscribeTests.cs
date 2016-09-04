@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using RabbitMQ.Client;
 using RawRabbit.Common;
 using RawRabbit.Configuration;
 using RawRabbit.Exceptions;
@@ -13,89 +14,97 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 {
 	public class PublishAndSubscribeTests : IntegrationTestBase
 	{
+
 		[Fact]
 		public async Task Should_Be_Able_To_Subscribe_Without_Any_Additional_Config()
 		{
 			/* Setup */
-			var message = new BasicMessage { Prop = "Hello, world!" };
-			var recievedTcs = new TaskCompletionSource<BasicMessage>();
-
-			var publisher = BusClientFactory.CreateDefault();
-			var subscriber = BusClientFactory.CreateDefault();
-
-			subscriber.SubscribeAsync<BasicMessage>((msg, info) =>
+			using (var publisher = BusClientFactory.CreateDefault())
+			using (var subscriber = BusClientFactory.CreateDefault())
 			{
-				recievedTcs.SetResult(msg);
-				return recievedTcs.Task;
-			});
+				var message = new BasicMessage { Prop = "Hello, world!" };
+				var recievedTcs = new TaskCompletionSource<BasicMessage>();
 
-			/* Test */
-			publisher.PublishAsync(message);
-			await recievedTcs.Task;
+				subscriber.SubscribeAsync<BasicMessage>((msg, info) =>
+				{
+					if (msg.Prop == message.Prop)
+					{
+						recievedTcs.SetResult(msg);
+					}
+					return Task.FromResult(true);
+				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
 
-			/* Assert */
-			Assert.Equal(expected: message.Prop, actual: recievedTcs.Task.Result.Prop);
+				/* Test */
+				publisher.PublishAsync(message);
+				await recievedTcs.Task;
+
+				/* Assert */
+				Assert.Equal(expected: message.Prop, actual: recievedTcs.Task.Result.Prop);
+			}
 		}
 
 		[Fact]
 		public async Task Should_Be_Able_To_Perform_Multiple_Pub_Subs()
 		{
 			/* Setup */
-			var subscriber = BusClientFactory.CreateDefault();
-			var publisher = BusClientFactory.CreateDefault();
-			const int numberOfCalls = 100;
-			var recived = 0;
-			var recievedTcs = new TaskCompletionSource<bool>();
-			subscriber.SubscribeAsync<BasicMessage>((message, context) =>
+			using (var subscriber = BusClientFactory.CreateDefault())
+			using (var publisher = BusClientFactory.CreateDefault())
 			{
-				Interlocked.Increment(ref recived);
-				if (numberOfCalls == recived)
+				const int numberOfCalls = 100;
+				var recived = 0;
+				var recievedTcs = new TaskCompletionSource<bool>();
+				subscriber.SubscribeAsync<BasicMessage>((message, context) =>
 				{
-					recievedTcs.SetResult(true);
+					Interlocked.Increment(ref recived);
+					if (numberOfCalls == recived)
+					{
+						recievedTcs.SetResult(true);
+					}
+					return Task.FromResult(true);
+				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+
+				/* Test */
+				var sw = Stopwatch.StartNew();
+				for (int i = 0; i < numberOfCalls; i++)
+				{
+					publisher.PublishAsync<BasicMessage>();
 				}
-				return Task.FromResult(true);
-			});
+				await recievedTcs.Task;
+				sw.Stop();
 
-			/* Test */
-			var sw = Stopwatch.StartNew();
-			for (int i = 0; i < numberOfCalls; i++)
-			{
-				publisher.PublishAsync<BasicMessage>();
+				/* Assert */
+				Assert.True(true, $"Completed {numberOfCalls} in {sw.ElapsedMilliseconds} ms.");
 			}
-			await recievedTcs.Task;
-			sw.Stop();
-
-			/* Assert */
-			Assert.True(true, $"Completed {numberOfCalls} in {sw.ElapsedMilliseconds} ms.");
 		}
 
 		[Fact]
 		public void Should_Be_Able_To_Perform_Subscribe_For_Multiple_Types()
 		{
 			/* Setup */
-			var subscriber = BusClientFactory.CreateDefault();
-			var publisher = BusClientFactory.CreateDefault();
-
-			var basicTcs = new TaskCompletionSource<BasicMessage>();
-			var simpleTcs = new TaskCompletionSource<SimpleMessage>();
-			subscriber.SubscribeAsync<BasicMessage>((message, context) =>
+			using (var subscriber = BusClientFactory.CreateDefault())
+			using (var publisher = BusClientFactory.CreateDefault())
 			{
-				basicTcs.SetResult(message);
-				return Task.FromResult(true);
-			});
-			subscriber.SubscribeAsync<SimpleMessage>((message, context) =>
-			{
-				simpleTcs.SetResult(message);
-				return Task.FromResult(true);
-			});
+				var basicTcs = new TaskCompletionSource<BasicMessage>();
+				var simpleTcs = new TaskCompletionSource<SimpleMessage>();
+				subscriber.SubscribeAsync<BasicMessage>((message, context) =>
+				{
+					basicTcs.SetResult(message);
+					return Task.FromResult(true);
+				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+				subscriber.SubscribeAsync<SimpleMessage>((message, context) =>
+				{
+					simpleTcs.SetResult(message);
+					return Task.FromResult(true);
+				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
 
-			/* Test */
-			publisher.PublishAsync<BasicMessage>();
-			publisher.PublishAsync<SimpleMessage>();
-			Task.WaitAll(basicTcs.Task, simpleTcs.Task);
+				/* Test */
+				publisher.PublishAsync<BasicMessage>();
+				publisher.PublishAsync<SimpleMessage>();
+				Task.WaitAll(basicTcs.Task, simpleTcs.Task);
 
-			/* Assert */
-			Assert.True(true, "Successfully recieved messages.");
+				/* Assert */
+				Assert.True(true, "Successfully recieved messages.");
+			}
 		}
 
 		[Fact]
@@ -104,11 +113,12 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			/* Setup */
 			var config = RawRabbitConfiguration.Local;
 			config.PublishConfirmTimeout = TimeSpan.FromTicks(1);
-			var publisher = BusClientFactory.CreateDefault(config);
-
-			/* Test */
-			/* Assert */
-			await Assert.ThrowsAsync<PublishConfirmException>(() => publisher.PublishAsync<BasicMessage>());
+			using (var publisher = BusClientFactory.CreateDefault(config))
+			{
+				/* Test */
+				/* Assert */
+				await Assert.ThrowsAsync<PublishConfirmException>(() => publisher.PublishAsync<BasicMessage>());
+			}
 		}
 
 		[Fact]
@@ -119,156 +129,167 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			var confirmTasks = new Task[numberOfCalls];
 			var config = RawRabbitConfiguration.Local;
 			config.PublishConfirmTimeout = TimeSpan.FromMilliseconds(500);
-			var publisher = BusClientFactory.CreateDefault(config);
-
-			for (int i = 0; i < numberOfCalls; i++)
+			using (var publisher = BusClientFactory.CreateDefault(config))
 			{
-				var confirmTask = publisher.PublishAsync<BasicMessage>();
-				confirmTasks[i] = confirmTask;
-			}
-			Task.WaitAll(confirmTasks);
-			Task.Delay(500).Wait();
+				for (int i = 0; i < numberOfCalls; i++)
+				{
+					var confirmTask = publisher.PublishAsync<BasicMessage>();
+					confirmTasks[i] = confirmTask;
+				}
+				Task.WaitAll(confirmTasks);
+				Task.Delay(500).Wait();
 
-			Assert.True(true, "Successfully confirmed all messages.");
+				Assert.True(true, "Successfully confirmed all messages.");
+			}
 		}
 
 		[Fact]
 		public void Should_Be_Able_To_Delivery_Message_To_Multiple_Subscribers_On_Same_Host()
 		{
 			/* Setup */
-			var subscriber = BusClientFactory.CreateDefault();
-			var publisher = BusClientFactory.CreateDefault();
-
-			var firstTcs = new TaskCompletionSource<bool>();
-			var secondTcs = new TaskCompletionSource<bool>();
-			subscriber.SubscribeAsync<BasicMessage>((message, context) =>
+			using (var subscriber = BusClientFactory.CreateDefault())
+			using (var publisher = BusClientFactory.CreateDefault())
 			{
-				firstTcs.SetResult(true);
-				return Task.FromResult(true);
-			});
-			subscriber.SubscribeAsync<BasicMessage>((message, context) =>
-			{
-				secondTcs.SetResult(true);
-				return Task.FromResult(true);
-			});
+				var firstTcs = new TaskCompletionSource<bool>();
+				var secondTcs = new TaskCompletionSource<bool>();
+				subscriber.SubscribeAsync<BasicMessage>((message, context) =>
+				{
+					firstTcs.SetResult(true);
+					return Task.FromResult(true);
+				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+				subscriber.SubscribeAsync<BasicMessage>((message, context) =>
+				{
+					secondTcs.SetResult(true);
+					return Task.FromResult(true);
+				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
 
-			/* Test */
-			var ackTask = publisher.PublishAsync<BasicMessage>();
-			Task.WaitAll(ackTask, firstTcs.Task, secondTcs.Task);
+				/* Test */
+				var ackTask = publisher.PublishAsync<BasicMessage>();
+				Task.WaitAll(ackTask, firstTcs.Task, secondTcs.Task);
 
-			/* Assert */
-			Assert.True(true, "Published and subscribe sucessfull.");
+				/* Assert */
+				Assert.True(true, "Published and subscribe sucessfull.");
+			}
 		}
 
 		[Fact]
 		public void Should_Be_Able_To_Deliver_Messages_To_Unique_Subscribers()
 		{
 			/* Setup */
-			var firstSubscriber = BusClientFactory.CreateDefault();
-			var secondSubscriber = BusClientFactory.CreateDefault();
-			var publisher = BusClientFactory.CreateDefault();
-
-			var firstTcs = new TaskCompletionSource<bool>();
-			var secondTcs = new TaskCompletionSource<bool>();
-			firstSubscriber.SubscribeAsync<BasicMessage>((message, context) =>
+			using (var firstSubscriber = BusClientFactory.CreateDefault())
+			using (var secondSubscriber = BusClientFactory.CreateDefault())
+			using (var publisher = BusClientFactory.CreateDefault())
 			{
-				firstTcs.SetResult(true);
-				return Task.FromResult(true);
-			}, cfg => cfg.WithSubscriberId("first_subscriber"));
-			secondSubscriber.SubscribeAsync<BasicMessage>((message, context) =>
-			{
-				secondTcs.SetResult(true);
-				return Task.FromResult(true);
-			}, cfg => cfg.WithSubscriberId("second_subscriber"));
+				var firstTcs = new TaskCompletionSource<bool>();
+				var secondTcs = new TaskCompletionSource<bool>();
+				firstSubscriber.SubscribeAsync<BasicMessage>((message, context) =>
+				{
+					firstTcs.SetResult(true);
+					return Task.FromResult(true);
+				}, cfg => cfg.WithSubscriberId("first_subscriber").WithQueue(q => q.WithAutoDelete()));
+				secondSubscriber.SubscribeAsync<BasicMessage>((message, context) =>
+				{
+					secondTcs.SetResult(true);
+					return Task.FromResult(true);
+				}, cfg => cfg.WithSubscriberId("second_subscriber").WithQueue(q => q.WithAutoDelete()));
 
-			/* Test */
-			var ackTask = publisher.PublishAsync<BasicMessage>();
-			Task.WaitAll(ackTask, firstTcs.Task, secondTcs.Task);
+				/* Test */
+				var ackTask = publisher.PublishAsync<BasicMessage>();
+				Task.WaitAll(ackTask, firstTcs.Task, secondTcs.Task);
 
-			/* Assert */
-			Assert.True(true, "Published and subscribe sucessfull.");
+				/* Assert */
+				Assert.True(true, "Published and subscribe sucessfull.");
+
+			}
 		}
 
 		[Fact]
 		public async Task Should_Be_Able_To_Use_Priority()
 		{
 			/* Setup */
-			var subscriber = BusClientFactory.CreateDefault();
-			var publisher = BusClientFactory.CreateDefault();
-			var prioritySent = false;
-			var queueBuilt = new TaskCompletionSource<bool>();
-			var priorityTcs = new TaskCompletionSource<BasicMessage>();
-			subscriber.SubscribeAsync<BasicMessage>(async (message, context) =>
+			using (var subscriber = BusClientFactory.CreateDefault())
+			using (var publisher = BusClientFactory.CreateDefault())
 			{
-				await queueBuilt.Task;
-				if (!prioritySent)
+				var prioritySent = false;
+				var queueBuilt = new TaskCompletionSource<bool>();
+				var priorityTcs = new TaskCompletionSource<BasicMessage>();
+				subscriber.SubscribeAsync<BasicMessage>(async (message, context) =>
 				{
-					await subscriber.PublishAsync(new BasicMessage
+					await queueBuilt.Task;
+					if (!prioritySent)
 					{
-						Prop = "I am important!"
-					}, configuration: cfg => cfg.WithProperties(p =>
+						await subscriber.PublishAsync(new BasicMessage
+						{
+							Prop = "I am important!"
+						}, configuration: cfg => cfg.WithProperties(p =>
+						{
+							p.Priority = 3;
+						}));
+						prioritySent = true;
+					}
+					else
 					{
-						p.Priority = 3;
-					}));
-					prioritySent = true;
-				}
-				else
-				{
-					priorityTcs.TrySetResult(message);
-				}
+						priorityTcs.TrySetResult(message);
+					}
 
-			}, cfg => cfg
-				.WithQueue(q => q.WithArgument(QueueArgument.MaxPriority, 3))
-				.WithSubscriberId("priority")
-				.WithPrefetchCount(1));
+				}, cfg => cfg
+					.WithQueue(q => q.WithArgument(QueueArgument.MaxPriority, 3).WithAutoDelete())
+					.WithSubscriberId("priority")
+					.WithPrefetchCount(1));
 
-			/* Test */
-			await publisher.PublishAsync(new BasicMessage {Prop = "I will be delivered"});
-			await publisher.PublishAsync(new BasicMessage {Prop = "Someone will pass me in the queue"}, configuration: cfg => cfg.WithProperties(p => p.Priority = 0));
-			queueBuilt.SetResult(true);
-			await priorityTcs.Task;
+				/* Test */
+				await publisher.PublishAsync(new BasicMessage { Prop = "I will be delivered" });
+				await publisher.PublishAsync(new BasicMessage { Prop = "Someone will pass me in the queue" }, configuration: cfg => cfg.WithProperties(p => p.Priority = 0));
+				queueBuilt.SetResult(true);
+				await priorityTcs.Task;
 
-			/* Asset */
-			Assert.Equal(expected: "I am important!", actual: priorityTcs.Task.Result.Prop);
+				/* Asset */
+				Assert.Equal(expected: "I am important!", actual: priorityTcs.Task.Result.Prop);
+			}
 		}
 
 		[Fact]
 		public async Task Should_Stop_Subscribe_When_Subscription_Is_Disposed()
 		{
 			/* Setup */
-			var publisher = BusClientFactory.CreateDefault();
-			var subscriber = BusClientFactory.CreateDefault();
-			var firstMessage = new BasicMessage {Prop = "Value"};
-			var secondMessage = new BasicMessage {Prop = "AnotherValue"};
-			var  firstRecievedTcs = new TaskCompletionSource<BasicMessage>();
-			var  secondRecievedTcs = new TaskCompletionSource<BasicMessage>();
-			var recievedCount = 0;
-
-			var subscription = subscriber.SubscribeAsync<BasicMessage>((message, context) =>
+			using (var publisher = BusClientFactory.CreateDefault())
+			using (var subscriber = BusClientFactory.CreateDefault())
 			{
-				recievedCount++;
-				firstRecievedTcs.SetResult(message);
-				return Task.FromResult(true);
-			});
+				var firstMessage = new BasicMessage { Prop = "Value" };
+				var secondMessage = new BasicMessage { Prop = "AnotherValue" };
+				var firstRecievedTcs = new TaskCompletionSource<BasicMessage>();
+				var secondRecievedTcs = new TaskCompletionSource<BasicMessage>();
+				var recievedCount = 0;
 
-			/* Test */
-			await publisher.PublishAsync(firstMessage);
-			await firstRecievedTcs.Task;
-			subscription.Dispose();
-			var recievedAfterFirstPublish = recievedCount;
-			await publisher.PublishAsync(secondMessage);
-			await Task.Delay(20);
-			publisher.SubscribeAsync<BasicMessage>((message, context) =>
-			{
-				secondRecievedTcs.SetResult(message);
-				return Task.FromResult(true);
-			});
-			await secondRecievedTcs.Task;
+				var subscription = subscriber.SubscribeAsync<BasicMessage>((message, context) =>
+				{
+					recievedCount++;
+					if (!firstRecievedTcs.Task.IsCompleted)
+					{
+						firstRecievedTcs.SetResult(message);
+					}
+					return Task.FromResult(true);
+				});
 
-			/* Assert */
-			Assert.Equal(recievedAfterFirstPublish, recievedCount);
-			Assert.Equal(firstRecievedTcs.Task.Result.Prop, firstMessage.Prop);
-			Assert.Equal(secondRecievedTcs.Task.Result.Prop, secondMessage.Prop);
+				/* Test */
+				await publisher.PublishAsync(firstMessage);
+				await firstRecievedTcs.Task;
+				subscription.Dispose();
+				var recievedAfterFirstPublish = recievedCount;
+				await publisher.PublishAsync(secondMessage);
+				await Task.Delay(20);
+				publisher.SubscribeAsync<BasicMessage>((message, context) =>
+				{
+					secondRecievedTcs.SetResult(message);
+					return Task.FromResult(true);
+				});
+				await secondRecievedTcs.Task;
+				TestChannel.QueueDelete(subscription.QueueName);
+				/* Assert */
+				Assert.Equal(recievedAfterFirstPublish, recievedCount);
+				Assert.Equal(firstRecievedTcs.Task.Result.Prop, firstMessage.Prop);
+				Assert.Equal(secondRecievedTcs.Task.Result.Prop, secondMessage.Prop);
+			}
 		}
 	}
 }

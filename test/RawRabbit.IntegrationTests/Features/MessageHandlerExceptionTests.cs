@@ -18,15 +18,20 @@ using Xunit;
 
 namespace RawRabbit.IntegrationTests.Features
 {
-	public class MessageHandlerExceptionTests
+	public class MessageHandlerExceptionTests : IDisposable
 	{
 		private readonly Mock<IErrorHandlingStrategy> _errorHandler;
-		private readonly IBusClient _client;
+		private readonly RawRabbit.vNext.Disposable.IBusClient _client;
 
 		public MessageHandlerExceptionTests()
 		{
 			_errorHandler = new Mock<IErrorHandlingStrategy>();
 			_client = BusClientFactory.CreateDefault(null, ioc => ioc.AddSingleton(c => _errorHandler.Object));
+		}
+
+		public void Dispose()
+		{
+			_client.Dispose();
 		}
 
 		[Fact]
@@ -125,71 +130,75 @@ namespace RawRabbit.IntegrationTests.Features
 		{
 			/* Setup */
 			var conventions = new NamingConventions();
-			var client = BusClientFactory.CreateDefault(null, ioc => ioc.AddSingleton(c => conventions));
-			var recieveTcs = new TaskCompletionSource<HandlerExceptionMessage>();
-			MessageContext firstRecieved = null;
-			MessageContext secondRecieved = null;
-			client.SubscribeAsync<HandlerExceptionMessage>((message, context) =>
+			using (var client = BusClientFactory.CreateDefault(null, ioc => ioc.AddSingleton(c => conventions)))
 			{
-				secondRecieved = context;
-				recieveTcs.TrySetResult(message);
-				return Task.FromResult(true);
-			}, c => c
-				.WithExchange(e => e.WithName(conventions.ErrorExchangeNamingConvention()))
-				.WithQueue(q => q.WithArgument(QueueArgument.MessageTtl, (int)TimeSpan.FromSeconds(1).TotalMilliseconds))
-				.WithRoutingKey("#"));
-			client.SubscribeAsync<BasicMessage>((message, context) =>
-			{
-				firstRecieved = context;
-				throw new Exception("Oh oh!");
-			});
-			var originalMsg = new BasicMessage { Prop = "Hello, world" };
+				var recieveTcs = new TaskCompletionSource<HandlerExceptionMessage>();
+				MessageContext firstRecieved = null;
+				MessageContext secondRecieved = null;
+				client.SubscribeAsync<HandlerExceptionMessage>((message, context) =>
+				{
+					secondRecieved = context;
+					recieveTcs.TrySetResult(message);
+					return Task.FromResult(true);
+				}, c => c
+					.WithExchange(e => e.WithName(conventions.ErrorExchangeNamingConvention()))
+					.WithQueue(q => q.WithArgument(QueueArgument.MessageTtl, (int)TimeSpan.FromSeconds(1).TotalMilliseconds))
+					.WithRoutingKey("#"));
+				client.SubscribeAsync<BasicMessage>((message, context) =>
+				{
+					firstRecieved = context;
+					throw new Exception("Oh oh!");
+				});
+				var originalMsg = new BasicMessage { Prop = "Hello, world" };
 
-			/* Test */
-			client.PublishAsync(originalMsg);
-			await recieveTcs.Task;
+				/* Test */
+				client.PublishAsync(originalMsg);
+				await recieveTcs.Task;
 
-			/* Assert */
-			Assert.Equal(((BasicMessage)recieveTcs.Task.Result.Message).Prop, originalMsg.Prop);
-			Assert.NotNull(firstRecieved);
-			Assert.NotNull(secondRecieved);
-			Assert.Equal(firstRecieved.GlobalRequestId, secondRecieved.GlobalRequestId);
+				/* Assert */
+				Assert.Equal(((BasicMessage)recieveTcs.Task.Result.Message).Prop, originalMsg.Prop);
+				Assert.NotNull(firstRecieved);
+				Assert.NotNull(secondRecieved);
+				Assert.Equal(firstRecieved.GlobalRequestId, secondRecieved.GlobalRequestId);
+			}
 		}
 
 		[Fact]
 		public async Task Should_Keep_Consumer_Open_After_Publish_Exception()
 		{
 			/* Setup */
-			var hasThrownTcs = new TaskCompletionSource<bool>();
-			var hasRecievedTcs = new TaskCompletionSource<bool>();
-			var client = BusClientFactory.CreateDefault();
-			client.SubscribeAsync<BasicMessage>((message, context) =>
+			using (var client = BusClientFactory.CreateDefault())
 			{
-				if (!hasThrownTcs.Task.IsCompleted)
+				var hasThrownTcs = new TaskCompletionSource<bool>();
+				var hasRecievedTcs = new TaskCompletionSource<bool>();
+				client.SubscribeAsync<BasicMessage>((message, context) =>
 				{
-					Timer timer = null;
-					timer = new Timer(state =>
+					if (!hasThrownTcs.Task.IsCompleted)
 					{
-						timer?.Dispose();
-						hasThrownTcs.SetResult(true);
-					}, null, TimeSpan.FromMilliseconds(100), new TimeSpan(-1));
-					throw new Exception("Uh uh!");
-				}
-				else
-				{
-					hasRecievedTcs.SetResult(true);
-				}
-				return Task.FromResult(true);
-			});
+						Timer timer = null;
+						timer = new Timer(state =>
+						{
+							timer?.Dispose();
+							hasThrownTcs.SetResult(true);
+						}, null, TimeSpan.FromMilliseconds(100), new TimeSpan(-1));
+						throw new Exception("Uh uh!");
+					}
+					else
+					{
+						hasRecievedTcs.SetResult(true);
+					}
+					return Task.FromResult(true);
+				});
 
-			/* Test */
-			client.PublishAsync(new BasicMessage());
-			await hasThrownTcs.Task;
-			client.PublishAsync(new BasicMessage());
-			await hasRecievedTcs.Task;
+				/* Test */
+				client.PublishAsync(new BasicMessage());
+				await hasThrownTcs.Task;
+				client.PublishAsync(new BasicMessage());
+				await hasRecievedTcs.Task;
 
-			/* Assert */
-			Assert.True(true);
+				/* Assert */
+				Assert.True(true);
+			}
 		}
 	}
 }

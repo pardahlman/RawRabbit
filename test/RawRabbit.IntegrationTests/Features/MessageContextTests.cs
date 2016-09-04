@@ -21,146 +21,159 @@ namespace RawRabbit.IntegrationTests.Features
 		public async Task Should_Send_Message_Context_Correctly()
 		{
 			/* Setup */
-			var subscriber = BusClientFactory.CreateDefault();
 
 			var expectedId = Guid.NewGuid();
-			var subscribeTcs = new TaskCompletionSource<Guid>();
-			var contextProvider = new MessageContextProvider<MessageContext>(new JsonSerializer(), () => new MessageContext {GlobalRequestId = expectedId});
-			var publisher = BusClientFactory.CreateDefault(collection => collection.AddSingleton<IMessageContextProvider<MessageContext>>(contextProvider));
-			subscriber.SubscribeAsync<BasicMessage>((msg, c) =>
+			var contextProvider = new MessageContextProvider<MessageContext>(new JsonSerializer(), () => new MessageContext { GlobalRequestId = expectedId });
+			using (var subscriber = BusClientFactory.CreateDefault())
+			using (var publisher = BusClientFactory.CreateDefault(collection => collection.AddSingleton<IMessageContextProvider<MessageContext>>(contextProvider)))
 			{
-				subscribeTcs.SetResult(c.GlobalRequestId);
-				return subscribeTcs.Task;
-			});
+				var subscribeTcs = new TaskCompletionSource<Guid>();
 
-			/* Test */
-			publisher.PublishAsync<BasicMessage>();
-			await subscribeTcs.Task;
+				subscriber.SubscribeAsync<BasicMessage>((msg, c) =>
+				{
+					subscribeTcs.SetResult(c.GlobalRequestId);
+					return subscribeTcs.Task;
+				}, c => c.WithQueue(q => q.WithAutoDelete()));
 
-			/* Assert */
-			Assert.Equal(expected: expectedId, actual: subscribeTcs.Task.Result);
+				/* Test */
+				publisher.PublishAsync<BasicMessage>();
+				await subscribeTcs.Task;
+
+				/* Assert */
+				Assert.Equal(expected: expectedId, actual: subscribeTcs.Task.Result);
+			}
 		}
 
 		[Fact]
 		public async Task Should_Forward_Context_On_Publish()
 		{
 			/* Setup */
-			var firstCtxTcs = new TaskCompletionSource<MessageContext>();
-			var secondCtxTcs = new TaskCompletionSource<MessageContext>();
-			var publisher = BusClientFactory.CreateDefault();
-			var firstSubscriber = BusClientFactory.CreateDefault();
-			var secondSubscriber = BusClientFactory.CreateDefault();
-			firstSubscriber.SubscribeAsync<BasicMessage>((msg, i) =>
+			using (var publisher = BusClientFactory.CreateDefault())
+			using (var firstSubscriber = BusClientFactory.CreateDefault())
+			using (var secondSubscriber = BusClientFactory.CreateDefault())
 			{
-				firstCtxTcs.SetResult(i);
-				firstSubscriber.PublishAsync(new SimpleMessage(), i.GlobalRequestId);
-				return firstCtxTcs.Task;
-			});
-			secondSubscriber.SubscribeAsync<SimpleMessage>((msg, i) =>
-			{
-				secondCtxTcs.SetResult(i);
-				return secondCtxTcs.Task;
-			});
+				var firstCtxTcs = new TaskCompletionSource<MessageContext>();
+				var secondCtxTcs = new TaskCompletionSource<MessageContext>();
+				firstSubscriber.SubscribeAsync<BasicMessage>((msg, i) =>
+				{
+					firstCtxTcs.SetResult(i);
+					firstSubscriber.PublishAsync(new SimpleMessage(), i.GlobalRequestId);
+					return firstCtxTcs.Task;
+				}, c => c.WithQueue(q => q.WithAutoDelete()));
+				secondSubscriber.SubscribeAsync<SimpleMessage>((msg, i) =>
+				{
+					secondCtxTcs.SetResult(i);
+					return secondCtxTcs.Task;
+				}, c => c.WithQueue(q => q.WithAutoDelete()));
 
-			/* Test */
-			publisher.PublishAsync<BasicMessage>();
-			Task.WaitAll(firstCtxTcs.Task, secondCtxTcs.Task);
+				/* Test */
+				publisher.PublishAsync<BasicMessage>();
+				Task.WaitAll(firstCtxTcs.Task, secondCtxTcs.Task);
 
-			/* Assert */
-			Assert.Equal(firstCtxTcs.Task.Result.GlobalRequestId, secondCtxTcs.Task.Result.GlobalRequestId);
+				/* Assert */
+				Assert.Equal(firstCtxTcs.Task.Result.GlobalRequestId, secondCtxTcs.Task.Result.GlobalRequestId);
+			}
 		}
 
 		[Fact]
 		public async Task Should_Implicit_Forward_Context_On_Publish()
 		{
 			/* Setup */
-			var firstCtxTcs = new TaskCompletionSource<MessageContext>();
-			var secondCtxTcs = new TaskCompletionSource<MessageContext>();
-			var publisher = BusClientFactory.CreateDefault();
-			var firstSubscriber = BusClientFactory.CreateDefault();
-			var secondSubscriber = BusClientFactory.CreateDefault();
-			firstSubscriber.SubscribeAsync<BasicMessage>((msg, i) =>
+			using (var publisher = BusClientFactory.CreateDefault())
+			using (var firstSubscriber = BusClientFactory.CreateDefault())
+			using (var secondSubscriber = BusClientFactory.CreateDefault())
 			{
-				firstCtxTcs.SetResult(i);
-				firstSubscriber.PublishAsync(new SimpleMessage());
-				return firstCtxTcs.Task;
-			});
-			secondSubscriber.SubscribeAsync<SimpleMessage>((msg, i) =>
-			{
-				secondCtxTcs.SetResult(i);
-				return secondCtxTcs.Task;
-			});
+				var firstCtxTcs = new TaskCompletionSource<MessageContext>();
+				var secondCtxTcs = new TaskCompletionSource<MessageContext>();
 
-			/* Test */
-			publisher.PublishAsync<BasicMessage>();
-			Task.WaitAll(firstCtxTcs.Task, secondCtxTcs.Task);
+				firstSubscriber.SubscribeAsync<BasicMessage>((msg, i) =>
+				{
+					firstCtxTcs.SetResult(i);
+					firstSubscriber.PublishAsync(new SimpleMessage());
+					return firstCtxTcs.Task;
+				}, c => c.WithQueue(q => q.WithAutoDelete()));
+				secondSubscriber.SubscribeAsync<SimpleMessage>((msg, i) =>
+				{
+					secondCtxTcs.SetResult(i);
+					return secondCtxTcs.Task;
+				}, c => c.WithQueue(q => q.WithAutoDelete()));
 
-			/* Assert */
-			Assert.Equal(firstCtxTcs.Task.Result.GlobalRequestId, secondCtxTcs.Task.Result.GlobalRequestId);
+				/* Test */
+				publisher.PublishAsync<BasicMessage>();
+				Task.WaitAll(firstCtxTcs.Task, secondCtxTcs.Task);
+
+				/* Assert */
+				Assert.Equal(firstCtxTcs.Task.Result.GlobalRequestId, secondCtxTcs.Task.Result.GlobalRequestId);
+			}
 		}
 
 		[Fact]
 		public async Task Should_Forward_Context_On_Rpc()
 		{
 			/* Setup */
-			var tcs = new TaskCompletionSource<bool>();
-			MessageContext firstContext = null;
-			MessageContext secondContext = null;
-			var requester = BusClientFactory.CreateDefault();
-			var firstResponder = BusClientFactory.CreateDefault();
-			var secondResponder = BusClientFactory.CreateDefault();
-
-			firstResponder.RespondAsync<FirstRequest, FirstResponse>(async (req, c) =>
+			using (var requester = BusClientFactory.CreateDefault())
+			using (var firstResponder = BusClientFactory.CreateDefault())
+			using (var secondResponder = BusClientFactory.CreateDefault())
 			{
-				firstContext = c;
-				var resp = await firstResponder.RequestAsync<SecondRequest, SecondResponse>(new SecondRequest(), c.GlobalRequestId);
-				return new FirstResponse { Infered = resp.Source };
-			});
-			secondResponder.RespondAsync<SecondRequest, SecondResponse>((req, c) =>
-			{
-				secondContext = c;
-				tcs.SetResult(true);
-				return Task.FromResult(new SecondResponse { Source = Guid.NewGuid() });
-			});
+				var tcs = new TaskCompletionSource<bool>();
+				MessageContext firstContext = null;
+				MessageContext secondContext = null;
 
-			/* Test */
-			requester.RequestAsync<FirstRequest, FirstResponse>();
-			await tcs.Task;
+				firstResponder.RespondAsync<FirstRequest, FirstResponse>(async (req, c) =>
+				{
+					firstContext = c;
+					var resp = await firstResponder.RequestAsync<SecondRequest, SecondResponse>(new SecondRequest(), c.GlobalRequestId);
+					return new FirstResponse { Infered = resp.Source };
+				}, c => c.WithQueue(q => q.WithAutoDelete()));
+				secondResponder.RespondAsync<SecondRequest, SecondResponse>((req, c) =>
+				{
+					secondContext = c;
+					tcs.SetResult(true);
+					return Task.FromResult(new SecondResponse { Source = Guid.NewGuid() });
+				}, c => c.WithQueue(q => q.WithAutoDelete()));
 
-			/* Assert */
-			Assert.Equal(firstContext.GlobalRequestId, secondContext.GlobalRequestId);
+				/* Test */
+				requester.RequestAsync<FirstRequest, FirstResponse>();
+				await tcs.Task;
+
+				/* Assert */
+				Assert.Equal(firstContext.GlobalRequestId, secondContext.GlobalRequestId);
+			}
+			
 		}
 
 		[Fact]
 		public async Task Should_Forward_Context_On_Rpc_To_Publish()
 		{
 			/* Setup */
-			var tcs = new TaskCompletionSource<bool>();
-			MessageContext firstContext = null;
-			MessageContext secondContext = null;
-			var requester = BusClientFactory.CreateDefault();
-			var firstResponder = BusClientFactory.CreateDefault();
-			var firstSubscriber = BusClientFactory.CreateDefault();
-
-			firstResponder.RespondAsync<FirstRequest, FirstResponse>(async (req, c) =>
+			using (var requester = BusClientFactory.CreateDefault())
+			using (var firstResponder = BusClientFactory.CreateDefault())
+			using (var firstSubscriber = BusClientFactory.CreateDefault())
 			{
-				firstContext = c;
-				await firstResponder.PublishAsync(new BasicMessage(), c.GlobalRequestId);
-				return new FirstResponse();
-			});
-			firstSubscriber.SubscribeAsync<BasicMessage>((req, c) =>
-			{
-				secondContext = c;
-				tcs.SetResult(true);
-				return tcs.Task;
-			});
+				var tcs = new TaskCompletionSource<bool>();
+				MessageContext firstContext = null;
+				MessageContext secondContext = null;
 
-			/* Test */
-			requester.RequestAsync<FirstRequest, FirstResponse>();
-			await tcs.Task;
+				firstResponder.RespondAsync<FirstRequest, FirstResponse>(async (req, c) =>
+				{
+					firstContext = c;
+					await firstResponder.PublishAsync(new BasicMessage(), c.GlobalRequestId);
+					return new FirstResponse();
+				}, c => c.WithQueue(q => q.WithAutoDelete()));
+				firstSubscriber.SubscribeAsync<BasicMessage>((req, c) =>
+				{
+					secondContext = c;
+					tcs.SetResult(true);
+					return tcs.Task;
+				}, c => c.WithQueue(q => q.WithAutoDelete()));
 
-			/* Assert */
-			Assert.Equal(firstContext.GlobalRequestId, secondContext.GlobalRequestId);
+				/* Test */
+				requester.RequestAsync<FirstRequest, FirstResponse>();
+				await tcs.Task;
+
+				/* Assert */
+				Assert.Equal(firstContext.GlobalRequestId, secondContext.GlobalRequestId);
+			}
 		}
 	}
 }

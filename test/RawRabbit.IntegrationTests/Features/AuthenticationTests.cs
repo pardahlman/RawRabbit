@@ -33,7 +33,8 @@ namespace RawRabbit.IntegrationTests.Features
 		{
 			/* Setup */
 			/* Test */
-			BusClientFactory.CreateDefault();
+			var b = BusClientFactory.CreateDefault();
+			b.Dispose();
 
 			/* Assert */
 			Assert.True(true, "Does not throw.");
@@ -53,7 +54,8 @@ namespace RawRabbit.IntegrationTests.Features
 			};
 
 			/* Test */
-			BusClientFactory.CreateDefault(config);
+			var b = BusClientFactory.CreateDefault();
+			b.Dispose();
 
 			/* Assert */
 			Assert.True(true, "Does not throw.");

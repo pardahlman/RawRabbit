@@ -12,34 +12,35 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		public async Task Should_Be_Able_To_Recieve_Different_Types_Of_Messages()
 		{
 			/* Setup */
-			var publisher = BusClientFactory.CreateDefault();
-			var subscriber = BusClientFactory.CreateDefault();
-
-			var basicMsg = new BasicMessage {Prop = "Hello, world!"};
-			var simpleMsg = new SimpleMessage {IsSimple = true};
-
-			var basicMsgTcs = new TaskCompletionSource<BasicMessage>();
-			var simpleMsgTcs = new TaskCompletionSource<SimpleMessage>();
-
-			subscriber.SubscribeAsync<BasicMessage>((msg, i) =>
+			using (var publisher = BusClientFactory.CreateDefault())
+			using (var subscriber = BusClientFactory.CreateDefault())
 			{
-				basicMsgTcs.SetResult(msg);
-				return basicMsgTcs.Task;
-			});
-			subscriber.SubscribeAsync<SimpleMessage>((msg, i) =>
-			{
-				simpleMsgTcs.SetResult(msg);
-				return basicMsgTcs.Task;
-			});
+				var basicMsg = new BasicMessage { Prop = "Hello, world!" };
+				var simpleMsg = new SimpleMessage { IsSimple = true };
 
-			/* Test */
-			publisher.PublishAsync(basicMsg);
-			publisher.PublishAsync(simpleMsg);
-			Task.WaitAll(basicMsgTcs.Task, simpleMsgTcs.Task);
+				var basicMsgTcs = new TaskCompletionSource<BasicMessage>();
+				var simpleMsgTcs = new TaskCompletionSource<SimpleMessage>();
 
-			/* Assert */
-			Assert.Equal(expected: basicMsg.Prop, actual: basicMsgTcs.Task.Result.Prop);
-			Assert.Equal(expected: simpleMsg.IsSimple, actual: simpleMsgTcs.Task.Result.IsSimple);
+				subscriber.SubscribeAsync<BasicMessage>((msg, i) =>
+				{
+					basicMsgTcs.SetResult(msg);
+					return basicMsgTcs.Task;
+				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+				subscriber.SubscribeAsync<SimpleMessage>((msg, i) =>
+				{
+					simpleMsgTcs.SetResult(msg);
+					return basicMsgTcs.Task;
+				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+
+				/* Test */
+				publisher.PublishAsync(basicMsg);
+				publisher.PublishAsync(simpleMsg);
+				Task.WaitAll(basicMsgTcs.Task, simpleMsgTcs.Task);
+
+				/* Assert */
+				Assert.Equal(expected: basicMsg.Prop, actual: basicMsgTcs.Task.Result.Prop);
+				Assert.Equal(expected: simpleMsg.IsSimple, actual: simpleMsgTcs.Task.Result.IsSimple);
+			}
 		}
 
 		public override void Dispose()
