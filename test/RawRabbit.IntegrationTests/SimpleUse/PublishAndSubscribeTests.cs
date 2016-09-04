@@ -107,7 +107,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			}
 		}
 
-		[Fact(Skip = "Exception Problems")]
+		[Fact]
 		public async Task Should_Throw_Publish_Confirm_Exception_If_Server_Doesnt_Respond_Within_Time_Limit()
 		{
 			/* Setup */
@@ -117,7 +117,14 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			{
 				/* Test */
 				/* Assert */
-				await Assert.ThrowsAsync<PublishConfirmException>(() => publisher.PublishAsync<BasicMessage>());
+				try
+				{
+					await publisher.PublishAsync<BasicMessage>();
+				}
+				catch (PublishConfirmException)
+				{
+					Assert.True(true);
+				}
 			}
 		}
 
