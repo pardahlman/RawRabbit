@@ -104,7 +104,7 @@ namespace RawRabbit.Operations
 						p.ReplyTo = cfg.ReplyQueue.QueueName;
 						p.CorrelationId = correlationId;
 						p.Expiration = _config.RequestTimeout.TotalMilliseconds.ToString();
-						p.Headers.Add(PropertyHeaders.Context, _contextProvider.GetMessageContext(globalMessageId));
+						p.Headers.Add(PropertyHeaders.Context, _contextProvider.GetMessageContext(ref globalMessageId));
 					}),
 				body: _serializer.Serialize(message)
 			);

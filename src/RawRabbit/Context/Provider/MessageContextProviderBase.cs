@@ -5,6 +5,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+#if NET451
+using System.Runtime.Remoting.Messaging;
+#endif
 
 namespace RawRabbit.Context.Provider
 {
@@ -12,16 +15,18 @@ namespace RawRabbit.Context.Provider
 	{
 		private readonly JsonSerializer _serializer;
 		protected ConcurrentDictionary<Guid, TMessageContext> ContextDictionary;
-		#if NETSTANDARD1_5
+#if NETSTANDARD1_5
 		private readonly AsyncLocal<Guid> _globalMsgId;
-		#endif
+#elif NET451
+		private const string GlobalMsgId = "RawRabbit:GlobalMessageId";
+#endif
 		protected MessageContextProviderBase(JsonSerializer serializer)
 		{
 			_serializer = serializer;
 			ContextDictionary = new ConcurrentDictionary<Guid, TMessageContext>();
-			#if NETSTANDARD1_5
+#if NETSTANDARD1_5
 			_globalMsgId = new AsyncLocal<Guid>();
-			#endif
+#endif
 		}
 
 		public TMessageContext ExtractContext(object o)
@@ -34,9 +39,11 @@ namespace RawRabbit.Context.Provider
 				context = _serializer.Deserialize<TMessageContext>(jsonReader);
 			}
 
-			#if NETSTANDARD1_5
+#if NETSTANDARD1_5
 			_globalMsgId.Value = context.GlobalRequestId;
-			#endif
+#elif NET451
+			CallContext.LogicalSetData(GlobalMsgId, context.GlobalRequestId);
+#endif
 			ContextDictionary.TryAdd(context.GlobalRequestId, context);
 			return context;
 		}
@@ -47,35 +54,25 @@ namespace RawRabbit.Context.Provider
 			return Task.FromResult(context);
 		}
 
-		public object GetMessageContext(Guid globalMessageId)
+		public object GetMessageContext(ref Guid globalMessageId)
 		{
 
-			#if NETSTANDARD1_5
+#if NETSTANDARD1_5
 			if (globalMessageId == Guid.Empty)
 			{
 				globalMessageId = _globalMsgId?.Value ?? globalMessageId;
 			}
-			#endif
-			var context = globalMessageId != Guid.Empty && ContextDictionary.ContainsKey(globalMessageId)
-				? ContextDictionary[globalMessageId]
-				: CreateMessageContext(globalMessageId);
-			var contextAsJson = SerializeContext(context);
-			var contextAsBytes = (object) Encoding.UTF8.GetBytes(contextAsJson);
-			return contextAsBytes;
-		}
-
-		public object GetMessageContext(out Guid globalMessageId)
-		{
-#if NETSTANDARD1_5
-			globalMessageId = _globalMsgId?.Value ?? globalMessageId;
-#else
-			globalMessageId = Guid.NewGuid();
+#elif NET451
+			if (globalMessageId == Guid.Empty)
+			{
+				globalMessageId = (Guid?)CallContext.LogicalGetData(GlobalMsgId) ?? globalMessageId;
+			}	
 #endif
 			var context = globalMessageId != Guid.Empty && ContextDictionary.ContainsKey(globalMessageId)
 				? ContextDictionary[globalMessageId]
 				: CreateMessageContext(globalMessageId);
 			var contextAsJson = SerializeContext(context);
-			var contextAsBytes = (object)Encoding.UTF8.GetBytes(contextAsJson);
+			var contextAsBytes = (object) Encoding.UTF8.GetBytes(contextAsJson);
 			return contextAsBytes;
 		}
 
