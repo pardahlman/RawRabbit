@@ -8,12 +8,14 @@ namespace RawRabbit.Common
 	{
 		string QueueName { get; }
 		string ConsumerTag { get; }
+		bool Active { get;  }
 	}
 
 	public class Subscription : ISubscription
 	{
 		public string QueueName { get; }
 		public string ConsumerTag { get; }
+		public bool Active { get; set; }
 
 		private readonly IRawConsumer _consumer;
 
@@ -31,6 +33,7 @@ namespace RawRabbit.Common
 
 		public void Dispose()
 		{
+			Active = false;
 			_consumer.Disconnect();
 		}
 	}

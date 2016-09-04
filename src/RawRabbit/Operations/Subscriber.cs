@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RawRabbit.Channel.Abstraction;
@@ -74,7 +75,7 @@ namespace RawRabbit.Operations
 					}, exception => _errorHandling.OnSubscriberExceptionAsync(consumer, config, args, exception));
 					consumer.Model.BasicConsume(config.Queue.FullQueueName, config.NoAck, consumer);
 					_logger.LogDebug($"Setting up a consumer on channel '{channelTask.Result.ChannelNumber}' for queue {config.Queue.QueueName} with NoAck set to {config.NoAck}.");
-					return new Subscription(consumer, config.Queue.QueueName);
+					return new Subscription(consumer, config.Queue.FullQueueName);
 				});
 			Task.WaitAll(subscriberTask);
 			_subscriptions.Add(subscriberTask.Result);
@@ -84,7 +85,7 @@ namespace RawRabbit.Operations
 		public async Task ShutdownAsync(TimeSpan? graceful = null)
 		{
 			_logger.LogDebug("Shutting down Subscriber.");
-			foreach (var subscription in _subscriptions)
+			foreach (var subscription in _subscriptions.Where(s => s.Active))
 			{
 				subscription.Dispose();
 			}
