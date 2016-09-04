@@ -25,9 +25,12 @@ namespace RawRabbit.Extensions.TopologyUpdater.Core
 					? UriEncodedDefaultVhost
 					: config.VirtualHost;
 
-			_httpClient = new HttpClient
+			_httpClient = new HttpClient(new HttpClientHandler
 			{
-				BaseAddress = new Uri($"http://{config.Hostnames.FirstOrDefault()}:15672/api/exchanges/{vHost}")
+				Credentials = new NetworkCredential(config.Username, config.Password)
+			})
+			{
+				BaseAddress = new Uri($"http://{config.Hostnames.FirstOrDefault()}:15672/api/exchanges/{vHost}/")
 			};
 		}
 
