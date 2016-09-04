@@ -25,6 +25,10 @@ namespace RawRabbit.Common
 		private readonly ConcurrentDictionary<Type, int> _subscriberCounter;
 		private readonly string _applicationName;
 		private const string IisWorkerProcessName = "w3wp";
+		private static readonly Regex DllRegex = new Regex(@"(?<ApplicationName>[^\\]*).dll", RegexOptions.Compiled);
+		private static readonly Regex ConsoleOrServiceRegex = new Regex(@"(?<ApplicationName>[^\\]*).exe", RegexOptions.Compiled);
+		private static readonly Regex IisHostedAppRegexVer1 = new Regex(@"-ap\s\\""(?<ApplicationName>[^\\]+)");
+		private static readonly Regex IisHostedAppRegexVer2 = new Regex(@"\\\\apppools\\\\(?<ApplicationName>[^\\]+)");
 
 		public virtual Func<Type, string> ExchangeNamingConvention { get; set; }
 		public virtual Func<Type, string> QueueNamingConvention { get; set; }
@@ -70,12 +74,15 @@ namespace RawRabbit.Common
 			return sb.ToString();
 		}
 
-		public static string GetApplicationName(string commandLine)
+		public static string GetApplicationName(params string[] commandLine)
 		{
-			var consoleOrServiceRegex = new Regex(@"(?<ApplicationName>[^\\]*).exe");
-			var match = consoleOrServiceRegex.Match(commandLine);
+			var match = ConsoleOrServiceRegex.Match(commandLine.FirstOrDefault() ?? string.Empty);
 			var applicationName = string.Empty;
 
+			if (commandLine == null)
+			{
+				return string.Empty;
+			}
 			if (match.Success && match.Groups["ApplicationName"].Value != IisWorkerProcessName)
 			{
 				applicationName = match.Groups["ApplicationName"].Value;
@@ -84,19 +91,25 @@ namespace RawRabbit.Common
 			}
 			else
 			{
-				var iisHostedAppRegexVer1 = new Regex(@"-ap\s\\""(?<ApplicationName>[^\\]+)");
-				match = iisHostedAppRegexVer1.Match(commandLine);
+				match = IisHostedAppRegexVer1.Match(commandLine.FirstOrDefault() ?? string.Empty);
 				if (match.Success)
 				{
 					applicationName = match.Groups["ApplicationName"].Value;
 				}
 				else
 				{
-					var iisHostedAppRegexVer2 = new Regex(@"\\\\apppools\\\\(?<ApplicationName>[^\\]+)");
-					match = iisHostedAppRegexVer2.Match(commandLine);
+					match = IisHostedAppRegexVer2.Match(commandLine.FirstOrDefault() ?? string.Empty);
 					if (match.Success)
 					{
 						applicationName = match.Groups["ApplicationName"].Value;
+					}
+					else
+					{
+						var index = commandLine.Length > 1 ? 1 : 0;
+						if (DllRegex.IsMatch(commandLine[index]))
+						{
+							applicationName = DllRegex.Match(commandLine[index]).Groups["ApplicationName"].Value;
+						}
 					}
 				}
 			}
