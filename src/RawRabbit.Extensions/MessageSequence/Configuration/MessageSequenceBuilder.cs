@@ -52,7 +52,9 @@ namespace RawRabbit.Extensions.MessageSequence.Configuration
 			_logger.LogDebug($"Registering handler for '{_globalMessageId}' of type '{typeof(TMessage).Name}'. Optional: {optionBuilder.Configuration.Optional}, Aborts: {optionBuilder.Configuration.AbortsExecution}");
 			_dispatcher.AddMessageHandler(_globalMessageId, func, optionBuilder.Configuration);
 			var bindTask = _chainTopology.BindToExchange<TMessage>(_globalMessageId);
+			bindTask.ConfigureAwait(false);
 			Task.WaitAll(bindTask);
+			_logger.LogDebug($"Sucessfully bound Sequence Queue for GlobalMessageId '{_globalMessageId}' of type '{typeof(TMessage).Name}.");
 			return this;
 		}
 
