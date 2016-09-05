@@ -15,10 +15,17 @@
 		"dotnet-test-xunit": "2.2.0-preview2-build1029"
 	},
 	"frameworks": {
-		"net451": {
+		"netcoreapp1.0": {
 			"dependencies": {
-				"Microsoft.NETCore.Platforms": "1.0.1"
-			}
+				"Microsoft.NETCore.App": {
+					"type": "platform",
+					"version": "1.0.0"
+				}
+			},
+			"imports": [
+				"dotnet5.4",
+				"portable-net451+win8"
+			]
 		}
 	}
 }

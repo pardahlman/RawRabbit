@@ -8,6 +8,10 @@ namespace RawRabbit.Exceptions
 	/// </summary>
 	public class MessageHandlerException : Exception
 	{
+		public string InnerExceptionType { get; set; }
+		public string InnerStackTrace { get; set; }
+		public string InnerMessage { get; set; }
+
 		public MessageHandlerException()
 		{ }
 

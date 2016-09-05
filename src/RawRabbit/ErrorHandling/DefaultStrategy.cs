@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -38,21 +39,23 @@ namespace RawRabbit.ErrorHandling
 		{
 			_logger.LogError($"An unhandled exception was thrown in the response handler for message '{args.BasicProperties.MessageId}'.", exception);
 			var innerException = UnwrapInnerException(exception);
-			var rawException = new MessageHandlerException(
-				message: $"An unhandled exception was thrown when consuming a message\n  MessageId: {args.BasicProperties.MessageId}\n  Queue: '{cfg.Queue.FullQueueName}'\n  Exchange: '{cfg.Exchange.ExchangeName}'\nSee inner exception for more details.",
-				inner: innerException
-			);
-
+			var exceptionInfo = new MessageHandlerExceptionInformation
+			{
+				Message = $"An unhandled exception was thrown when consuming a message\n  MessageId: {args.BasicProperties.MessageId}\n  Queue: '{cfg.Queue.FullQueueName}'\n  Exchange: '{cfg.Exchange.ExchangeName}'\nSee inner exception for more details.",
+				ExceptionType = innerException.GetType().FullName,
+				StackTrace = innerException.StackTrace,
+				InnerMessage = innerException.Message
+			};
 			_logger.LogInformation($"Sending MessageHandlerException with CorrelationId '{args.BasicProperties.CorrelationId}'");
 			rawConsumer.Model.BasicPublish(
 				exchange: string.Empty,
 				routingKey: args.BasicProperties?.ReplyTo ?? string.Empty,
-				basicProperties: _propertiesProvider.GetProperties<MessageHandlerException>(p =>
+				basicProperties: _propertiesProvider.GetProperties<MessageHandlerExceptionInformation>(p =>
 				{
 					p.CorrelationId = args.BasicProperties?.CorrelationId ?? string.Empty;
 					p.Headers.Add(PropertyHeaders.ExceptionHeader, _messageExceptionName);
 				}),
-				body: _serializer.Serialize(rawException)
+				body: _serializer.Serialize(exceptionInfo)
 			);
 
 			if (!cfg.NoAck)
@@ -79,7 +82,13 @@ namespace RawRabbit.ErrorHandling
 			if (containsException)
 			{
 				_logger.LogInformation($"Message '{args.BasicProperties.MessageId}' withh CorrelationId '{args.BasicProperties.CorrelationId}' contains exception. Deserialize and re-throw.");
-				var exception = _serializer.Deserialize<MessageHandlerException>(args.Body);
+				var exceptionInfo = _serializer.Deserialize<MessageHandlerExceptionInformation>(args.Body);
+				var exception = new MessageHandlerException(exceptionInfo.Message)
+				{
+					InnerExceptionType = exceptionInfo.ExceptionType,
+					InnerStackTrace = exceptionInfo.StackTrace,
+					InnerMessage = exceptionInfo.InnerMessage
+				};
 				responseTcs.TrySetException(exception);
 			}
 
@@ -118,6 +127,7 @@ namespace RawRabbit.ErrorHandling
 			}
 			try
 			{
+				_logger.LogError($"Error thrown in Subscriber: ", exception);
 				_logger.LogDebug($"Attempting to publish message '{args.BasicProperties.MessageId}' to error exchange.");
 
 				var topologyTask = _topologyProvider.DeclareExchangeAsync(_errorExchangeCfg);

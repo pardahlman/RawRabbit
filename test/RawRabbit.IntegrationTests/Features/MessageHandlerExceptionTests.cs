@@ -34,7 +34,7 @@ namespace RawRabbit.IntegrationTests.Features
 			_client.Dispose();
 		}
 
-		[Fact(Skip = "Problem with Serialization")]
+		[Fact]
 		public async Task Should_Call_Subscribe_Error_Handler_On_Exception_In_Subscribe_Handler()
 		{
 			/* Setup */
@@ -61,7 +61,7 @@ namespace RawRabbit.IntegrationTests.Features
 			{
 				recieveTcs.SetResult(message);
 				throw exception;
-			}, c => c.WithNoAck());
+			}, c => c.WithNoAck().WithQueue(q => q.WithAutoDelete()));
 
 			/* Test */
 			_client.PublishAsync<BasicMessage>();
@@ -71,43 +71,46 @@ namespace RawRabbit.IntegrationTests.Features
 			_errorHandler.VerifyAll();
 		}
 
-		[Fact(Skip = "Problem with Serialization")]
+		[Fact]
 		public async Task Should_Throw_Exception_To_Requester_If_Responder_Throws_Async()
 		{
 			/* Setup */
-			var responseException = new NotSupportedException("I'll throw this");
-			var requester = BusClientFactory.CreateDefault(TimeSpan.FromHours(1));
-			var responder = BusClientFactory.CreateDefault(TimeSpan.FromHours(1));
-			responder.RespondAsync<BasicRequest, BasicResponse>(async (request, context) =>
+			using (var requester = BusClientFactory.CreateDefault(TimeSpan.FromHours(1)))
+			using (var responder = BusClientFactory.CreateDefault(TimeSpan.FromHours(1)))
 			{
-				throw responseException;
-			});
+				responder.RespondAsync<BasicRequest, BasicResponse>((request, context) =>
+				{
+					throw new NotSupportedException("I'll throw this");
+				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
 
-			/* Test */
-			/* Assert */
-			var e = await Assert.ThrowsAsync<MessageHandlerException>(() => requester.RequestAsync<BasicRequest, BasicResponse>());
-			Assert.Equal(expected: responseException.Message, actual: e.InnerException.Message);
+				/* Test */
+				/* Assert */
+				var e = await Assert.ThrowsAsync<MessageHandlerException>(() => requester.RequestAsync<BasicRequest, BasicResponse>());
+				Assert.NotNull(e);
+			}
 		}
 
-		[Fact(Skip = "Problem with Serialization")]
+		[Fact]
 		public async Task Should_Throw_Exception_To_Requester_If_Responder_Throws_Sync()
 		{
 			/* Setup */
-			var responseException = new NotSupportedException("I'll throw this");
-			var requester = BusClientFactory.CreateDefault(TimeSpan.FromHours(1));
-			var responder = BusClientFactory.CreateDefault(TimeSpan.FromHours(1));
-			responder.RespondAsync<BasicRequest, BasicResponse>((request, context) =>
+			using (var requester = BusClientFactory.CreateDefault(TimeSpan.FromHours(1)))
+			using (var responder = BusClientFactory.CreateDefault(TimeSpan.FromHours(1)))
 			{
-				throw responseException;
-			});
+				var responseException = new NotSupportedException("I'll throw this");
+				responder.RespondAsync<BasicRequest, BasicResponse>((request, context) =>
+				{
+					throw responseException;
+				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
 
-			/* Test */
-			/* Assert */
-			var e = await Assert.ThrowsAsync<MessageHandlerException>(() => requester.RequestAsync<BasicRequest, BasicResponse>());
-			Assert.Equal(expected: responseException.Message, actual: e.InnerException.Message);
+				/* Test */
+				/* Assert */
+				var e = await Assert.ThrowsAsync<MessageHandlerException>(() => requester.RequestAsync<BasicRequest, BasicResponse>());
+				Assert.Equal(expected: responseException.Message, actual: e.InnerMessage);
+			}
 		}
 
-		[Fact(Skip = "Problem with Serialization")]
+		[Fact]
 		public async Task Should_Throw_Exception_If_Deserialization_Of_Response_Fails()
 		{
 			/* Setup */
@@ -116,16 +119,20 @@ namespace RawRabbit.IntegrationTests.Features
 			brokenMsgSerializer
 				.Setup(s => s.Deserialize(It.IsAny<BasicDeliverEventArgs>()))
 				.Throws(exception);
-			var brokenClient = BusClientFactory.CreateDefault(null, ioc => ioc.AddSingleton(provider => brokenMsgSerializer.Object));
-			brokenClient.RespondAsync<BasicRequest, BasicResponse>((request, context) => Task.FromResult(new BasicResponse()));
+			using (var brokenClient = BusClientFactory.CreateDefault(null, ioc => ioc.AddSingleton(provider => brokenMsgSerializer.Object)))
+			{
+				brokenClient.RespondAsync<BasicRequest, BasicResponse>(
+					(request, context) => Task.FromResult(new BasicResponse()),
+					cfg => cfg.WithQueue(q => q.WithAutoDelete()));
 
-			/* Test */
-			/* Assert */
-			var e = await Assert.ThrowsAsync<Exception>(() => brokenClient.RequestAsync<BasicRequest, BasicResponse>());
-			Assert.Equal(e, exception);
+				/* Test */
+				/* Assert */
+				var e = await Assert.ThrowsAsync<Exception>(() => brokenClient.RequestAsync<BasicRequest, BasicResponse>());
+				Assert.Equal(e, exception);
+			}
 		}
 
-		[Fact(Skip = "Problem with Serialization")]
+		[Fact]
 		public async Task Should_Publish_Message_On_Error_Exchange_If_Subscribe_Throws_Exception()
 		{
 			/* Setup */
@@ -142,13 +149,13 @@ namespace RawRabbit.IntegrationTests.Features
 					return Task.FromResult(true);
 				}, c => c
 					.WithExchange(e => e.WithName(conventions.ErrorExchangeNamingConvention()))
-					.WithQueue(q => q.WithArgument(QueueArgument.MessageTtl, (int)TimeSpan.FromSeconds(1).TotalMilliseconds))
+					.WithQueue(q => q.WithArgument(QueueArgument.MessageTtl, (int)TimeSpan.FromSeconds(1).TotalMilliseconds).WithAutoDelete())
 					.WithRoutingKey("#"));
 				client.SubscribeAsync<BasicMessage>((message, context) =>
 				{
 					firstRecieved = context;
 					throw new Exception("Oh oh!");
-				});
+				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
 				var originalMsg = new BasicMessage { Prop = "Hello, world" };
 
 				/* Test */
@@ -163,7 +170,7 @@ namespace RawRabbit.IntegrationTests.Features
 			}
 		}
 
-		[Fact(Skip = "Problem with Serialization")]
+		[Fact]
 		public async Task Should_Keep_Consumer_Open_After_Publish_Exception()
 		{
 			/* Setup */
@@ -188,7 +195,7 @@ namespace RawRabbit.IntegrationTests.Features
 						hasRecievedTcs.SetResult(true);
 					}
 					return Task.FromResult(true);
-				});
+				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
 
 				/* Test */
 				client.PublishAsync(new BasicMessage());
