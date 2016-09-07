@@ -11,5 +11,6 @@ before_build:
 build: 
   verbosity: minimal
 test_script: 
-  ps: "dotnet test .\\test\\RawRabbit.Tests"
+   - ps: "dotnet test .\\test\\RawRabbit.Tests"
+   - ps: "dotnet test .\\test\\RawRabbit.IntegrationTests -parallel none -appveyor"
 version: "1.9.2.{build}"
