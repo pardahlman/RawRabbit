@@ -144,12 +144,13 @@ namespace RawRabbit.ErrorHandling
 							Host = Environment.MachineName,
 							Message = msg,
 						};
-						consumer.Model.BasicPublish(
+						channelTask.Result.BasicPublish(
 							exchange: _errorExchangeCfg.ExchangeName,
 							routingKey: args.RoutingKey,
 							basicProperties: args.BasicProperties,
 							body: _serializer.Serialize(errorMsg)
 							);
+						channelTask.Result.Close();
 					});
 			}
 			catch (Exception e)
