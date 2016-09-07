@@ -316,8 +316,8 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 					return Task.FromResult(true);
 				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
 				var uniqueValue = Guid.NewGuid().ToString();
-				var jsonMsg = JsonConvert.SerializeObject(new BasicMessage {Prop = uniqueValue});
-				
+				var jsonMsg = JsonConvert.SerializeObject(new BasicMessage { Prop = uniqueValue });
+
 				/* Test */
 				TestChannel.BasicPublish(
 					conventions.ExchangeNamingConvention(typeof(BasicMessage)),
@@ -329,8 +329,30 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 
 				/* Assert */
 				Assert.Equal(uniqueValue, tcs.Task.Result.Prop);
+			}
+		}
 
+		[Fact]
+		public async void Should_Be_Able_To_Publish_Dynamic_Objects()
+		{
+			using (var client = BusClientFactory.CreateDefault())
+			{
+				/* Setup */
+				var tcs = new TaskCompletionSource<DynamicMessage>();
+				client.SubscribeAsync<DynamicMessage>((message, context) =>
+				{
+					tcs.TrySetResult(message);
+					return Task.FromResult(true);
+				});
+
+				/* Test */
+				client.PublishAsync(new DynamicMessage { Body = new { IsDynamic = true } });
+				await tcs.Task;
+
+				/* Assert */
+				Assert.True(tcs.Task.Result.Body.IsDynamic);
 			}
 		}
 	}
 }
+
