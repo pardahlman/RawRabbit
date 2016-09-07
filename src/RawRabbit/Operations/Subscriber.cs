@@ -69,7 +69,7 @@ namespace RawRabbit.Operations
 					consumer.OnMessageAsync = (o, args) => _errorHandling.ExecuteAsync(() =>
 					{
 						var body = _serializer.Deserialize<T>(args.Body);
-						var context = _contextProvider.ExtractContext(args.BasicProperties.Headers[PropertyHeaders.Context]);
+						var context = _contextProvider.ExtractContext(args.BasicProperties?.Headers?.GetOrDefault(PropertyHeaders.Context));
 						_contextEnhancer.WireUpContextFeatures(context, consumer, args);
 						return subscribeMethod(body, context);
 					}, exception => _errorHandling.OnSubscriberExceptionAsync(consumer, config, args, exception));

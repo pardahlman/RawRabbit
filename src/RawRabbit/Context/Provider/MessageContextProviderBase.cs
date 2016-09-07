@@ -31,6 +31,10 @@ namespace RawRabbit.Context.Provider
 
 		public TMessageContext ExtractContext(object o)
 		{
+			if (o == null)
+			{
+				return default(TMessageContext);
+			}
 			var bytes = (byte[])o;
 			var jsonHeader = Encoding.UTF8.GetString(bytes);
 			TMessageContext context;

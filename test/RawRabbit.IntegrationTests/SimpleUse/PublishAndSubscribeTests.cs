@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RawRabbit.Common;
 using RawRabbit.Configuration;
@@ -296,6 +299,37 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 				Assert.Equal(recievedAfterFirstPublish, recievedCount);
 				Assert.Equal(firstRecievedTcs.Task.Result.Prop, firstMessage.Prop);
 				Assert.Equal(secondRecievedTcs.Task.Result.Prop, secondMessage.Prop);
+			}
+		}
+
+		[Fact]
+		public async Task Should_Be_Able_To_Subscibe_To_Pure_Json_Message()
+		{
+			var conventions = new NamingConventions();
+			using (var client = BusClientFactory.CreateDefault(ioc => ioc.AddSingleton<INamingConventions>(c => conventions)))
+			{
+				/* Setup */
+				var tcs = new TaskCompletionSource<BasicMessage>();
+				var subscription = client.SubscribeAsync<BasicMessage>((message, context) =>
+				{
+					tcs.TrySetResult(message);
+					return Task.FromResult(true);
+				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+				var uniqueValue = Guid.NewGuid().ToString();
+				var jsonMsg = JsonConvert.SerializeObject(new BasicMessage {Prop = uniqueValue});
+				
+				/* Test */
+				TestChannel.BasicPublish(
+					conventions.ExchangeNamingConvention(typeof(BasicMessage)),
+					conventions.QueueNamingConvention(typeof(BasicMessage)),
+					true,
+					null,
+					Encoding.UTF8.GetBytes(jsonMsg));
+				await tcs.Task;
+
+				/* Assert */
+				Assert.Equal(uniqueValue, tcs.Task.Result.Prop);
+
 			}
 		}
 	}
