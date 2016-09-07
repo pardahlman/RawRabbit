@@ -148,7 +148,9 @@ namespace RawRabbit.IntegrationTests.Features
 					recieveTcs.TrySetResult(message);
 					return Task.FromResult(true);
 				}, c => c
-					.WithExchange(e => e.WithName(conventions.ErrorExchangeNamingConvention()))
+					.WithExchange(e => e
+						.WithName(conventions.ErrorExchangeNamingConvention())
+						.WithDurability(false))
 					.WithQueue(q => q.WithArgument(QueueArgument.MessageTtl, (int)TimeSpan.FromSeconds(1).TotalMilliseconds).WithAutoDelete())
 					.WithRoutingKey("#"));
 				client.SubscribeAsync<BasicMessage>((message, context) =>

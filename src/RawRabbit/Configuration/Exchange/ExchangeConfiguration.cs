@@ -26,7 +26,7 @@ namespace RawRabbit.Configuration.Exchange
 		public static ExchangeConfiguration Default => new ExchangeConfiguration
 		{
 			ExchangeName = "",
-			ExchangeType = RabbitMQ.Client.ExchangeType.Direct
+			ExchangeType = RabbitMQ.Client.ExchangeType.Topic
 		};
 
 	}
