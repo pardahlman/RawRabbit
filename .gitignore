@@ -10,6 +10,9 @@ docs/*build*/
 *.userosscache
 *.sln.docstates
 
+#VS Code
+.vscode/**
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 **ncrunch**
