@@ -4,9 +4,6 @@
 ## Quick introduction
 `RawRabbit` is a modern .NET client for communication over [RabbitMq](http://rabbitmq.com/). It is written for [`.NET Core`](http://dot.net) and uses Microsoft’s new frameworks for [logging](https://github.com/aspnet/Logging), [configuration](https://github.com/aspnet/Configuration) and [dependecy injection](https://github.com/aspnet/DependencyInjection). Full documentation available at [`rawrabbit.readthedocs.org`](http://rawrabbit.readthedocs.org/).
 
-## Run RawRabbit anywhere!
-The [`dotnet-core` branch](https://github.com/pardahlman/RawRabbit/tree/dotnet-core) of `RawRabbit` targets the [preview build of `RabbitMQ.Client` 4.0.0](https://groups.google.com/forum/#!topic/rabbitmq-users/hyJLlXCbocY), that is build for `netstandard1.5`. This is compatible with applications targeting `netcoreapp1.0` and other .NET Core platforms. For a working sample, run [the Console App in the `Sample` directory](https://github.com/pardahlman/RawRabbit/tree/dotnet-core/sample/RawRabbit.ConsoleApp.Sample).
-
 ### Publish/Subscribe
 Setting up publish/subscribe in just a few lines of code.
 
