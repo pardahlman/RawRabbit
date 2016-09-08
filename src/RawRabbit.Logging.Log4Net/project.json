@@ -1,6 +1,6 @@
 ﻿{
 	"title": "RawRabbit.Logging.Log4Net",
-	"version": "1.9.5-*",
+	"version": "1.10.0-*",
 	"authors": [ "par.dahlman" ],
 	"description": "Write RawRabbit's logs with Log4Net",
 
