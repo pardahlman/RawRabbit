@@ -1,3 +1,20 @@
+# 1.10.0
+
+ - [#104](https://github.com/pardahlman/RawRabbit/issues/104) - Provide Serilog Logger in Ctor
+ - [#103](https://github.com/pardahlman/RawRabbit/issues/103) - Support Messages in pure Json
+ - [#102](https://github.com/pardahlman/RawRabbit/issues/102) - Support Exception Propagation for .NET Core
+ - [#101](https://github.com/pardahlman/RawRabbit/issues/101) - Only dispose active Subscriptions on ShutDown
+ - [#100](https://github.com/pardahlman/RawRabbit/issues/100) - Run Integration Tests in AppVeyor
+ - [#99](https://github.com/pardahlman/RawRabbit/issues/99) - Upgrade to RabbitMQ.Client 4.0.X
+ - [#98](https://github.com/pardahlman/RawRabbit/issues/98) - Latest version of RabitMQ.Client breaking changes
+ - [#97](https://github.com/pardahlman/RawRabbit/issues/97) - Support for topic based routing
+ - [#96](https://github.com/pardahlman/RawRabbit/issues/96) - Use RabbitMQ.Client 3.6.4
+ - [#92](https://github.com/pardahlman/RawRabbit/issues/92) - Pass GlobalMessageId from Local CallContext
+ - [#91](https://github.com/pardahlman/RawRabbit/issues/91) - Update Lifetime Management / Disposal of BusClient
+
+Commits: d9a03a76a2...633dd493cb
+
+
 # 1.9.5
 
  - [#96](https://github.com/pardahlman/RawRabbit/issues/96) - Use RabbitMQ.Client 3.6.4
