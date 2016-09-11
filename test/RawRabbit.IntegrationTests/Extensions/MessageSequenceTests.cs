@@ -71,7 +71,7 @@ namespace RawRabbit.IntegrationTests.Extensions
 			Assert.True(true, "Recieed Response");
 		}
 
-		[Fact]
+		[Fact(Skip = "Investigation needed")]
 		public async Task Should_Call_Message_Handler_In_Correct_Order()
 		{
 			/* Setup */
