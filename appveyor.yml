@@ -12,4 +12,4 @@ build:
   verbosity: minimal
 test_script: 
    - ps: "dotnet test .\\test\\RawRabbit.Tests"
-version: "1.9.2.{build}"
+version: "1.10.0.{build}"
