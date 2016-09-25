@@ -23,11 +23,6 @@ namespace RawRabbit.Context.Enhancer
 
 		public void WireUpContextFeatures<TMessageContext>(TMessageContext context, IRawConsumer consumer, BasicDeliverEventArgs args) where TMessageContext : IMessageContext
 		{
-			if (context == null)
-			{
-				return;
-			}
-
 			var advancedCtx = context as IAdvancedMessageContext;
 			if (advancedCtx == null)
 			{
@@ -42,25 +37,20 @@ namespace RawRabbit.Context.Enhancer
 
 			advancedCtx.RetryLater = timespan =>
 			{
-				var dlxName = _conventions.DeadLetterExchangeNamingConvention();
-				var dlQueueName = _conventions.RetryQueueNamingConvention();
+				var dlxName = _conventions.RetryLaterExchangeConvention(timespan);
+				var dlQueueName = _conventions.RetryLaterExchangeConvention(timespan);
 				var channel = _channelFactory.CreateChannel();
-				channel.ExchangeDeclare(dlxName, ExchangeType.Direct);
-				channel.QueueDeclare(dlQueueName, false, false, true, new Dictionary<string, object>
+				channel.ExchangeDeclare(dlxName, ExchangeType.Direct, true, true, null);
+				channel.QueueDeclare(dlQueueName, true, false, true, new Dictionary<string, object>
 				{
 						{QueueArgument.DeadLetterExchange, args.Exchange},
+						{QueueArgument.Expires, Convert.ToInt32(timespan.Add(TimeSpan.FromSeconds(1)).TotalMilliseconds)},
 						{QueueArgument.MessageTtl, Convert.ToInt32(timespan.TotalMilliseconds)}
 				});
 				channel.QueueBind(dlQueueName, dlxName, args.RoutingKey, null);
 				UpdateHeaders(args.BasicProperties);
 				channel.BasicPublish(dlxName, args.RoutingKey, args.BasicProperties, args.Body);
-				Timer disposeChannel = null;
-				disposeChannel = new Timer(state =>
-				{
-					channel.QueueDelete(dlQueueName); //TODO: investigate why auto-delete doesn't work?
-						channel.Dispose();
-					disposeChannel?.Dispose();
-				}, null, timespan.Add(TimeSpan.FromMilliseconds(20)), new TimeSpan(-1));
+				channel.QueueUnbind(dlQueueName, dlxName, args.RoutingKey, null);
 			};
 
 			advancedCtx.RetryInfo = GetRetryInformatino(args.BasicProperties);

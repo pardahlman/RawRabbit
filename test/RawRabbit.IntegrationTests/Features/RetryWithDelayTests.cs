@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -79,6 +80,51 @@ namespace RawRabbit.IntegrationTests.Features
 
 				/* Assert */
 				Assert.Equal(expected: delay.Seconds, actual: actualDelay.Seconds);
+			}
+		}
+
+		[Fact]
+		public async Task Should_Successfully_Retry_With_Different_TimeSpans()
+		{
+			/* Setup */
+			using (var subscriber = BusClientFactory.CreateDefault<AdvancedMessageContext>())
+			using (var publisher = BusClientFactory.CreateDefault<AdvancedMessageContext>())
+			{
+				var recived = new List<DateTime>();
+				var redelivered = new List<DateTime>();
+				var allRedelivered = new TaskCompletionSource<bool>();
+				var recievedCount = 0;
+
+				subscriber.SubscribeAsync<BasicMessage>((message, context) =>
+				{
+					recievedCount++;
+					if (recievedCount <= 3)
+					{
+						recived.Add(DateTime.Now);
+						context.RetryLater(TimeSpan.FromSeconds(recievedCount));
+					}
+					else
+					{
+						redelivered.Add(DateTime.Now);
+						if (redelivered.Count == 3)
+						{
+							allRedelivered.SetResult(true);
+						}
+					}
+					return Task.FromResult(true);
+				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+
+				/* Test */
+				await publisher.PublishAsync(new BasicMessage { Prop = "I'm about to be reborn!" });
+				await publisher.PublishAsync(new BasicMessage { Prop = "I'm about to be reborn!" });
+				await publisher.PublishAsync(new BasicMessage { Prop = "I'm about to be reborn!" });
+				await allRedelivered.Task;
+
+				/* Assert */
+				for (var i = 0; i < 3; i++)
+				{
+					Assert.Equal(expected: (redelivered[i]-recived[i]).Seconds, actual: i+1);
+				}
 			}
 		}
 	}

@@ -25,5 +25,12 @@
 		/// RAM when requested by consumer.
 		/// </summary>
 		public static readonly string QueueMode = "x-queue-mode";
+
+		/// <summary>
+		/// Controls for how long a queue can be unused before it is automatically deleted.
+		/// Unused means the queue has no consumers, the queue has not been redeclared, and
+		/// basic.get has not been invoked for a duration of at least the expiration period
+		/// </summary>
+		public static readonly string Expires = "x-expires";
 	}
 }
