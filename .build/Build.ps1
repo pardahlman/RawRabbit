@@ -4,7 +4,7 @@ Push-Location $PSScriptRoot
 
 if(Test-Path ..\artifacts) {
 	echo "build: Cleaning .\artifacts"
-	Remove-Item .\artifacts -Force -Recurse
+	Remove-Item ..\artifacts -Force -Recurse
 }
 
 & dotnet restore ../ --no-cache
