@@ -1,0 +1,13 @@
+version: '{build}'
+skip_tags: true
+image: Visual Studio 2015
+configuration: Release
+
+build_script:
+- ps: ./.build/Install-Environment.ps1
+- ps: ./.build/Install-MgmtPlugin.ps1
+- ps: ./.build/Build.ps1
+test_script:
+- ps: ./.build/./Test.ps1
+artifacts:
+- path: artifacts/RawRabbit.*.nupkg
