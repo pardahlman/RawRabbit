@@ -28,9 +28,9 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		public async Task Should_Deliver_Message_To_All_Subscribers_On_Exchange()
 		{
 			/* Setup */
-			using (var publisher = BusClientFactory.CreateDefault())
-			using (var firstSubscriber = BusClientFactory.CreateDefault())
-			using (var secondSubscriber = BusClientFactory.CreateDefault())
+			using (var publisher = TestClientFactory.CreateNormal())
+			using (var firstSubscriber = TestClientFactory.CreateNormal())
+			using (var secondSubscriber = TestClientFactory.CreateNormal())
 			{
 				var firstMsgTcs = new TaskCompletionSource<BasicMessage>();
 				var secondMsgTcs = new TaskCompletionSource<BasicMessage>();
@@ -41,8 +41,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 					return firstMsgTcs.Task;
 				}, cfg => cfg
 					.WithQueue(q => q
-						.WithName("first.topic.queue")
-						.WithAutoDelete())
+						.WithName("first.topic.queue"))
 					.WithRoutingKey("*.topic.queue")
 					.WithExchange(e => e.WithType(ExchangeType.Topic)));
 				secondSubscriber.SubscribeAsync<BasicMessage>((msg, i) =>
@@ -51,8 +50,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 					return firstMsgTcs.Task;
 				}, cfg => cfg
 					.WithQueue(q => q
-						.WithName("second.topic.queue")
-						.WithAutoDelete())
+						.WithName("second.topic.queue"))
 					.WithRoutingKey("*.topic.queue")
 					.WithExchange(e => e.AssumeInitialized()));
 

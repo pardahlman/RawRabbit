@@ -12,8 +12,8 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		public async Task Should_Be_Able_To_Recieve_Different_Types_Of_Messages()
 		{
 			/* Setup */
-			using (var publisher = BusClientFactory.CreateDefault())
-			using (var subscriber = BusClientFactory.CreateDefault())
+			using (var publisher = TestClientFactory.CreateNormal())
+			using (var subscriber = TestClientFactory.CreateNormal())
 			{
 				var basicMsg = new BasicMessage { Prop = "Hello, world!" };
 				var simpleMsg = new SimpleMessage { IsSimple = true };
@@ -25,12 +25,12 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 				{
 					basicMsgTcs.SetResult(msg);
 					return basicMsgTcs.Task;
-				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+				});
 				subscriber.SubscribeAsync<SimpleMessage>((msg, i) =>
 				{
 					simpleMsgTcs.SetResult(msg);
 					return basicMsgTcs.Task;
-				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+				});
 
 				/* Test */
 				publisher.PublishAsync(basicMsg);

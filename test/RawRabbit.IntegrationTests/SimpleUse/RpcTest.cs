@@ -15,14 +15,14 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		public async Task Should_Perform_Basic_Rpc_Without_Any_Config()
 		{
 			/* Setup */
-			using (var requester = BusClientFactory.CreateDefault())
-			using (var responder = BusClientFactory.CreateDefault())
+			using (var requester = TestClientFactory.CreateNormal())
+			using (var responder = TestClientFactory.CreateNormal())
 			{
 				var response = new BasicResponse { Prop = "This is the response." };
 				responder.RespondAsync<BasicRequest, BasicResponse>((req, i) =>
 				{
 					return Task.FromResult(response);
-				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+				});
 
 				/* Test */
 				var recieved = await requester.RequestAsync<BasicRequest, BasicResponse>();
@@ -36,14 +36,14 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		public async Task Should_Perform_Basic_Rpc_For_Generic_Message_Types()
 		{
 			/* Setup */
-			using (var requester = BusClientFactory.CreateDefault())
-			using (var responder = BusClientFactory.CreateDefault())
+			using (var requester = TestClientFactory.CreateNormal())
+			using (var responder = TestClientFactory.CreateNormal())
 			{
 				var response = new GenericResponse<First, Second> { Prop = "This is the response." };
 				responder.RespondAsync<GenericRequest<First, Second>, GenericResponse<First, Second>>((req, i) =>
 				{
 					return Task.FromResult(response);
-				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+				});
 
 				/* Test */
 				var recieved = await requester.RequestAsync<GenericRequest<First, Second>, GenericResponse<First, Second>>();
@@ -57,14 +57,14 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		public async Task Should_Perform_Rpc_Without_Direct_Reply_To()
 		{
 			/* Setup */
-			using (var requester = BusClientFactory.CreateDefault())
-			using (var responder = BusClientFactory.CreateDefault())
+			using (var requester = TestClientFactory.CreateNormal())
+			using (var responder = TestClientFactory.CreateNormal())
 			{
 				var response = new BasicResponse { Prop = "This is the response." };
 				responder.RespondAsync<BasicRequest, BasicResponse>((req, i) =>
 				{
 					return Task.FromResult(response);
-				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+				});
 
 				/* Test */
 				var firstRecieved = await requester.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest(),
@@ -93,8 +93,8 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		public async Task Should_Succeed_With_Multiple_Rpc_Calls_At_The_Same_Time()
 		{
 			/* Setup */
-			using (var requester = BusClientFactory.CreateDefault())
-			using (var responder = BusClientFactory.CreateDefault())
+			using (var requester = TestClientFactory.CreateNormal())
+			using (var responder = TestClientFactory.CreateNormal())
 			{
 				var payloads = new List<Guid> { Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid() };
 				var uniqueResponse = new ConcurrentStack<Guid>(payloads);
@@ -106,7 +106,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 						Assert.True(false, "No entities in stack. Try purgin the response queue.");
 					};
 					return Task.FromResult(new BasicResponse { Payload = payload });
-				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+				});
 
 				/* Test */
 				var first = requester.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest { Number = 1 });
@@ -128,9 +128,9 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		public async Task Should_Successfully_Perform_Nested_Requests()
 		{
 			/* Setup */
-			using (var requester = BusClientFactory.CreateDefault())
-			using (var firstResponder = BusClientFactory.CreateDefault())
-			using (var secondResponder = BusClientFactory.CreateDefault())
+			using (var requester = TestClientFactory.CreateNormal())
+			using (var firstResponder = TestClientFactory.CreateNormal())
+			using (var secondResponder = TestClientFactory.CreateNormal())
 			{
 				var payload = Guid.NewGuid();
 
@@ -138,10 +138,10 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 				{
 					var secondResp = await firstResponder.RequestAsync<SecondRequest, SecondResponse>(new SecondRequest());
 					return new FirstResponse { Infered = secondResp.Source };
-				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+				});
 				secondResponder.RespondAsync<SecondRequest, SecondResponse>((req, i) =>
 					Task.FromResult(new SecondResponse { Source = payload })
-				, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+				);
 
 				/* Test */
 				var response = await requester.RequestAsync<FirstRequest, FirstResponse>(new FirstRequest());
@@ -155,8 +155,8 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		public async Task Should_Work_When_Not_Awaiting_One_Response_At_A_Time()
 		{
 			/* Setup */
-			using (var requester = BusClientFactory.CreateDefault())
-			using (var responder = BusClientFactory.CreateDefault())
+			using (var requester = TestClientFactory.CreateNormal())
+			using (var responder = TestClientFactory.CreateNormal())
 			{
 				const int numberOfCalls = 10;
 				var tasks = new Task[numberOfCalls];

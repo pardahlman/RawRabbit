@@ -22,8 +22,8 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		public async Task Should_Be_Able_To_Subscribe_Without_Any_Additional_Config()
 		{
 			/* Setup */
-			using (var publisher = BusClientFactory.CreateDefault())
-			using (var subscriber = BusClientFactory.CreateDefault())
+			using (var publisher = TestClientFactory.CreateNormal())
+			using (var subscriber = TestClientFactory.CreateNormal())
 			{
 				var message = new BasicMessage { Prop = "Hello, world!" };
 				var recievedTcs = new TaskCompletionSource<BasicMessage>();
@@ -35,7 +35,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 						recievedTcs.SetResult(msg);
 					}
 					return Task.FromResult(true);
-				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+				});
 
 				/* Test */
 				publisher.PublishAsync(message);
@@ -50,8 +50,8 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		public async Task Should_Be_Able_To_Perform_Multiple_Pub_Subs()
 		{
 			/* Setup */
-			using (var subscriber = BusClientFactory.CreateDefault())
-			using (var publisher = BusClientFactory.CreateDefault())
+			using (var subscriber = TestClientFactory.CreateNormal())
+			using (var publisher = TestClientFactory.CreateNormal())
 			{
 				const int numberOfCalls = 100;
 				var recived = 0;
@@ -64,7 +64,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 						recievedTcs.SetResult(true);
 					}
 					return Task.FromResult(true);
-				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+				});
 
 				/* Test */
 				var sw = Stopwatch.StartNew();
@@ -84,8 +84,8 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		public void Should_Be_Able_To_Perform_Subscribe_For_Multiple_Types()
 		{
 			/* Setup */
-			using (var subscriber = BusClientFactory.CreateDefault())
-			using (var publisher = BusClientFactory.CreateDefault())
+			using (var subscriber = TestClientFactory.CreateNormal())
+			using (var publisher = TestClientFactory.CreateNormal())
 			{
 				var basicTcs = new TaskCompletionSource<BasicMessage>();
 				var simpleTcs = new TaskCompletionSource<SimpleMessage>();
@@ -93,12 +93,12 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 				{
 					basicTcs.SetResult(message);
 					return Task.FromResult(true);
-				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+				});
 				subscriber.SubscribeAsync<SimpleMessage>((message, context) =>
 				{
 					simpleTcs.SetResult(message);
 					return Task.FromResult(true);
-				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+				});
 
 				/* Test */
 				publisher.PublishAsync<BasicMessage>();
@@ -114,9 +114,13 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		public async Task Should_Throw_Publish_Confirm_Exception_If_Server_Doesnt_Respond_Within_Time_Limit()
 		{
 			/* Setup */
-			var config = RawRabbitConfiguration.Local;
-			config.PublishConfirmTimeout = TimeSpan.FromTicks(1);
-			using (var publisher = BusClientFactory.CreateDefault(config))
+			var publisher = TestClientFactory.CreateNormal(ioc => ioc.AddSingleton(p =>
+			{
+				var config = RawRabbitConfiguration.Local;
+				config.PublishConfirmTimeout = TimeSpan.FromTicks(1);
+				return config;
+			}));
+			using (publisher)
 			{
 				/* Test */
 				/* Assert */
@@ -137,9 +141,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			/* Setup */
 			const int numberOfCalls = 100;
 			var confirmTasks = new Task[numberOfCalls];
-			var config = RawRabbitConfiguration.Local;
-			config.PublishConfirmTimeout = TimeSpan.FromMilliseconds(500);
-			using (var publisher = BusClientFactory.CreateDefault(config))
+			using (var publisher = TestClientFactory.CreateNormal())
 			{
 				for (int i = 0; i < numberOfCalls; i++)
 				{
@@ -157,8 +159,8 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		public void Should_Be_Able_To_Delivery_Message_To_Multiple_Subscribers_On_Same_Host()
 		{
 			/* Setup */
-			using (var subscriber = BusClientFactory.CreateDefault())
-			using (var publisher = BusClientFactory.CreateDefault())
+			using (var subscriber = TestClientFactory.CreateNormal())
+			using (var publisher = TestClientFactory.CreateNormal())
 			{
 				var firstTcs = new TaskCompletionSource<bool>();
 				var secondTcs = new TaskCompletionSource<bool>();
@@ -166,12 +168,12 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 				{
 					firstTcs.SetResult(true);
 					return Task.FromResult(true);
-				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+				});
 				subscriber.SubscribeAsync<BasicMessage>((message, context) =>
 				{
 					secondTcs.SetResult(true);
 					return Task.FromResult(true);
-				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+				});
 
 				/* Test */
 				var ackTask = publisher.PublishAsync<BasicMessage>();
@@ -186,9 +188,9 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		public void Should_Be_Able_To_Deliver_Messages_To_Unique_Subscribers()
 		{
 			/* Setup */
-			using (var firstSubscriber = BusClientFactory.CreateDefault())
-			using (var secondSubscriber = BusClientFactory.CreateDefault())
-			using (var publisher = BusClientFactory.CreateDefault())
+			using (var firstSubscriber = TestClientFactory.CreateNormal())
+			using (var secondSubscriber = TestClientFactory.CreateNormal())
+			using (var publisher = TestClientFactory.CreateNormal())
 			{
 				var firstTcs = new TaskCompletionSource<bool>();
 				var secondTcs = new TaskCompletionSource<bool>();
@@ -196,12 +198,12 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 				{
 					firstTcs.SetResult(true);
 					return Task.FromResult(true);
-				}, cfg => cfg.WithSubscriberId("first_subscriber").WithQueue(q => q.WithAutoDelete()));
+				}, cfg => cfg.WithSubscriberId("first_subscriber"));
 				secondSubscriber.SubscribeAsync<BasicMessage>((message, context) =>
 				{
 					secondTcs.SetResult(true);
 					return Task.FromResult(true);
-				}, cfg => cfg.WithSubscriberId("second_subscriber").WithQueue(q => q.WithAutoDelete()));
+				}, cfg => cfg.WithSubscriberId("second_subscriber"));
 
 				/* Test */
 				var ackTask = publisher.PublishAsync<BasicMessage>();
@@ -217,8 +219,8 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		public async Task Should_Be_Able_To_Use_Priority()
 		{
 			/* Setup */
-			using (var subscriber = BusClientFactory.CreateDefault())
-			using (var publisher = BusClientFactory.CreateDefault())
+			using (var subscriber = TestClientFactory.CreateNormal())
+			using (var publisher = TestClientFactory.CreateNormal())
 			{
 				var prioritySent = false;
 				var queueBuilt = new TaskCompletionSource<bool>();
@@ -243,7 +245,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 					}
 
 				}, cfg => cfg
-					.WithQueue(q => q.WithArgument(QueueArgument.MaxPriority, 3).WithAutoDelete())
+					.WithQueue(q => q.WithArgument(QueueArgument.MaxPriority, 3))
 					.WithSubscriberId("priority")
 					.WithPrefetchCount(1));
 
@@ -262,8 +264,8 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		public async Task Should_Stop_Subscribe_When_Subscription_Is_Disposed()
 		{
 			/* Setup */
-			using (var publisher = BusClientFactory.CreateDefault())
-			using (var subscriber = BusClientFactory.CreateDefault())
+			using (var publisher = TestClientFactory.CreateNormal())
+			using (var subscriber = TestClientFactory.CreateNormal())
 			{
 				var firstMessage = new BasicMessage { Prop = "Value" };
 				var secondMessage = new BasicMessage { Prop = "AnotherValue" };
@@ -279,20 +281,20 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 						firstRecievedTcs.SetResult(message);
 					}
 					return Task.FromResult(true);
-				});
+				}, cfg => cfg.WithQueue(q => q.WithAutoDelete(false)));
 
 				/* Test */
-				await publisher.PublishAsync(firstMessage);
+				publisher.PublishAsync(firstMessage);
 				await firstRecievedTcs.Task;
 				subscription.Dispose();
 				var recievedAfterFirstPublish = recievedCount;
-				await publisher.PublishAsync(secondMessage);
+				publisher.PublishAsync(secondMessage);
 				await Task.Delay(20);
 				publisher.SubscribeAsync<BasicMessage>((message, context) =>
 				{
 					secondRecievedTcs.SetResult(message);
 					return Task.FromResult(true);
-				});
+				}, cfg => cfg.WithQueue(q => q.WithAutoDelete(false)));
 				await secondRecievedTcs.Task;
 				TestChannel.QueueDelete(subscription.QueueName);
 				/* Assert */
@@ -306,7 +308,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		public async Task Should_Be_Able_To_Subscibe_To_Pure_Json_Message()
 		{
 			var conventions = new NamingConventions();
-			using (var client = BusClientFactory.CreateDefault(ioc => ioc.AddSingleton<INamingConventions>(c => conventions)))
+			using (var client = TestClientFactory.CreateNormal(ioc => ioc.AddSingleton<INamingConventions>(c => conventions)))
 			{
 				/* Setup */
 				var tcs = new TaskCompletionSource<BasicMessage>();
@@ -314,7 +316,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 				{
 					tcs.TrySetResult(message);
 					return Task.FromResult(true);
-				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+				});
 				var uniqueValue = Guid.NewGuid().ToString();
 				var jsonMsg = JsonConvert.SerializeObject(new BasicMessage { Prop = uniqueValue });
 
@@ -335,7 +337,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		[Fact]
 		public async void Should_Be_Able_To_Publish_Dynamic_Objects()
 		{
-			using (var client = BusClientFactory.CreateDefault())
+			using (var client = TestClientFactory.CreateNormal())
 			{
 				/* Setup */
 				var tcs = new TaskCompletionSource<DynamicMessage>();

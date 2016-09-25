@@ -35,7 +35,7 @@ namespace RawRabbit.IntegrationTests.Extensions
 			TestChannel.ExchangeDelete(exchangeName);
 			TestChannel.ExchangeDeclare(exchangeName, RabbitMQ.Client.ExchangeType.Direct);
 
-			using (var client = RawRabbitFactory.Create())
+			using (var client = TestClientFactory.CreateExtendable())
 			{
 				/* Test */
 				await client.UpdateTopologyAsync(t => t
@@ -57,7 +57,7 @@ namespace RawRabbit.IntegrationTests.Extensions
 		{
 			/* Setup */
 			var cfg = RawRabbitConfiguration.Local.AsLegacy();
-			using (var client = RawRabbitFactory.Create(ioc => ioc.AddSingleton(s => cfg)))
+			using (var client = TestClientFactory.CreateExtendable(ioc => ioc.AddSingleton(s => cfg)))
 			{
 				var firstTcs = new TaskCompletionSource<BasicMessage>();
 				var secondTcs = new TaskCompletionSource<BasicMessage>();
@@ -74,7 +74,7 @@ namespace RawRabbit.IntegrationTests.Extensions
 						return secondTcs.Task;
 					}
 					return Task.FromResult(true);
-				}, c => c.WithQueue(q => q.WithAutoDelete()));
+				});
 
 				/* Test */
 				// 1. Verify subscriber
@@ -100,7 +100,7 @@ namespace RawRabbit.IntegrationTests.Extensions
 		{
 			/* Setup */
 			var cfg = RawRabbitConfiguration.Local.AsLegacy();
-			using (var client = RawRabbitFactory.Create(ioc => ioc.AddSingleton(s => cfg)))
+			using (var client = TestClientFactory.CreateExtendable(ioc => ioc.AddSingleton(s => cfg)))
 			{
 				var firstTcs = new TaskCompletionSource<BasicMessage>();
 				var secondTcs = new TaskCompletionSource<BasicMessage>();
@@ -117,7 +117,7 @@ namespace RawRabbit.IntegrationTests.Extensions
 						return secondTcs.Task;
 					}
 					return Task.FromResult(true);
-				}, c => c.WithQueue(q => q.WithAutoDelete()));
+				});
 
 				/* Test */
 				// 1. Verify subscriber
@@ -142,7 +142,7 @@ namespace RawRabbit.IntegrationTests.Extensions
 		public async Task Should_Honor_Last_Configuration()
 		{
 			/* Setup */
-			using (var client = RawRabbitFactory.Create())
+			using (var client = TestClientFactory.CreateExtendable())
 			{
 				const string exchangeName = "topology";
 				TestChannel.ExchangeDelete(exchangeName);
@@ -167,8 +167,8 @@ namespace RawRabbit.IntegrationTests.Extensions
 		public async Task Should_Use_Routing_Key_Transformer_If_Present()
 		{
 			/* Setup */
-			using (var legacyClient = RawRabbitFactory.Create(ioc => ioc.AddSingleton(s => RawRabbitConfiguration.Local.AsLegacy())))
-			using (var currentClient = RawRabbitFactory.Create())
+			using (var legacyClient = TestClientFactory.CreateExtendable(ioc => ioc.AddSingleton(s => RawRabbitConfiguration.Local.AsLegacy())))
+			using (var currentClient = TestClientFactory.CreateExtendable())
 			{
 				var legacyTcs = new TaskCompletionSource<BasicMessage>();
 				var currentTcs = new TaskCompletionSource<BasicMessage>();
@@ -186,7 +186,7 @@ namespace RawRabbit.IntegrationTests.Extensions
 						return legacyTcs.Task;
 					}
 					return Task.FromResult(true);
-				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+				});
 
 				/* Test */
 				// 1. Verify subscriber

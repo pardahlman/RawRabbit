@@ -7,7 +7,7 @@ foreach ($test in ls ../test/*) {
 
 	echo "build: Testing project in $test"
 
-	& dotnet test -c Release
+	& dotnet test -c Release -parallel none
 	if($LASTEXITCODE -ne 0) { exit 3 }
 
 	Pop-Location

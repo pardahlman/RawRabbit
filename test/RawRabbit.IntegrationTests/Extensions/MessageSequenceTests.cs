@@ -20,7 +20,7 @@ namespace RawRabbit.IntegrationTests.Extensions
 
 		public MessageSequenceTests()
 		{
-			_client = RawRabbitFactory.Create();
+			_client = TestClientFactory.CreateExtendable();
 		}
 
 		public override void Dispose()
@@ -75,17 +75,14 @@ namespace RawRabbit.IntegrationTests.Extensions
 		public async Task Should_Call_Message_Handler_In_Correct_Order()
 		{
 			/* Setup */
-			using (var publisher = BusClientFactory.CreateDefault())
+			using (var publisher = TestClientFactory.CreateExtendable())
 			{
 				publisher.SubscribeAsync<FirstMessage>((message, context) =>
-					publisher.PublishAsync(new SecondMessage(), context.GlobalRequestId)
-				, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+					publisher.PublishAsync(new SecondMessage(), context.GlobalRequestId));
 				publisher.SubscribeAsync<SecondMessage>((message, context) =>
-					publisher.PublishAsync(new ThirdMessage(), context.GlobalRequestId)
-				, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+					publisher.PublishAsync(new ThirdMessage(), context.GlobalRequestId));
 				publisher.SubscribeAsync<ThirdMessage>((message, context) =>
-					publisher.PublishAsync(new ForthMessage(), context.GlobalRequestId)
-				, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+					publisher.PublishAsync(new ForthMessage(), context.GlobalRequestId));
 				var recieveIndex = 0;
 				var secondMsgDate = DateTime.MinValue;
 				var thirdMsgDate = DateTime.MinValue;
@@ -123,11 +120,11 @@ namespace RawRabbit.IntegrationTests.Extensions
 			_client.SubscribeAsync<BasicRequest>(async (request, context) =>
 			{
 				await _client.PublishAsync(new BasicMessage(), context.GlobalRequestId);
-			}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+			});
 			_client.SubscribeAsync<BasicMessage>(async (request, context) =>
 			{
 				await _client.PublishAsync(new BasicResponse(), context.GlobalRequestId);
-			}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+			});
 
 			/* Test */
 			var triggerTasks = new Task[outer];
@@ -166,11 +163,11 @@ namespace RawRabbit.IntegrationTests.Extensions
 			_client.SubscribeAsync<FirstMessage>(async (request, context) =>
 			{
 				await _client.PublishAsync(new SecondMessage(), context.GlobalRequestId);
-			}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+			});
 			_client.SubscribeAsync<SecondMessage>(async (request, context) =>
 			{
 				await _client.PublishAsync(new ThirdMessage(), context.GlobalRequestId);
-			}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+			});
 
 			/* Test */
 			var chain = _client.ExecuteSequence(c => c
@@ -201,11 +198,11 @@ namespace RawRabbit.IntegrationTests.Extensions
 			_client.SubscribeAsync<FirstMessage>(async (request, context) =>
 			{
 				await _client.PublishAsync(new ThirdMessage(), context.GlobalRequestId);
-			}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+			});
 			_client.SubscribeAsync<ThirdMessage>(async (request, context) =>
 			{
 				await _client.PublishAsync(new ForthMessage(), context.GlobalRequestId);
-			}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+			});
 
 			/* Test */
 			var chain = _client.ExecuteSequence(c => c
@@ -236,15 +233,15 @@ namespace RawRabbit.IntegrationTests.Extensions
 			_client.SubscribeAsync<FirstMessage>(async (request, context) =>
 			{
 				await _client.PublishAsync(new SecondMessage(), context.GlobalRequestId);
-			}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+			});
 			_client.SubscribeAsync<SecondMessage>(async (request, context) =>
 			{
 				await _client.PublishAsync(new ThirdMessage(), context.GlobalRequestId);
-			}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+			});
 			_client.SubscribeAsync<ThirdMessage>(async (request, context) =>
 			{
 				await _client.PublishAsync(new ForthMessage(), context.GlobalRequestId);
-			}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+			});
 
 			/* Test */
 			var chain = _client.ExecuteSequence(c => c
@@ -273,7 +270,7 @@ namespace RawRabbit.IntegrationTests.Extensions
 			/* Setup */
 			var cfg = RawRabbitConfiguration.Local;
 			cfg.RequestTimeout = TimeSpan.FromMilliseconds(200);
-			using (var client = RawRabbitFactory.Create(ioc => ioc.AddSingleton(c => cfg)))
+			using (var client = TestClientFactory.CreateExtendable(ioc => ioc.AddSingleton(c => cfg)))
 			{
 				/* Test */
 				var chain = client.ExecuteSequence(c => c

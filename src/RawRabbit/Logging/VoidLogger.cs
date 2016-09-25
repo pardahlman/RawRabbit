@@ -20,4 +20,22 @@ namespace RawRabbit.Logging
 		{
 		}
 	}
+
+	public class VoidLoggerFactory : ILoggerFactory
+	{
+		private readonly VoidLogger _logger;
+
+		public VoidLoggerFactory()
+		{
+			_logger = new VoidLogger();
+		}
+		public void Dispose()
+		{
+		}
+
+		public ILogger CreateLogger(string categoryName)
+		{
+			return _logger;
+		}
+	}
 }

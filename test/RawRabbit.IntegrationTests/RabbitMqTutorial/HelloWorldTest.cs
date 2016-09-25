@@ -12,8 +12,8 @@ namespace RawRabbit.IntegrationTests.RabbitMqTutorial
 		public async Task Should_Support_The_Hello_World_Tutorial()
 		{
 			/* Setup */
-			using (var sender = BusClientFactory.CreateDefault())
-			using (var reciever = BusClientFactory.CreateDefault())
+			using (var sender = TestClientFactory.CreateNormal())
+			using (var reciever = TestClientFactory.CreateNormal())
 			{
 				var sent = new BasicMessage { Prop = "Hello, world!" };
 				var recieved = new TaskCompletionSource<BasicMessage>();
@@ -28,7 +28,6 @@ namespace RawRabbit.IntegrationTests.RabbitMqTutorial
 								.WithName("hello")
 								.WithExclusivity(false)
 								.WithAutoDelete(false)
-								.WithAutoDelete()
 							)
 						.WithRoutingKey("hello")
 				);

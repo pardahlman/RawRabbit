@@ -12,9 +12,9 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		public async Task Should_Call_Handle_Method_Just_As_Many_Times_As_Published()
 		{
 			/* Setup */
-			using (var firstWorker = BusClientFactory.CreateDefault())
-			using (var secondWorker = BusClientFactory.CreateDefault())
-			using (var publisher = BusClientFactory.CreateDefault())
+			using (var firstWorker = TestClientFactory.CreateNormal())
+			using (var secondWorker = TestClientFactory.CreateNormal())
+			using (var publisher = TestClientFactory.CreateNormal())
 			{
 				var allCallTcs = new TaskCompletionSource<int>();
 				const int noOfPublishes = 8;
@@ -29,7 +29,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 						allCallTcs.SetResult(noOfPublishes);
 					}
 					return Task.FromResult(true);
-				}, cfg => cfg.WithPrefetchCount(1).WithQueue(q =>q.WithAutoDelete()));
+				}, cfg => cfg.WithPrefetchCount(1));
 				secondWorker.SubscribeAsync<BasicMessage>((msg, i) =>
 				{
 					secondWorkerCalls++;
@@ -38,7 +38,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 						allCallTcs.SetResult(noOfPublishes);
 					}
 					return allCallTcs.Task;
-				}, cfg => cfg.WithPrefetchCount(1).WithQueue(q => q.WithAutoDelete()));
+				}, cfg => cfg.WithPrefetchCount(1));
 
 				/* Test */
 				for (var i = 0; i < noOfPublishes; i++)

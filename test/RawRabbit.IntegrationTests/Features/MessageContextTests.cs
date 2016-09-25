@@ -2,15 +2,9 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
-using RabbitMQ.Client;
-using RawRabbit.Common;
-using RawRabbit.Configuration;
 using RawRabbit.Context;
 using RawRabbit.Context.Provider;
 using RawRabbit.IntegrationTests.TestMessages;
-using RawRabbit.Operations;
-using RawRabbit.Serialization;
-using RawRabbit.vNext;
 using Xunit;
 
 namespace RawRabbit.IntegrationTests.Features
@@ -24,8 +18,8 @@ namespace RawRabbit.IntegrationTests.Features
 
 			var expectedId = Guid.NewGuid();
 			var contextProvider = new MessageContextProvider<MessageContext>(new JsonSerializer(), () => new MessageContext { GlobalRequestId = expectedId });
-			using (var subscriber = BusClientFactory.CreateDefault())
-			using (var publisher = BusClientFactory.CreateDefault(collection => collection.AddSingleton<IMessageContextProvider<MessageContext>>(contextProvider)))
+			using (var subscriber = TestClientFactory.CreateNormal())
+			using (var publisher = TestClientFactory.CreateNormal(collection => collection.AddSingleton<IMessageContextProvider<MessageContext>>(contextProvider)))
 			{
 				var subscribeTcs = new TaskCompletionSource<Guid>();
 
@@ -33,7 +27,7 @@ namespace RawRabbit.IntegrationTests.Features
 				{
 					subscribeTcs.SetResult(c.GlobalRequestId);
 					return subscribeTcs.Task;
-				}, c => c.WithQueue(q => q.WithAutoDelete()));
+				});
 
 				/* Test */
 				publisher.PublishAsync<BasicMessage>();
@@ -48,9 +42,9 @@ namespace RawRabbit.IntegrationTests.Features
 		public async Task Should_Forward_Context_On_Publish()
 		{
 			/* Setup */
-			using (var publisher = BusClientFactory.CreateDefault())
-			using (var firstSubscriber = BusClientFactory.CreateDefault())
-			using (var secondSubscriber = BusClientFactory.CreateDefault())
+			using (var publisher = TestClientFactory.CreateNormal())
+			using (var firstSubscriber = TestClientFactory.CreateNormal())
+			using (var secondSubscriber = TestClientFactory.CreateNormal())
 			{
 				var firstCtxTcs = new TaskCompletionSource<MessageContext>();
 				var secondCtxTcs = new TaskCompletionSource<MessageContext>();
@@ -59,12 +53,12 @@ namespace RawRabbit.IntegrationTests.Features
 					firstCtxTcs.SetResult(i);
 					firstSubscriber.PublishAsync(new SimpleMessage(), i.GlobalRequestId);
 					return firstCtxTcs.Task;
-				}, c => c.WithQueue(q => q.WithAutoDelete()));
+				});
 				secondSubscriber.SubscribeAsync<SimpleMessage>((msg, i) =>
 				{
 					secondCtxTcs.SetResult(i);
 					return secondCtxTcs.Task;
-				}, c => c.WithQueue(q => q.WithAutoDelete()));
+				});
 
 				/* Test */
 				publisher.PublishAsync<BasicMessage>();
@@ -79,9 +73,9 @@ namespace RawRabbit.IntegrationTests.Features
 		public async Task Should_Implicit_Forward_Context_On_Publish()
 		{
 			/* Setup */
-			using (var publisher = BusClientFactory.CreateDefault())
-			using (var firstSubscriber = BusClientFactory.CreateDefault())
-			using (var secondSubscriber = BusClientFactory.CreateDefault())
+			using (var publisher = TestClientFactory.CreateNormal())
+			using (var firstSubscriber = TestClientFactory.CreateNormal())
+			using (var secondSubscriber = TestClientFactory.CreateNormal())
 			{
 				var firstCtxTcs = new TaskCompletionSource<MessageContext>();
 				var secondCtxTcs = new TaskCompletionSource<MessageContext>();
@@ -91,12 +85,12 @@ namespace RawRabbit.IntegrationTests.Features
 					firstCtxTcs.SetResult(i);
 					firstSubscriber.PublishAsync(new SimpleMessage());
 					return firstCtxTcs.Task;
-				}, c => c.WithQueue(q => q.WithAutoDelete()));
+				});
 				secondSubscriber.SubscribeAsync<SimpleMessage>((msg, i) =>
 				{
 					secondCtxTcs.SetResult(i);
 					return secondCtxTcs.Task;
-				}, c => c.WithQueue(q => q.WithAutoDelete()));
+				});
 
 				/* Test */
 				publisher.PublishAsync<BasicMessage>();
@@ -111,9 +105,9 @@ namespace RawRabbit.IntegrationTests.Features
 		public async Task Should_Forward_Context_On_Rpc()
 		{
 			/* Setup */
-			using (var requester = BusClientFactory.CreateDefault())
-			using (var firstResponder = BusClientFactory.CreateDefault())
-			using (var secondResponder = BusClientFactory.CreateDefault())
+			using (var requester = TestClientFactory.CreateNormal())
+			using (var firstResponder = TestClientFactory.CreateNormal())
+			using (var secondResponder = TestClientFactory.CreateNormal())
 			{
 				var tcs = new TaskCompletionSource<bool>();
 				MessageContext firstContext = null;
@@ -124,13 +118,13 @@ namespace RawRabbit.IntegrationTests.Features
 					firstContext = c;
 					var resp = await firstResponder.RequestAsync<SecondRequest, SecondResponse>(new SecondRequest(), c.GlobalRequestId);
 					return new FirstResponse { Infered = resp.Source };
-				}, c => c.WithQueue(q => q.WithAutoDelete()));
+				});
 				secondResponder.RespondAsync<SecondRequest, SecondResponse>((req, c) =>
 				{
 					secondContext = c;
 					tcs.SetResult(true);
 					return Task.FromResult(new SecondResponse { Source = Guid.NewGuid() });
-				}, c => c.WithQueue(q => q.WithAutoDelete()));
+				});
 
 				/* Test */
 				requester.RequestAsync<FirstRequest, FirstResponse>();
@@ -146,9 +140,9 @@ namespace RawRabbit.IntegrationTests.Features
 		public async Task Should_Forward_Context_On_Rpc_To_Publish()
 		{
 			/* Setup */
-			using (var requester = BusClientFactory.CreateDefault())
-			using (var firstResponder = BusClientFactory.CreateDefault())
-			using (var firstSubscriber = BusClientFactory.CreateDefault())
+			using (var requester = TestClientFactory.CreateNormal())
+			using (var firstResponder = TestClientFactory.CreateNormal())
+			using (var firstSubscriber = TestClientFactory.CreateNormal())
 			{
 				var tcs = new TaskCompletionSource<bool>();
 				MessageContext firstContext = null;
@@ -159,13 +153,13 @@ namespace RawRabbit.IntegrationTests.Features
 					firstContext = c;
 					await firstResponder.PublishAsync(new BasicMessage(), c.GlobalRequestId);
 					return new FirstResponse();
-				}, c => c.WithQueue(q => q.WithAutoDelete()));
+				});
 				firstSubscriber.SubscribeAsync<BasicMessage>((req, c) =>
 				{
 					secondContext = c;
 					tcs.SetResult(true);
 					return tcs.Task;
-				}, c => c.WithQueue(q => q.WithAutoDelete()));
+				});
 
 				/* Test */
 				requester.RequestAsync<FirstRequest, FirstResponse>();

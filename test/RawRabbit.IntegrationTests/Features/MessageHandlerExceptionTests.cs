@@ -26,7 +26,7 @@ namespace RawRabbit.IntegrationTests.Features
 		public MessageHandlerExceptionTests()
 		{
 			_errorHandler = new Mock<IErrorHandlingStrategy>();
-			_client = BusClientFactory.CreateDefault(null, ioc => ioc.AddSingleton(c => _errorHandler.Object));
+			_client = TestClientFactory.CreateNormal(ioc => ioc.AddSingleton(c => _errorHandler.Object));
 		}
 
 		public void Dispose()
@@ -61,7 +61,7 @@ namespace RawRabbit.IntegrationTests.Features
 			{
 				recieveTcs.SetResult(message);
 				throw exception;
-			}, c => c.WithNoAck().WithQueue(q => q.WithAutoDelete()));
+			}, c => c.WithNoAck());
 
 			/* Test */
 			_client.PublishAsync<BasicMessage>();
@@ -75,13 +75,13 @@ namespace RawRabbit.IntegrationTests.Features
 		public async Task Should_Throw_Exception_To_Requester_If_Responder_Throws_Async()
 		{
 			/* Setup */
-			using (var requester = BusClientFactory.CreateDefault(TimeSpan.FromHours(1)))
-			using (var responder = BusClientFactory.CreateDefault(TimeSpan.FromHours(1)))
+			using (var requester = TestClientFactory.CreateNormal())
+			using (var responder = TestClientFactory.CreateNormal())
 			{
 				responder.RespondAsync<BasicRequest, BasicResponse>((request, context) =>
 				{
 					throw new NotSupportedException("I'll throw this");
-				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+				});
 
 				/* Test */
 				/* Assert */
@@ -94,14 +94,14 @@ namespace RawRabbit.IntegrationTests.Features
 		public async Task Should_Throw_Exception_To_Requester_If_Responder_Throws_Sync()
 		{
 			/* Setup */
-			using (var requester = BusClientFactory.CreateDefault(TimeSpan.FromHours(1)))
-			using (var responder = BusClientFactory.CreateDefault(TimeSpan.FromHours(1)))
+			using (var requester = TestClientFactory.CreateNormal())
+			using (var responder = TestClientFactory.CreateNormal())
 			{
 				var responseException = new NotSupportedException("I'll throw this");
 				responder.RespondAsync<BasicRequest, BasicResponse>((request, context) =>
 				{
 					throw responseException;
-				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+				});
 
 				/* Test */
 				/* Assert */
@@ -119,11 +119,10 @@ namespace RawRabbit.IntegrationTests.Features
 			brokenMsgSerializer
 				.Setup(s => s.Deserialize(It.IsAny<BasicDeliverEventArgs>()))
 				.Throws(exception);
-			using (var brokenClient = BusClientFactory.CreateDefault(null, ioc => ioc.AddSingleton(provider => brokenMsgSerializer.Object)))
+			using (var brokenClient = TestClientFactory.CreateNormal(ioc => ioc.AddSingleton(provider => brokenMsgSerializer.Object)))
 			{
 				brokenClient.RespondAsync<BasicRequest, BasicResponse>(
-					(request, context) => Task.FromResult(new BasicResponse()),
-					cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+					(request, context) => Task.FromResult(new BasicResponse()));
 
 				/* Test */
 				/* Assert */
@@ -137,7 +136,7 @@ namespace RawRabbit.IntegrationTests.Features
 		{
 			/* Setup */
 			var conventions = new NamingConventions();
-			using (var client = BusClientFactory.CreateDefault(null, ioc => ioc.AddSingleton(c => conventions)))
+			using (var client = TestClientFactory.CreateNormal(ioc => ioc.AddSingleton(c => conventions)))
 			{
 				var recieveTcs = new TaskCompletionSource<HandlerExceptionMessage>();
 				MessageContext firstRecieved = null;
@@ -157,7 +156,7 @@ namespace RawRabbit.IntegrationTests.Features
 				{
 					firstRecieved = context;
 					throw new Exception("Oh oh!");
-				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+				});
 				var originalMsg = new BasicMessage { Prop = "Hello, world" };
 
 				/* Test */
@@ -176,7 +175,7 @@ namespace RawRabbit.IntegrationTests.Features
 		public async Task Should_Keep_Consumer_Open_After_Publish_Exception()
 		{
 			/* Setup */
-			using (var client = BusClientFactory.CreateDefault())
+			using (var client = TestClientFactory.CreateNormal())
 			{
 				var hasThrownTcs = new TaskCompletionSource<bool>();
 				var hasRecievedTcs = new TaskCompletionSource<bool>();
@@ -197,7 +196,7 @@ namespace RawRabbit.IntegrationTests.Features
 						hasRecievedTcs.SetResult(true);
 					}
 					return Task.FromResult(true);
-				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+				});
 
 				/* Test */
 				client.PublishAsync(new BasicMessage());

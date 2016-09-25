@@ -19,9 +19,9 @@ namespace RawRabbit.IntegrationTests.Features
 		public async Task Should_Be_Able_To_Nack_Message()
 		{
 			/* Setup */
-			using (var firstResponder = BusClientFactory.CreateDefault<AdvancedMessageContext>())
-			using (var secondResponder = BusClientFactory.CreateDefault<AdvancedMessageContext>())
-			using (var requester = BusClientFactory.CreateDefault<AdvancedMessageContext>())
+			using (var firstResponder = TestClientFactory.CreateNormal<AdvancedMessageContext>())
+			using (var secondResponder = TestClientFactory.CreateNormal<AdvancedMessageContext>())
+			using (var requester = TestClientFactory.CreateNormal<AdvancedMessageContext>())
 			{
 
 				var hasBeenNacked = false;
@@ -38,7 +38,7 @@ namespace RawRabbit.IntegrationTests.Features
 						response = new BasicResponse();
 					}
 					return Task.FromResult(response);
-				}, c => c.WithNoAck(false).WithQueue(q => q.WithAutoDelete()));
+				}, c => c.WithNoAck(false));
 				secondResponder.RespondAsync<BasicRequest, BasicResponse>((request, context) =>
 				{
 					BasicResponse response = null;
@@ -52,12 +52,12 @@ namespace RawRabbit.IntegrationTests.Features
 						response = new BasicResponse();
 					}
 					return Task.FromResult(response);
-				}, c => c.WithNoAck(false).WithQueue(q => q.WithAutoDelete()));
+				}, c => c.WithNoAck(false));
 
 				/* Test */
 				var result = await requester.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest(), configuration: cfg => cfg
 						 .WithReplyQueue(
-							 q => q.WithName("special_reply_queue").WithAutoDelete()));
+							 q => q.WithName("special_reply_queue")));
 
 				/* Assert */
 				Assert.NotNull(result);
@@ -69,9 +69,9 @@ namespace RawRabbit.IntegrationTests.Features
 		public async Task Should_Be_Able_To_Nack_On_Subscribe()
 		{
 			/* Setup */
-			using (var subscriber = BusClientFactory.CreateDefault<AdvancedMessageContext>())
-			using (var secondSubscriber = BusClientFactory.CreateDefault<AdvancedMessageContext>())
-			using (var publisher = BusClientFactory.CreateDefault<AdvancedMessageContext>())
+			using (var subscriber = TestClientFactory.CreateNormal<AdvancedMessageContext>())
+			using (var secondSubscriber = TestClientFactory.CreateNormal<AdvancedMessageContext>())
+			using (var publisher = TestClientFactory.CreateNormal<AdvancedMessageContext>())
 			{
 				var callcount = 0;
 				var subscribeTcs = new TaskCompletionSource<bool>();
@@ -82,12 +82,12 @@ namespace RawRabbit.IntegrationTests.Features
 					context?.Nack();
 					subscribeTcs.TrySetResult(true);
 					return Task.FromResult(true);
-				}, c => c.WithQueue(q => q.WithAutoDelete()));
+				});
 				secondSubscriber.SubscribeAsync<BasicMessage>((message, context) =>
 				{
 					secondSubscribeTcs.TrySetResult(true);
 					return Task.FromResult(true);
-				}, c => c.WithQueue(q => q.WithAutoDelete()));
+				});
 
 				Task.WaitAll(
 					publisher.PublishAsync<BasicMessage>(),

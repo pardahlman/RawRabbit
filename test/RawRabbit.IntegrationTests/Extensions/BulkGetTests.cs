@@ -27,11 +27,11 @@ namespace RawRabbit.IntegrationTests.Extensions
 			_secondBasicQueue = $"{basicQueueBase}_{secondSuffix}";
 			_firstSimpleQueue = $"{simpleQueueBase}_{firstSuffix}";
 
-			using (var subscriber = BusClientFactory.CreateDefault())
+			using (var subscriber = TestClientFactory.CreateNormal())
 			{
-				subscriber.SubscribeAsync<BasicMessage>((message, context) => Task.FromResult(true), cfg => cfg.WithSubscriberId(firstSuffix));
-				subscriber.SubscribeAsync<BasicMessage>((message, context) => Task.FromResult(true), cfg => cfg.WithSubscriberId(secondSuffix));
-				subscriber.SubscribeAsync<SimpleMessage>((message, context) => Task.FromResult(true), cfg => cfg.WithSubscriberId(firstSuffix));
+				subscriber.SubscribeAsync<BasicMessage>((message, context) => Task.FromResult(true), cfg => cfg.WithSubscriberId(firstSuffix).WithQueue(q => q.WithAutoDelete(false)));
+				subscriber.SubscribeAsync<BasicMessage>((message, context) => Task.FromResult(true), cfg => cfg.WithSubscriberId(secondSuffix).WithQueue(q => q.WithAutoDelete(false)));
+				subscriber.SubscribeAsync<SimpleMessage>((message, context) => Task.FromResult(true), cfg => cfg.WithSubscriberId(firstSuffix).WithQueue(q => q.WithAutoDelete(false)));
 			}
 		}
 
@@ -51,7 +51,7 @@ namespace RawRabbit.IntegrationTests.Extensions
 			var thridBasicMsg = new BasicMessage { Prop = "This is the thrid message" };
 			var firstSimpleMsg = new SimpleMessage { IsSimple = true };
 
-			using (var client = RawRabbitFactory.Create())
+			using (var client = TestClientFactory.CreateExtendable())
 			{
 				await client.PublishAsync(secondBasicMsg);
 				await client.PublishAsync(firstBasicMsg);

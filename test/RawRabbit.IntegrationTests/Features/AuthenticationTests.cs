@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client.Exceptions;
 using RawRabbit.Common;
 using RawRabbit.Configuration;
@@ -25,7 +26,7 @@ namespace RawRabbit.IntegrationTests.Features
 
 			/* Test */
 			/* Assert */
-			Assert.ThrowsAny<AuthenticationFailureException>(() => BusClientFactory.CreateDefault(config));
+			Assert.ThrowsAny<AuthenticationFailureException>(() => TestClientFactory.CreateNormal(ioc => ioc.AddSingleton(p => config)));
 		}
 
 		[Fact]
@@ -33,7 +34,7 @@ namespace RawRabbit.IntegrationTests.Features
 		{
 			/* Setup */
 			/* Test */
-			var b = BusClientFactory.CreateDefault();
+			var b = TestClientFactory.CreateNormal();
 			b.Dispose();
 
 			/* Assert */
@@ -54,7 +55,7 @@ namespace RawRabbit.IntegrationTests.Features
 			};
 
 			/* Test */
-			var b = BusClientFactory.CreateDefault();
+			var b = TestClientFactory.CreateNormal(ioc => ioc.AddSingleton(p => config));
 			b.Dispose();
 
 			/* Assert */

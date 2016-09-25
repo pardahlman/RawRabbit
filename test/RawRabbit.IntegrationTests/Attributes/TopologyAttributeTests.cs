@@ -14,7 +14,7 @@ namespace RawRabbit.IntegrationTests.Attributes
 		public async Task Should_Work_For_Pub_Sub()
 		{
 			/* Setup */
-			using (var client = BusClientFactory.CreateDefault(ioc => ioc
+			using (var client = TestClientFactory.CreateNormal(ioc => ioc
 				.AddSingleton<IConfigurationEvaluator, AttributeConfigEvaluator>()
 				))
 			{
@@ -23,7 +23,7 @@ namespace RawRabbit.IntegrationTests.Attributes
 				{
 					tcs.TrySetResult(message);
 					return Task.FromResult(true);
-				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+				});
 
 				/* Test */
 				await client.PublishAsync(new AttributedMessage());
@@ -38,12 +38,11 @@ namespace RawRabbit.IntegrationTests.Attributes
 		public async Task Should_Work_For_Rpc()
 		{
 			/* Setup */
-			using (var client = BusClientFactory.CreateDefault(ioc => ioc.AddSingleton<IConfigurationEvaluator, AttributeConfigEvaluator>()))
+			using (var client = TestClientFactory.CreateNormal(ioc => ioc.AddSingleton<IConfigurationEvaluator, AttributeConfigEvaluator>()))
 			{
 				client.RespondAsync<AttributedRequest, AttributedResponse>((message, context) =>
-					Task.FromResult(new AttributedResponse()),
-					cfg => cfg.WithQueue(q => q.WithAutoDelete())
-					);
+					Task.FromResult(new AttributedResponse())
+				);
 
 				/* Test */
 				await client.RequestAsync<AttributedRequest, AttributedResponse>();
@@ -57,7 +56,7 @@ namespace RawRabbit.IntegrationTests.Attributes
 		public async Task Should_Honor_Custom_Config()
 		{
 			/* Setup */
-			using (var client = BusClientFactory.CreateDefault(ioc => ioc
+			using (var client = TestClientFactory.CreateNormal(ioc => ioc
 				.AddSingleton<IConfigurationEvaluator, AttributeConfigEvaluator>()
 				))
 			{
@@ -68,8 +67,7 @@ namespace RawRabbit.IntegrationTests.Attributes
 					return Task.FromResult(true);
 				}, c => c
 					.WithRoutingKey("special")
-					.WithExchange(e => e.WithName("special"))
-					.WithQueue(q => q.WithAutoDelete()));
+					.WithExchange(e => e.WithName("special")));
 
 				/* Test */
 				await

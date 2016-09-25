@@ -16,8 +16,8 @@ namespace RawRabbit.IntegrationTests.Features
 		public async Task Should_Retry_For_Publish_Subscribe_After_Given_Timespan()
 		{
 			/* Setup */
-			using (var subscriber = BusClientFactory.CreateDefault<AdvancedMessageContext>())
-			using (var publisher = BusClientFactory.CreateDefault<AdvancedMessageContext>())
+			using (var subscriber = TestClientFactory.CreateNormal<AdvancedMessageContext>())
+			using (var publisher = TestClientFactory.CreateNormal<AdvancedMessageContext>())
 			{
 				var subscribeTcs = new TaskCompletionSource<bool>();
 				var delay = TimeSpan.FromSeconds(1);
@@ -36,7 +36,7 @@ namespace RawRabbit.IntegrationTests.Features
 					}
 					secondRecieved = DateTime.Now;
 					return Task.Delay(10).ContinueWith(t => subscribeTcs.SetResult(true));
-				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+				});
 
 				/* Test */
 				await publisher.PublishAsync(new BasicMessage { Prop = "I'm about to be reborn!" });
@@ -52,8 +52,8 @@ namespace RawRabbit.IntegrationTests.Features
 		[Fact]
 		public async Task Should_Retry_And_Leave_Requester_Hanging_On_Rpc()
 		{
-			using (var requester = BusClientFactory.CreateDefault<AdvancedMessageContext>())
-			using (var responder = BusClientFactory.CreateDefault<AdvancedMessageContext>())
+			using (var requester = TestClientFactory.CreateNormal<AdvancedMessageContext>())
+			using (var responder = TestClientFactory.CreateNormal<AdvancedMessageContext>())
 			{
 				var delay = TimeSpan.FromSeconds(1);
 				var hasBeenDelayed = false;
@@ -71,7 +71,7 @@ namespace RawRabbit.IntegrationTests.Features
 					}
 					secondRecieved = DateTime.Now;
 					return Task.FromResult(new BasicResponse());
-				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+				});
 
 				/* Test */
 				var response = await requester.RequestAsync<BasicRequest, BasicResponse>();
@@ -87,8 +87,8 @@ namespace RawRabbit.IntegrationTests.Features
 		public async Task Should_Successfully_Retry_With_Different_TimeSpans()
 		{
 			/* Setup */
-			using (var subscriber = BusClientFactory.CreateDefault<AdvancedMessageContext>())
-			using (var publisher = BusClientFactory.CreateDefault<AdvancedMessageContext>())
+			using (var subscriber = TestClientFactory.CreateNormal<AdvancedMessageContext>())
+			using (var publisher = TestClientFactory.CreateNormal<AdvancedMessageContext>())
 			{
 				var recived = new List<DateTime>();
 				var redelivered = new List<DateTime>();
@@ -112,7 +112,7 @@ namespace RawRabbit.IntegrationTests.Features
 						}
 					}
 					return Task.FromResult(true);
-				}, cfg => cfg.WithQueue(q => q.WithAutoDelete()));
+				});
 
 				/* Test */
 				await publisher.PublishAsync(new BasicMessage { Prop = "I'm about to be reborn!" });

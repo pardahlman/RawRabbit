@@ -5,6 +5,7 @@ using Moq;
 using RabbitMQ.Client;
 using RawRabbit.Channel;
 using RawRabbit.Configuration;
+using RawRabbit.Logging;
 using Xunit;
 
 namespace RawRabbit.Tests.Channel
@@ -21,6 +22,7 @@ namespace RawRabbit.Tests.Channel
 
 		public ChannelFactoryTests()
 		{
+			LogManager.CurrentFactory = new VoidLoggerFactory();
 			_connectionFactory = new Mock<IConnectionFactory>();
 			_connection = new Mock<IConnection>();
 			_firstChannel = new Mock<IModel>();
