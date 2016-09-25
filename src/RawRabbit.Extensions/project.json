@@ -1,6 +1,6 @@
 ﻿{
 	"title": "RawRabbit.Extensions",
-	"version": "1.10.0",
+	"version": "1.10.1",
 	"description": "Make the most of RawRabbit with these extensions",
 	"authors": [ "par.dahlman" ],
 	"packOptions": {

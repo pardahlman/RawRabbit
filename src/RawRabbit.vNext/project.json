@@ -1,5 +1,5 @@
 ﻿{
-	"version": "1.10.0",
+	"version": "1.10.1",
 	"authors": [ "pardahlman", "enrique-avalon" ],
 	"description": "Take advantage of vNext for your RawRabbit setup. Extension for IServiceCollection, IConfiguration support and much more!",
 	"packOptions": {
