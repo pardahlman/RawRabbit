@@ -1,3 +1,17 @@
+# 1.10.1
+
+ - [#108](https://github.com/pardahlman/RawRabbit/issues/108) - Upgrade to RabbitMQ.Client 4.1.0
+ - [#107](https://github.com/pardahlman/RawRabbit/issues/107) - Prevent message duplicatoin on multiple Retrys
+ - [#104](https://github.com/pardahlman/RawRabbit/issues/104) - Provide Serilog Logger in Ctor
+ - [#103](https://github.com/pardahlman/RawRabbit/issues/103) - Support Messages in pure Json +feature
+ - [#102](https://github.com/pardahlman/RawRabbit/issues/102) - Support Exception Propagation for .NET Core +feature
+ - [#101](https://github.com/pardahlman/RawRabbit/issues/101) - Only dispose active Subscriptions on ShutDown +fix
+ - [#100](https://github.com/pardahlman/RawRabbit/issues/100) - Run Integration Tests in AppVeyor
+ - [#99](https://github.com/pardahlman/RawRabbit/issues/99) - Upgrade to RabbitMQ.Client 4.0.X
+
+Commits: 440910db25...9f0afa415e
+
+
 # 1.10.0
 
  - [#104](https://github.com/pardahlman/RawRabbit/issues/104) - Provide Serilog Logger in Ctor
