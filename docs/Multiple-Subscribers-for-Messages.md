@@ -10,7 +10,7 @@ The reason for this behaviour  is that in many cases it is unwanted to perform a
 A service subscribes to a message `OrderSent`, the service sends an email to the customer. Even if this service has multiple insanse connected to the same broker, only one email should be sent.
 
 The default behaviour is achieved by creating unique queue names that contains:
-* queue name (extracted from naing convention)
+* queue name (extracted from naming convention)
 * the application name (extracted from executing folder)
 * a unique counter of subscriber to a message type (given the instance of the bus client). In order to make the queue names shorter, the counter is emitted for the first subscriber.
 
