@@ -52,19 +52,23 @@ namespace RawRabbit.Operations
 			return Task
 				.WhenAll(exchangeTask, channelTask)
 				.ContinueWith(t =>
+				{
+					if (t.IsFaulted)
 					{
-						lock (_publishLock)
-						{
-							var ackTask = _acknowledger.GetAckTask(channelTask.Result);
-							channelTask.Result.BasicPublish(
-								exchange: config.Exchange.ExchangeName,
-								routingKey: _config.RouteWithGlobalId ? $"{config.RoutingKey}.{globalMessageId}" : config.RoutingKey,
-								basicProperties: props,
-								body: _serializer.Serialize(message)
-								);
-							return ackTask;
-						}
-					})
+						throw t.Exception;
+					}
+					lock (_publishLock)
+					{
+						var ackTask = _acknowledger.GetAckTask(channelTask.Result);
+						channelTask.Result.BasicPublish(
+							exchange: config.Exchange.ExchangeName,
+							routingKey: _config.RouteWithGlobalId ? $"{config.RoutingKey}.{globalMessageId}" : config.RoutingKey,
+							basicProperties: props,
+							body: _serializer.Serialize(message)
+							);
+						return ackTask;
+					}
+				})
 				.Unwrap();
 		}
 	}

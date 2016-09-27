@@ -12,6 +12,7 @@ using RawRabbit.Exceptions;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.vNext;
 using Xunit;
+using ExchangeType = RawRabbit.Configuration.Exchange.ExchangeType;
 
 namespace RawRabbit.IntegrationTests.SimpleUse
 {
@@ -353,6 +354,39 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 
 				/* Assert */
 				Assert.True(tcs.Task.Result.Body.IsDynamic);
+			}
+		}
+
+		[Fact]
+		public async Task Should_Be_Able_To_Publish_Message_After_Failed_Publish()
+		{
+			using(var firstClient = TestClientFactory.CreateNormal())
+			using (var secondClient = TestClientFactory.CreateNormal())
+			{
+				/* Setup */
+				var tcs = new TaskCompletionSource<bool>();
+				firstClient.SubscribeAsync<SimpleMessage>((message, context) =>
+				{
+					tcs.TrySetResult(true);
+					return Task.FromResult(true);
+				});
+
+				/* Test */
+				try
+				{
+					await
+						secondClient.PublishAsync(new SimpleMessage(),
+							configuration: cfg => cfg.WithExchange(e => e.WithType(ExchangeType.Direct)));
+				}
+				catch (Exception)
+				{
+					await Task.Delay(50);
+					Assert.False(tcs.Task.IsCompleted);
+				}
+				secondClient.PublishAsync(new SimpleMessage());
+				await tcs.Task;
+				/* Assert */
+				Assert.True(true);
 			}
 		}
 	}

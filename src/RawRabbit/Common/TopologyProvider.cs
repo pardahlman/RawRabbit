@@ -53,7 +53,7 @@ namespace RawRabbit.Common
 
 		public Task DeclareExchangeAsync(ExchangeConfiguration exchange)
 		{
-			if(IsInitialized(exchange))
+			if (IsInitialized(exchange))
 			{
 				return _completed;
 			}
@@ -193,7 +193,10 @@ namespace RawRabbit.Common
 				queue.AutoDelete,
 				queue.Arguments);
 
-			_initQueues.Add(queue.FullQueueName);
+			if (queue.AutoDelete)
+			{
+				_initQueues.Add(queue.FullQueueName);
+			}
 		}
 
 		private void DeclareExchange(ExchangeConfiguration exchange)
@@ -206,12 +209,15 @@ namespace RawRabbit.Common
 			_logger.LogInformation($"Declaring exchange '{exchange.ExchangeName}'.");
 			var channel = GetOrCreateChannel();
 			channel.ExchangeDeclare(
-					exchange.ExchangeName,
-					exchange.ExchangeType,
-					exchange.Durable,
-					exchange.AutoDelete,
-					exchange.Arguments);
-			_initExchanges.Add(exchange.ExchangeName);
+				exchange.ExchangeName,
+				exchange.ExchangeType,
+				exchange.Durable,
+				exchange.AutoDelete,
+				exchange.Arguments);
+			if (!exchange.AutoDelete)
+			{
+				_initExchanges.Add(exchange.ExchangeName);
+			}
 		}
 
 		private void EnsureWorker()
@@ -236,16 +242,34 @@ namespace RawRabbit.Common
 				var exchange = topologyTask as ScheduledExchangeTask;
 				if (exchange != null)
 				{
-					DeclareExchange(exchange.Configuration);
-					exchange.TaskCompletionSource.TrySetResult(true);
+					try
+					{
+						DeclareExchange(exchange.Configuration);
+						exchange.TaskCompletionSource.TrySetResult(true);
+					}
+					catch (Exception e)
+					{
+						_logger.LogError($"Unable to declare exchange {exchange.Configuration.ExchangeName}", e);
+						exchange.TaskCompletionSource.TrySetException(e);
+					}
+
 					continue;
 				}
 
 				var queue = topologyTask as ScheduledQueueTask;
 				if (queue != null)
 				{
-					DeclareQueue(queue.Configuration);
-					queue.TaskCompletionSource.TrySetResult(true);
+					try
+					{
+						DeclareQueue(queue.Configuration);
+						queue.TaskCompletionSource.TrySetResult(true);
+					}
+					catch (Exception e)
+					{
+						_logger.LogError($"Unable to declare queue", e);
+						queue.TaskCompletionSource.TrySetException(e);
+					}
+
 					continue;
 				}
 
