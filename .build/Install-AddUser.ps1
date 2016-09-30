@@ -2,7 +2,9 @@
 write-host 'install:Add RabbitMq User "RawRabbit"'
 
 $rabbitMqPath = Get-RabbitMQPath
-$rabbitmqctl = '$rabbitMqPath\sbin\rabbitmqctl.bat'
+$rabbitmqctl = "'$rabbitMqPath\sbin\rabbitmqctl.bat'"
+
+Write-Host "Found Comand Line Tool at $rabbitmqctl"
 
 $healthCheck = "cmd.exe /C $rabbitmqctl node_health_check"
 $createUser = "cmd.exe /C $rabbitmqctl add_user RawRabbit RawRabbit"
