@@ -11,8 +11,11 @@ $install = "cmd.exe /C $rabbitmqSrv install"
 $install = "cmd.exe /C $rabbitmqSrv start"
 
 Invoke-Expression -Command:$uninstall
+Start-Sleep 2
 Invoke-Expression -Command:$install
+Start-Sleep 2
 Invoke-Expression -Command:$start
+Start-Sleep 2
 
 # Health Check
 Write-Host "install: RabbitMq Health Check" -ForegroundColor Green
