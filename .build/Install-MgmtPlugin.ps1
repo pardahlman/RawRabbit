@@ -1,6 +1,6 @@
 . "$PSScriptRoot\Util-RabbitMqPath.ps1"
 
-Write-Host "install: verifying that RabbitMq Mgmt Tool is up"
+Write-Host "install: verifying that RabbitMq Mgmt Tool is up" -ForegroundColor Green
 
 $rabbitMqPath = Get-RabbitMQPath
 $rabbitmqPlugin = "'$rabbitMqPath\sbin\rabbitmq-plugins.bat'"
@@ -14,10 +14,10 @@ while(!$client.Connected -and $attempt -lt 30) {
 	try {
 		$attempt++;
 		$client.Connect("127.0.0.1", 15672);
-		Write-Host "install: mgmt tool is listening on port"
+		Write-Host "install: mgmt tool is listening on port" -ForegroundColor Green
 		}
 	catch {
-		Write-Host "install: mgmt tool not is listening on port"
+		Write-Host "install: mgmt tool not is listening on port" -ForegroundColor Green
 		Invoke-Expression -Command:$enableMgmt
 		Start-Sleep 2
 		}

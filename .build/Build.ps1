@@ -1,9 +1,9 @@
-write-host "build: Build started"
+write-host "build: Build started" -ForegroundColor Green
 
 Push-Location $PSScriptRoot
 
 if(Test-Path ..\artifacts) {
-	write-host "build: Cleaning .\artifacts"
+	write-host "build: Cleaning .\artifacts" -ForegroundColor Green
 	Remove-Item ..\artifacts -Force -Recurse
 }
 
@@ -13,12 +13,12 @@ $branch = @{ $true = $env:APPVEYOR_REPO_BRANCH; $false = $(git symbolic-ref --sh
 $revision = @{ $true = "{0:00000}" -f [convert]::ToInt32("0" + $env:APPVEYOR_BUILD_NUMBER, 10); $false = "local" }[$env:APPVEYOR_BUILD_NUMBER -ne $NULL];
 $suffix = @{ $true = ""; $false = "$($branch.Substring(0, [math]::Min(10,$branch.Length)))-$revision"}[$branch -eq "master" -and $revision -ne "local"]
 
-write-host "build: Version suffix is $suffix"
+write-host "build: Version suffix is $suffix" -ForegroundColor Green
 
 foreach ($src in ls ../src/*) {
 	Push-Location $src
 
-	write-host "build: Packaging project in $src"
+	write-host "build: Packaging project in $src" -ForegroundColor Green
 
 	& dotnet pack -c Release -o ..\..\artifacts --version-suffix=$suffix
 	if($LASTEXITCODE -ne 0) { exit 1 }
