@@ -13,3 +13,9 @@ $install = "cmd.exe /C $rabbitmqSrv start"
 Invoke-Expression -Command:$uninstall
 Invoke-Expression -Command:$install
 Invoke-Expression -Command:$start
+
+# Health Check
+Write-Host "install: RabbitMq Health Check" -ForegroundColor Green
+
+$rabbitmqctl = "'$rabbitMqPath\sbin\rabbitmqctl.bat'"
+$healthCheck = "cmd.exe /C $rabbitmqctl node_health_check"
