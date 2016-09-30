@@ -1,4 +1,11 @@
+. "$PSScriptRoot\Util-RabbitMqPath.ps1"
+
 Write-Host "install: verifying that RabbitMq Mgmt Tool is up"
+
+$rabbitMqPath = Get-RabbitMQPath
+$rabbitmqPlugin = "'$rabbitMqPath\sbin\rabbitmq-plugins.bat'"
+$enableMgmt = "cmd.exe /C $rabbitmqPlugin enable rabbitmq_management"
+
 
 $client = New-Object System.Net.Sockets.TcpClient([System.Net.Sockets.AddressFamily]::InterNetwork)
 $attempt=0
@@ -11,7 +18,8 @@ while(!$client.Connected -and $attempt -lt 30) {
 		}
 	catch {
 		Write-Host "install: mgmt tool not is listening on port"
-		Start-Sleep 1
+		Invoke-Expression -Command:$enableMgmt
+		Start-Sleep 2
 		}
 }
 $client.Close()
