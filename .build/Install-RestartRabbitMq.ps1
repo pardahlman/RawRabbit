@@ -8,7 +8,7 @@ Write-Host "Found Comand Line Tool at $rabbitmqSrv" -ForegroundColor Green
 
 $uninstall = "cmd.exe /C $rabbitmqSrv remove"
 $install = "cmd.exe /C $rabbitmqSrv install"
-$install = "cmd.exe /C $rabbitmqSrv start"
+$start = "cmd.exe /C $rabbitmqSrv start"
 
 Invoke-Expression -Command:$uninstall
 Start-Sleep 2
