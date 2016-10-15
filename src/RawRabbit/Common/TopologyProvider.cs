@@ -276,16 +276,33 @@ namespace RawRabbit.Common
 				var bind = topologyTask as ScheduledBindQueueTask;
 				if (bind != null)
 				{
-					BindQueueToExchange(bind);
-					bind.TaskCompletionSource.TrySetResult(true);
+					try
+					{
+						BindQueueToExchange(bind);
+						bind.TaskCompletionSource.TrySetResult(true);
+					}
+					catch (Exception e)
+					{
+						_logger.LogError($"Unable to bind queue", e);
+						bind.TaskCompletionSource.TrySetException(e);
+					}
 					continue;
 				}
 
 				var unbind = topologyTask as ScheduledUnbindQueueTask;
 				if (unbind != null)
 				{
-					UnbindQueueFromExchange(unbind);
-					unbind.TaskCompletionSource.TrySetResult(true);
+					try
+					{
+						UnbindQueueFromExchange(unbind);
+						unbind.TaskCompletionSource.TrySetResult(true);
+					}
+					catch (Exception e)
+					{
+						_logger.LogError($"Unable to unbind queue", e);
+						unbind.TaskCompletionSource.TrySetException(e);
+					}
+					
 					continue;
 				}
 
