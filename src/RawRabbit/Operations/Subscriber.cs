@@ -65,6 +65,10 @@ namespace RawRabbit.Operations
 				.WhenAll(topologyTask, channelTask)
 				.ContinueWith(t =>
 				{
+					if (topologyTask.IsFaulted)
+					{
+						throw topologyTask.Exception ?? new Exception("Topology Task Faulted");
+					}
 					var consumer = _consumerFactory.CreateConsumer(config, channelTask.Result);
 					consumer.OnMessageAsync = (o, args) => _errorHandling.ExecuteAsync(() =>
 					{
