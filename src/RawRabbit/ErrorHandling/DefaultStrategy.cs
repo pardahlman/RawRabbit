@@ -118,7 +118,7 @@ namespace RawRabbit.ErrorHandling
 			}
 		}
 
-		public virtual Task OnSubscriberExceptionAsync(IRawConsumer consumer, SubscriptionConfiguration config, BasicDeliverEventArgs args, Exception exception)
+		public virtual async Task OnSubscriberExceptionAsync(IRawConsumer consumer, SubscriptionConfiguration config, BasicDeliverEventArgs args, Exception exception)
 		{
 			if (!config.NoAck)
 			{
@@ -130,33 +130,27 @@ namespace RawRabbit.ErrorHandling
 				_logger.LogError($"Error thrown in Subscriber: ", exception);
 				_logger.LogDebug($"Attempting to publish message '{args.BasicProperties.MessageId}' to error exchange.");
 
-				var topologyTask = _topologyProvider.DeclareExchangeAsync(_errorExchangeCfg);
-				var channelTask = _channelFactory.GetChannelAsync();
-				return Task
-					.WhenAll(topologyTask, channelTask)
-					.ContinueWith(t =>
-					{
-						var msg = _serializer.Deserialize(args);
-						var errorMsg = new HandlerExceptionMessage
-						{
-							Exception = exception,
-							Time = DateTime.Now,
-							Host = Environment.MachineName,
-							Message = msg,
-						};
-						channelTask.Result.BasicPublish(
-							exchange: _errorExchangeCfg.ExchangeName,
-							routingKey: args.RoutingKey,
-							basicProperties: args.BasicProperties,
-							body: _serializer.Serialize(errorMsg)
-							);
-						channelTask.Result.Close();
-					});
+				await _topologyProvider.DeclareExchangeAsync(_errorExchangeCfg);
+				var channel = await _channelFactory.GetChannelAsync();
+				var msg = _serializer.Deserialize(args);
+				var errorMsg = new HandlerExceptionMessage
+				{
+					Exception = exception,
+					Time = DateTime.Now,
+					Host = Environment.MachineName,
+					Message = msg,
+				};
+				channel.BasicPublish(
+					exchange: _errorExchangeCfg.ExchangeName,
+					routingKey: args.RoutingKey,
+					basicProperties: args.BasicProperties,
+					body: _serializer.Serialize(errorMsg)
+					);
+				channel.Close();
 			}
 			catch (Exception e)
 			{
 				_logger.LogWarning($"Unable to publish message '{args.BasicProperties.MessageId}' to default error exchange.", e);
-				return Task.FromResult(true);
 			}
 		}
 	}
