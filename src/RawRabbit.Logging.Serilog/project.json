@@ -1,6 +1,6 @@
 {
 	"title": "RawRabbit.Logging.Serilog",
-	"version": "1.10.1-*",
+	"version": "1.10.2-*",
 	"authors": [ "par.dahlman" ],
 	"description": "Write RawRabbit's logs with Serilog",
 

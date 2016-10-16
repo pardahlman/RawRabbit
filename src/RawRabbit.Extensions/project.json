@@ -1,6 +1,6 @@
 ﻿{
 	"title": "RawRabbit.Extensions",
-	"version": "1.10.1",
+	"version": "1.10.2-*",
 	"description": "Make the most of RawRabbit with these extensions",
 	"authors": [ "par.dahlman" ],
 	"packOptions": {
@@ -13,7 +13,7 @@
 	"dependencies": {
 		"RawRabbit": { "target": "project" },
 		"RawRabbit.vNext": { "target": "project" },
-		"System.Net.Http" : "4.1.0" 
+		"System.Net.Http": "4.1.0"
 	},
 
 	"frameworks": {

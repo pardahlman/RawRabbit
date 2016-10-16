@@ -1,6 +1,6 @@
 ﻿{
 	"title": "RawRabbit.Logging.NLog",
-	"version": "1.10.1-*",
+	"version": "1.10.2-*",
 	"authors": [ "par.dahlman" ],
 	"description": "Write RawRabbit's logs with NLog",
 
