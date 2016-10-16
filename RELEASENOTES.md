@@ -1,3 +1,12 @@
+# 1.10.2
+
+ - [#117](https://github.com/pardahlman/RawRabbit/issues/117) - Propegate Topology Exception for Consumers
+ - [#112](https://github.com/pardahlman/RawRabbit/pull/112) - Update Multiple-Subscribers-for-Messages.md contributed by Robert Campbell ([jayrulez](https://github.com/jayrulez))
+ - [#111](https://github.com/pardahlman/RawRabbit/issues/111) - Guard against OperationInteruptedException in TopologyProvider
+
+Commits: af0bda979e...331e174a02
+
+
 # 1.10.1
 
  - [#108](https://github.com/pardahlman/RawRabbit/issues/108) - Upgrade to RabbitMQ.Client 4.1.0
