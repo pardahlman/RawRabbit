@@ -10,6 +10,7 @@ namespace RawRabbit.Common
 	public interface IBasicPropertiesProvider
 	{
 		IBasicProperties GetProperties<TMessage>(Action<IBasicProperties> custom = null);
+		IBasicProperties GetProperties(Type type, Action<IBasicProperties> custom = null);
 	}
 
 	public class BasicPropertiesProvider : IBasicPropertiesProvider
@@ -23,6 +24,11 @@ namespace RawRabbit.Common
 
 		public IBasicProperties GetProperties<TMessage>(Action<IBasicProperties> custom = null)
 		{
+			return GetProperties(typeof(TMessage), custom);
+		}
+
+		public IBasicProperties GetProperties(Type msgType, Action<IBasicProperties> custom = null)
+		{
 			var properties = new BasicProperties
 			{
 				MessageId = Guid.NewGuid().ToString(),
@@ -31,7 +37,7 @@ namespace RawRabbit.Common
 			};
 			custom?.Invoke(properties);
 			properties.Headers.Add(PropertyHeaders.Sent, DateTime.UtcNow.ToString("u"));
-			properties.Headers.Add(PropertyHeaders.MessageType, GetTypeName(typeof(TMessage)));
+			properties.Headers.Add(PropertyHeaders.MessageType, GetTypeName(msgType));
 			return properties;
 		}
 
