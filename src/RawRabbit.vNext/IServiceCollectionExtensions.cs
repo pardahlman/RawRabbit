@@ -20,7 +20,9 @@ using RawRabbit.ErrorHandling;
 using RawRabbit.Logging;
 using RawRabbit.Operations;
 using RawRabbit.Operations.Abstraction;
+using RawRabbit.Pipe;
 using RawRabbit.Serialization;
+using PipeBuilder = RawRabbit.vNext.Pipe.PipeBuilder;
 
 namespace RawRabbit.vNext
 {
@@ -32,7 +34,7 @@ namespace RawRabbit.vNext
 				.AddSingleton<IBusClient>(provider =>
 					{
 						LogManager.CurrentFactory = provider.GetService<ILoggerFactory>();
-						return ActivatorUtilities.CreateInstance<BusClient>(provider);
+						return ActivatorUtilities.CreateInstance<RawRabbit.Pipe.BusClient>(provider);
 					})
 				.AddRawRabbit<MessageContext>(config, custom);
 		}
@@ -107,6 +109,13 @@ namespace RawRabbit.vNext
 				.AddTransient<IPublisher, Publisher<TMessageContext>>()
 				.AddTransient<IResponder<TMessageContext>, Responder<TMessageContext>>()
 				.AddTransient<IRequester, Requester<TMessageContext>>()
+
+				.AddSingleton<IStartup, Startup<TMessageContext>>()
+				.AddSingleton<IHeaderSerializer, HeaderSerializer>()
+				.AddSingleton<IResourceDisposer, ResourceDisposer>()
+				.AddSingleton<IPipeContextFactory, PipeContextFactory>()
+				.AddSingleton<IPipeBuilderFactory>(provider => new PipeBuilderFactory(() => new PipeBuilder(provider)))
+
 				.AddSingleton<IBusClient<TMessageContext>>(provider =>
 				{
 					LogManager.CurrentFactory = provider.GetService<ILoggerFactory>();
