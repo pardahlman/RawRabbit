@@ -105,6 +105,6 @@ namespace RawRabbit.Context.Provider
 			return Task.FromResult(CreateMessageContext());
 		}
 
-		protected abstract TMessageContext CreateMessageContext(Guid globalRequestId = default(Guid));
+		public abstract TMessageContext CreateMessageContext(Guid globalRequestId = default(Guid));
 	}
 }
