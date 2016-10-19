@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using RawRabbit.Serialization;
 
 namespace RawRabbit.Context.Provider
 {
@@ -9,13 +10,13 @@ namespace RawRabbit.Context.Provider
 		private readonly Func<Task<TContext>> _createContextAsync;
 		private readonly Func<TContext> _createContext;
 
-		public MessageContextProvider(JsonSerializer serializer, Func<Task<TContext>> createContextAsync = null)
+		public MessageContextProvider(IHeaderSerializer serializer, Func<Task<TContext>> createContextAsync = null)
 			: base(serializer)
 		{
 			_createContextAsync = createContextAsync;
 		}
 
-		public MessageContextProvider(JsonSerializer serializer, Func<TContext> createContext)
+		public MessageContextProvider(IHeaderSerializer serializer, Func<TContext> createContext)
 		: base(serializer)
 		{
 			_createContext = createContext;

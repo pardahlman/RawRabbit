@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using RawRabbit.Context;
 using RawRabbit.Context.Provider;
 using RawRabbit.IntegrationTests.TestMessages;
+using RawRabbit.Serialization;
 using Xunit;
 
 namespace RawRabbit.IntegrationTests.Features
@@ -17,7 +18,7 @@ namespace RawRabbit.IntegrationTests.Features
 			/* Setup */
 
 			var expectedId = Guid.NewGuid();
-			var contextProvider = new MessageContextProvider<MessageContext>(new JsonSerializer(), () => new MessageContext { GlobalRequestId = expectedId });
+			var contextProvider = new MessageContextProvider<MessageContext>(new HeaderSerializer(new JsonSerializer()), () => new MessageContext { GlobalRequestId = expectedId });
 			using (var subscriber = TestClientFactory.CreateNormal())
 			using (var publisher = TestClientFactory.CreateNormal(collection => collection.AddSingleton<IMessageContextProvider<MessageContext>>(contextProvider)))
 			{
