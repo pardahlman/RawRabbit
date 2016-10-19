@@ -5,12 +5,14 @@ using RabbitMQ.Client.Events;
 using RawRabbit.Common;
 using RawRabbit.Configuration;
 using RawRabbit.Exceptions;
+using RawRabbit.Logging;
 
 namespace RawRabbit.Pipe.Middleware
 {
 	public class PublishAcknowledgeMiddleware : Middleware
 	{
 		private TimeSpan _publishTimeOut;
+		private readonly ILogger _logger = LogManager.GetLogger<PublishAcknowledgeMiddleware>();
 
 		public PublishAcknowledgeMiddleware(RawRabbitConfiguration config)
 		{
@@ -21,6 +23,7 @@ namespace RawRabbit.Pipe.Middleware
 			var channel = context.GetChannel();
 			if (channel.NextPublishSeqNo == 0UL)
 			{
+				_logger.LogInformation($"Setting 'Publish Acknowledge' for channel '{channel.ChannelNumber}'");
 				channel.ConfirmSelect();
 			}
 
@@ -38,6 +41,8 @@ namespace RawRabbit.Pipe.Middleware
 			EventHandler<BasicAckEventArgs> channelBasicAck = null;
 			channelBasicAck = (sender, args) =>
 			{
+				_logger.LogInformation($"Basic Ack recieved for '{args.DeliveryTag}' on channel '{channel.ChannelNumber}'");
+
 				if (args.DeliveryTag < thisSequence)
 				{
 					return;
@@ -46,6 +51,8 @@ namespace RawRabbit.Pipe.Middleware
 				{
 					return;
 				}
+
+				_logger.LogDebug($"Recieve Confirm for '{thisSequence}' on channel '{channel.ChannelNumber}'.");
 				channel.BasicAcks -= channelBasicAck;
 				ackTcs.TrySetResult(thisSequence);
 			};
