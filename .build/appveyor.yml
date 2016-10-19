@@ -2,6 +2,10 @@ version: '{build}'
 skip_tags: true
 image: Visual Studio 2015
 configuration: Release
+branches:
+  only:
+    - master
+    - stable
 
 build_script:
 - ps: ./.build/Install-Environment.ps1
