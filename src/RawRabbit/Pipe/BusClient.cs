@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Publish;
@@ -7,58 +6,30 @@ using RawRabbit.Configuration.Request;
 using RawRabbit.Configuration.Respond;
 using RawRabbit.Configuration.Subscribe;
 using RawRabbit.Context;
+using RawRabbit.Pipe.Client;
 
 namespace RawRabbit.Pipe
 {
 	public class BusClient<TContext> : IBusClient<TContext> where TContext : IMessageContext
 	{
-		private readonly IPipeContextFactory _pipeContext;
+		private readonly Client.IBusClient _nextGeneration;
 		private readonly IResourceDisposer _resourceDisposer;
-		private readonly Middleware.Middleware _subscribe;
-		private readonly Middleware.Middleware _publish;
 
-		public BusClient(IPipeContextFactory pipeContext, IPipeBuilderFactory pipeBuilderFactory, IStartup startup, IResourceDisposer resourceDisposer)
+		public BusClient(Client.IBusClient nextGeneration, IResourceDisposer resourceDisposer)
 		{
-			var subscribe = pipeBuilderFactory.Create();
-			startup.ConfigureSubscribe(subscribe);
-			_subscribe = subscribe.Build();
-
-			var publish = pipeBuilderFactory.Create();
-			startup.ConfigurePublish(publish);
-			_publish = publish.Build();
-			_pipeContext = pipeContext;
+			_nextGeneration = nextGeneration;
 			_resourceDisposer = resourceDisposer;
 		}
 
 		public ISubscription SubscribeAsync<T>(Func<T, TContext, Task> subscribeMethod, Action<ISubscriptionConfigurationBuilder> configuration = null)
 		{
-			Func<object, IMessageContext, Task> genericHandler = (o, c) => subscribeMethod((T)o, (TContext)c);
-
-			var context = _pipeContext.CreateContext(
-				new KeyValuePair<string, object>(PipeKey.Operation, Operation.Subscribe),
-				new KeyValuePair<string, object>(PipeKey.MessageType, typeof(T)),
-				new KeyValuePair<string, object>(PipeKey.MessageHandler, genericHandler),
-				new KeyValuePair<string, object>(PipeKey.ConfigurationAction, configuration)
-			);
-			_subscribe
-				.InvokeAsync(context)
-				.GetAwaiter()
-				.GetResult();
+			_nextGeneration.SubscribeAsync(subscribeMethod, configuration);
 			return null;
 		}
 
 		public Task PublishAsync<T>(T message = default(T), Guid globalMessageId = new Guid(), Action<IPublishConfigurationBuilder> configuration = null)
 		{
-			var context = _pipeContext.CreateContext(
-				new KeyValuePair<string, object>(PipeKey.Operation, Operation.Publish),
-				new KeyValuePair<string, object>(PipeKey.MessageType, typeof(T)),
-				new KeyValuePair<string, object>(PipeKey.Message, message),
-				new KeyValuePair<string, object>(PipeKey.ConfigurationAction, configuration)
-			);
-			return _publish
-				.InvokeAsync(context)
-				.ContinueWith(t => context.Get(PipeKey.PublishAcknowledger, Task.FromResult(0) as Task))
-				.Unwrap();
+			return _nextGeneration.PublishAsync(message, configuration);
 		}
 
 		public ISubscription RespondAsync<TRequest, TResponse>(Func<TRequest, TContext, Task<TResponse>> onMessage, Action<IResponderConfigurationBuilder> configuration = null)
@@ -81,8 +52,7 @@ namespace RawRabbit.Pipe
 
 	public class BusClient : BusClient<MessageContext>, IBusClient
 	{
-		public BusClient(IPipeContextFactory pipeContext, IPipeBuilderFactory pipeBuilderFactory, IStartup startup, IResourceDisposer down)
-			: base(pipeContext, pipeBuilderFactory, startup, down)
+		public BusClient(Client.IBusClient nextGeneration, IResourceDisposer resourceDisposer) : base(nextGeneration, resourceDisposer)
 		{
 		}
 	}

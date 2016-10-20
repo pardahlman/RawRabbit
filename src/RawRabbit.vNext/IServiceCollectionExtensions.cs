@@ -110,7 +110,7 @@ namespace RawRabbit.vNext
 				.AddTransient<IResponder<TMessageContext>, Responder<TMessageContext>>()
 				.AddTransient<IRequester, Requester<TMessageContext>>()
 
-				.AddSingleton<IStartup, Startup<TMessageContext>>()
+				.AddSingleton<RawRabbit.Pipe.Client.IBusClient, RawRabbit.Pipe.Client.BusClient>()
 				.AddSingleton<IHeaderSerializer, HeaderSerializer>()
 				.AddSingleton<IResourceDisposer, ResourceDisposer>()
 				.AddSingleton<IPipeContextFactory, PipeContextFactory>()
