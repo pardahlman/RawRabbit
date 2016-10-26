@@ -9,6 +9,6 @@ namespace RawRabbit.Pipe
 
 	public class PipeContext : IPipeContext
 	{
-		public IDictionary<string, object> Properties { get; set;  }
+		public IDictionary<string, object> Properties { get; set; }
 	}
 }
