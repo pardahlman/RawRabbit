@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using RawRabbit.Pipe.Middleware;
 
@@ -18,11 +19,11 @@ namespace RawRabbit.Pipe
 
 	public class PipeBuilder : IExtendedPipeBuilder
 	{
-		private readonly List<MiddlewareInfo> _pipe;
+		protected List<MiddlewareInfo> Pipe;
 
 		public PipeBuilder()
 		{
-			_pipe = new List<MiddlewareInfo>();
+			Pipe = new List<MiddlewareInfo>();
 		}
 
 		public IPipeBuilder Use(Func<IPipeContext, Func<Task>, Task> handler)
@@ -33,7 +34,7 @@ namespace RawRabbit.Pipe
 
 		public IPipeBuilder Use<TMiddleWare>(params object[] args) where TMiddleWare : Middleware.Middleware
 		{
-			_pipe.Add(new MiddlewareInfo
+			Pipe.Add(new MiddlewareInfo
 			{
 				Type = typeof(TMiddleWare),
 				ConstructorArgs = args
@@ -41,12 +42,18 @@ namespace RawRabbit.Pipe
 			return this;
 		}
 		
-		public Middleware.Middleware Build()
+		public virtual Middleware.Middleware Build()
+		{
+			var middlewares = Pipe.Select(CreateInstance).ToList();
+			return Build(middlewares);
+		}
+
+		protected virtual Middleware.Middleware Build(IList<Middleware.Middleware> middlewares)
 		{
 			Middleware.Middleware next = new NoOpMiddleware();
-			for (var i = _pipe.Count-1; i >= 0; i--)
+			for (var i = middlewares.Count - 1; i >= 0; i--)
 			{
-				var current = CreateInstance(_pipe[i]);
+				var current = middlewares[i];
 				current.Next = next;
 				next = current;
 			}
@@ -55,7 +62,7 @@ namespace RawRabbit.Pipe
 
 		protected virtual Middleware.Middleware CreateInstance(MiddlewareInfo middlewareInfo)
 		{
-			return  Activator.CreateInstance(middlewareInfo.Type, middlewareInfo.ConstructorArgs) as Middleware.Middleware;
+			return Activator.CreateInstance(middlewareInfo.Type, middlewareInfo.ConstructorArgs) as Middleware.Middleware;
 		}
 	}
 }
