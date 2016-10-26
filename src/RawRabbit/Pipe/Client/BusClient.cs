@@ -6,7 +6,8 @@ namespace RawRabbit.Pipe.Client
 {
 	public interface IBusClient
 	{
-		Task InvokeAsync(Action<IPipeBuilder> pipe, CancellationToken token = default(CancellationToken));
+		Task InvokeAsync(Action<IPipeBuilder> pipeCfg, CancellationToken token = default(CancellationToken));
+		Task InvokeAsync(Action<IPipeBuilder> pipeCfg, Action<IPipeContext> contextCfg, CancellationToken token = default(CancellationToken));
 	}
 
 	public class BusClient : IBusClient
@@ -22,10 +23,17 @@ namespace RawRabbit.Pipe.Client
 
 		public Task InvokeAsync(Action<IPipeBuilder> pipeCfg, CancellationToken token)
 		{
+			return InvokeAsync(pipeCfg, context => { }, token);
+		}
+
+		public Task InvokeAsync(Action<IPipeBuilder> pipeCfg, Action<IPipeContext> contextCfg, CancellationToken token = new CancellationToken())
+		{
 			var builder = _pipeBuilderFactory.Create();
 			pipeCfg(builder);
 			var pipe = builder.Build();
-			return pipe.InvokeAsync(_contextFactory.CreateContext());
+			var context = _contextFactory.CreateContext();
+			contextCfg(context);
+			return pipe.InvokeAsync(context);
 		}
 	}
 }
