@@ -5,6 +5,7 @@ namespace RawRabbit.Pipe
 	public interface IPipeBuilderFactory
 	{
 		IExtendedPipeBuilder Create();
+		Middleware.Middleware Create(Action<IPipeBuilder> pipe);
 	}
 
 	public class PipeBuilderFactory : IPipeBuilderFactory
@@ -19,6 +20,13 @@ namespace RawRabbit.Pipe
 		public IExtendedPipeBuilder Create()
 		{
 			return _pipeBuilder();
+		}
+
+		public Middleware.Middleware Create(Action<IPipeBuilder> pipe)
+		{
+			var builder = _pipeBuilder();
+			pipe(builder);
+			return builder.Build();
 		}
 	}
 }
