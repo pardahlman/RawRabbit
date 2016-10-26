@@ -33,9 +33,7 @@ namespace RawRabbit.Pipe.Middleware
 			_channelFactory = channelFactory;
 			_consumerFactory = consumerFactory;
 
-			var builder = pipeBuilderFactory.Create();
-			consumeOptions.Pipe(builder);
-			_consumePipe = builder.Build();
+			_consumePipe = pipeBuilderFactory.Create(consumeOptions.Pipe);
 		}
 
 		public override Task InvokeAsync(IPipeContext context)
