@@ -13,9 +13,9 @@ namespace RawRabbit.Extensions.TopologyUpdater
 {
 	public static class TopologyUpdaterExtension
 	{
-		public static Task<TopologyUpdateResult> UpdateTopologyAsync<TMessageContext>(this IBusClient<TMessageContext> client, Action<ITopologySelector> config) where TMessageContext : IMessageContext
+		public static Task<TopologyUpdateResult> UpdateTopologyAsync<TMessageContext>(this ILegacyBusClient<TMessageContext> client, Action<ITopologySelector> config) where TMessageContext : IMessageContext
 		{
-			var extended = (client as Client.IBusClient<TMessageContext>);
+			var extended = (client as Client.ILegacyBusClient<TMessageContext>);
 			if (extended == null)
 			{
 				throw new InvalidOperationException("Extensions is only available for ExtendableBusClient");

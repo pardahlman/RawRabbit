@@ -157,15 +157,15 @@ namespace RawRabbit.DependencyInjection.Ninject
 				.InSingletonScope();
 
 			Kernel
-				.Bind<IBusClient<TMessageContext>>()
+				.Bind<ILegacyBusClient<TMessageContext>>()
 				.To<BaseBusClient<TMessageContext>>()
 				.InSingletonScope();
 
 			if (typeof(TMessageContext) == typeof(MessageContext))
 			{
 				Kernel
-					.Bind<IBusClient>()
-					.To<BusClient>()
+					.Bind<ILegacyBusClient>()
+					.To<LegacyBusClient>()
 					.InSingletonScope();
 			}
 		}

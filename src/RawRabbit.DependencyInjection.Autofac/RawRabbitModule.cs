@@ -167,15 +167,15 @@ namespace RawRabbit.DependencyInjection.Autofac
 
 			builder
 				.RegisterType<BaseBusClient<TMessageContext>>()
-				.As<IBusClient<TMessageContext>>()
+				.As<ILegacyBusClient<TMessageContext>>()
 				.SingleInstance()
 				.PreserveExistingDefaults();
 
 			if (typeof (TMessageContext) == typeof (MessageContext))
 			{
 				builder
-					.RegisterType<BusClient>()
-					.As<IBusClient>()
+					.RegisterType<LegacyBusClient>()
+					.As<ILegacyBusClient>()
 					.SingleInstance()
 					.PreserveExistingDefaults();
 			}

@@ -1,15 +1,34 @@
-﻿using RawRabbit.Common;
-using RawRabbit.Context;
-using RawRabbit.Operations.Abstraction;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using RawRabbit.Pipe;
 
 namespace RawRabbit
 {
-	public interface IBusClient : IBusClient<MessageContext> { }
-
-	public class BusClient : BaseBusClient<MessageContext>, IBusClient
+	public class BusClient : IBusClient
 	{
-		public BusClient(IConfigurationEvaluator configEval, ISubscriber<MessageContext> subscriber, IPublisher publisher, IResponder<MessageContext> responder, IRequester requester)
-			: base(configEval, subscriber, publisher, responder, requester)
-		{ }
+		private readonly IPipeBuilderFactory _pipeBuilderFactory;
+		private readonly IPipeContextFactory _contextFactory;
+
+		public BusClient(IPipeBuilderFactory pipeBuilderFactory, IPipeContextFactory contextFactory)
+		{
+			_pipeBuilderFactory = pipeBuilderFactory;
+			_contextFactory = contextFactory;
+		}
+
+		public Task InvokeAsync(Action<IPipeBuilder> pipeCfg, CancellationToken token)
+		{
+			return InvokeAsync(pipeCfg, context => { }, token);
+		}
+
+		public Task InvokeAsync(Action<IPipeBuilder> pipeCfg, Action<IPipeContext> contextCfg, CancellationToken token = new CancellationToken())
+		{
+			var builder = _pipeBuilderFactory.Create();
+			pipeCfg(builder);
+			var pipe = builder.Build();
+			var context = _contextFactory.CreateContext();
+			contextCfg(context);
+			return pipe.InvokeAsync(context);
+		}
 	}
 }

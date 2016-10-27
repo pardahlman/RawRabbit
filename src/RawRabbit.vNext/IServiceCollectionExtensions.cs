@@ -31,10 +31,10 @@ namespace RawRabbit.vNext
 		public static IServiceCollection AddRawRabbit(this IServiceCollection collection, Action<IConfigurationBuilder> config = null, Action<IServiceCollection> custom = null)
 		{
 			return collection
-				.AddSingleton<IBusClient>(provider =>
+				.AddSingleton<ILegacyBusClient>(provider =>
 					{
 						LogManager.CurrentFactory = provider.GetService<ILoggerFactory>();
-						return ActivatorUtilities.CreateInstance<RawRabbit.Pipe.BusClient>(provider);
+						return ActivatorUtilities.CreateInstance<RawRabbit.Pipe.LegacyBusClient>(provider);
 					})
 				.AddRawRabbit<MessageContext>(config, custom);
 		}
@@ -110,13 +110,13 @@ namespace RawRabbit.vNext
 				.AddTransient<IResponder<TMessageContext>, Responder<TMessageContext>>()
 				.AddTransient<IRequester, Requester<TMessageContext>>()
 
-				.AddSingleton<RawRabbit.Pipe.Client.IBusClient, RawRabbit.Pipe.Client.BusClient>()
+				.AddSingleton<IBusClient, BusClient>()
 				.AddSingleton<IHeaderSerializer, HeaderSerializer>()
 				.AddSingleton<IResourceDisposer, ResourceDisposer>()
 				.AddSingleton<IPipeContextFactory, PipeContextFactory>()
 				.AddSingleton<IPipeBuilderFactory>(provider => new PipeBuilderFactory(() => new PipeBuilder(provider)))
 
-				.AddSingleton<IBusClient<TMessageContext>>(provider =>
+				.AddSingleton<ILegacyBusClient<TMessageContext>>(provider =>
 				{
 					LogManager.CurrentFactory = provider.GetService<ILoggerFactory>();
 					return ActivatorUtilities.CreateInstance<BaseBusClient<TMessageContext>>(provider);

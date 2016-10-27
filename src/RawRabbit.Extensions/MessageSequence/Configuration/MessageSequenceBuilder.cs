@@ -17,7 +17,7 @@ namespace RawRabbit.Extensions.MessageSequence.Configuration
 		, IMessageSequenceBuilder<TMessageContext> where TMessageContext : IMessageContext
 	{
 		private readonly ILogger _logger = LogManager.GetLogger<MessageSequenceBuilder<TMessageContext>>();
-		private readonly IBusClient<TMessageContext> _busClient;
+		private readonly ILegacyBusClient<TMessageContext> _busClient;
 		private readonly IMessageChainTopologyUtil _chainTopology;
 		private readonly IMessageChainDispatcher _dispatcher;
 		private readonly IMessageSequenceRepository _repository;
@@ -26,9 +26,9 @@ namespace RawRabbit.Extensions.MessageSequence.Configuration
 		private Func<Task> _publishAsync;
 		private Guid _globalMessageId ;
 
-		public MessageSequenceBuilder(IBusClient<TMessageContext> busClient, IMessageChainTopologyUtil chainTopology, IMessageChainDispatcher dispatcher, IMessageSequenceRepository repository, RawRabbitConfiguration mainCfg)
+		public MessageSequenceBuilder(ILegacyBusClient<TMessageContext> legacyBusClient, IMessageChainTopologyUtil chainTopology, IMessageChainDispatcher dispatcher, IMessageSequenceRepository repository, RawRabbitConfiguration mainCfg)
 		{
-			_busClient = busClient;
+			_busClient = legacyBusClient;
 			_chainTopology = chainTopology;
 			_dispatcher = dispatcher;
 			_repository = repository;

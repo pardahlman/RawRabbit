@@ -13,10 +13,10 @@ namespace RawRabbit.Extensions.BulkGet
 {
 	public static class BulkGetExtension
 	{
-		public static BulkResult<TMessageContext> GetMessages<TMessageContext>(this IBusClient<TMessageContext> client, Action<IBulkGetConfigurationBuilder> cfg)
+		public static BulkResult<TMessageContext> GetMessages<TMessageContext>(this ILegacyBusClient<TMessageContext> client, Action<IBulkGetConfigurationBuilder> cfg)
 			where TMessageContext : IMessageContext
 		{
-			var extended = (client as Client.IBusClient<TMessageContext>);
+			var extended = (client as Client.ILegacyBusClient<TMessageContext>);
 			if (extended == null)
 			{
 				throw new InvalidOperationException("Bus client does not support extensions. Make sure that the client is of type ExtendableBusClient.");

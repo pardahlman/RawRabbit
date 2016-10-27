@@ -10,7 +10,7 @@ using RawRabbit.Operations.Abstraction;
 
 namespace RawRabbit.Common
 {
-	public class BaseBusClient<TMessageContext> : IBusClient<TMessageContext> where TMessageContext : IMessageContext
+	public class BaseBusClient<TMessageContext> : ILegacyBusClient<TMessageContext> where TMessageContext : IMessageContext
 	{
 		private readonly IConfigurationEvaluator _configEval;
 		private readonly ISubscriber<TMessageContext> _subscriber;

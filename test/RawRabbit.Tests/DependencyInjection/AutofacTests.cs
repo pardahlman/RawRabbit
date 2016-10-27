@@ -20,7 +20,7 @@ namespace RawRabbit.Tests.DependencyInjection
 			var container = builder.Build();
 			
 			/* Test */
-			var client = container.Resolve<IBusClient>();
+			var client = container.Resolve<ILegacyBusClient>();
 			await client.ShutdownAsync(TimeSpan.Zero);
 
 			/* Assert */
@@ -37,7 +37,7 @@ namespace RawRabbit.Tests.DependencyInjection
 			var container = builder.Build();
 
 			/* Test */
-			var client = container.Resolve<IBusClient<AdvancedMessageContext>>();
+			var client = container.Resolve<ILegacyBusClient<AdvancedMessageContext>>();
 			await client.ShutdownAsync(TimeSpan.Zero);
 
 			/* Assert */

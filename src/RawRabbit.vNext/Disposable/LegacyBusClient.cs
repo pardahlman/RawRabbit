@@ -7,15 +7,15 @@ using RawRabbit.Configuration.Respond;
 using RawRabbit.Configuration.Subscribe;
 using RawRabbit.Context;
 
-namespace RawRabbit.Extensions.Disposable
+namespace RawRabbit.vNext.Disposable
 {
-	public interface IBusClient : Client.IBusClient, IDisposable { }
+	public interface ILegacyBusClient : RawRabbit.ILegacyBusClient, IDisposable { }
 
-	public class BusClient : IBusClient
+	public class LegacyBusClient : ILegacyBusClient
 	{
-		private readonly Client.IBusClient _client;
+		private readonly RawRabbit.ILegacyBusClient _client;
 
-		public BusClient(Client.IBusClient client)
+		public LegacyBusClient(RawRabbit.ILegacyBusClient client)
 		{
 			_client = client;
 		}
@@ -27,12 +27,6 @@ namespace RawRabbit.Extensions.Disposable
 		}
 
 		#region Pass-through
-
-		public TService GetService<TService>()
-		{
-			return _client.GetService<TService>();
-		}
-
 		public Task ShutdownAsync(TimeSpan? graceful = null)
 		{
 			return _client.ShutdownAsync(graceful);

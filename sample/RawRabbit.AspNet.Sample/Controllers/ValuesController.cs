@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using RawRabbit.Extensions.Client;
 using RawRabbit.Extensions.MessageSequence;
 using RawRabbit.Messages.Sample;
 using Serilog;
@@ -10,17 +11,15 @@ using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace RawRabbit.AspNet.Sample.Controllers
 {
-	using IBusClient = Extensions.Client.IBusClient;
-
 	public class ValuesController : Controller
 	{
-		private readonly IBusClient _busClient;
+		private readonly ILegacyBusClient _busClient;
 		private readonly Random _random;
 		private readonly ILogger<ValuesController> _logger;
 
-		public ValuesController(IBusClient busClient, ILoggerFactory loggerFactory)
+		public ValuesController(ILegacyBusClient legacyBusClient, ILoggerFactory loggerFactory)
 		{
-			_busClient = busClient;
+			_busClient = legacyBusClient;
 			_logger = loggerFactory.CreateLogger<ValuesController>();
 			_random = new Random();
 		}

@@ -15,7 +15,7 @@ namespace RawRabbit.ConsoleApp.Sample
 {
 	public class Program
 	{
-		private static IBusClient _client;
+		private static ILegacyBusClient _client;
 
 		public static void Main(string[] args)
 		{

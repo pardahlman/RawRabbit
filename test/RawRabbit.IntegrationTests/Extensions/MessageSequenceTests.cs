@@ -16,7 +16,7 @@ namespace RawRabbit.IntegrationTests.Extensions
 {
 	public class MessageSequenceTests : IntegrationTestBase
 	{
-		private readonly RawRabbit.Extensions.Disposable.IBusClient _client;
+		private readonly RawRabbit.Extensions.Disposable.ILegacyBusClient _client;
 
 		public MessageSequenceTests()
 		{

@@ -9,14 +9,14 @@ using RawRabbit.Context;
 
 namespace RawRabbit.vNext.Disposable
 {
-	public interface IBusClient<out TMessageContext> : RawRabbit.IBusClient<TMessageContext>, IDisposable where TMessageContext : IMessageContext
+	public interface ILegacyBusClient<out TMessageContext> : RawRabbit.ILegacyBusClient<TMessageContext>, IDisposable where TMessageContext : IMessageContext
 	{ }
 
-	public class BusClient<TMessageContext> : IBusClient<TMessageContext> where TMessageContext : IMessageContext
+	public class LegacyBusClient<TMessageContext> : ILegacyBusClient<TMessageContext> where TMessageContext : IMessageContext
 	{
-		private readonly RawRabbit.IBusClient<TMessageContext> _client;
+		private readonly RawRabbit.ILegacyBusClient<TMessageContext> _client;
 
-		public BusClient(RawRabbit.IBusClient<TMessageContext> client)
+		public LegacyBusClient(RawRabbit.ILegacyBusClient<TMessageContext> client)
 		{
 			_client = client;
 		}

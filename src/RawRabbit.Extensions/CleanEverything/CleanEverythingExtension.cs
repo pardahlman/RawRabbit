@@ -13,10 +13,10 @@ namespace RawRabbit.Extensions.CleanEverything
 {
 	public static class CleanEverythingExtension
 	{
-		public static Task CleanAsync<TMessageContext>(this IBusClient<TMessageContext> busClient, Action<ICleanConfigurationBuilder> cfg = null)
+		public static Task CleanAsync<TMessageContext>(this ILegacyBusClient<TMessageContext> legacyBusClient, Action<ICleanConfigurationBuilder> cfg = null)
 			where TMessageContext : IMessageContext
 		{
-			var extended = (busClient as Client.IBusClient<TMessageContext>);
+			var extended = (legacyBusClient as Client.ILegacyBusClient<TMessageContext>);
 			if (extended == null)
 			{
 				throw new InvalidOperationException("Bus client does not support extensions. Make sure that the client is of type ExtendableBusClient.");

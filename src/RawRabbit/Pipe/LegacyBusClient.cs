@@ -10,12 +10,12 @@ using RawRabbit.Pipe.Client;
 
 namespace RawRabbit.Pipe
 {
-	public class BusClient<TContext> : IBusClient<TContext> where TContext : IMessageContext
+	public class LegacyBusClient<TContext> : ILegacyBusClient<TContext> where TContext : IMessageContext
 	{
-		private readonly Client.IBusClient _nextGeneration;
+		private readonly IBusClient _nextGeneration;
 		private readonly IResourceDisposer _resourceDisposer;
 
-		public BusClient(Client.IBusClient nextGeneration, IResourceDisposer resourceDisposer)
+		public LegacyBusClient(IBusClient nextGeneration, IResourceDisposer resourceDisposer)
 		{
 			_nextGeneration = nextGeneration;
 			_resourceDisposer = resourceDisposer;
@@ -50,9 +50,9 @@ namespace RawRabbit.Pipe
 		}
 	}
 
-	public class BusClient : BusClient<MessageContext>, IBusClient
+	public class LegacyBusClient : LegacyBusClient<MessageContext>, ILegacyBusClient
 	{
-		public BusClient(Client.IBusClient nextGeneration, IResourceDisposer resourceDisposer) : base(nextGeneration, resourceDisposer)
+		public LegacyBusClient(IBusClient nextGeneration, IResourceDisposer resourceDisposer) : base(nextGeneration, resourceDisposer)
 		{
 		}
 	}

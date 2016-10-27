@@ -21,7 +21,7 @@ namespace RawRabbit.IntegrationTests.Features
 	public class MessageHandlerExceptionTests : IDisposable
 	{
 		private readonly Mock<IErrorHandlingStrategy> _errorHandler;
-		private readonly RawRabbit.vNext.Disposable.IBusClient _client;
+		private readonly RawRabbit.vNext.Disposable.ILegacyBusClient _client;
 
 		public MessageHandlerExceptionTests()
 		{

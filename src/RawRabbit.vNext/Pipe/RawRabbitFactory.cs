@@ -9,7 +9,7 @@ namespace RawRabbit.vNext.Pipe
 {
 	public static class RawRabbitFactory
 	{
-		public static RawRabbit.Pipe.Client.IBusClient Create(RawRabbitOptions options = null)
+		public static IBusClient Create(RawRabbitOptions options = null)
 		{
 			var collection = new ServiceCollection().AddRawRabbit();
 			options?.DependencyInjection?.Invoke(collection);
@@ -34,7 +34,7 @@ namespace RawRabbit.vNext.Pipe
 			var provider = collection.BuildServiceProvider();
 			var pipeBuilder = new PipeBuilder(provider);
 			var pipeBuliderFactory = new PipeBuilderFactory(() => pipeBuilder);
-			return new RawRabbit.Pipe.Client.BusClient(pipeBuliderFactory, provider.GetService<IPipeContextFactory>());
+			return new BusClient(pipeBuliderFactory, provider.GetService<IPipeContextFactory>());
 		}
 	}
 

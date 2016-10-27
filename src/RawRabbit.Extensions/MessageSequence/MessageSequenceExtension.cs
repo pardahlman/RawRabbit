@@ -12,11 +12,11 @@ namespace RawRabbit.Extensions.MessageSequence
 	public static class MessageSequenceExtension
 	{
 		public static MessageSequence<TCompleteType> ExecuteSequence<TMessageContext, TCompleteType>(
-			this IBusClient<TMessageContext> client,
+			this ILegacyBusClient<TMessageContext> client,
 			Func<IMessageChainPublisher<TMessageContext>, MessageSequence<TCompleteType>> cfg
 			) where TMessageContext : IMessageContext
 		{
-			var extended = (client as Client.IBusClient<TMessageContext>);
+			var extended = (client as Client.ILegacyBusClient<TMessageContext>);
 			if (extended == null)
 			{
 				throw new InvalidOperationException("Extensions is only available for ExtendableBusClient");

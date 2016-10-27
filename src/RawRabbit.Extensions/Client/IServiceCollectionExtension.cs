@@ -34,7 +34,7 @@ namespace RawRabbit.Extensions.Client
 				/* Topology Updater */
 				.AddTransient<IBindingProvider, BindingProvider>()
 				.AddTransient<IExchangeUpdater, ExchangeUpdater>()
-				.AddSingleton<IBusClient<TMessageContext>>(c => new ExtendableBusClient<TMessageContext>(collection.BuildServiceProvider()));
+				.AddSingleton<ILegacyBusClient<TMessageContext>>(c => new ExtendableBusClient<TMessageContext>(collection.BuildServiceProvider()));
 			return collection;
 		}
 
@@ -43,7 +43,7 @@ namespace RawRabbit.Extensions.Client
 			return vNext.IServiceCollectionExtensions
 				.AddRawRabbit(collection, config, custom)
 				.AddRawRabbitExtensions<TMessageContext>()
-				.AddSingleton<IBusClient>(c =>
+				.AddSingleton<ILegacyBusClient>(c =>
 				{
 					LogManager.CurrentFactory = c.GetService<ILoggerFactory>();
 					return new ExtendableBusClient(collection.BuildServiceProvider());
@@ -53,7 +53,7 @@ namespace RawRabbit.Extensions.Client
 		public static IServiceCollection AddRawRabbit(this IServiceCollection collection, Action<IConfigurationBuilder> config = null, Action<IServiceCollection> custom = null)
 		{
 			return AddRawRabbit<MessageContext>(collection, config, custom)
-				.AddSingleton<IBusClient>(provider =>
+				.AddSingleton<ILegacyBusClient>(provider =>
 				{
 					LogManager.CurrentFactory = provider.GetService<ILoggerFactory>();
 					return new ExtendableBusClient(collection.BuildServiceProvider());

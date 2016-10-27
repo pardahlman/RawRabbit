@@ -21,7 +21,7 @@ namespace RawRabbit.Tests.DependencyInjection
 			kernel.RegisterRawRabbit("guest:guest@localhost:5672/");
 
 			/* Test */
-			var client = kernel.Get<IBusClient>();
+			var client = kernel.Get<ILegacyBusClient>();
 			await client.ShutdownAsync(TimeSpan.Zero);
 
 			/* Assert */
@@ -37,7 +37,7 @@ namespace RawRabbit.Tests.DependencyInjection
 			kernel.RegisterRawRabbit<AdvancedMessageContext>("guest:guest@localhost:5672/");
 
 			/* Test */
-			var client = kernel.Get<IBusClient<AdvancedMessageContext>>();
+			var client = kernel.Get<ILegacyBusClient<AdvancedMessageContext>>();
 			await client.ShutdownAsync(TimeSpan.Zero);
 
 			/* Assert */
