@@ -20,9 +20,13 @@
 		public const string PublishAcknowledger = "PublishAcknowledger";
 		public const string RoutingKey = "RoutingKey";
 		public const string QueueConfiguration = "QueueConfiguration";
+		public const string ExchangeName = "ExchangeName";
 		public const string ExchangeConfiguration = "ExchangeConfiguration";
 		public const string NoAck = "NoAck";
+		public const string MandatoryPublishFlag = "MandatoryPublishFlag";
+		public const string SerializedMessage = "SerializedMessage";
 		public const string PrefetchCount = "PrefetchCount";
+		public const string ReturnedMessageCallback = "ReturnedMessageCallback";
 		public const string BasicPropertyModifier = "BasicPropertyModifier";
 	}
 }

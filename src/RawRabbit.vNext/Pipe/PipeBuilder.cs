@@ -20,7 +20,7 @@ namespace RawRabbit.vNext.Pipe
 
 		public override Middleware Build()
 		{
-			_additional(this);
+			_additional?.Invoke(this);
 
 			var stageMarkerOptions = Pipe
 				.Where(info => info.Type == typeof(StageMarkerMiddleware))
@@ -34,7 +34,7 @@ namespace RawRabbit.vNext.Pipe
 
 			foreach (var stageMarkerOption in stageMarkerOptions)
 			{
-				var thisStageMws = stagedMiddleware.Where(mw => mw.StageMarker == stageMarkerOption.StageMarker).ToList<Middleware>();
+				var thisStageMws = stagedMiddleware.Where(mw => mw.StageMarker == stageMarkerOption.Stage).ToList<Middleware>();
 				stageMarkerOption.EntryPoint = Build(thisStageMws);
 			}
 			Pipe = Pipe.Except(stageMwInfo).ToList();

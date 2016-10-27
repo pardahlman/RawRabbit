@@ -23,12 +23,12 @@ namespace RawRabbit.Serialization
 			{
 				return Encoding.UTF8.GetBytes(string.Empty);
 			}
-			string msgStr;
-			using (var sw = new StringWriter())
-			{
-				_serializer.Serialize(sw, obj);
-				msgStr = sw.GetStringBuilder().ToString();
-			}
+				string msgStr;
+				using (var sw = new StringWriter())
+				{
+					_serializer.Serialize(sw, obj);
+					msgStr = sw.GetStringBuilder().ToString();
+				}
 			var msgBytes = Encoding.UTF8.GetBytes(msgStr);
 			return msgBytes;
 		}

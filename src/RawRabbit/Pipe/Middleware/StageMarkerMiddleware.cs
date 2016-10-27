@@ -3,19 +3,19 @@ using System.Threading.Tasks;
 
 namespace RawRabbit.Pipe.Middleware
 {
-	public class StageMarkerMiddleware<TPipe> : Middleware
+	public class StageMarkerMiddleware : Middleware
 	{
+		public readonly string Stage;
 		private readonly Middleware _pipe;
-		public TPipe StageMarker { get; }
 
-		public StageMarkerMiddleware(StageMarkerOptions<TPipe> options, IPipeBuilderFactory builder)
+		public StageMarkerMiddleware(StageMarkerOptions options)
 		{
 			if (options == null)
 			{
 				throw new ArgumentNullException(nameof(options));
 			}
 
-			StageMarker = options.StageMarker;
+			Stage = options.Stage;
 			_pipe = options.EntryPoint;
 		}
 
@@ -28,41 +28,25 @@ namespace RawRabbit.Pipe.Middleware
 		}
 	}
 
-	public class StageMarkerMiddleware : StageMarkerMiddleware<StageMarker>
-	{
-		public StageMarkerMiddleware(StageMarkerOptions options, IPipeBuilderFactory builder) : base(options, builder)
-		{
-		}
-	}
 
-	public class StageMarkerOptions : StageMarkerOptions<StageMarker>
+	public class StageMarkerOptions
 	{
-		public new static StageMarkerOptions For(StageMarker stage)
+		public string Stage { get; set; }
+		public Middleware EntryPoint { get; set; }
+
+		public static StageMarkerOptions For<TPipe>(TPipe stage)
 		{
 			return new StageMarkerOptions
 			{
-				StageMarker = stage
+				Stage = stage.ToString()
 			};
 		}
 	}
 
-	public class StageMarkerOptions<TPipe>
-	{
-		public TPipe StageMarker { get; set; }
-		public Middleware EntryPoint { get; set; }
-
-		public static StageMarkerOptions<TPipe> For(TPipe stage)
-		{
-			return new StageMarkerOptions<TPipe>
-			{
-				StageMarker = stage
-			};
-		}
-	}
 
 	public abstract class StagedMiddleware : Middleware
 	{
-		public abstract StageMarker StageMarker { get; }
+		public abstract string StageMarker { get; }
 	}
 
 	public enum StageMarker

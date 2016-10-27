@@ -53,6 +53,21 @@ namespace RawRabbit.Pipe
 			return Get<ExchangeConfiguration>(context, PipeKey.ExchangeConfiguration);
 		}
 
+		public static string GetExchangeName(this IPipeContext context)
+		{
+			return Get<string>(context, PipeKey.ExchangeName) ?? GetExchangeConfiguration(context)?.ExchangeName;
+		}
+
+		public static bool GetMandatoryPublishFlag(this IPipeContext context)
+		{
+			return GetReturnedMessageCallback(context) != null;
+		}
+
+		public static EventHandler<BasicReturnEventArgs> GetReturnedMessageCallback(this IPipeContext context)
+		{
+			return Get<EventHandler<BasicReturnEventArgs>>(context, PipeKey.ReturnedMessageCallback);
+		}
+
 		public static IConsumerConfiguration GetConsumerConfiguration(this IPipeContext context)
 		{
 			var routingKey = GetRoutingKey(context);

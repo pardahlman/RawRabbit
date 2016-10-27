@@ -1,5 +1,6 @@
 using System;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Request;
 
@@ -10,13 +11,15 @@ namespace RawRabbit.Configuration.Publish
 		private readonly ExchangeConfigurationBuilder _exchange;
 		private string _routingKey;
 		private Action<IBasicProperties> _properties;
+		private Action<BasicReturnEventArgs> _callback;
 		private const string _oneOrMoreWords = "#";
 
 		public PublishConfiguration Configuration => new PublishConfiguration
 		{
 			Exchange = _exchange.Configuration,
 			RoutingKey = _routingKey,
-			PropertyModifier = _properties ?? (b => {})
+			PropertyModifier = _properties ?? (b => {}),
+			ReturnCallback = (sender, args) => _callback?.Invoke(args)
 		};
 
 		public PublishConfigurationBuilder(ExchangeConfiguration defaultExchange = null, string routingKey =null)
@@ -46,6 +49,12 @@ namespace RawRabbit.Configuration.Publish
 		public IPublishConfigurationBuilder WithProperties(Action<IBasicProperties> properties)
 		{
 			_properties = properties;
+			return this;
+		}
+
+		public IPublishConfigurationBuilder WithReturnCallback(Action<BasicReturnEventArgs> callback)
+		{
+			_callback = callback;
 			return this;
 		}
 	}

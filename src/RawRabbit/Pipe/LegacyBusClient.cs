@@ -29,7 +29,8 @@ namespace RawRabbit.Pipe
 
 		public Task PublishAsync<T>(T message = default(T), Guid globalMessageId = new Guid(), Action<IPublishConfigurationBuilder> configuration = null)
 		{
-			return _nextGeneration.PublishAsync(message, configuration);
+			return null;
+			//return _nextGeneration.PublishAsync(message, configuration);
 		}
 
 		public ISubscription RespondAsync<TRequest, TResponse>(Func<TRequest, TContext, Task<TResponse>> onMessage, Action<IResponderConfigurationBuilder> configuration = null)

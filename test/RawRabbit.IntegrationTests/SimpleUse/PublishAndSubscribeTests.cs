@@ -8,9 +8,12 @@ using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RawRabbit.Common;
 using RawRabbit.Configuration;
+using RawRabbit.Context;
+using RawRabbit.Enrichers.Publish.MessageContext;
 using RawRabbit.Exceptions;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.vNext;
+using RawRabbit.vNext.Pipe;
 using Xunit;
 using ExchangeType = RawRabbit.Configuration.Exchange.ExchangeType;
 
@@ -18,6 +21,15 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 {
 	public class PublishAndSubscribeTests : IntegrationTestBase
 	{
+		[Fact]
+		public async Task Should()
+		{
+			var client = RawRabbitFactory.Create(new RawRabbitOptions
+			{
+				Plugins = plugin => plugin.PublishMessageContext<MessageContext>()
+			});
+			await client.PublishAsync(new BasicMessage(), cfg => cfg.WithReturnCallback(args => {  }));
+		}
 
 		[Fact]
 		public async Task Should_Be_Able_To_Subscribe_Without_Any_Additional_Config()

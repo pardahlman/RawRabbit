@@ -1,5 +1,5 @@
-﻿using System.Threading.Tasks;
-using RawRabbit.Channel.Abstraction;
+﻿using System.Text;
+using System.Threading.Tasks;
 
 namespace RawRabbit.Pipe.Middleware
 {
@@ -7,18 +7,19 @@ namespace RawRabbit.Pipe.Middleware
 	{
 		public override Task InvokeAsync(IPipeContext context)
 		{
-			var exchange = context.GetExchangeConfiguration();
+			var exchange = context.GetExchangeName();
 			var routingKey = context.GetRoutingKey();
 			var basicProps = context.GetBasicProperties();
-			var body = context.Get<byte[]>(PipeKey.MessageBytes);
+			var mandatory = context.GetMandatoryPublishFlag();
+			var body = context.Get<string>(PipeKey.SerializedMessage);
 			var channel = context.GetChannel();
 
 			channel.BasicPublish(
-				exchange: exchange.ExchangeName,
+				exchange: exchange,
 				routingKey: routingKey,
 				basicProperties: basicProps,
-				body: body,
-				mandatory: false
+				body: Encoding.UTF8.GetBytes(body),
+				mandatory: mandatory
 				);
 
 			return Next.InvokeAsync(context);
