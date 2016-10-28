@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,6 +21,7 @@ namespace RawRabbit.vNext.Pipe
 
 		public override Middleware Build()
 		{
+			
 			_additional?.Invoke(this);
 
 			var stageMarkerOptions = Pipe

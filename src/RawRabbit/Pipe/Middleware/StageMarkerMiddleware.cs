@@ -28,7 +28,6 @@ namespace RawRabbit.Pipe.Middleware
 		}
 	}
 
-
 	public class StageMarkerOptions
 	{
 		public string Stage { get; set; }
@@ -47,15 +46,5 @@ namespace RawRabbit.Pipe.Middleware
 	public abstract class StagedMiddleware : Middleware
 	{
 		public abstract string StageMarker { get; }
-	}
-
-	public enum StageMarker
-	{
-		NotSpecified,
-		PreChannelCreation,
-		PostChannelCreation,
-		PreMessagePublish,
-		PostMessagePublish,
-		Recieved
 	}
 }

@@ -34,7 +34,7 @@ namespace RawRabbit.vNext
 				.AddSingleton<ILegacyBusClient>(provider =>
 					{
 						LogManager.CurrentFactory = provider.GetService<ILoggerFactory>();
-						return ActivatorUtilities.CreateInstance<RawRabbit.Pipe.LegacyBusClient>(provider);
+						return ActivatorUtilities.CreateInstance<RawRabbit.LegacyBusClient>(provider);
 					})
 				.AddRawRabbit<MessageContext>(config, custom);
 		}

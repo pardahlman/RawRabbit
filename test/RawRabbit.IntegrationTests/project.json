@@ -6,6 +6,7 @@
 	"dependencies": {
 		"RawRabbit": { "target": "project" },
 		"RawRabbit.Operations.Publish": { "target": "project" },
+		"RawRabbit.Operations.Subscribe": { "target": "project" },
 		"RawRabbit.Enrichers.Publish.MessageContext": { "target": "project" },
 		"RawRabbit.DependencyInjection.Autofac": { "target": "project" },
 		"RawRabbit.DependencyInjection.Ninject": { "target": "project" },

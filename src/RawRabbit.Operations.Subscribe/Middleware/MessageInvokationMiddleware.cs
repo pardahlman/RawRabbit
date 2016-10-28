@@ -1,18 +1,18 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using RawRabbit.Operations.Subscribe.Stages;
+using RawRabbit.Pipe;
 
-namespace RawRabbit.Pipe.Middleware
+namespace RawRabbit.Operations.Subscribe.Middleware
 {
-	public class MessageInvokationMiddleware : Middleware
+	public class MessageInvokationMiddleware : Pipe.Middleware.Middleware
 	{
 		public override Task InvokeAsync(IPipeContext context)
 		{
-			var msgContext = context.GetMessageContext();
 			var message = context.GetMessage();
 			var handler = context.GetMessageHandler();
 
 			return handler
-				.Invoke(message, msgContext)
+				.Invoke(message)
 				.ContinueWith(t => Next.InvokeAsync(context))
 				.Unwrap();
 		}

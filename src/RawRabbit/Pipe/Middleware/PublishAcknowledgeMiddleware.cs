@@ -38,6 +38,7 @@ namespace RawRabbit.Pipe.Middleware
 				ackTimer?.Dispose();
 			}, channel, _publishTimeOut, new TimeSpan(-1));
 
+			TaskCompletionSource<ulong> ackedTsc = new TaskCompletionSource<ulong>();
 			EventHandler<BasicAckEventArgs> channelBasicAck = null;
 			channelBasicAck = (sender, args) =>
 			{
@@ -53,12 +54,13 @@ namespace RawRabbit.Pipe.Middleware
 				}
 
 				_logger.LogDebug($"Recieve Confirm for '{thisSequence}' on channel '{channel.ChannelNumber}'.");
+				ackedTsc.TrySetResult(args.DeliveryTag);
 				channel.BasicAcks -= channelBasicAck;
 				ackTcs.TrySetResult(thisSequence);
 			};
 			channel.BasicAcks += channelBasicAck;
 			context.Properties.Add(PipeKey.PublishAcknowledger, ackTcs.Task);
-			return Next.InvokeAsync(context);
+			return Next.InvokeAsync(context).ContinueWith(t => ackTcs.Task).Unwrap();
 		}
 	}
 }

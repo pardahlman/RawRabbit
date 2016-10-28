@@ -32,8 +32,7 @@ namespace RawRabbit.vNext.Pipe
 				collection.AddSingleton(c => mainCfg);
 			}
 			var provider = collection.BuildServiceProvider();
-			var pipeBuilder = new PipeBuilder(provider);
-			var pipeBuliderFactory = new PipeBuilderFactory(() => pipeBuilder);
+			var pipeBuliderFactory = new PipeBuilderFactory(() => new PipeBuilder(provider));
 			return new BusClient(pipeBuliderFactory, provider.GetService<IPipeContextFactory>());
 		}
 	}

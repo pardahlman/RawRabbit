@@ -12,7 +12,6 @@ using RawRabbit.Context;
 using RawRabbit.Enrichers.Publish.MessageContext;
 using RawRabbit.Exceptions;
 using RawRabbit.IntegrationTests.TestMessages;
-using RawRabbit.vNext;
 using RawRabbit.vNext.Pipe;
 using Xunit;
 using ExchangeType = RawRabbit.Configuration.Exchange.ExchangeType;
@@ -24,11 +23,22 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		[Fact]
 		public async Task Should()
 		{
+			var tsc = new TaskCompletionSource<BasicMessage>();
 			var client = RawRabbitFactory.Create(new RawRabbitOptions
 			{
 				Plugins = plugin => plugin.PublishMessageContext<MessageContext>()
 			});
-			await client.PublishAsync(new BasicMessage(), cfg => cfg.WithReturnCallback(args => {  }));
+			await client.SubscribeAsync<BasicMessage>(message =>
+			{
+				tsc.TrySetResult(message);
+				return Task.FromResult(0);
+			});
+			await client.PublishAsync(new BasicMessage(), cfg => cfg.WithReturnCallback(args =>
+			{
+				var i = args;
+			}));
+			await tsc.Task;
+			Assert.True(true);
 		}
 
 		[Fact]

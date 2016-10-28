@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using RawRabbit.Configuration.Publish;
-using RawRabbit.Context;
 using RawRabbit.Operations.Publish;
 using RawRabbit.Operations.Publish.Middleware;
 using RawRabbit.Pipe;

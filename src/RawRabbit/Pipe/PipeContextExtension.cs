@@ -23,11 +23,6 @@ namespace RawRabbit.Pipe
 			return Get<object>(context, PipeKey.Message);
 		}
 
-		public static Func<object, IMessageContext, Task> GetMessageHandler(this IPipeContext context)
-		{
-			return Get<Func<object, IMessageContext, Task>>(context, PipeKey.MessageHandler);
-		}
-
 		public static Type GetMessageType(this IPipeContext context)
 		{
 			return Get<Type>(context, PipeKey.MessageType);
