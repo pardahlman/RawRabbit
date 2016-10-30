@@ -10,6 +10,7 @@ namespace RawRabbit.Pipe
 	{
 		IPipeBuilder Use(Func<IPipeContext, Func<Task>, Task> handler);
 		IPipeBuilder Use<TMiddleWare>(params object[] args) where TMiddleWare : Middleware.Middleware;
+		IPipeBuilder Replace<TCurrent, TNew>(Predicate<object[]> predicate = null, params object[] args) where TCurrent: Middleware.Middleware where TNew : Middleware.Middleware;
 	}
 
 	public interface IExtendedPipeBuilder : IPipeBuilder
@@ -41,7 +42,19 @@ namespace RawRabbit.Pipe
 			});
 			return this;
 		}
-		
+
+		public IPipeBuilder Replace<TCurrent, TNew>(Predicate<object[]> predicate = null, params object[] args) where TCurrent : Middleware.Middleware where TNew : Middleware.Middleware
+		{
+			predicate = predicate ?? (objects => true);
+			var matching = Pipe.Where(c => c.Type == typeof(TCurrent) && predicate(c.ConstructorArgs));
+			foreach (var middlewareInfo in matching)
+			{
+				middlewareInfo.Type = typeof(TNew);
+				middlewareInfo.ConstructorArgs = args;
+			}
+			return this;
+		}
+
 		public virtual Middleware.Middleware Build()
 		{
 			var middlewares = Pipe.Select(CreateInstance).ToList();

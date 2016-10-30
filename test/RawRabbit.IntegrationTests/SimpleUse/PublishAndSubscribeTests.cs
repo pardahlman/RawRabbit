@@ -9,7 +9,7 @@ using RabbitMQ.Client;
 using RawRabbit.Common;
 using RawRabbit.Configuration;
 using RawRabbit.Context;
-using RawRabbit.Enrichers.Publish.MessageContext;
+using RawRabbit.Enrichers.MessageContext.Subscribe;
 using RawRabbit.Exceptions;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.vNext.Pipe;
@@ -23,22 +23,27 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		[Fact]
 		public async Task Should()
 		{
-			var tsc = new TaskCompletionSource<BasicMessage>();
+			var firstMsgContext = new TaskCompletionSource<MessageContext>();
+			var secondMsgContext = new TaskCompletionSource<MessageContext>();
 			var client = RawRabbitFactory.Create(new RawRabbitOptions
 			{
-				Plugins = plugin => plugin.PublishMessageContext<MessageContext>()
+				Plugins = plugin => plugin
+					.PublishMessageContext<MessageContext>()
+					.UseMessageChaining()
 			});
-			await client.SubscribeAsync<BasicMessage>(message =>
+			await client.SubscribeAsync<BasicMessage, MessageContext>(async (message, context) =>
 			{
-				tsc.TrySetResult(message);
+				firstMsgContext.TrySetResult(context);
+				await client.PublishAsync(new SimpleMessage());
+			});
+			await client.SubscribeAsync<SimpleMessage, MessageContext>((message, context) =>
+			{
+				secondMsgContext.TrySetResult(context);
 				return Task.FromResult(0);
 			});
-			await client.PublishAsync(new BasicMessage(), cfg => cfg.WithReturnCallback(args =>
-			{
-				var i = args;
-			}));
-			await tsc.Task;
-			Assert.True(true);
+			await client.PublishAsync(new BasicMessage());
+			await secondMsgContext.Task;
+			Assert.Equal(firstMsgContext.Task.Result.GlobalRequestId, secondMsgContext.Task.Result.GlobalRequestId);
 		}
 
 		[Fact]

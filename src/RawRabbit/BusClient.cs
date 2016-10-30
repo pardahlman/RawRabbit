@@ -28,7 +28,8 @@ namespace RawRabbit
 			var pipe = builder.Build();
 			var context = _contextFactory.CreateContext();
 			contextCfg(context);
-			return pipe.InvokeAsync(context);
+			return pipe
+				.InvokeAsync(context);
 		}
 	}
 }

@@ -24,6 +24,7 @@
 		public const string ExchangeConfiguration = "ExchangeConfiguration";
 		public const string NoAck = "NoAck";
 		public const string MandatoryPublishFlag = "MandatoryPublishFlag";
+		public const string Subscription = "Subscription";
 		public const string SerializedMessage = "SerializedMessage";
 		public const string PrefetchCount = "PrefetchCount";
 		public const string ReturnedMessageCallback = "ReturnedMessageCallback";

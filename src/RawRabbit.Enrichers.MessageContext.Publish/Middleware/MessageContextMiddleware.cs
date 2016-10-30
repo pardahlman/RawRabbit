@@ -8,7 +8,7 @@ using RawRabbit.Operations.Publish;
 using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
 
-namespace RawRabbit.Enrichers.Publish.MessageContext.Middleware
+namespace RawRabbit.Enrichers.MessageContext.Publish.Middleware
 {
 	public class MessageContextMiddleware<TMessageContext> : StagedMiddleware where TMessageContext : IMessageContext, new()
 	{
@@ -20,16 +20,15 @@ namespace RawRabbit.Enrichers.Publish.MessageContext.Middleware
 		}
 		public override Task InvokeAsync(IPipeContext context)
 		{
-			var globalMessageId = context.GetGlobalMessageId();
-			if (globalMessageId == Guid.Empty)
+			var messageContext = context.GetMessageContext();
+			if (messageContext == null)
 			{
-				globalMessageId = Guid.NewGuid();
+				messageContext = new TMessageContext
+				{
+					GlobalRequestId = Guid.NewGuid()
+				};
+				context.Properties.Add(PipeKey.MessageContext, messageContext);
 			}
-			var messageContext = new TMessageContext
-			{
-				GlobalRequestId = globalMessageId
-			};
-			context.Properties.Add(PipeKey.MessageContext, messageContext);
 
 			var properties = context.GetBasicProperties();
 			string serializedProps;

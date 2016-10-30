@@ -15,42 +15,42 @@ namespace RawRabbit.Pipe
 	{
 		public static Operation GetOperation(this IPipeContext context)
 		{
-			return Get<Operation>(context, PipeKey.Operation);
+			return context.Get<Operation>(PipeKey.Operation);
 		}
 
 		public static object GetMessage(this IPipeContext context)
 		{
-			return Get<object>(context, PipeKey.Message);
+			return context.Get<object>(PipeKey.Message);
 		}
 
 		public static Type GetMessageType(this IPipeContext context)
 		{
-			return Get<Type>(context, PipeKey.MessageType);
+			return context.Get<Type>(PipeKey.MessageType);
 		}
 
 		public static IMessageContext GetMessageContext(this IPipeContext context)
 		{
-			return Get<IMessageContext>(context, PipeKey.MessageContext);
+			return context.Get<IMessageContext>(PipeKey.MessageContext);
 		}
 
 		public static IRawConsumer GetConsumer(this IPipeContext context)
 		{
-			return Get<IRawConsumer>(context, PipeKey.Consumer);
+			return context.Get<IRawConsumer>(PipeKey.Consumer);
 		}
 
 		public static QueueConfiguration GetQueueConfiguration(this IPipeContext context)
 		{
-			return Get<QueueConfiguration>(context, PipeKey.QueueConfiguration);
+			return context.Get<QueueConfiguration>(PipeKey.QueueConfiguration);
 		}
 
 		public static ExchangeConfiguration GetExchangeConfiguration(this IPipeContext context)
 		{
-			return Get<ExchangeConfiguration>(context, PipeKey.ExchangeConfiguration);
+			return context.Get<ExchangeConfiguration>(PipeKey.ExchangeConfiguration);
 		}
 
 		public static string GetExchangeName(this IPipeContext context)
 		{
-			return Get<string>(context, PipeKey.ExchangeName) ?? GetExchangeConfiguration(context)?.ExchangeName;
+			return context.Get<string>(PipeKey.ExchangeName) ?? GetExchangeConfiguration(context)?.ExchangeName;
 		}
 
 		public static bool GetMandatoryPublishFlag(this IPipeContext context)
@@ -60,7 +60,7 @@ namespace RawRabbit.Pipe
 
 		public static EventHandler<BasicReturnEventArgs> GetReturnedMessageCallback(this IPipeContext context)
 		{
-			return Get<EventHandler<BasicReturnEventArgs>>(context, PipeKey.ReturnedMessageCallback);
+			return context.Get<EventHandler<BasicReturnEventArgs>>(PipeKey.ReturnedMessageCallback);
 		}
 
 		public static IConsumerConfiguration GetConsumerConfiguration(this IPipeContext context)
@@ -68,8 +68,8 @@ namespace RawRabbit.Pipe
 			var routingKey = GetRoutingKey(context);
 			var queueCfg = GetQueueConfiguration(context);
 			var exchangeCfg = GetExchangeConfiguration(context);
-			var noAck = Get<bool>(context, PipeKey.NoAck);
-			var prefetch = Get<ushort>(context, PipeKey.PrefetchCount);
+			var noAck = context.Get<bool>(PipeKey.NoAck);
+			var prefetch = context.Get<ushort>(PipeKey.PrefetchCount);
 			return new SubscriptionConfiguration
 			{
 				RoutingKey = routingKey,
@@ -82,41 +82,27 @@ namespace RawRabbit.Pipe
 
 		public static string GetRoutingKey(this IPipeContext context)
 		{
-			return Get<string>(context, PipeKey.RoutingKey);
+			return context.Get<string>(PipeKey.RoutingKey);
 		}
 
 		public static IModel GetChannel(this IPipeContext context)
 		{
-			return Get<IModel>(context, PipeKey.Channel);
+			return context.Get<IModel>(PipeKey.Channel);
 		}
 
 		public static Guid GetGlobalMessageId(this IPipeContext context)
 		{
-			return Get<Guid>(context, PipeKey.GlobalMessageId);
+			return context.Get<Guid>(PipeKey.GlobalMessageId);
 		}
 
 		public static IBasicProperties GetBasicProperties(this IPipeContext context)
 		{
-			return GetDeliveryEventArgs(context)?.BasicProperties ?? Get<IBasicProperties>(context, PipeKey.BasicProperties);
+			return GetDeliveryEventArgs(context)?.BasicProperties ?? context.Get<IBasicProperties>(PipeKey.BasicProperties);
 		}
 
 		public static BasicDeliverEventArgs GetDeliveryEventArgs(this IPipeContext context)
 		{
-			return Get<BasicDeliverEventArgs>(context, PipeKey.DeliveryEventArgs);
-		}
-
-		public static TType Get<TType>(this IPipeContext context, string key, TType fallback = default(TType))
-		{
-			if (context?.Properties == null)
-			{
-				return fallback;
-			}
-			object result;
-			if (context.Properties.TryGetValue(key, out result))
-			{
-				return result is TType ? (TType)result : fallback;
-			}
-			return fallback;
+			return context.Get<BasicDeliverEventArgs>(PipeKey.DeliveryEventArgs);
 		}
 	}
 }

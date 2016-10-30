@@ -11,6 +11,7 @@ namespace RawRabbit
 	public static class PublishMessageExtension
 	{
 		private static readonly Action<IPipeBuilder> PublishPipeAction = pipe => pipe
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.Initiated))
 			.Use<PublishConfigurationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.ExchangeConfigured))
 			.Use<ExchangeDeclareMiddleware>()
@@ -25,6 +26,7 @@ namespace RawRabbit
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.ChannelCreated))
 			.Use<MandatoryCallbackMiddleware>()
 			.Use<PublishAcknowledgeMiddleware>()
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.PreMessagePublish))
 			.Use<PublishMessage>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.MessagePublished));
 

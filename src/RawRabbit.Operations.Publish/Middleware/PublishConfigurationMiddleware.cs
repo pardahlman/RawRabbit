@@ -20,11 +20,7 @@ namespace RawRabbit.Operations.Publish.Middleware
 		{
 			var action = context.Get<Action<IPublishConfigurationBuilder>>(PipeKey.ConfigurationAction);
 			var messageType = context.GetMessageType();
-
-			if (action == null)
-			{
-				throw new KeyNotFoundException(PipeKey.ConfigurationAction);
-			}
+			
 			if (messageType == null)
 			{
 				throw new KeyNotFoundException(PipeKey.MessageType);

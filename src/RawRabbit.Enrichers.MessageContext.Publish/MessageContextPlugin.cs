@@ -1,8 +1,8 @@
 ﻿using RawRabbit.Context;
-using RawRabbit.Enrichers.Publish.MessageContext.Middleware;
+using RawRabbit.Enrichers.MessageContext.Publish.Middleware;
 using RawRabbit.vNext.Pipe;
 
-namespace RawRabbit.Enrichers.Publish.MessageContext
+namespace RawRabbit
 {
 	public static class MessageContextPlugin
 	{

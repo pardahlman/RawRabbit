@@ -1,8 +1,8 @@
 ﻿{
-	"title": "RawRabbit.Enrichers.Publish.MessageContext",
+	"title": "RawRabbit.Compatibility.Legacy",
 	"version": "2.0.0-*",
-	"authors": [ "pardahlman", "enrique-avalon" ],
-	"description": "A modern framework for communication over RabbitMq.",
+	"authors": [ "pardahlman" ],
+	"description": "A bus client that is compatible with older ones.",
 	"packOptions": {
 		"iconUrl": "http://pardahlman.se/raw/icon.png",
 		"projectUrl": "https://github.com/pardahlman/RawRabbit",
@@ -11,8 +11,10 @@
 	},
 
 	"dependencies": {
-		"RawRabbit.Operations.Publish": { "target": "project" },
-		"RawRabbit.vNext": { "target": "project" }
+		"RawRabbit.Enrichers.MessageContext.Publish": { "target": "project" },
+		"RawRabbit.Enrichers.MessageContext.Subscribe": { "target": "project" },
+		"RawRabbit.Enrichers.MessageContext.Chaining": { "target": "project" }
+
 	},
 
 	"frameworks": {
