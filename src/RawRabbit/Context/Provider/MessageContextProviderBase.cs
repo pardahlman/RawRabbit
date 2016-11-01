@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using System.Threading.Tasks;
 using RawRabbit.Serialization;
 
@@ -6,17 +7,22 @@ namespace RawRabbit.Context.Provider
 {
 	public abstract class MessageContextProviderBase<TMessageContext> : IMessageContextProvider<TMessageContext> where TMessageContext : IMessageContext
 	{
-		private readonly IHeaderSerializer _headerSerializer;
+		private readonly ISerializer _serializer;
 
-		protected MessageContextProviderBase(IHeaderSerializer headerSerializer)
+		protected MessageContextProviderBase(ISerializer serializer)
 		{
-			_headerSerializer = headerSerializer;
+			_serializer = serializer;
 		}
 
 		public TMessageContext ExtractContext(object o)
 		{
-			var context = _headerSerializer.Deserialize<TMessageContext>(o);
-			return context;
+			if (o == null)
+			{
+				return default(TMessageContext);
+			}
+			var bytes = (byte[])o;
+			var jsonHeader = Encoding.UTF8.GetString(bytes);
+			return _serializer.Deserialize<TMessageContext>(jsonHeader);
 		}
 
 		public Task<TMessageContext> ExtractContextAsync(object o)
@@ -28,13 +34,20 @@ namespace RawRabbit.Context.Provider
 		public object GetMessageContext(ref Guid globalMessageId)
 		{
 			var context = CreateMessageContext(globalMessageId);
-			return _headerSerializer.Serialize(context);
+			var objAsJson = _serializer.Serialize(context);
+			var objAsBytes = (object)Encoding.UTF8.GetBytes(objAsJson);
+			return objAsBytes;
 		}
 
 		public Task<object> GetMessageContextAsync(Guid globalMessageId)
 		{
 			return CreateMessageContextAsync()
-				.ContinueWith(contextTask => _headerSerializer.Serialize(contextTask.Result));
+				.ContinueWith(contextTask =>
+				{
+					var objAsJson = _serializer.Serialize(contextTask.Result);
+					var objAsBytes = (object)Encoding.UTF8.GetBytes(objAsJson);
+					return objAsBytes;
+				});
 		}
 
 		protected virtual Task<TMessageContext> CreateMessageContextAsync()

@@ -18,7 +18,7 @@ namespace RawRabbit.IntegrationTests.Features
 			/* Setup */
 
 			var expectedId = Guid.NewGuid();
-			var contextProvider = new MessageContextProvider<MessageContext>(new HeaderSerializer(new JsonSerializer()), () => new MessageContext { GlobalRequestId = expectedId });
+			var contextProvider = new MessageContextProvider<MessageContext>(new RawRabbit.Serialization.JsonSerializer(new Newtonsoft.Json.JsonSerializer()), () => new MessageContext { GlobalRequestId = expectedId });
 			using (var subscriber = TestClientFactory.CreateNormal())
 			using (var publisher = TestClientFactory.CreateNormal(collection => collection.AddSingleton<IMessageContextProvider<MessageContext>>(contextProvider)))
 			{

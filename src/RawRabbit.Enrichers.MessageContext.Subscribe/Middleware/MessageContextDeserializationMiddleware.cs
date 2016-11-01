@@ -6,14 +6,15 @@ using Newtonsoft.Json;
 using RawRabbit.Common;
 using RawRabbit.Context;
 using RawRabbit.Pipe;
+using RawRabbit.Serialization;
 
 namespace RawRabbit.Enrichers.MessageContext.Subscribe.Middleware
 {
 	public class MessageContextDeserializationMiddleware : Pipe.Middleware.Middleware
 	{
-		private readonly JsonSerializer _serializer;
+		private readonly ISerializer _serializer;
 
-		public MessageContextDeserializationMiddleware(JsonSerializer serializer)
+		public MessageContextDeserializationMiddleware(ISerializer serializer)
 		{
 			_serializer = serializer;
 		}
@@ -32,11 +33,7 @@ namespace RawRabbit.Enrichers.MessageContext.Subscribe.Middleware
 			}
 
 			var contextString = Encoding.UTF8.GetString((byte[])contextBytes);
-			object messageContext;
-			using (var jsonReader = new JsonTextReader(new StringReader(contextString)))
-			{
-				messageContext = _serializer.Deserialize<IMessageContext>(jsonReader);
-			}
+			object messageContext = _serializer.Deserialize<IMessageContext>(contextString); ;
 			if (messageContext == null)
 			{
 				throw new Exception();

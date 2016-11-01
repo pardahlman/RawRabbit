@@ -78,7 +78,7 @@ namespace RawRabbit.vNext
 				.AddSingleton<IClientPropertyProvider, ClientPropertyProvider>()
 				.AddSingleton<ILoggerFactory, LoggerFactory>()
 				.AddTransient<IMessageSerializer, JsonMessageSerializer>()
-				.AddTransient(c => new JsonSerializer
+				.AddTransient(c => new Newtonsoft.Json.JsonSerializer
 				{
 					TypeNameAssemblyFormat = FormatterAssemblyStyle.Simple,
 					Formatting = Formatting.None,
@@ -112,7 +112,6 @@ namespace RawRabbit.vNext
 				.AddTransient<IRequester, Requester<TMessageContext>>()
 
 				.AddSingleton<IBusClient, BusClient>()
-				.AddSingleton<IHeaderSerializer, HeaderSerializer>()
 				.AddSingleton<IResourceDisposer, ResourceDisposer>()
 				.AddSingleton<IPipeContextFactory, PipeContextFactory>()
 				.AddSingleton<IPipeBuilderFactory>(provider => new PipeBuilderFactory(() => new PipeBuilder(new ServiceProviderAdapter(provider))))

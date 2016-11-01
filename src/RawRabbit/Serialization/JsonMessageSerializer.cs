@@ -9,9 +9,9 @@ namespace RawRabbit.Serialization
 {
 	public class JsonMessageSerializer : IMessageSerializer
 	{
-		private readonly JsonSerializer _serializer;
+		private readonly Newtonsoft.Json.JsonSerializer _serializer;
 
-		public JsonMessageSerializer(JsonSerializer serializer, Action<JsonSerializer> config = null)
+		public JsonMessageSerializer(Newtonsoft.Json.JsonSerializer serializer, Action<Newtonsoft.Json.JsonSerializer> config = null)
 		{
 			_serializer = serializer;
 			config?.Invoke(_serializer);

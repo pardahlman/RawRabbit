@@ -1,17 +1,17 @@
 ﻿using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using RawRabbit.Operations.Respond.Extensions;
 using RawRabbit.Pipe;
+using RawRabbit.Serialization;
 
 namespace RawRabbit.Operations.Respond.Middleware
 {
 	public class ResponseSerializationMiddleware : Pipe.Middleware.Middleware
 	{
-		private readonly JsonSerializer _serializer;
+		private readonly ISerializer _serializer;
 
-		public ResponseSerializationMiddleware(JsonSerializer serializer)
+		public ResponseSerializationMiddleware(ISerializer serializer)
 		{
 			_serializer = serializer;
 		}
@@ -20,12 +20,7 @@ namespace RawRabbit.Operations.Respond.Middleware
 		{
 			var response = context.GetResponseMessageType();
 
-			string serialized;
-			using (var sw = new StringWriter())
-			{
-				_serializer.Serialize(sw, response);
-				serialized = sw.GetStringBuilder().ToString();
-			}
+			var serialized = _serializer.Serialize(response);
 			context.Properties.Add(RespondKey.SerializedResponse, serialized);
 			return Next.InvokeAsync(context);
 		}

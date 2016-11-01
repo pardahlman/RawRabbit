@@ -10,13 +10,13 @@ namespace RawRabbit.Context.Provider
 		private readonly Func<Task<TContext>> _createContextAsync;
 		private readonly Func<TContext> _createContext;
 
-		public MessageContextProvider(IHeaderSerializer serializer, Func<Task<TContext>> createContextAsync = null)
+		public MessageContextProvider(ISerializer serializer, Func<Task<TContext>> createContextAsync = null)
 			: base(serializer)
 		{
 			_createContextAsync = createContextAsync;
 		}
 
-		public MessageContextProvider(IHeaderSerializer serializer, Func<TContext> createContext)
+		public MessageContextProvider(ISerializer serializer, Func<TContext> createContext)
 		: base(serializer)
 		{
 			_createContext = createContext;

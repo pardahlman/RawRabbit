@@ -1,20 +1,20 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using RawRabbit.Common;
 using RawRabbit.Context;
 using RawRabbit.Operations.Publish;
 using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
+using RawRabbit.Serialization;
 
 namespace RawRabbit.Enrichers.MessageContext.Publish.Middleware
 {
 	public class MessageContextMiddleware<TMessageContext> : StagedMiddleware where TMessageContext : IMessageContext, new()
 	{
-		private readonly JsonSerializer _serializer;
+		private readonly ISerializer _serializer;
 
-		public MessageContextMiddleware(JsonSerializer serializer)
+		public MessageContextMiddleware(ISerializer serializer)
 		{
 			_serializer = serializer;
 		}
@@ -31,13 +31,7 @@ namespace RawRabbit.Enrichers.MessageContext.Publish.Middleware
 			}
 
 			var properties = context.GetBasicProperties();
-			string serializedProps;
-			using (var sw = new StringWriter())
-			{
-				_serializer.Serialize(sw, messageContext);
-				serializedProps = sw.GetStringBuilder().ToString();
-			}
-
+			var serializedProps = _serializer.Serialize(messageContext);
 			properties.Headers.Add(PropertyHeaders.Context, serializedProps);
 			return Next.InvokeAsync(context);
 		}

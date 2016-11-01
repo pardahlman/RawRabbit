@@ -3,14 +3,15 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using RawRabbit.Pipe;
+using RawRabbit.Serialization;
 
 namespace RawRabbit.Operations.Subscribe.Middleware
 {
 	public class MessageDeserializationMiddleware : Pipe.Middleware.Middleware
 	{
-		private readonly JsonSerializer _serializer;
+		private readonly ISerializer _serializer;
 
-		public MessageDeserializationMiddleware(JsonSerializer serializer)
+		public MessageDeserializationMiddleware(ISerializer serializer)
 		{
 			_serializer = serializer;
 		}
@@ -21,11 +22,7 @@ namespace RawRabbit.Operations.Subscribe.Middleware
 			var body = Encoding.UTF8.GetString(args.Body);
 			var messageType = context.GetMessageType();
 
-			object message;
-			using (var jsonReader = new JsonTextReader(new StringReader(body)))
-			{
-				message = _serializer.Deserialize(jsonReader, messageType);
-			}
+			var message = _serializer.Deserialize(messageType, body);
 			context.Properties.Add(PipeKey.Message, message);
 			return Next.InvokeAsync(context);
 		}

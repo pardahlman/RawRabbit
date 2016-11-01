@@ -54,7 +54,7 @@ namespace RawRabbit.DependencyInjection.Autofac
 				.PreserveExistingDefaults();
 
 			builder
-				.Register(c => new JsonSerializer
+				.Register(c => new Newtonsoft.Json.JsonSerializer
 				{
 					ContractResolver = new CamelCasePropertyNamesContractResolver(),
 					ObjectCreationHandling = ObjectCreationHandling.Auto,

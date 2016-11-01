@@ -57,8 +57,8 @@ namespace RawRabbit.DependencyInjection.Ninject
 				.WithConstructorArgument("createContextAsync", (Func<Task<TMessageContext>>)null);
 
 			Kernel
-				.Bind<JsonSerializer>()
-				.ToMethod(context => new JsonSerializer
+				.Bind<Newtonsoft.Json.JsonSerializer>()
+				.ToMethod(context => new Newtonsoft.Json.JsonSerializer
 				{
 					ContractResolver = new CamelCasePropertyNamesContractResolver(),
 					ObjectCreationHandling = ObjectCreationHandling.Auto,
@@ -112,7 +112,7 @@ namespace RawRabbit.DependencyInjection.Ninject
 				.Bind<IMessageSerializer>()
 				.To<JsonMessageSerializer>()
 				.InSingletonScope()
-				.WithConstructorArgument("config", (Action<JsonSerializer>)null);
+				.WithConstructorArgument("config", (Action<Newtonsoft.Json.JsonSerializer>)null);
 
 			Kernel
 				.Bind<IConsumerFactory>()

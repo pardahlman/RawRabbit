@@ -42,8 +42,8 @@ namespace RawRabbit.DependecyInjection
 				})
 				.AddSingleton<IClientPropertyProvider, ClientPropertyProvider>()
 				.AddSingleton<ILoggerFactory, LoggerFactory>()
-				.AddTransient<IMessageSerializer, JsonMessageSerializer>()
-				.AddTransient(c => new JsonSerializer
+				.AddTransient<ISerializer, Serialization.JsonSerializer>()
+				.AddTransient(c => new Newtonsoft.Json.JsonSerializer
 				{
 					TypeNameAssemblyFormat = FormatterAssemblyStyle.Simple,
 					Formatting = Formatting.None,
@@ -72,7 +72,6 @@ namespace RawRabbit.DependecyInjection
 				.AddSingleton<INamingConventions, NamingConventions>()
 			
 				.AddSingleton<IBusClient, BusClient>()
-				.AddSingleton<IHeaderSerializer, HeaderSerializer>()
 				.AddSingleton<IResourceDisposer, ResourceDisposer>()
 				.AddSingleton<IPipeContextFactory, PipeContextFactory>()
 				.AddSingleton<IPipeBuilderFactory>(provider => new PipeBuilderFactory(() => new PipeBuilder(provider)));
