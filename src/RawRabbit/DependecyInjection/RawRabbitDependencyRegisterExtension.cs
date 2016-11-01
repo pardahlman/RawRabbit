@@ -66,9 +66,6 @@ namespace RawRabbit.DependecyInjection
 				.AddSingleton<ChannelFactoryConfiguration, ChannelFactoryConfiguration>(c => ChannelFactoryConfiguration.Default)
 				.AddSingleton<ITopologyProvider, TopologyProvider>()
 				.AddTransient<IConfigurationEvaluator, ConfigurationEvaluator>()
-				.AddTransient<IPublishAcknowledger, PublishAcknowledger>(
-					p => new PublishAcknowledger(p.GetService<RawRabbitConfiguration>().PublishConfirmTimeout)
-				)
 				.AddSingleton<INamingConventions, NamingConventions>()
 			
 				.AddSingleton<IBusClient, BusClient>()

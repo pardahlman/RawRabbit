@@ -13,11 +13,6 @@ namespace RawRabbit.Pipe
 {
 	public static class PipeContextExtension
 	{
-		public static Operation GetOperation(this IPipeContext context)
-		{
-			return context.Get<Operation>(PipeKey.Operation);
-		}
-
 		public static object GetMessage(this IPipeContext context)
 		{
 			return context.Get<object>(PipeKey.Message);

@@ -23,7 +23,7 @@ namespace RawRabbit
 						.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.MessageDeserialized))
 						.Use<MessageContextDeserializationMiddleware>()
 						.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.MessageContextDeserialized))
-						.Use<MessageContextEnhanceMiddleware>()
+						.Use<MessageContextEnhancementMiddleware>()
 						.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.MessageContextEnhanced))
 						.Use<MessageHandlerInvokationMiddleware>()
 						.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.HandlerInvoked))
