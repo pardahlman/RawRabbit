@@ -3,7 +3,7 @@ using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RawRabbit.Configuration;
-using RawRabbit.Pipe;
+using RawRabbit.vNext.DependecyInjection;
 
 namespace RawRabbit.vNext.Pipe
 {
@@ -11,17 +11,10 @@ namespace RawRabbit.vNext.Pipe
 	{
 		public static IBusClient Create(RawRabbitOptions options = null)
 		{
-			var collection = new ServiceCollection().AddRawRabbit();
+			var collection = new ServiceCollection();
 			options?.DependencyInjection?.Invoke(collection);
+			var ioc = new ServiceCollectionAdapter(collection);
 
-			if (options?.Plugins != null)
-			{
-				var clientBuilder = new ClientBuilder();
-				options.Plugins(clientBuilder);
-				clientBuilder.ServiceAction(collection);
-				collection.AddSingleton<IPipeBuilder, PipeBuilder>();
-				collection.AddSingleton(clientBuilder.PipeBuilderAction);
-			}
 			if (options?.Configuration != null)
 			{
 				var builder = new ConfigurationBuilder();
@@ -29,18 +22,9 @@ namespace RawRabbit.vNext.Pipe
 				var mainCfg = RawRabbitConfiguration.Local;
 				builder.Build().Bind(mainCfg);
 				mainCfg.Hostnames = mainCfg.Hostnames.Distinct(StringComparer.CurrentCultureIgnoreCase).ToList();
-				collection.AddSingleton(c => mainCfg);
+				ioc.AddSingleton(c => mainCfg);
 			}
-			var provider = collection.BuildServiceProvider();
-			var pipeBuliderFactory = new PipeBuilderFactory(() => new PipeBuilder(provider));
-			return new BusClient(pipeBuliderFactory, provider.GetService<IPipeContextFactory>());
+			return Instantiation.RawRabbitFactory.Create(options, ioc, register => new ServiceProviderAdapter((register as ServiceCollectionAdapter)?.Collection));
 		}
-	}
-
-	public class RawRabbitOptions
-	{
-		public Action<IConfigurationBuilder> Configuration { get; set; }
-		public Action<IServiceCollection> DependencyInjection { get; set; }
-		public Action<IClientBuilder> Plugins { get; set; }
 	}
 }

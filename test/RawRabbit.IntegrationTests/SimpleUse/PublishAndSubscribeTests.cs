@@ -25,12 +25,13 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		{
 			var firstMsgContext = new TaskCompletionSource<MessageContext>();
 			var secondMsgContext = new TaskCompletionSource<MessageContext>();
-			var client = RawRabbitFactory.Create(new RawRabbitOptions
+			var client = Instantiation.RawRabbitFactory.Create(new Instantiation.RawRabbitOptions
 			{
 				Plugins = plugin => plugin
 					.PublishMessageContext<MessageContext>()
 					.UseMessageChaining()
 			});
+
 			await client.SubscribeAsync<BasicMessage, MessageContext>(async (message, context) =>
 			{
 				firstMsgContext.TrySetResult(context);

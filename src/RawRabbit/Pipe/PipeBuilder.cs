@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
+using RawRabbit.DependecyInjection;
 using RawRabbit.Pipe.Middleware;
 
 namespace RawRabbit.Pipe
@@ -20,10 +22,14 @@ namespace RawRabbit.Pipe
 
 	public class PipeBuilder : IExtendedPipeBuilder
 	{
+		private readonly IDependecyResolver _resolver;
 		protected List<MiddlewareInfo> Pipe;
+		private Action<IPipeBuilder> _additional;
 
-		public PipeBuilder()
+		public PipeBuilder(IDependecyResolver resolver)
 		{
+			_resolver = resolver;
+			_additional = _resolver.GetService<Action<IPipeBuilder>>();
 			Pipe = new List<MiddlewareInfo>();
 		}
 
@@ -57,6 +63,26 @@ namespace RawRabbit.Pipe
 
 		public virtual Middleware.Middleware Build()
 		{
+			_additional?.Invoke(this);
+
+			var stageMarkerOptions = Pipe
+				.Where(info => info.Type == typeof(StageMarkerMiddleware))
+				.SelectMany(info => info.ConstructorArgs.OfType<StageMarkerOptions>());
+
+			var stageMwInfo = Pipe
+				.Where(info => typeof(StagedMiddleware).IsAssignableFrom(info.Type))
+				.ToList();
+			var stagedMiddleware = stageMwInfo
+				.Select(CreateInstance)
+				.OfType<StagedMiddleware>()
+				.ToList();
+
+			foreach (var stageMarkerOption in stageMarkerOptions)
+			{
+				var thisStageMws = stagedMiddleware.Where(mw => mw.StageMarker == stageMarkerOption.Stage).ToList<Middleware.Middleware>();
+				stageMarkerOption.EntryPoint = Build(thisStageMws);
+			}
+			Pipe = Pipe.Except(stageMwInfo).ToList();
 			var middlewares = Pipe.Select(CreateInstance).ToList();
 			return Build(middlewares);
 		}
@@ -75,7 +101,7 @@ namespace RawRabbit.Pipe
 
 		protected virtual Middleware.Middleware CreateInstance(MiddlewareInfo middlewareInfo)
 		{
-			return Activator.CreateInstance(middlewareInfo.Type, middlewareInfo.ConstructorArgs) as Middleware.Middleware;
+			return _resolver.GetService(middlewareInfo.Type, middlewareInfo.ConstructorArgs) as Middleware.Middleware;
 		}
 	}
 }

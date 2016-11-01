@@ -1,18 +1,18 @@
 ﻿using System;
-using Microsoft.Extensions.DependencyInjection;
+using RawRabbit.DependecyInjection;
 using RawRabbit.Pipe;
 
-namespace RawRabbit.vNext.Pipe
+namespace RawRabbit.Instantiation
 {
 	public interface IClientBuilder
 	{
-		void Register(Action<IPipeBuilder> pipe, Action<IServiceCollection> ioc = null);
+		void Register(Action<IPipeBuilder> pipe, Action<IDependecyRegister> ioc = null);
 	}
 
 	public class ClientBuilder : IClientBuilder
 	{
 		public Action<IPipeBuilder> PipeBuilderAction { get; set; }
-		public Action<IServiceCollection> ServiceAction { get; set; }
+		public Action<IDependecyRegister> ServiceAction { get; set; }
 
 		public ClientBuilder()
 		{
@@ -20,7 +20,7 @@ namespace RawRabbit.vNext.Pipe
 			ServiceAction = collection => { };
 		}
 
-		public void Register(Action<IPipeBuilder> pipe, Action<IServiceCollection> ioc)
+		public void Register(Action<IPipeBuilder> pipe, Action<IDependecyRegister> ioc)
 		{
 			PipeBuilderAction += pipe;
 			ServiceAction += ioc;

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using RawRabbit.Enrichers.MessageContext.Chaining.Dependencies;
 using RawRabbit.Enrichers.MessageContext.Chaining.Middleware;
+using RawRabbit.Instantiation;
 using RawRabbit.vNext.Pipe;
 
 namespace RawRabbit
