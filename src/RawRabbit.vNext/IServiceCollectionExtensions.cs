@@ -93,7 +93,7 @@ namespace RawRabbit.vNext
 					NullValueHandling = NullValueHandling.Ignore
 
 				})
-				.AddTransient<IConsumerFactory, EventingBasicConsumerFactory>()
+				.AddTransient<IRawConsumerFactory, EventingBasicConsumerFactory>()
 				.AddTransient<IErrorHandlingStrategy, DefaultStrategy>()
 				.AddSingleton<IMessageContextProvider<TMessageContext>, MessageContextProvider<TMessageContext>>()
 				.AddSingleton<IContextEnhancer, ContextEnhancer>()

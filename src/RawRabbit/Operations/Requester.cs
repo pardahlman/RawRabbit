@@ -21,7 +21,7 @@ namespace RawRabbit.Operations
 	public class Requester<TMessageContext> : IShutdown, IRequester where TMessageContext : IMessageContext
 	{
 		private readonly IChannelFactory _channelFactory;
-		private readonly IConsumerFactory _consumerFactory;
+		private readonly IRawConsumerFactory _consumerFactory;
 		private readonly IMessageSerializer _serializer;
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
 		private readonly IErrorHandlingStrategy _errorStrategy;
@@ -36,7 +36,7 @@ namespace RawRabbit.Operations
 
 		public Requester(
 			IChannelFactory channelFactory,
-			IConsumerFactory consumerFactory,
+			IRawConsumerFactory consumerFactory,
 			IMessageSerializer serializer,
 			IMessageContextProvider<TMessageContext> contextProvider,
 			IErrorHandlingStrategy errorStrategy,

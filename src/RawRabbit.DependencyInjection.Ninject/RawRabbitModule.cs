@@ -115,7 +115,7 @@ namespace RawRabbit.DependencyInjection.Ninject
 				.WithConstructorArgument("config", (Action<Newtonsoft.Json.JsonSerializer>)null);
 
 			Kernel
-				.Bind<IConsumerFactory>()
+				.Bind<IRawConsumerFactory>()
 				.To<EventingBasicConsumerFactory>()
 				.InSingletonScope();
 

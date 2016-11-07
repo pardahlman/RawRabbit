@@ -22,10 +22,10 @@ namespace RawRabbit.Pipe.Middleware
 	public class MessageConsumeMiddleware : Middleware
 	{
 		private readonly IPipeContextFactory _contextFactory;
-		private readonly IConsumerFactory _consumerFactory;
+		private readonly IRawConsumerFactory _consumerFactory;
 		private readonly Middleware _consumePipe;
 
-		public MessageConsumeMiddleware(IPipeBuilderFactory pipeBuilderFactory, IPipeContextFactory contextFactory, ConsumeOptions consumeOptions, IConsumerFactory consumerFactory)
+		public MessageConsumeMiddleware(IPipeBuilderFactory pipeBuilderFactory, IPipeContextFactory contextFactory, ConsumeOptions consumeOptions, IRawConsumerFactory consumerFactory)
 		{
 			_contextFactory = contextFactory;
 			_consumerFactory = consumerFactory;

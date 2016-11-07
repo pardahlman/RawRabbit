@@ -7,6 +7,10 @@ using RawRabbit.Channel;
 using RawRabbit.Channel.Abstraction;
 using RawRabbit.Common;
 using RawRabbit.Configuration;
+using RawRabbit.Configuration.Consume;
+using RawRabbit.Configuration.Exchange;
+using RawRabbit.Configuration.Queue;
+using RawRabbit.Consumer;
 using RawRabbit.Consumer.Abstraction;
 using RawRabbit.Consumer.Eventing;
 using RawRabbit.Context.Enhancer;
@@ -58,7 +62,7 @@ namespace RawRabbit.DependecyInjection
 					NullValueHandling = NullValueHandling.Ignore
 
 				})
-				.AddTransient<IConsumerFactory, EventingBasicConsumerFactory>()
+				.AddTransient<IRawConsumerFactory, EventingBasicConsumerFactory>()
 				.AddTransient<IErrorHandlingStrategy, DefaultStrategy>()
 				.AddSingleton<IContextEnhancer, ContextEnhancer>()
 				.AddSingleton<IBasicPropertiesProvider, BasicPropertiesProvider>()

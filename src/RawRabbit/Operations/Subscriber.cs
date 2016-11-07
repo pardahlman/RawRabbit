@@ -21,7 +21,7 @@ namespace RawRabbit.Operations
 	public class Subscriber<TMessageContext> : IShutdown, ISubscriber<TMessageContext> where TMessageContext : IMessageContext
 	{
 		private readonly IChannelFactory _channelFactory;
-		private readonly IConsumerFactory _consumerFactory;
+		private readonly IRawConsumerFactory _consumerFactory;
 		private readonly ITopologyProvider _topologyProvider;
 		private readonly IMessageSerializer _serializer;
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
@@ -33,7 +33,7 @@ namespace RawRabbit.Operations
 
 		public Subscriber(
 			IChannelFactory channelFactory,
-			IConsumerFactory consumerFactory,
+			IRawConsumerFactory consumerFactory,
 			ITopologyProvider topologyProvider,
 			IMessageSerializer serializer,
 			IMessageContextProvider<TMessageContext> contextProvider,

@@ -21,7 +21,7 @@ namespace RawRabbit.Operations
 	{
 		private readonly IChannelFactory _channelFactory;
 		private readonly ITopologyProvider _topologyProvider;
-		private readonly IConsumerFactory _consumerFactory;
+		private readonly IRawConsumerFactory _consumerFactory;
 		private readonly IMessageSerializer _serializer;
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
 		private readonly IContextEnhancer _contextEnhancer;
@@ -34,7 +34,7 @@ namespace RawRabbit.Operations
 		public Responder(
 			IChannelFactory channelFactory,
 			ITopologyProvider topologyProvider,
-			IConsumerFactory consumerFactory,
+			IRawConsumerFactory consumerFactory,
 			IMessageSerializer serializer,
 			IMessageContextProvider<TMessageContext> contextProvider,
 			IContextEnhancer contextEnhancer,

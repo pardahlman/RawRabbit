@@ -4,13 +4,14 @@ using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
+using RawRabbit.Configuration.Consume;
 using RawRabbit.Configuration.Respond;
 using RawRabbit.Consumer.Abstraction;
 using RawRabbit.Logging;
 
 namespace RawRabbit.Consumer.Eventing
 {
-	public class EventingBasicConsumerFactory : IConsumerFactory
+	public class EventingBasicConsumerFactory : IRawConsumerFactory
 	{
 		private readonly ConcurrentBag<string> _processedButNotAcked;
 		private readonly ILogger _logger = LogManager.GetLogger<EventingBasicConsumerFactory>();
@@ -22,7 +23,17 @@ namespace RawRabbit.Consumer.Eventing
 
 		public IRawConsumer CreateConsumer(IConsumerConfiguration cfg, IModel channel)
 		{
-			ConfigureQos(channel, cfg.PrefetchCount);
+			return CreateConsumer(cfg.PrefetchCount, cfg.NoAck, channel);
+		}
+
+		public IRawConsumer CreateConsumer(ConsumeConfiguration cfg, IModel channel)
+		{
+			return CreateConsumer(cfg.PrefetchCount, cfg.NoAck, channel);
+		}
+
+		protected virtual IRawConsumer CreateConsumer(ushort prefetch, bool noAck, IModel channel)
+		{
+			ConfigureQos(channel, prefetch);
 			var rawConsumer = new EventingRawConsumer(channel);
 
 			rawConsumer.Received += (sender, args) =>
@@ -44,7 +55,7 @@ namespace RawRabbit.Consumer.Eventing
 						.OnMessageAsync(sender, args)
 						.ContinueWith(t =>
 						{
-							if (cfg.NoAck || rawConsumer.AcknowledgedTags.Contains(args.DeliveryTag))
+							if (noAck || rawConsumer.AcknowledgedTags.Contains(args.DeliveryTag))
 							{
 								return;
 							}

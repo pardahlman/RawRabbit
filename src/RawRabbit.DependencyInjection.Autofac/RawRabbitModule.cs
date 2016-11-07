@@ -117,7 +117,7 @@ namespace RawRabbit.DependencyInjection.Autofac
 
 			builder
 				.RegisterType<EventingBasicConsumerFactory>()
-				.As<IConsumerFactory>()
+				.As<IRawConsumerFactory>()
 				.SingleInstance()
 				.PreserveExistingDefaults();
 
