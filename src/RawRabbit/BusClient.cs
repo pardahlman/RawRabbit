@@ -16,12 +16,12 @@ namespace RawRabbit
 			_contextFactory = contextFactory;
 		}
 
-		public Task InvokeAsync(Action<IPipeBuilder> pipeCfg, CancellationToken token)
+		public Task<IPipeContext> InvokeAsync(Action<IPipeBuilder> pipeCfg, CancellationToken token)
 		{
 			return InvokeAsync(pipeCfg, context => { }, token);
 		}
 
-		public Task InvokeAsync(Action<IPipeBuilder> pipeCfg, Action<IPipeContext> contextCfg, CancellationToken token = new CancellationToken())
+		public Task<IPipeContext> InvokeAsync(Action<IPipeBuilder> pipeCfg, Action<IPipeContext> contextCfg, CancellationToken token = new CancellationToken())
 		{
 			var builder = _pipeBuilderFactory.Create();
 			pipeCfg(builder);
@@ -29,7 +29,8 @@ namespace RawRabbit
 			var context = _contextFactory.CreateContext();
 			contextCfg(context);
 			return pipe
-				.InvokeAsync(context);
+				.InvokeAsync(context)
+				.ContinueWith(t => context, token);
 		}
 	}
 }
