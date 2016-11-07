@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using RawRabbit.Operations.Respond.Extensions;
+using RawRabbit.Operations.Respond.Core;
 using RawRabbit.Pipe;
 
 namespace RawRabbit.Operations.Respond.Middleware

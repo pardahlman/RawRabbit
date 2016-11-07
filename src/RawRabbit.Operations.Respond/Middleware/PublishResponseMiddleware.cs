@@ -1,5 +1,6 @@
-﻿using System.Threading.Tasks;
-using RawRabbit.Operations.Respond.Extensions;
+﻿using System.Text;
+using System.Threading.Tasks;
+using RawRabbit.Operations.Respond.Core;
 using RawRabbit.Pipe;
 
 namespace RawRabbit.Operations.Respond.Middleware
@@ -9,11 +10,18 @@ namespace RawRabbit.Operations.Respond.Middleware
 		public override Task InvokeAsync(IPipeContext context)
 		{
 			var body = context.Get<string>(RespondKey.SerializedResponse);
-			var channel = context.GetChannel();
-			var args = context.GetDeliveryEventArgs();
+			var channel = context.GetTransientChannel();
+			var replyTo = context.GetPublicationAddress();
+			var basicProps = context.GetBasicProperties();
 
-			//channel.BasicPublish();
-			throw new System.NotImplementedException();
+			channel.BasicPublish(
+				exchange: replyTo.ExchangeName,
+				routingKey: replyTo.RoutingKey,
+				mandatory: true,
+				basicProperties: basicProps,
+				body: Encoding.UTF8.GetBytes(body)
+			);
+			return Next.InvokeAsync(context);
 		}
 	}
 }

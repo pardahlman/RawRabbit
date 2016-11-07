@@ -1,6 +1,6 @@
 ﻿namespace RawRabbit.Pipe
 {
-	public static partial class PipeKey
+	public static class PipeKey
 	{
 		public const string Message = "MessageId";
 		public const string MessageBytes = "MessageBytes";
@@ -16,6 +16,7 @@
 		public const string StartTime = "StartTime";
 		public const string Consumer = "Consumer";
 		public const string Channel = "Channel";
+		public const string TransientChannel = "TransientChannel";
 		public const string Operation = "Operation";
 		public const string PublishAcknowledger = "PublishAcknowledger";
 		public const string RoutingKey = "RoutingKey";

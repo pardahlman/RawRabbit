@@ -2,16 +2,16 @@
 using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Respond;
-using RawRabbit.Operations.Respond.Extensions;
+using RawRabbit.Operations.Respond.Core;
 using RawRabbit.Pipe;
 
 namespace RawRabbit.Operations.Respond.Middleware
 {
-	public class ConsumeConfigurationMiddleware : Pipe.Middleware.Middleware
+	public class RespondConfigurationMiddleware : Pipe.Middleware.Middleware
 	{
 		private readonly IConfigurationEvaluator _configEvaluator;
 
-		public ConsumeConfigurationMiddleware(IConfigurationEvaluator configEvaluator)
+		public RespondConfigurationMiddleware(IConfigurationEvaluator configEvaluator)
 		{
 			_configEvaluator = configEvaluator;
 		}

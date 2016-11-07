@@ -19,7 +19,7 @@ namespace RawRabbit.Pipe.Middleware
 		}
 		public override Task InvokeAsync(IPipeContext context)
 		{
-			var channel = context.GetChannel();
+			var channel = context.GetTransientChannel();
 			if (channel.NextPublishSeqNo == 0UL)
 			{
 				_logger.LogInformation($"Setting 'Publish Acknowledge' for channel '{channel.ChannelNumber}'");

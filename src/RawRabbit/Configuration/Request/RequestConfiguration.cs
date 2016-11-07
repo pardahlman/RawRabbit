@@ -1,6 +1,8 @@
-﻿using RawRabbit.Configuration.Exchange;
+﻿using RabbitMQ.Client.Events;
+using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Queue;
 using RawRabbit.Configuration.Respond;
+using RawRabbit.Pipe;
 
 namespace RawRabbit.Configuration.Request
 {

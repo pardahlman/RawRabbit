@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
+using RabbitMQ.Client;
 using RawRabbit.Pipe;
 
-namespace RawRabbit.Operations.Respond.Extensions
+namespace RawRabbit.Operations.Respond.Core
 {
 	public static class PipeContextExtensions
 	{
@@ -19,6 +20,11 @@ namespace RawRabbit.Operations.Respond.Extensions
 		public static Func<object, Task<object>> GetMessageHandler(this IPipeContext context)
 		{
 			return context.Get<Func<object, Task<object>>>(PipeKey.MessageHandler);
+		}
+
+		public static PublicationAddress GetPublicationAddress(this IPipeContext context)
+		{
+			return context.Get<PublicationAddress>(RespondKey.PublicationAddress);
 		}
 	}
 }

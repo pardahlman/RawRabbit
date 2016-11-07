@@ -12,6 +12,7 @@ using RawRabbit.Context;
 using RawRabbit.Enrichers.MessageContext.Subscribe;
 using RawRabbit.Exceptions;
 using RawRabbit.IntegrationTests.TestMessages;
+using RawRabbit.Operations.Request;
 using RawRabbit.vNext.Pipe;
 using Xunit;
 using ExchangeType = RawRabbit.Configuration.Exchange.ExchangeType;
@@ -31,6 +32,8 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 					.PublishMessageContext<MessageContext>()
 					.UseMessageChaining()
 			});
+			await client.RespondAsync<BasicRequest, BasicResponse>(request => Task.FromResult(new BasicResponse {Payload = Guid.NewGuid()}));
+			var response = await client.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest { Number = 1});
 
 			await client.SubscribeAsync<BasicMessage, MessageContext>(async (message, context) =>
 			{

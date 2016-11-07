@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RawRabbit.Configuration.Consume;
 using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Queue;
 using RawRabbit.Configuration.Respond;
@@ -58,20 +59,20 @@ namespace RawRabbit.Pipe
 			return context.Get<EventHandler<BasicReturnEventArgs>>(PipeKey.ReturnedMessageCallback);
 		}
 
-		public static IConsumerConfiguration GetConsumerConfiguration(this IPipeContext context)
+		public static ConsumeConfiguration GetConsumerConfiguration(this IPipeContext context)
 		{
 			var routingKey = GetRoutingKey(context);
 			var queueCfg = GetQueueConfiguration(context);
 			var exchangeCfg = GetExchangeConfiguration(context);
 			var noAck = context.Get<bool>(PipeKey.NoAck);
 			var prefetch = context.Get<ushort>(PipeKey.PrefetchCount);
-			return new SubscriptionConfiguration
+			return new ConsumeConfiguration
 			{
 				RoutingKey = routingKey,
 				Queue = queueCfg,
 				Exchange = exchangeCfg,
 				NoAck = noAck,
-				PrefetchCount = prefetch
+				PrefetchCount = prefetch,
 			};
 		}
 
@@ -83,6 +84,11 @@ namespace RawRabbit.Pipe
 		public static IModel GetChannel(this IPipeContext context)
 		{
 			return context.Get<IModel>(PipeKey.Channel);
+		}
+
+		public static IModel GetTransientChannel(this IPipeContext context)
+		{
+			return context.Get<IModel>(PipeKey.TransientChannel);
 		}
 
 		public static Guid GetGlobalMessageId(this IPipeContext context)

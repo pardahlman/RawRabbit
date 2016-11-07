@@ -82,10 +82,13 @@ namespace RawRabbit.DependecyInjection
 			var additionalTypes = additional.Select(a => a.GetType());
 			var ctors = implementationType
 				.GetConstructors();
-			var ctor = ctors.FirstOrDefault(c => c.GetParameters().Where(p => !additionalTypes.Contains(p.ParameterType)).All(p => _registrations.Keys.Contains(p.ParameterType)));
+			var ctor = ctors
+				.Where(c => c.GetParameters().All(p => p.Attributes.HasFlag(ParameterAttributes.Optional) || additionalTypes.Contains(p.ParameterType) || _registrations.Keys.Contains(p.ParameterType)))
+				.OrderByDescending(c => c.GetParameters().Length)
+				.FirstOrDefault();
 			if (ctor == null)
 			{
-				return null;
+				throw new Exception($"Unable to find suitable constructor for {implementationType.Name}.");
 			}
 			var dependencies = ctor
 				.GetParameters()

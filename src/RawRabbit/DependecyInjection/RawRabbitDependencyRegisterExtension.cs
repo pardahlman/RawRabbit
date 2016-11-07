@@ -63,6 +63,7 @@ namespace RawRabbit.DependecyInjection
 
 				})
 				.AddTransient<IRawConsumerFactory, EventingBasicConsumerFactory>()
+				.AddTransient<IConsumerFactory, ConsumerFactory>()
 				.AddTransient<IErrorHandlingStrategy, DefaultStrategy>()
 				.AddSingleton<IContextEnhancer, ContextEnhancer>()
 				.AddSingleton<IBasicPropertiesProvider, BasicPropertiesProvider>()
@@ -70,6 +71,10 @@ namespace RawRabbit.DependecyInjection
 				.AddSingleton<ChannelFactoryConfiguration, ChannelFactoryConfiguration>(c => ChannelFactoryConfiguration.Default)
 				.AddSingleton<ITopologyProvider, TopologyProvider>()
 				.AddTransient<IConfigurationEvaluator, ConfigurationEvaluator>()
+				.AddTransient<IPublishConfigurationFactory, PublishConfigurationFactory>()
+				.AddTransient<IConsumeConfigurationFactory, ConsumeConfigurationFactory>()
+				.AddTransient<IExchangeConfigurationFactory, ExchangeConfigurationFactory>()
+				.AddTransient<IQueueConfigurationFactory, QueueConfigurationFactory>()
 				.AddSingleton<INamingConventions, NamingConventions>()
 			
 				.AddSingleton<IBusClient, BusClient>()

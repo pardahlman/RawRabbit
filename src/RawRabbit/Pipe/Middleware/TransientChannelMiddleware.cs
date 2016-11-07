@@ -3,11 +3,11 @@ using RawRabbit.Channel.Abstraction;
 
 namespace RawRabbit.Pipe.Middleware
 {
-	public class PublishChannelMiddleware : Middleware
+	public class TransientChannelMiddleware : Middleware
 	{
 		private readonly IChannelFactory _channelFactory;
 
-		public PublishChannelMiddleware(IChannelFactory channelFactory)
+		public TransientChannelMiddleware(IChannelFactory channelFactory)
 		{
 			_channelFactory = channelFactory;
 		}
@@ -16,11 +16,12 @@ namespace RawRabbit.Pipe.Middleware
 		{
 			return _channelFactory
 				.GetChannelAsync()
-				.ContinueWith(async tChannel =>
+				.ContinueWith(tChannel =>
 				{
-					context.Properties.Add(PipeKey.Channel, tChannel.Result);
-					await Next.InvokeAsync(context);
-				});
+					context.Properties.Add(PipeKey.TransientChannel, tChannel.Result);
+					return Next.InvokeAsync(context);
+				})
+				.Unwrap();
 		}
 	}
 }

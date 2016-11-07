@@ -22,6 +22,10 @@ namespace RawRabbit.Serialization
 
 		public string Serialize(object obj)
 		{
+			if (obj == null)
+			{
+				return string.Empty;
+			}
 			string serialized;
 			using (var sw = new StringWriter())
 			{
