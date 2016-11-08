@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using RawRabbit.Configuration.Respond;
+using RawRabbit.Operations.Respond.Configuration;
 using RawRabbit.Operations.Respond.Core;
 using RawRabbit.Operations.Respond.Middleware;
 using RawRabbit.Pipe;
@@ -14,14 +14,14 @@ namespace RawRabbit
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.Initiated))
 			.Use<RespondConfigurationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ConfigurationCreated))
-			.Use<QueueDeclareMiddleware>()
+			.Use<QueueDeclareMiddleware>(new QueueDeclareOptions { QueueFunc = context => context.GetRespondConfiguration()?.Queue})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.QueueDeclared))
-			.Use<ExchangeDeclareMiddleware>()
+			.Use<ExchangeDeclareMiddleware>(new ExchangeDeclareOptions { ExchangeFunc = context => context.GetRespondConfiguration()?.Exchange})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ExchangeDeclared))
-			.Use<QueueBindMiddleware>()
+			.Use<QueueBindMiddleware>(new QueueBindOptions { ConsumeFunc = context => context.GetRespondConfiguration() })
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.QueueBound))
-			.Use<ChannelCreationMiddleware>()
-			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ConsumerChannelCreated))
+			.Use<ConsumerCreationMiddleware>(new ConsumerCreationOptions { ConsumeFunc = context => context.GetRespondConfiguration()})
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ConsumerCreated))
 			.Use<MessageConsumeMiddleware>(new ConsumeOptions
 			{
 				Pipe = consume => consume
@@ -41,10 +41,9 @@ namespace RawRabbit
 					.Use<PublishResponseMiddleware>()
 					.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ResponsePublished))
 			})
-			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ConsumerCreated))
-			.Use<SubscriptionMiddleware>();
+			.Use<SubscriptionMiddleware>(new SubscriptionOptions { QueueFunc = context => context.GetRespondConfiguration()?.Queue});
 
-		public static Task RespondAsync<TRequest, TResponse>(this IBusClient client, Func<TRequest, Task<TResponse>> handler, Action<IResponderConfigurationBuilder> configuration = null)
+		public static Task RespondAsync<TRequest, TResponse>(this IBusClient client, Func<TRequest, Task<TResponse>> handler, Action<IRespondConfigurationBuilder> configuration = null)
 		{
 			return client
 				.InvokeAsync(RespondPipe, ctx =>

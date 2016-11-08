@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using RawRabbit.Common;
-using RawRabbit.Configuration.Respond;
+using RawRabbit.Configuration.Consume;
+using RawRabbit.Operations.Respond.Configuration;
 using RawRabbit.Operations.Respond.Core;
 using RawRabbit.Pipe;
 
@@ -9,18 +9,23 @@ namespace RawRabbit.Operations.Respond.Middleware
 {
 	public class RespondConfigurationMiddleware : Pipe.Middleware.Middleware
 	{
-		private readonly IConfigurationEvaluator _configEvaluator;
+		private readonly IRespondConfigurationFactory _factory;
 
-		public RespondConfigurationMiddleware(IConfigurationEvaluator configEvaluator)
+		public RespondConfigurationMiddleware(IRespondConfigurationFactory factory)
 		{
-			_configEvaluator = configEvaluator;
+			_factory = factory;
+		}
+
+		public RespondConfigurationMiddleware(IConsumeConfigurationFactory consumeFactory)
+		{
+			_factory = new RespondConfigurationFactory(consumeFactory);
 		}
 
 		public override Task InvokeAsync(IPipeContext context)
 		{
 			var requestType = context.GetRequestMessageType();
 			var responseType = context.GetResponseMessageType();
-			var action = context.Get<Action<IResponderConfigurationBuilder>>(PipeKey.ConfigurationAction);
+			var action = context.Get<Action<IRespondConfigurationBuilder>>(PipeKey.ConfigurationAction);
 
 			if (requestType == null)
 			{
@@ -31,13 +36,12 @@ namespace RawRabbit.Operations.Respond.Middleware
 				throw new ArgumentNullException(nameof(responseType));
 			}
 
-			var cfg = _configEvaluator.GetConfiguration(requestType, responseType, action);
+			var defaultCfg = _factory.Create(requestType, responseType);
+			var builder = new RespondConfigurationBuilder(defaultCfg);
+			action?.Invoke(builder);
 
-			context.Properties.Add(PipeKey.QueueConfiguration, cfg.Queue);
-			context.Properties.Add(PipeKey.ExchangeConfiguration, cfg.Exchange);
-			context.Properties.Add(PipeKey.NoAck, cfg.NoAck);
-			context.Properties.Add(PipeKey.PrefetchCount, cfg.PrefetchCount);
-			context.Properties.Add(PipeKey.RoutingKey, cfg.RoutingKey);
+			var respondCfg = builder.Config;
+			context.Properties.Add(RespondKey.Configuration, respondCfg);
 
 			return Next.InvokeAsync(context);
 		}

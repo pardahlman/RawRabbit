@@ -7,5 +7,6 @@
 		public const string SerializedResponse = "SerializedResponse";
 		public const string RequestMessageType = "RequestMessageType";
 		public const string PublicationAddress = "PublicationAddress";
+		public const string Configuration = "Configuration";
 	}
 }

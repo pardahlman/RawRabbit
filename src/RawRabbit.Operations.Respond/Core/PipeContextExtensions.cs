@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
+using RawRabbit.Operations.Respond.Configuration;
 using RawRabbit.Pipe;
 
 namespace RawRabbit.Operations.Respond.Core
@@ -25,6 +26,11 @@ namespace RawRabbit.Operations.Respond.Core
 		public static PublicationAddress GetPublicationAddress(this IPipeContext context)
 		{
 			return context.Get<PublicationAddress>(RespondKey.PublicationAddress);
+		}
+
+		public static RespondConfiguration GetRespondConfiguration(this IPipeContext context)
+		{
+			return context.Get<RespondConfiguration>(RespondKey.Configuration);
 		}
 	}
 }

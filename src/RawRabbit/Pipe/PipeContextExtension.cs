@@ -29,9 +29,9 @@ namespace RawRabbit.Pipe
 			return context.Get<IMessageContext>(PipeKey.MessageContext);
 		}
 
-		public static IRawConsumer GetConsumer(this IPipeContext context)
+		public static IBasicConsumer GetConsumer(this IPipeContext context)
 		{
-			return context.Get<IRawConsumer>(PipeKey.Consumer);
+			return context.Get<IBasicConsumer>(PipeKey.Consumer);
 		}
 
 		public static QueueConfiguration GetQueueConfiguration(this IPipeContext context)

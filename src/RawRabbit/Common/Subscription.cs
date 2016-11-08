@@ -1,5 +1,6 @@
 ﻿using System;
 using RabbitMQ.Client;
+using RawRabbit.Consumer;
 using RawRabbit.Consumer.Abstraction;
 
 namespace RawRabbit.Common
@@ -17,9 +18,9 @@ namespace RawRabbit.Common
 		public string ConsumerTag { get; }
 		public bool Active { get; set; }
 
-		private readonly IRawConsumer _consumer;
+		private readonly IBasicConsumer _consumer;
 
-		public Subscription(IRawConsumer consumer, string queueName)
+		public Subscription(IBasicConsumer consumer, string queueName)
 		{
 			_consumer = consumer;
 			var basicConsumer = consumer as DefaultBasicConsumer;
@@ -34,7 +35,7 @@ namespace RawRabbit.Common
 		public void Dispose()
 		{
 			Active = false;
-			_consumer.Disconnect();
+			_consumer.CancelAsync();
 		}
 	}
 }

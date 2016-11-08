@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using RawRabbit.Consumer.Abstraction;
 using RawRabbit.Context.Enhancer;
 using RawRabbit.Pipe;
 
@@ -16,7 +17,7 @@ namespace RawRabbit.Enrichers.MessageContext.Subscribe.Middleware
 		public override Task InvokeAsync(IPipeContext context)
 		{
 			var msgContext = context.GetMessageContext();
-			var consumer = context.GetConsumer();
+			var consumer = context.Get<IRawConsumer>(PipeKey.Consumer);
 			var args = context.GetDeliveryEventArgs();
 			if (msgContext == null || consumer == null || args == null)
 			{

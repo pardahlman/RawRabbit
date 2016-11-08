@@ -7,7 +7,6 @@
 		public const string QueueDeclared = "QueueDeclared";
 		public const string ExchangeDeclared = "ExchangeDeclared";
 		public const string QueueBound = "ExchangeDeclared";
-		public const string ConsumerChannelCreated = "ConsumerChannelCreated";
 		public const string ConsumerCreated = "ConsumerCreated";
 		public const string MessageRecieved = "MessageRecieved";
 		public const string MessageDeserialized = "MessageDeserialized";
