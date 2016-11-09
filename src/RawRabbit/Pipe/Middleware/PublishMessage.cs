@@ -21,8 +21,8 @@ namespace RawRabbit.Pipe.Middleware
 
 		public PublishMessage(PublishOptions options = null)
 		{
-			_exchangeFunc = options?.ExchangeFunc ?? (context => context.GetExchangeName());
-			_routingKeyFunc = options?.RoutingKeyFunc ?? (context =>context.GetRoutingKey());
+			_exchangeFunc = options?.ExchangeFunc ?? (context => context.GetPublishConfiguration()?.Exchange.ExchangeName);
+			_routingKeyFunc = options?.RoutingKeyFunc ?? (context =>context.GetPublishConfiguration()?.RoutingKey);
 			_bodyFunc = options?.BodyFunc ?? (context => context.Get<string>(PipeKey.SerializedMessage));
 			_channelFunc = options?.ChannelFunc ?? (context =>context.GetTransientChannel());
 		}

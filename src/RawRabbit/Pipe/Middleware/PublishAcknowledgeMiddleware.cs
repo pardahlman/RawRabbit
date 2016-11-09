@@ -37,7 +37,7 @@ namespace RawRabbit.Pipe.Middleware
 				ackTimer?.Dispose();
 			}, channel, _publishTimeOut, new TimeSpan(-1));
 
-			TaskCompletionSource<ulong> ackedTsc = new TaskCompletionSource<ulong>();
+			var ackedTsc = new TaskCompletionSource<ulong>();
 			EventHandler<BasicAckEventArgs> channelBasicAck = null;
 			channelBasicAck = (sender, args) =>
 			{

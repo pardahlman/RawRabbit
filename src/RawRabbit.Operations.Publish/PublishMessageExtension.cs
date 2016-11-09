@@ -5,6 +5,7 @@ using RawRabbit.Operations.Publish;
 using RawRabbit.Operations.Publish.Middleware;
 using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
+using IPublishConfigurationBuilder = RawRabbit.Configuration.Consume.IPublishConfigurationBuilder;
 
 namespace RawRabbit
 {

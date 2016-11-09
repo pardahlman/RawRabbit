@@ -61,19 +61,12 @@ namespace RawRabbit.Pipe
 
 		public static ConsumeConfiguration GetConsumerConfiguration(this IPipeContext context)
 		{
-			var routingKey = GetRoutingKey(context);
-			var queueCfg = GetQueueConfiguration(context);
-			var exchangeCfg = GetExchangeConfiguration(context);
-			var noAck = context.Get<bool>(PipeKey.NoAck);
-			var prefetch = context.Get<ushort>(PipeKey.PrefetchCount);
-			return new ConsumeConfiguration
-			{
-				RoutingKey = routingKey,
-				Queue = queueCfg,
-				Exchange = exchangeCfg,
-				NoAck = noAck,
-				PrefetchCount = prefetch,
-			};
+			return context.Get<ConsumeConfiguration>(PipeKey.ConsumerConfiguration);
+		}
+
+		public static PublishConfiguration GetPublishConfiguration(this IPipeContext context)
+		{
+			return context.Get<PublishConfiguration>(PipeKey.PublishConfiguration);
 		}
 
 		public static string GetRoutingKey(this IPipeContext context)
@@ -89,11 +82,6 @@ namespace RawRabbit.Pipe
 		public static IModel GetTransientChannel(this IPipeContext context)
 		{
 			return context.Get<IModel>(PipeKey.TransientChannel);
-		}
-
-		public static Guid GetGlobalMessageId(this IPipeContext context)
-		{
-			return context.Get<Guid>(PipeKey.GlobalMessageId);
 		}
 
 		public static IBasicProperties GetBasicProperties(this IPipeContext context)

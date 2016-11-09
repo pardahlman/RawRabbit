@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using RawRabbit.Configuration.Subscribe;
+using RawRabbit.Configuration.Respond;
 using RawRabbit.Operations.Subscribe.Middleware;
 using RawRabbit.Operations.Subscribe.Stages;
 using RawRabbit.Pipe;
@@ -13,13 +13,13 @@ namespace RawRabbit
 		public static readonly Action<IPipeBuilder> SubscribePipe = pipe => pipe
 			.Use<ConsumeConfigurationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(SubscribeStage.ConfigurationCreated))
-			.Use<QueueDeclareMiddleware>()
+			.Use<QueueDeclareMiddleware>(new QueueDeclareOptions { QueueFunc = context => context.GetConsumerConfiguration()?.Queue})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(SubscribeStage.QueueDeclared))
-			.Use<ExchangeDeclareMiddleware>()
+			.Use<ExchangeDeclareMiddleware>(new ExchangeDeclareOptions { ExchangeFunc = context => context.GetConsumerConfiguration()?.Exchange})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(SubscribeStage.ExchangeDeclared))
-			.Use<QueueBindMiddleware>()
+			.Use<QueueBindMiddleware>(new QueueBindOptions {ConsumeFunc = context => context.GetConsumerConfiguration()})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(SubscribeStage.QueueBound))
-			.Use<ChannelCreationMiddleware>()
+			.Use<ConsumerCreationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(SubscribeStage.ConsumerChannelCreated))
 			.Use<MessageConsumeMiddleware>(new ConsumeOptions
 			{
@@ -33,19 +33,19 @@ namespace RawRabbit
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(SubscribeStage.ConsumerCreated))
 			.Use<SubscriptionMiddleware>();
 
-		public static Task SubscribeAsync<TMessage>(this IBusClient client, Func<TMessage, Task> subscribeMethod, Action<ISubscriptionConfigurationBuilder> configuration = null)
+		public static Task SubscribeAsync<TMessage>(this IBusClient client, Func<TMessage, Task> subscribeMethod, Action<IConsumerConfiguration> configuration = null)
 		{
 			return client.InvokeAsync(
 				SubscribePipe,
 				context =>
-					{
-						Func<object, Task> genericHandler = o => subscribeMethod((TMessage)o);
+				{
+					Func<object, Task> genericHandler = o => subscribeMethod((TMessage)o);
 
-						context.Properties.Add(PipeKey.MessageType, typeof(TMessage));
-						context.Properties.Add(PipeKey.MessageHandler, genericHandler);
-						context.Properties.Add(PipeKey.ConfigurationAction, configuration);
-					}
-				);
+					context.Properties.Add(PipeKey.MessageType, typeof(TMessage));
+					context.Properties.Add(PipeKey.MessageHandler, genericHandler);
+					context.Properties.Add(PipeKey.ConfigurationAction, configuration);
+				}
+			);
 		}
 	}
 }

@@ -9,6 +9,7 @@ namespace RawRabbit.Pipe.Middleware
 	{
 		public Func<IPipeContext, ConsumeConfiguration> ConsumeFunc { get; set; }
 	}
+
 	public class ConsumerCreationMiddleware : Middleware
 	{
 		private readonly IConsumerFactory _consumerFactory;

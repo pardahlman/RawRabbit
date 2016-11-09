@@ -20,12 +20,12 @@ namespace RawRabbit.Compatibility.Legacy
 		}
 		public Task<ISubscription> SubscribeAsync<T>(Func<T, TMessageContext, Task> subscribeMethod, Action<ISubscriptionConfigurationBuilder> configuration = null)
 		{
-			return _busClient.SubscribeAsync(subscribeMethod, configuration) as Task<ISubscription>;
+			throw new NotImplementedException();
 		}
 
 		public Task PublishAsync<T>(T message = default(T), Action<IPublishConfigurationBuilder> configuration = null)
 		{
-			return _busClient.PublishAsync(message, configuration);
+			throw new NotImplementedException();
 		}
 
 		public Task<ISubscription> RespondAsync<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, Action<IResponderConfigurationBuilder> configuration = null)

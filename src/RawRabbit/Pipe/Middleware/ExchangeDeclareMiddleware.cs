@@ -32,7 +32,7 @@ namespace RawRabbit.Pipe.Middleware
 		private readonly Func<IPipeContext, ExchangeConfiguration> _exchangeFunc;
 
 		public ExchangeDeclareMiddleware(ITopologyProvider topologyProvider)
-			: this(topologyProvider, ExchangeDeclareOptions.For(c => c.GetExchangeConfiguration()))
+			: this(topologyProvider, ExchangeDeclareOptions.For(c => c.GetPublishConfiguration()?.Exchange))
 		{ }
 
 		public ExchangeDeclareMiddleware(ITopologyProvider topologyProvider, ExchangeDeclareOptions options)
@@ -44,6 +44,11 @@ namespace RawRabbit.Pipe.Middleware
 		public override Task InvokeAsync(IPipeContext context)
 		{
 			var exchangeCfg = _exchangeFunc(context);
+
+			if (exchangeCfg == null)
+			{
+				throw new ArgumentNullException(nameof(exchangeCfg));
+			}
 
 			return _topologyProvider
 				.DeclareExchangeAsync(exchangeCfg)
