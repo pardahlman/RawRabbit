@@ -4,7 +4,7 @@ using RawRabbit.Pipe;
 
 namespace RawRabbit.Operations.Subscribe.Middleware
 {
-	public class MessageInvokationMiddleware : Pipe.Middleware.Middleware
+	public class AutoAckMessageHandlerMiddleware : Pipe.Middleware.Middleware
 	{
 		public override Task InvokeAsync(IPipeContext context)
 		{
@@ -13,7 +13,13 @@ namespace RawRabbit.Operations.Subscribe.Middleware
 
 			return handler
 				.Invoke(message)
-				.ContinueWith(t => Next.InvokeAsync(context))
+				.ContinueWith(t =>
+				{
+					var deliveryArgs = context.GetDeliveryEventArgs();
+					var channel = context.GetConsumer().Model;
+					channel.BasicAck(deliveryArgs.DeliveryTag, false);
+					return Next.InvokeAsync(context);
+				})
 				.Unwrap();
 		}
 	}
