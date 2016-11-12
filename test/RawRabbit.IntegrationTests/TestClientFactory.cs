@@ -28,7 +28,7 @@ namespace RawRabbit.IntegrationTests
 		public static RawRabbit.Extensions.Disposable.ILegacyBusClient CreateExtendable(Action<IServiceCollection> custom = null)
 		{
 			custom = AddTestConfig(custom);
-			return RawRabbitFactory.Create(custom);
+			return RawRabbit.Extensions.Client.RawRabbitFactory.Create(custom);
 		}
 
 		private static Action<IServiceCollection> AddTestConfig(Action<IServiceCollection> action)

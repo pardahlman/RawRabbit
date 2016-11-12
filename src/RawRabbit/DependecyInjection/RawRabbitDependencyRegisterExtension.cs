@@ -26,7 +26,7 @@ namespace RawRabbit.DependecyInjection
 		public static IDependecyRegister AddRawRabbit(this IDependecyRegister register)
 		{
 			register
-				.AddSingleton(c => RawRabbitConfiguration.Local)
+				.AddSingleton(RawRabbitConfiguration.Local)
 				.AddSingleton<IConnectionFactory, ConnectionFactory>(provider =>
 				{
 					var cfg = provider.GetService<RawRabbitConfiguration>();

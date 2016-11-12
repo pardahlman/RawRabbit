@@ -26,7 +26,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		{
 			var firstMsgContext = new TaskCompletionSource<MessageContext>();
 			var secondMsgContext = new TaskCompletionSource<MessageContext>();
-			var client = Instantiation.RawRabbitFactory.Create(new Instantiation.RawRabbitOptions
+			var client = Instantiation.RawRabbitFactory.CreateSingleton(new RawRabbitOptions
 			{
 				Plugins = plugin => plugin
 					.PublishMessageContext<MessageContext>()

@@ -39,6 +39,10 @@ namespace RawRabbit.Instantiation
 				register.AddSingleton<IPipeBuilder, PipeBuilder>();
 				register.AddSingleton(clientBuilder.PipeBuilderAction);
 			}
+			else
+			{
+				register.AddSingleton(new Action<IPipeBuilder>(b => { }));
+			}
 			var resolver = resolverFunc(register);
 			return new InstanceFactory(resolver);
 		}

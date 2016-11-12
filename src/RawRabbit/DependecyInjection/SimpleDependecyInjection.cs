@@ -11,19 +11,23 @@ namespace RawRabbit.DependecyInjection
 
 		public IDependecyRegister AddTransient<TService, TImplementation>(Func<IDependecyResolver, TImplementation> instanceCreator) where TService : class where TImplementation : class, TService
 		{
+			if (_registrations.ContainsKey(typeof(TService)))
+			{
+				_registrations.Remove(typeof(TService));
+			}
 			_registrations.Add(typeof(TService), instanceCreator);
 			return this;
 		}
 
 		public IDependecyRegister AddTransient<TService, TImplementation>() where TImplementation : class, TService where TService : class
 		{
-			_registrations.Add(typeof(TService), resolver => GetService(typeof(TImplementation)));
+			AddTransient<TService, TImplementation>(resolver => GetService(typeof(TImplementation)) as TImplementation);
 			return this;
 		}
 
 		public IDependecyRegister AddSingleton<TService>(TService instance) where TService : class
 		{
-			_registrations.Add(typeof(TService), resolver => instance);
+			AddTransient<TService, TService>(resolver => instance);
 			return this;
 		}
 
