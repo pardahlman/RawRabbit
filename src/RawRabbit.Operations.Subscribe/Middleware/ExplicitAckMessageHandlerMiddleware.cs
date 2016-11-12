@@ -20,45 +20,50 @@ namespace RawRabbit.Operations.Subscribe.Middleware
 
 		public override Task InvokeAsync(IPipeContext context)
 		{
+			return InvokeMessageHandlerAsync(context)
+				.ContinueWith(t => AcknowledgeAndContinueAsync(t, context))
+				.Unwrap();
+		}
+
+		protected virtual Task InvokeMessageHandlerAsync(IPipeContext context)
+		{
 			var message = context.GetMessage();
 			var handler = context.GetMessageHandler();
+			return handler.Invoke(message);
+		}
 
-			return handler
-				.Invoke(message)
-				.ContinueWith(t =>
-				{
-					var ack = (t as Task<Acknowledgement>)?.Result;
-					if (ack == null)
-					{
-						throw new NotSupportedException($"Expected Handler to return Task<Acknowledgement>. Got {t?.GetType()}");
-					}
-					var deliveryArgs = context.GetDeliveryEventArgs();
-					var channel = context.GetConsumer().Model;
+		protected virtual Task AcknowledgeAndContinueAsync(Task handlerInvokeTask, IPipeContext context)
+		{
+			var ack = (handlerInvokeTask as Task<Acknowledgement>)?.Result;
+			if (ack == null)
+			{
+				throw new NotSupportedException($"Expected Handler to return Task<Acknowledgement>. Got {handlerInvokeTask?.GetType()}");
+			}
+			var deliveryArgs = context.GetDeliveryEventArgs();
+			var channel = context.GetConsumer().Model;
 
-					if (ack is Ack)
-					{
-						HandleAck(ack as Ack, channel, deliveryArgs);
-						return Next.InvokeAsync(context);
-					}
-					if (ack is Nack)
-					{
-						HandleNack(ack as Nack, channel, deliveryArgs);
-						return Next.InvokeAsync(context);
-					}
-					if (ack is Reject)
-					{
-						HandleReject(ack as Reject, channel, deliveryArgs);
-						return Next.InvokeAsync(context);
-					}
-					if (ack is Retry)
-					{
-						HandleRetry(ack as Retry, channel, deliveryArgs);
-						return Next.InvokeAsync(context);
-					}
+			if (ack is Ack)
+			{
+				HandleAck(ack as Ack, channel, deliveryArgs);
+				return Next.InvokeAsync(context);
+			}
+			if (ack is Nack)
+			{
+				HandleNack(ack as Nack, channel, deliveryArgs);
+				return Next.InvokeAsync(context);
+			}
+			if (ack is Reject)
+			{
+				HandleReject(ack as Reject, channel, deliveryArgs);
+				return Next.InvokeAsync(context);
+			}
+			if (ack is Retry)
+			{
+				HandleRetry(ack as Retry, channel, deliveryArgs);
+				return Next.InvokeAsync(context);
+			}
 
-					throw new NotSupportedException($"Unable to handle {ack.GetType()} as an Acknowledgement.");
-				})
-				.Unwrap();
+			throw new NotSupportedException($"Unable to handle {ack.GetType()} as an Acknowledgement.");
 		}
 
 		protected virtual void HandleAck(Ack ack, IModel channel, BasicDeliverEventArgs deliveryArgs)
