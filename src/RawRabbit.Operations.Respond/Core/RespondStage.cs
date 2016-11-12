@@ -3,7 +3,7 @@
 	public static class RespondStage
 	{
 		public const string Initiated = "Initiated";
-		public const string ConfigurationCreated = "ConfigurationCreated";
+		public const string ConsumeConfigured = "ConsumeConfigured";
 		public const string QueueDeclared = "QueueDeclared";
 		public const string ExchangeDeclared = "ExchangeDeclared";
 		public const string QueueBound = "ExchangeDeclared";

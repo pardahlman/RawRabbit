@@ -12,14 +12,14 @@ namespace RawRabbit.Operations.Request.Middleware
 	{
 		private readonly IRequestConfigurationFactory _factory;
 
-		public RequestConfigurationMiddleware(IRequestConfigurationFactory factory)
-		{
-			_factory = factory;
-		}
-
 		public RequestConfigurationMiddleware(IPublishConfigurationFactory publish, IConsumeConfigurationFactory consume)
 		{
 			_factory = new RequestConfigurationFactory(publish, consume);
+		}
+
+		public RequestConfigurationMiddleware(IRequestConfigurationFactory factory)
+		{
+			_factory = factory;
 		}
 
 		public override Task InvokeAsync(IPipeContext context)
@@ -44,6 +44,8 @@ namespace RawRabbit.Operations.Request.Middleware
 			var requestConfig = builder.Config;
 
 			context.Properties.Add(RequestKey.Configuration, requestConfig);
+			context.Properties.Add(PipeKey.PublishConfiguration, requestConfig.Request);
+			context.Properties.Add(PipeKey.ConsumerConfiguration, requestConfig.Response);
 			return Next.InvokeAsync(context);
 		}
 	}

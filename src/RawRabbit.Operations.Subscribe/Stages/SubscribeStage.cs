@@ -2,7 +2,7 @@
 {
 	public enum SubscribeStage
 	{
-		ConfigurationCreated,
+		ConsumeConfigured,
 		QueueDeclared,
 		ExchangeDeclared,
 		QueueBound,

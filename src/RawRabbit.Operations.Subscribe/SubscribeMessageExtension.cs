@@ -21,7 +21,7 @@ namespace RawRabbit
 
 		public static readonly Action<IPipeBuilder> SubscribePipe = pipe => pipe
 			.Use<ConsumeConfigurationMiddleware>()
-			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(SubscribeStage.ConfigurationCreated))
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(SubscribeStage.ConsumeConfigured))
 			.Use<QueueDeclareMiddleware>(new QueueDeclareOptions { QueueFunc = context => context.GetConsumerConfiguration()?.Queue})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(SubscribeStage.QueueDeclared))
 			.Use<ExchangeDeclareMiddleware>(new ExchangeDeclareOptions { ExchangeFunc = context => context.GetConsumerConfiguration()?.Exchange})

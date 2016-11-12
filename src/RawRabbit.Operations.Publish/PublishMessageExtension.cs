@@ -13,7 +13,7 @@ namespace RawRabbit
 		private static readonly Action<IPipeBuilder> PublishPipeAction = pipe => pipe
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.Initiated))
 			.Use<PublishConfigurationMiddleware>()
-			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.ExchangeConfigured))
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.PublishConfigured))
 			.Use<ExchangeDeclareMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.ExchangeDeclared))
 			.Use<RoutingKeyMiddleware>()

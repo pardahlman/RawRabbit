@@ -13,7 +13,7 @@ namespace RawRabbit
 		public static readonly Action<IPipeBuilder> RespondPipe = pipe => pipe
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.Initiated))
 			.Use<RespondConfigurationMiddleware>()
-			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ConfigurationCreated))
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ConsumeConfigured))
 			.Use<QueueDeclareMiddleware>(new QueueDeclareOptions { QueueFunc = context => context.GetRespondConfiguration()?.Queue})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.QueueDeclared))
 			.Use<ExchangeDeclareMiddleware>(new ExchangeDeclareOptions { ExchangeFunc = context => context.GetRespondConfiguration()?.Exchange})

@@ -3,7 +3,7 @@
 	public enum PublishStage
 	{
 		Initiated,
-		ExchangeConfigured,
+		PublishConfigured,
 		RoutingKeyCreated,
 		ExchangeDeclared,
 		MessageSerialized,

@@ -13,6 +13,8 @@ namespace RawRabbit
 	{
 		public static readonly Action<IPipeBuilder> RequestPipe = pipe => pipe
 			.Use<RequestConfigurationMiddleware>()
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.PublishConfigured))
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.ConsumeConfigured))
 			.Use<QueueDeclareMiddleware>(new QueueDeclareOptions { QueueFunc = context => context.GetResponseQueue()})
 			.Use<ExchangeDeclareMiddleware>(new ExchangeDeclareOptions { ExchangeFunc = context => context.GetResponseExchange()})
 			.Use<QueueBindMiddleware>(new QueueBindOptions { ConsumeFunc = context => context.GetResponseConfiguration() })

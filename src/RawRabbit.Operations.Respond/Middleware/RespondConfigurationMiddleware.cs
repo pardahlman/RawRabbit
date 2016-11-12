@@ -7,24 +7,32 @@ using RawRabbit.Pipe;
 
 namespace RawRabbit.Operations.Respond.Middleware
 {
+	public class RespondConfigurationOptions
+	{
+		public Func<IPipeContext, Type> RequestTypeFunc { get; set; }
+		public Func<IPipeContext, Type> ResponseTypeFunc { get; set; }
+	}
+
 	public class RespondConfigurationMiddleware : Pipe.Middleware.Middleware
 	{
 		private readonly IRespondConfigurationFactory _factory;
+		private readonly Func<IPipeContext, Type> _requestTypeFunc;
+		private readonly Func<IPipeContext, Type> _responseTypeFunc;
 
-		public RespondConfigurationMiddleware(IConsumeConfigurationFactory consumeFactory)
-		{
-			_factory = new RespondConfigurationFactory(consumeFactory);
-		}
+		public RespondConfigurationMiddleware(IConsumeConfigurationFactory consumeFactory, RespondConfigurationOptions options = null)
+			: this(new RespondConfigurationFactory(consumeFactory), options) { }
 
-		public RespondConfigurationMiddleware(IRespondConfigurationFactory factory)
+		public RespondConfigurationMiddleware(IRespondConfigurationFactory factory, RespondConfigurationOptions options = null)
 		{
 			_factory = factory;
+			_requestTypeFunc = options?.RequestTypeFunc ?? (context => context.GetRequestMessageType());
+			_responseTypeFunc = options?.RequestTypeFunc ?? (context => context.GetResponseMessageType());
 		}
 
 		public override Task InvokeAsync(IPipeContext context)
 		{
-			var requestType = context.GetRequestMessageType();
-			var responseType = context.GetResponseMessageType();
+			var requestType = _requestTypeFunc(context);
+			var responseType = _responseTypeFunc(context);
 			var action = context.Get<Action<IRespondConfigurationBuilder>>(PipeKey.ConfigurationAction);
 
 			if (requestType == null)
@@ -42,6 +50,7 @@ namespace RawRabbit.Operations.Respond.Middleware
 
 			var respondCfg = builder.Config;
 			context.Properties.Add(RespondKey.Configuration, respondCfg);
+			context.Properties.Add(PipeKey.ConsumerConfiguration, respondCfg);
 
 			return Next.InvokeAsync(context);
 		}
