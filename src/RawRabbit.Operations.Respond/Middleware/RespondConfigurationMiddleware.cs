@@ -11,14 +11,14 @@ namespace RawRabbit.Operations.Respond.Middleware
 	{
 		private readonly IRespondConfigurationFactory _factory;
 
-		public RespondConfigurationMiddleware(IRespondConfigurationFactory factory)
-		{
-			_factory = factory;
-		}
-
 		public RespondConfigurationMiddleware(IConsumeConfigurationFactory consumeFactory)
 		{
 			_factory = new RespondConfigurationFactory(consumeFactory);
+		}
+
+		public RespondConfigurationMiddleware(IRespondConfigurationFactory factory)
+		{
+			_factory = factory;
 		}
 
 		public override Task InvokeAsync(IPipeContext context)
