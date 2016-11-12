@@ -1,4 +1,5 @@
 ﻿using System;
+using RawRabbit.Common;
 using RawRabbit.Configuration;
 using RawRabbit.DependecyInjection;
 using RawRabbit.Pipe;
@@ -7,13 +8,25 @@ namespace RawRabbit.Instantiation
 {
 	public class RawRabbitFactory
 	{
-		public static IBusClient Create(RawRabbitOptions options = null)
+		public static Disposable.BusClient CreateSingleton(RawRabbitOptions options = null)
 		{
 			var ioc = new SimpleDependecyInjection();
-			return Create(options, ioc, register => ioc);
+			return CreateSingleton(options, ioc, register => ioc);
 		}
 
-		public static IBusClient Create(RawRabbitOptions options, IDependecyRegister register, Func<IDependecyRegister, IDependecyResolver> resolverFunc)
+		public static Disposable.BusClient CreateSingleton(RawRabbitOptions options, IDependecyRegister register, Func<IDependecyRegister, IDependecyResolver> resolverFunc)
+		{
+			var factory = CreateInstanceFactory(options, register, resolverFunc);
+			return new Disposable.BusClient(factory);
+		}
+
+		public static InstanceFactory CreateInstanceFactory(RawRabbitOptions options = null)
+		{
+			var ioc = new SimpleDependecyInjection();
+			return CreateInstanceFactory(options, ioc, register => ioc);
+		}
+
+		public static InstanceFactory CreateInstanceFactory(RawRabbitOptions options, IDependecyRegister register, Func<IDependecyRegister, IDependecyResolver> resolverFunc)
 		{
 			register.AddRawRabbit();
 			options?.DependencyInjection?.Invoke(register);
@@ -26,10 +39,8 @@ namespace RawRabbit.Instantiation
 				register.AddSingleton<IPipeBuilder, PipeBuilder>();
 				register.AddSingleton(clientBuilder.PipeBuilderAction);
 			}
-
 			var resolver = resolverFunc(register);
-			var pipeBuliderFactory = new PipeBuilderFactory(() => new PipeBuilder(resolver));
-			return new BusClient(pipeBuliderFactory, resolver.GetService<IPipeContextFactory>());
+			return new InstanceFactory(resolver);
 		}
 	}
 }

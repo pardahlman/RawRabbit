@@ -3,13 +3,20 @@ using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RawRabbit.Configuration;
+using RawRabbit.Instantiation;
 using RawRabbit.vNext.DependecyInjection;
 
 namespace RawRabbit.vNext.Pipe
 {
 	public static class RawRabbitFactory
 	{
-		public static IBusClient Create(RawRabbitOptions options = null)
+		public static Instantiation.Disposable.BusClient CreateSingleton(RawRabbitOptions options = null)
+		{
+			var factory = CreateInstanceFactory(options);
+			return new Instantiation.Disposable.BusClient(factory);
+		}
+
+		public static InstanceFactory CreateInstanceFactory(RawRabbitOptions options = null)
 		{
 			var collection = new ServiceCollection();
 			options?.DependencyInjection?.Invoke(collection);
@@ -24,7 +31,7 @@ namespace RawRabbit.vNext.Pipe
 				mainCfg.Hostnames = mainCfg.Hostnames.Distinct(StringComparer.CurrentCultureIgnoreCase).ToList();
 				ioc.AddSingleton(c => mainCfg);
 			}
-			return Instantiation.RawRabbitFactory.Create(options, ioc, register => new ServiceProviderAdapter((register as ServiceCollectionAdapter)?.Collection));
+			return Instantiation.RawRabbitFactory.CreateInstanceFactory(options, ioc, register => new ServiceProviderAdapter((register as ServiceCollectionAdapter)?.Collection));
 		}
 	}
 }

@@ -5,7 +5,12 @@ using RawRabbit.Pipe;
 
 namespace RawRabbit.Instantiation
 {
-	public class InstanceFactory : IDisposable
+	public interface IInstanceFactory
+	{
+		IBusClient Create();
+	}
+
+	public class InstanceFactory : IDisposable, IInstanceFactory
 	{
 		private readonly IDependecyResolver _resolver;
 
