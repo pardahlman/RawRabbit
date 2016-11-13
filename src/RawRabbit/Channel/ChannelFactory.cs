@@ -8,6 +8,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 using RawRabbit.Channel.Abstraction;
 using RawRabbit.Configuration;
+using RawRabbit.Exceptions;
 using RawRabbit.Logging;
 
 namespace RawRabbit.Channel
@@ -208,7 +209,7 @@ namespace RawRabbit.Channel
 				var isRecoverable = _channels.Any(c => c is IRecoverable);
 				if (!isRecoverable)
 				{
-					throw new Exception("Unable to retreive channel. All existing channels are closed and none of them are recoverable.");
+					throw new ChannelAvailabilityException("Unable to retreive channel. All existing channels are closed and none of them are recoverable.");
 				}
 
 				_logger.LogInformation("Unable to find an open channel. Requeue TaskCompletionSource for future process and abort execution.");
