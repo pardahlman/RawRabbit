@@ -12,6 +12,7 @@ namespace RawRabbit
 	public static class RequestExtension
 	{
 		public static readonly Action<IPipeBuilder> RequestPipe = pipe => pipe
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.Initialized))
 			.Use<RequestConfigurationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.PublishConfigured))
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.ConsumeConfigured))
@@ -21,6 +22,7 @@ namespace RawRabbit
 			.Use<MessageSerializationMiddleware>(new MessageSerializationOptions { MessageFunc = context => context.GetMessage()})
 			.Use<CorrelationIdMiddleware>()
 			.Use<BasicPropertiesMiddleware>()
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.BasicPropertiesCreated))
 			.Use<ResponseConsumeMiddleware>(new ResponseConsumerOptions
 				{
 					ResponseRecieved = p => p

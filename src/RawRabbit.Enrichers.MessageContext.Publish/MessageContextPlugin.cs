@@ -1,7 +1,6 @@
 ﻿using RawRabbit.Context;
 using RawRabbit.Enrichers.MessageContext.Publish.Middleware;
 using RawRabbit.Instantiation;
-using RawRabbit.vNext.Pipe;
 
 namespace RawRabbit
 {

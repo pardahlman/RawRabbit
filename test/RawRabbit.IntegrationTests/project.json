@@ -12,6 +12,8 @@
 		"RawRabbit.Enrichers.Attributes": {"target": "project"},
 		"RawRabbit.Enrichers.MessageContext.Publish": {"target": "project"},
 		"RawRabbit.Enrichers.MessageContext.Subscribe": {"target": "project"},
+		"RawRabbit.Enrichers.MessageContext.Request": {"target": "project"},
+		"RawRabbit.Enrichers.MessageContext.Respond": {"target": "project"},
 		"RawRabbit.Enrichers.MessageContext.Chaining": {"target": "project"},
 		"RawRabbit.DependencyInjection.Autofac": { "target": "project" },
 		"RawRabbit.DependencyInjection.Ninject": { "target": "project" },

@@ -12,7 +12,6 @@
 
 	"dependencies": {
 		"RawRabbit.Operations.Publish": { "target": "project" },
-		"RawRabbit.vNext": { "target": "project" }
 	},
 
 	"frameworks": {

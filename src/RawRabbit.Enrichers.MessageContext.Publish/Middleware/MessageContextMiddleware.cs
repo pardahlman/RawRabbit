@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Context;
@@ -20,6 +19,11 @@ namespace RawRabbit.Enrichers.MessageContext.Publish.Middleware
 		}
 		public override Task InvokeAsync(IPipeContext context)
 		{
+			var properties = context.GetBasicProperties();
+			if (properties.Headers.ContainsKey(PropertyHeaders.Context))
+			{
+				return Next.InvokeAsync(context);
+			}
 			var messageContext = context.GetMessageContext();
 			if (messageContext == null)
 			{
@@ -30,7 +34,6 @@ namespace RawRabbit.Enrichers.MessageContext.Publish.Middleware
 				context.Properties.Add(PipeKey.MessageContext, messageContext);
 			}
 
-			var properties = context.GetBasicProperties();
 			var serializedProps = _serializer.Serialize(messageContext);
 			properties.Headers.Add(PropertyHeaders.Context, serializedProps);
 			return Next.InvokeAsync(context);

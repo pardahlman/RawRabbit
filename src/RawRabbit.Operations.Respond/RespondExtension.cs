@@ -10,7 +10,24 @@ namespace RawRabbit
 {
 	public static class RespondExtension
 	{
-		public static readonly Action<IPipeBuilder> RespondPipe = pipe => pipe
+		public static Action<IPipeBuilder> ConsumePipe = pipe => pipe
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.MessageRecieved))
+			.Use<RequestDeserializationMiddleware>()
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.MessageDeserialized))
+			.Use<AutoAckMessageHandlerMiddleware>()
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.HandlerInvoked))
+			.Use<BasicPropertiesMiddleware>()
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.BasicPropertiesCreated))
+			.Use<ResponseSerializationMiddleware>()
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ResponseSerialized))
+			.Use<ReplyToExtractionMiddleware>()
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ReplyToExtracted))
+			.Use<TransientChannelMiddleware>()
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.RespondChannelCreated))
+			.Use<PublishResponseMiddleware>()
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ResponsePublished));
+
+		public static Action<IPipeBuilder> RespondPipe = pipe => pipe
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.Initiated))
 			.Use<RespondConfigurationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ConsumeConfigured))
@@ -22,25 +39,7 @@ namespace RawRabbit
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.QueueBound))
 			.Use<ConsumerCreationMiddleware>(new ConsumerCreationOptions { ConsumeFunc = context => context.GetRespondConfiguration()})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ConsumerCreated))
-			.Use<MessageConsumeMiddleware>(new ConsumeOptions
-			{
-				Pipe = consume => consume
-					.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.MessageRecieved))
-					.Use<RequestDeserializationMiddleware>()
-					.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.MessageDeserialized))
-					.Use<MessageInvokationMiddleware>()
-					.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.HandlerInvoked))
-					.Use<BasicPropertiesMiddleware>()
-					.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.BasicPropertiesCreated))
-					.Use<ResponseSerializationMiddleware>()
-					.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ResponseSerialized))
-					.Use<ReplyToExtractionMiddleware>()
-					.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ReplyToExtracted))
-					.Use<TransientChannelMiddleware>()
-					.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.RespondChannelCreated))
-					.Use<PublishResponseMiddleware>()
-					.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ResponsePublished))
-			})
+			.Use<MessageConsumeMiddleware>(new ConsumeOptions { Pipe = ConsumePipe })
 			.Use<SubscriptionMiddleware>(new SubscriptionOptions { QueueFunc = context => context.GetRespondConfiguration()?.Queue});
 
 		public static Task RespondAsync<TRequest, TResponse>(this IBusClient client, Func<TRequest, Task<TResponse>> handler, Action<IRespondConfigurationBuilder> configuration = null)

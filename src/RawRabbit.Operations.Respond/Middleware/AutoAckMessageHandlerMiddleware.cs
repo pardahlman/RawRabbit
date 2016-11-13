@@ -1,10 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
-using RawRabbit.Context;
+﻿using System.Threading.Tasks;
+using RawRabbit.Operations.Respond.Core;
 using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
 
-namespace RawRabbit.Enrichers.MessageContext.Subscribe.Middleware
+namespace RawRabbit.Operations.Respond.Middleware
 {
 	public class AutoAckMessageHandlerMiddleware : AutoAckMessageHandlerMiddlewareBase
 	{
@@ -14,10 +13,11 @@ namespace RawRabbit.Enrichers.MessageContext.Subscribe.Middleware
 		protected override Task InvokeHandlerAsync(IPipeContext context)
 		{
 			var message = context.GetMessage();
-			var messageContext = context.GetMessageContext();
-			var handler = context.Get<Func<object, IMessageContext, Task>>(PipeKey.MessageHandler);
+			var handler = context.GetMessageHandler();
 
-			return handler.Invoke(message, messageContext);
+			return handler
+				.Invoke(message)
+				.ContinueWith(tResponse => context.Properties.Add(RespondKey.ResponseMessage, tResponse.Result));
 		}
 	}
 }

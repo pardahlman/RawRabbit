@@ -1,7 +1,7 @@
 ﻿{
-	"title": "RawRabbit.Enrichers.MessageContext.Chaining",
+	"title": "RawRabbit.Enrichers.MessageContext.Request",
 	"version": "2.0.0-*",
-	"authors": [ "pardahlman"],
+	"authors": [ "pardahlman", "enrique-avalon" ],
 	"description": "A modern framework for communication over RabbitMq.",
 	"packOptions": {
 		"iconUrl": "http://pardahlman.se/raw/icon.png",
@@ -11,7 +11,7 @@
 	},
 
 	"dependencies": {
-		"RawRabbit": { "target": "project" },
+		"RawRabbit.Operations.Request": { "target": "project" }
 	},
 
 	"frameworks": {
