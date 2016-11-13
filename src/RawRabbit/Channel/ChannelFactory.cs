@@ -29,15 +29,7 @@ namespace RawRabbit.Channel
 
 		public ChannelFactory(IConnectionFactory connectionFactory, RawRabbitConfiguration config, ChannelFactoryConfiguration channelConfig)
 		{
-			try
-			{
-				_connection = connectionFactory.CreateConnection(config.Hostnames);
-			}
-			catch (BrokerUnreachableException e)
-			{
-				_logger.LogError("Unable to connect to broker", e);
-				throw e.InnerException;
-			}
+			ConnectToBroker();
 			_connectionFactory = connectionFactory;
 			_config = config;
 			_channelConfig = channelConfig;
@@ -45,6 +37,19 @@ namespace RawRabbit.Channel
 			_channels = new LinkedList<IModel>();
 
 			Initialize();
+		}
+
+		protected virtual void ConnectToBroker()
+		{
+			try
+			{
+				_connection = _connectionFactory.CreateConnection(_config.Hostnames);
+			}
+			catch (BrokerUnreachableException e)
+			{
+				_logger.LogError("Unable to connect to broker", e);
+				throw e.InnerException;
+			}
 		}
 
 		internal virtual void Initialize()
