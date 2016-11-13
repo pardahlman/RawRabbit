@@ -13,6 +13,7 @@ namespace RawRabbit.Pipe
 		IPipeBuilder Use(Func<IPipeContext, Func<Task>, Task> handler);
 		IPipeBuilder Use<TMiddleWare>(params object[] args) where TMiddleWare : Middleware.Middleware;
 		IPipeBuilder Replace<TCurrent, TNew>(Predicate<object[]> predicate = null, params object[] args) where TCurrent: Middleware.Middleware where TNew : Middleware.Middleware;
+		IPipeBuilder Remove<TMiddleware>(Predicate<object[]> predicate = null) where TMiddleware : Middleware.Middleware;
 	}
 
 	public interface IExtendedPipeBuilder : IPipeBuilder
@@ -24,12 +25,12 @@ namespace RawRabbit.Pipe
 	{
 		private readonly IDependecyResolver _resolver;
 		protected List<MiddlewareInfo> Pipe;
-		private Action<IPipeBuilder> _additional;
+		private readonly Action<IPipeBuilder> _additional;
 
 		public PipeBuilder(IDependecyResolver resolver)
 		{
 			_resolver = resolver;
-			_additional = _resolver.GetService<Action<IPipeBuilder>>();
+			_additional = _resolver.GetService<Action<IPipeBuilder>>() ?? (builder => {});
 			Pipe = new List<MiddlewareInfo>();
 		}
 
@@ -61,9 +62,20 @@ namespace RawRabbit.Pipe
 			return this;
 		}
 
+		public IPipeBuilder Remove<TMiddleware>(Predicate<object[]> predicate = null) where TMiddleware : Middleware.Middleware
+		{
+			predicate = predicate ?? (objects => true);
+			var matching = Pipe.Where(c => c.Type == typeof(TMiddleware) && predicate(c.ConstructorArgs));
+			foreach (var match in matching)
+			{
+				Pipe.Remove(match);
+			}
+			return this;
+		}
+
 		public virtual Middleware.Middleware Build()
 		{
-			_additional?.Invoke(this);
+			_additional.Invoke(this);
 
 			var stageMarkerOptions = Pipe
 				.Where(info => info.Type == typeof(StageMarkerMiddleware))

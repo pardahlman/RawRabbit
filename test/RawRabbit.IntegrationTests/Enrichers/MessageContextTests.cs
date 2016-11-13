@@ -32,7 +32,7 @@ namespace RawRabbit.IntegrationTests.Enrichers
 		}
 
 		[Fact]
-		public async Task Should_Send_Context_On_Pub_Sub()
+		public async Task Should_Implicitly_Send_Context_On_Pub_Sub()
 		{
 			using (var publisher = RawRabbitFactory.CreateTestClient(new RawRabbitOptions { Plugins = p => p.PublishMessageContext<MessageContext>() }))
 			using (var subscriber = RawRabbitFactory.CreateTestClient())
@@ -50,6 +50,28 @@ namespace RawRabbit.IntegrationTests.Enrichers
 				await contextTsc.Task;
 				/* Assert */
 				Assert.NotNull(contextTsc.Task);
+			}
+		}
+
+		[Fact]
+		public async Task Should_Override_With_Explicit_Context_On_Pub_Sub()
+		{
+			using (var publisher = RawRabbitFactory.CreateTestClient(new RawRabbitOptions { Plugins = p => p.PublishMessageContext<MessageContext>() }))
+			using (var subscriber = RawRabbitFactory.CreateTestClient())
+			{
+				/* Setup */
+				var contextTsc = new TaskCompletionSource<IMessageContext>();
+				await subscriber.SubscribeAsync<BasicMessage, IMessageContext>((request, context) =>
+				{
+					contextTsc.TrySetResult(context);
+					return Task.FromResult(0);
+				});
+
+				/* Test */
+				await publisher.PublishAsync(new BasicMessage(), new TestMessageContext());
+				await contextTsc.Task;
+				/* Assert */
+				Assert.IsType<TestMessageContext>(contextTsc.Task.Result);
 			}
 		}
 	}

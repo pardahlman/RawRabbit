@@ -26,5 +26,6 @@
 		public const string PrefetchCount = "PrefetchCount";
 		public const string ReturnedMessageCallback = "ReturnedMessageCallback";
 		public const string BasicPropertyModifier = "BasicPropertyModifier";
+		public const string Operation = "Operation";
 	}
 }

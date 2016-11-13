@@ -8,6 +8,7 @@ namespace RawRabbit.Pipe.Middleware
 {
 	public class HeaderSerializationOptions
 	{
+		public Predicate<IPipeContext> ExecutePredicate { get; set; }
 		public Func<IPipeContext, IBasicProperties> BasicPropsFunc { get; set; }
 		public Func<IPipeContext, object> RetrieveItemFunc { get; set; }
 		public Func<IPipeContext, object> CreateItemFunc { get; set; }
@@ -21,10 +22,12 @@ namespace RawRabbit.Pipe.Middleware
 		private readonly string _headerKey;
 		private readonly Func<IPipeContext, object> _retrieveItemFunc;
 		private readonly Func<IPipeContext, object> _createItemFunc;
+		private readonly Predicate<IPipeContext> _executePredicate;
 
 		public HeaderSerializationMiddleware(ISerializer serializer, HeaderSerializationOptions options = null)
 		{
 			_serializer = serializer;
+			_executePredicate = options?.ExecutePredicate ?? (context => true);
 			_basicPropsFunc = options?.BasicPropsFunc ?? (context => context.GetBasicProperties());
 			_headerKey = options?.HeaderKey;
 			_retrieveItemFunc = options?.RetrieveItemFunc;
@@ -33,6 +36,10 @@ namespace RawRabbit.Pipe.Middleware
 
 		public override Task InvokeAsync(IPipeContext context)
 		{
+			if (!_executePredicate(context))
+			{
+				return Next.InvokeAsync(context);
+			}
 			var properties = _basicPropsFunc(context);
 			if (properties.Headers.ContainsKey(_headerKey))
 			{

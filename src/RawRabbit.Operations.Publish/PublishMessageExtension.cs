@@ -10,7 +10,7 @@ namespace RawRabbit
 {
 	public static class PublishMessageExtension
 	{
-		private static readonly Action<IPipeBuilder> PublishPipeAction = pipe => pipe
+		public static Action<IPipeBuilder> PublishPipeAction = pipe => pipe
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.Initiated))
 			.Use<PublishConfigurationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.PublishConfigured))
@@ -38,6 +38,7 @@ namespace RawRabbit
 				{
 					ctx.Properties.Add(PipeKey.MessageType, typeof(TMessage));
 					ctx.Properties.Add(PipeKey.Message, message);
+					ctx.Properties.Add(PipeKey.Operation, PublishKey.Publish);
 					ctx.Properties.Add(PipeKey.ConfigurationAction, config);
 				});
 		}
