@@ -3,8 +3,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using RawRabbit.Attributes;
-using RawRabbit.Common;
 using RawRabbit.Extensions.Client;
 using RawRabbit.vNext.Logging;
 using Serilog;
@@ -36,7 +34,6 @@ namespace RawRabbit.AspNet.Sample
 					Configuration.GetSection("RawRabbit"),
 					ioc => ioc
 						.AddSingleton(LoggingFactory.ApplicationLogger))
-						.AddSingleton<IConfigurationEvaluator, AttributeConfigEvaluator>()
 				.AddMvc();
 		}
 

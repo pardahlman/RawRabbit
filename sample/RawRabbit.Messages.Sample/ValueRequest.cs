@@ -1,5 +1,5 @@
-﻿using RawRabbit.Attributes;
-using RawRabbit.Configuration.Exchange;
+﻿using RawRabbit.Configuration.Exchange;
+using RawRabbit.Enrichers.Attributes;
 
 namespace RawRabbit.Messages.Sample
 {

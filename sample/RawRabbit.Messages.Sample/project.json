@@ -2,7 +2,7 @@
 	"version": "1.0.0-*",
 
 	"dependencies": {
-		"RawRabbit.Attributes": { "target": "project" }
+		"RawRabbit.Enrichers.Attributes": { "target": "project" }
 	},
 
 	"frameworks": {
