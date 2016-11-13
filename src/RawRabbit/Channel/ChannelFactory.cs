@@ -15,7 +15,7 @@ namespace RawRabbit.Channel
 	public class ChannelFactory : IChannelFactory
 	{
 		private readonly ConcurrentQueue<TaskCompletionSource<IModel>> _requestQueue;
-		private readonly ILogger _logger = LogManager.GetLogger<ThreadBasedChannelFactory>();
+		private readonly ILogger _logger = LogManager.GetLogger<ChannelFactory>();
 		internal readonly ChannelFactoryConfiguration _channelConfig;
 		private readonly IConnectionFactory _connectionFactory;
 		private readonly RawRabbitConfiguration _config;
