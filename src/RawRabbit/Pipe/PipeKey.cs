@@ -10,6 +10,8 @@
 		public const string MessageType = "MessageType";
 		public const string MessageContext = "MessageContext";
 		public const string MessageHandler = "MessageHandler";
+		public const string MessageHandlerArgs = "MessageHandlerArgs";
+		public const string MessageHandlerResult = "MessageHandlerResult";
 		public const string BasicProperties = "BasicProperties";
 		public const string ConfigurationAction = "ConfigurationAction";
 		public const string DeliveryEventArgs = "DeliveryEventArgs";

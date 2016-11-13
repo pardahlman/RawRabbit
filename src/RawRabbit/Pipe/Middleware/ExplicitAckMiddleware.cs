@@ -4,63 +4,72 @@ using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RawRabbit.Common;
-using RawRabbit.Operations.Subscribe.Stages;
-using RawRabbit.Pipe;
 
-namespace RawRabbit.Operations.Subscribe.Middleware
+namespace RawRabbit.Pipe.Middleware
 {
-	public class ExplicitAckMessageHandlerMiddleware : Pipe.Middleware.Middleware
+	public class ExplicitAckOptions
+	{
+		public Func<IPipeContext, Task> InvokeMessageHandlerFunc { get; set; }
+		public Func<IPipeContext, IBasicConsumer> ConsumerFunc { get; set; }
+		public Func<IPipeContext, BasicDeliverEventArgs> DeliveryArgsFunc { get; set; }
+		public Func<IPipeContext, Task> InvokationResultFunc { get; set; }
+		public Predicate<Acknowledgement> AbortExecution { get; set; }
+	}
+
+	public class ExplicitAckMiddleware : Middleware
 	{
 		private readonly INamingConventions _conventions;
+		private readonly Func<IPipeContext, BasicDeliverEventArgs> _deliveryArgsFunc;
+		private readonly Func<IPipeContext, IBasicConsumer> _consumerFunc;
+		private readonly Func<IPipeContext, Task> _invokationResultFunc;
+		private readonly Predicate<Acknowledgement> _abortExecution;
 
-		public ExplicitAckMessageHandlerMiddleware(INamingConventions conventions)
+		public ExplicitAckMiddleware(INamingConventions conventions, ExplicitAckOptions options = null)
 		{
 			_conventions = conventions;
+			_deliveryArgsFunc = options?.DeliveryArgsFunc ?? (context => context.GetDeliveryEventArgs());
+			_consumerFunc = options?.ConsumerFunc ?? (context => context.GetConsumer());
+			_invokationResultFunc = options?.InvokationResultFunc ?? (context => context.GetMessageHandlerResult());
+			_abortExecution = options?.AbortExecution ?? (acknowledgement => !(acknowledgement is Ack));
 		}
 
 		public override Task InvokeAsync(IPipeContext context)
 		{
-			return InvokeMessageHandlerAsync(context)
-				.ContinueWith(t => AcknowledgeAndContinueAsync(t, context))
-				.Unwrap();
+			var ack = AcknowledgeMessage(context);
+			return _abortExecution(ack)
+				? Task.FromResult(0)
+				: Next.InvokeAsync(context);
 		}
-
-		protected virtual Task InvokeMessageHandlerAsync(IPipeContext context)
+		
+		protected virtual Acknowledgement AcknowledgeMessage(IPipeContext context)
 		{
-			var message = context.GetMessage();
-			var handler = context.GetMessageHandler();
-			return handler.Invoke(message);
-		}
-
-		protected virtual Task AcknowledgeAndContinueAsync(Task handlerInvokeTask, IPipeContext context)
-		{
-			var ack = (handlerInvokeTask as Task<Acknowledgement>)?.Result;
+			var ack = (_invokationResultFunc(context) as Task<Acknowledgement>)?.Result;
 			if (ack == null)
 			{
-				throw new NotSupportedException($"Expected Handler to return Task<Acknowledgement>. Got {handlerInvokeTask?.GetType()}");
+				throw new NotSupportedException($"Invokation Result of Message Handler not found.");
 			}
-			var deliveryArgs = context.GetDeliveryEventArgs();
-			var channel = context.GetConsumer().Model;
+			var deliveryArgs = _deliveryArgsFunc(context);
+			var channel = _consumerFunc(context).Model;
 
 			if (ack is Ack)
 			{
 				HandleAck(ack as Ack, channel, deliveryArgs);
-				return Next.InvokeAsync(context);
+				return ack;
 			}
 			if (ack is Nack)
 			{
 				HandleNack(ack as Nack, channel, deliveryArgs);
-				return Next.InvokeAsync(context);
+				return ack;
 			}
 			if (ack is Reject)
 			{
 				HandleReject(ack as Reject, channel, deliveryArgs);
-				return Next.InvokeAsync(context);
+				return ack;
 			}
 			if (ack is Retry)
 			{
 				HandleRetry(ack as Retry, channel, deliveryArgs);
-				return Next.InvokeAsync(context);
+				return ack;
 			}
 
 			throw new NotSupportedException($"Unable to handle {ack.GetType()} as an Acknowledgement.");

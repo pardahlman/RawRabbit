@@ -10,7 +10,7 @@ namespace RawRabbit
 {
 	public static class PublishMessageExtension
 	{
-		public static Action<IPipeBuilder> PublishPipeAction = pipe => pipe
+		public static readonly Action<IPipeBuilder> PublishPipeAction = pipe => pipe
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.Initiated))
 			.Use<PublishConfigurationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.PublishConfigured))

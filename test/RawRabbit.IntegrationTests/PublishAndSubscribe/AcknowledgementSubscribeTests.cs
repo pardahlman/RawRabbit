@@ -7,8 +7,31 @@ using Xunit;
 
 namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 {
-	public class AcknowledgementTests
+	public class AcknowledgementSubscribeTests
 	{
+		[Fact]
+		public async Task Should_Be_Able_To_Auto_Ack()
+		{
+			using (var publisher = RawRabbitFactory.CreateTestClient())
+			using (var subscriber = RawRabbitFactory.CreateTestClient())
+			{
+				/* Setup */
+				var recievedTcs = new TaskCompletionSource<BasicMessage>();
+				await subscriber.SubscribeAsync<BasicMessage>(async recieved =>
+				{
+					recievedTcs.TrySetResult(recieved);
+				});
+				var message = new BasicMessage { Prop = "Hello, world!" };
+
+				/* Test */
+				await publisher.PublishAsync(message);
+				await recievedTcs.Task;
+
+				/* Assert */
+				Assert.Equal(message.Prop, recievedTcs.Task.Result.Prop);
+			}
+		}
+
 		[Fact]
 		public async Task Should_Be_Able_To_Return_Ack()
 		{

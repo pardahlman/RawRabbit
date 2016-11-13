@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Consume;
-using RawRabbit.Configuration.Respond;
 using RawRabbit.Operations.Subscribe.Middleware;
 using RawRabbit.Operations.Subscribe.Stages;
 using RawRabbit.Pipe;
@@ -16,7 +15,8 @@ namespace RawRabbit
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(ConsumerStage.MessageRecieved))
 			.Use<MessageDeserializationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(ConsumerStage.MessageDeserialized))
-			.Use<AutoAckMessageHandlerMiddleware>()
+			.Use<SubscribeInvokationMiddleware>()
+			.Use<AutoAckMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(ConsumerStage.HandlerInvoked));
 
 		public static readonly Action<IPipeBuilder> AutoAckPipe = pipe => pipe
@@ -37,7 +37,7 @@ namespace RawRabbit
 		public static readonly Action<IPipeBuilder> ExplicitAckPipe = AutoAckPipe + (pipe => pipe
 			.Replace<MessageConsumeMiddleware, MessageConsumeMiddleware>(args: new ConsumeOptions
 			{
-				Pipe = ConsumePipe + (builder => builder.Replace<AutoAckMessageHandlerMiddleware, ExplicitAckMessageHandlerMiddleware>())
+				Pipe = ConsumePipe + (builder => builder.Replace<AutoAckMiddleware, ExplicitAckMiddleware>())
 			})
 		);
 
@@ -47,7 +47,7 @@ namespace RawRabbit
 				AutoAckPipe,
 				context =>
 				{
-					Func<object, Task> genericHandler = o => subscribeMethod((TMessage) o);
+					Func<object[], Task> genericHandler = args => subscribeMethod((TMessage) args[0]);
 
 					context.Properties.Add(PipeKey.MessageType, typeof(TMessage));
 					context.Properties.Add(PipeKey.MessageHandler, genericHandler);
@@ -62,7 +62,7 @@ namespace RawRabbit
 				ExplicitAckPipe,
 				context =>
 				{
-					Func<object, Task> genericHandler = o => subscribeMethod((TMessage) o);
+					Func<object[], Task> genericHandler = args => subscribeMethod((TMessage) args[0]);
 
 					context.Properties.Add(PipeKey.MessageType, typeof(TMessage));
 					context.Properties.Add(PipeKey.MessageHandler, genericHandler);

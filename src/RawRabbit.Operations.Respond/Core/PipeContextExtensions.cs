@@ -18,7 +18,7 @@ namespace RawRabbit.Operations.Respond.Core
 			return context.Get<Type>(RespondKey.RequestMessageType);
 		}
 
-		public static Func<object, Task<object>> GetMessageHandler(this IPipeContext context)
+		public static Func<object, Task<object>> GetResponseMessageHandler(this IPipeContext context)
 		{
 			return context.Get<Func<object, Task<object>>>(PipeKey.MessageHandler);
 		}

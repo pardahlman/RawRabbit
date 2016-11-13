@@ -4,7 +4,6 @@ using RawRabbit.Common;
 using RawRabbit.Configuration.Subscribe;
 using RawRabbit.Context;
 using RawRabbit.Enrichers.MessageContext.Subscribe;
-using RawRabbit.Enrichers.MessageContext.Subscribe.Middleware;
 using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
 
@@ -16,11 +15,15 @@ namespace RawRabbit
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.MessageRecieved))
 			.Use<MessageDeserializationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.MessageDeserialized))
-			.Use<MessageContextDeserializationMiddleware>()
+			.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
+			{
+				Type = typeof(IMessageContext),
+				HeaderKey = PropertyHeaders.Context,
+				ContextSaveAction = (pipeCtx, msgCtx) => pipeCtx.Properties.TryAdd(PipeKey.MessageContext, msgCtx)
+			})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.MessageContextDeserialized))
-			.Use<MessageContextEnhancementMiddleware>()
-			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.MessageContextEnhanced))
-			.Use<AutoAckMessageHandlerMiddleware>()
+			.Use<MessageHandlerInvokationMiddleware>(new MessageHandlerInvokationOptions { HandlerArgsFunc = context => new [] {context.GetMessage(), context.GetMessageContext()}})
+			.Use<AutoAckMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.HandlerInvoked));
 
 		public static readonly Action<IPipeBuilder> AutoAckPipe = SubscribeMessageExtension.AutoAckPipe + (pipe =>
@@ -31,7 +34,7 @@ namespace RawRabbit
 		public static readonly Action<IPipeBuilder> ExplicitAckPipe = AutoAckPipe + (pipe =>
 			pipe.Replace<MessageConsumeMiddleware, MessageConsumeMiddleware>(args: new ConsumeOptions
 			{
-				Pipe = ConsumePipe + (builder => builder.Replace<AutoAckMessageHandlerMiddleware, ExplicitAckMessageHandlerMiddleware>())
+				Pipe = ConsumePipe + (builder => builder.Replace<AutoAckMiddleware, ExplicitAckMiddleware>())
 			})
 		);
 
@@ -42,7 +45,7 @@ namespace RawRabbit
 					AutoAckPipe,
 					context =>
 					{
-						Func<object, IMessageContext, Task> genericHandler = (msg, ctx) => subscribeMethod((TMessage)msg, (TMessageContext)ctx);
+						Func<object[], Task> genericHandler = args => subscribeMethod((TMessage)args[0], (TMessageContext)args[1]);
 
 						context.Properties.Add(PipeKey.MessageType, typeof(TMessage));
 						context.Properties.Add(PipeKey.MessageHandler, genericHandler);
@@ -58,7 +61,7 @@ namespace RawRabbit
 					ExplicitAckPipe,
 					context =>
 					{
-						Func<object, IMessageContext, Task> genericHandler = (msg, ctx) => subscribeMethod((TMessage)msg, (TMessageContext)ctx);
+						Func<object[], Task> genericHandler = args => subscribeMethod((TMessage)args[0], (TMessageContext)args[1]);
 
 						context.Properties.Add(PipeKey.MessageType, typeof(TMessage));
 						context.Properties.Add(PipeKey.MessageHandler, genericHandler);

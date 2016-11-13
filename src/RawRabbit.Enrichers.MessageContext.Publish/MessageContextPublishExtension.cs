@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Common;
@@ -13,13 +12,13 @@ namespace RawRabbit
 {
 	public static class MessageContextPublishExtension
 	{
-		public static Action<IPipeBuilder> PublishPipeAction = PublishMessageExtension.PublishPipeAction += pipe => pipe
+		public static Action<IPipeBuilder> PublishPipeAction = PublishMessageExtension.PublishPipeAction + (pipe => pipe
 			.Use<HeaderSerializationMiddleware>(new HeaderSerializationOptions
 			{
 				HeaderKey = PropertyHeaders.Context,
 				RetrieveItemFunc = context => context.GetMessageContext(),
 				CreateItemFunc = context => { throw new KeyNotFoundException(PipeKey.MessageContext);}
-			});
+			}));
 
 		public static Task PublishAsync<TMessage, TMessageContext>(
 			this IBusClient busClient,
