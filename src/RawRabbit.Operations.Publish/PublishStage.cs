@@ -4,7 +4,6 @@
 	{
 		Initiated,
 		PublishConfigured,
-		RoutingKeyCreated,
 		ExchangeDeclared,
 		MessageSerialized,
 		BasicPropertiesCreated,
