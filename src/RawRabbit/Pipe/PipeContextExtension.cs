@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RawRabbit.Configuration;
 using RawRabbit.Configuration.Consume;
 using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Queue;
@@ -107,6 +108,11 @@ namespace RawRabbit.Pipe
 		public static Task GetMessageHandlerResult(this IPipeContext context)
 		{
 			return context.Get<Task>(PipeKey.MessageHandlerResult);
+		}
+
+		public static RawRabbitConfiguration GetClientConfiguration(this IPipeContext context)
+		{
+			return context.Get<RawRabbitConfiguration>(PipeKey.ClientConfiguration);
 		}
 	}
 }

@@ -20,8 +20,7 @@ namespace RawRabbit
 			.Use<ExchangeDeclareMiddleware>(new ExchangeDeclareOptions { ExchangeFunc = context => context.GetResponseExchange()})
 			.Use<QueueBindMiddleware>(new QueueBindOptions { ConsumeFunc = context => context.GetResponseConfiguration() })
 			.Use<MessageSerializationMiddleware>(new MessageSerializationOptions { MessageFunc = context => context.GetMessage()})
-			.Use<CorrelationIdMiddleware>()
-			.Use<BasicPropertiesMiddleware>()
+			.Use<Operations.Request.Middleware.BasicPropertiesMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.BasicPropertiesCreated))
 			.Use<ResponseConsumeMiddleware>(new ResponseConsumerOptions
 				{

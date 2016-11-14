@@ -29,5 +29,6 @@
 		public const string ReturnedMessageCallback = "ReturnedMessageCallback";
 		public const string BasicPropertyModifier = "BasicPropertyModifier";
 		public const string Operation = "Operation";
+		public const string ClientConfiguration = "ClientConfiguration";
 	}
 }

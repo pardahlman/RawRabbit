@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using RawRabbit.Common;
 using RawRabbit.Operations.Respond.Acknowledgement;
 using RawRabbit.Operations.Respond.Configuration;
 using RawRabbit.Operations.Respond.Core;
@@ -18,7 +19,14 @@ namespace RawRabbit
 			.Use<RespondInvokationMiddleware>()
 			.Use<AutoAckMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.HandlerInvoked))
-			.Use<BasicPropertiesMiddleware>()
+			.Use<BasicPropertiesMiddleware>(new BasicPropertiesOptions
+			{
+				PropertyModier = (context, properties) =>
+				{
+					properties.CorrelationId = context.GetDeliveryEventArgs()?.BasicProperties.CorrelationId;
+					properties.Type = context.GetResponseMessageType()?.GetUserFriendlyName();
+				}
+			})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.BasicPropertiesCreated))
 			.Use<ResponseSerializationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ResponseSerialized))

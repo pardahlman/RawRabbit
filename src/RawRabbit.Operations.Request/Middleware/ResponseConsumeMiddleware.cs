@@ -25,7 +25,7 @@ namespace RawRabbit.Operations.Request.Middleware
 		public override Task InvokeAsync(IPipeContext context)
 		{
 			var respondCfg = context.GetResponseConfiguration();
-			var correlationId = context.GetCorrelationId();
+			var correlationId = context.GetBasicProperties()?.CorrelationId;
 
 			var executionTsc = new TaskCompletionSource<bool>();
 

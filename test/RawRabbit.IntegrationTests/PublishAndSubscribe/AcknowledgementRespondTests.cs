@@ -44,7 +44,7 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 					Prop = "I am the response"
 				};
 				await responder.RespondAsync<BasicRequest, BasicResponse>(async request =>
-					Respond.Ack(sent)
+						new Ack<BasicResponse>(sent)
 				);
 
 				/* Test */

@@ -1,47 +1,30 @@
-﻿using System.Threading.Tasks;
+﻿using System;
 using RabbitMQ.Client;
-using RawRabbit.Common;
-using RawRabbit.Configuration;
 using RawRabbit.Configuration.Queue;
 using RawRabbit.Operations.Request.Core;
 using RawRabbit.Pipe;
 
 namespace RawRabbit.Operations.Request.Middleware
 {
-	public class BasicPropertiesMiddleware : Pipe.Middleware.Middleware
+	public class BasicPropertiesMiddleware : Pipe.Middleware.BasicPropertiesMiddleware
 	{
-		private readonly IBasicPropertiesProvider _provider;
-		private readonly RawRabbitConfiguration _config;
-
-		public BasicPropertiesMiddleware(IBasicPropertiesProvider provider, RawRabbitConfiguration config)
+		protected override void ModifyBasicProperties(IPipeContext context, IBasicProperties props)
 		{
-			_provider = provider;
-			_config = config;
-		}
+			var correlationId = context.GetCorrelationId() ?? Guid.NewGuid().ToString();
+			var consumeCfg = context.GetResponseConfiguration();
+			var clientCfg = context.GetClientConfiguration();
 
-		public override Task InvokeAsync(IPipeContext context)
-		{
-			var responseType = context.GetResponseMessageType();
-			var correlationId = context.GetCorrelationId();
-			var cfg = context.GetResponseConfiguration();
-
-			var props = _provider.GetProperties(responseType, p =>
+			if (consumeCfg.Queue.IsDirectReplyTo())
 			{
-				if (cfg.Queue.IsDirectReplyTo())
-				{
-					p.ReplyTo = cfg.Queue.QueueName;
-				}
-				else
-				{
-					p.ReplyToAddress = new PublicationAddress(cfg.Exchange.ExchangeType, cfg.Exchange.ExchangeName, cfg.RoutingKey);
-				}
+				props.ReplyTo = consumeCfg.Queue.QueueName;
+			}
+			else
+			{
+				props.ReplyToAddress = new PublicationAddress(consumeCfg.Exchange.ExchangeType, consumeCfg.Exchange.ExchangeName, consumeCfg.RoutingKey);
+			}
 
-				p.CorrelationId = correlationId;
-				p.Expiration = _config.RequestTimeout.TotalMilliseconds.ToString();
-			});
-
-			context.Properties.Add(PipeKey.BasicProperties, props);
-			return Next.InvokeAsync(context);
+			props.CorrelationId = correlationId;
+			props.Expiration = clientCfg.RequestTimeout.TotalMilliseconds.ToString();
 		}
 	}
 }

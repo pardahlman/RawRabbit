@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using RawRabbit.Common;
 using RawRabbit.Configuration.Consume;
 using RawRabbit.Operations.Publish;
 using RawRabbit.Operations.Publish.Middleware;
@@ -20,7 +21,11 @@ namespace RawRabbit
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.RoutingKeyCreated))
 			.Use<MessageSerializationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.MessageSerialized))
-			.Use<BasicPropertiesMiddleware>()
+			.Use<BasicPropertiesMiddleware>(new BasicPropertiesOptions { PostCreateAction = (ctx, props) =>
+			{
+				props.Headers.TryAdd(PropertyHeaders.Sent, DateTime.UtcNow.ToString("u"));
+				props.Headers.TryAdd(PropertyHeaders.MessageType, ctx.GetMessageType().GetUserFriendlyName());
+			}})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.BasicPropertiesCreated))
 			.Use<TransientChannelMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.ChannelCreated))
