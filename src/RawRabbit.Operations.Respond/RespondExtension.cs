@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Operations.Respond.Acknowledgement;
@@ -34,7 +35,13 @@ namespace RawRabbit
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ReplyToExtracted))
 			.Use<TransientChannelMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.RespondChannelCreated))
-			.Use<PublishResponseMiddleware>()
+			.Use<BasicPublishMiddleware>(new BasicPublishOptions
+			{
+				ExchangeNameFunc = context => context.GetPublicationAddress()?.ExchangeName,
+				RoutingKeyFunc = context => context.GetPublicationAddress()?.RoutingKey,
+				MandatoryFunc = context => true,
+				BodyFunc = context => Encoding.UTF8.GetBytes(context.Get<string>(RespondKey.SerializedResponse))
+			})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ResponsePublished));
 
 		public static readonly Action<IPipeBuilder> AutoAckPipe = pipe => pipe
