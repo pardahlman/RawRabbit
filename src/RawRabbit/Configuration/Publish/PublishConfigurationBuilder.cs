@@ -12,7 +12,6 @@ namespace RawRabbit.Configuration.Publish
 		private string _routingKey;
 		private Action<IBasicProperties> _properties;
 		private const string _oneOrMoreWords = "#";
-		private bool _mandatory;
 		private EventHandler<BasicReturnEventArgs> _basicReturn;
 
 		public PublishConfiguration Configuration => new PublishConfiguration
@@ -20,7 +19,6 @@ namespace RawRabbit.Configuration.Publish
 			Exchange = _exchange.Configuration,
 			RoutingKey = _routingKey,
 			PropertyModifier = _properties ?? (b => {}),
-			Mandatory = _mandatory,
 			BasicReturn = _basicReturn
 		};
 
@@ -56,7 +54,6 @@ namespace RawRabbit.Configuration.Publish
 
 		public IPublishConfigurationBuilder WithMandatoryDelivery(EventHandler<BasicReturnEventArgs> basicReturn)
 		{
-			_mandatory = true;
 			_basicReturn = basicReturn;
 			return this;
 		}

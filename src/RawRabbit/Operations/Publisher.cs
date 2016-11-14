@@ -67,9 +67,12 @@ namespace RawRabbit.Operations
 							routingKey: _config.RouteWithGlobalId ? $"{config.RoutingKey}.{globalMessageId}" : config.RoutingKey,
 							basicProperties: props,
 							body: _serializer.Serialize(message),
-							mandatory: config.Mandatory
+							mandatory: (config.BasicReturn != null)
 						);
-						return ackTask;
+						return ackTask
+						.ContinueWith(a => {
+							channelTask.Result.BasicReturn -= config.BasicReturn;
+						});
 					}
 				})
 				.Unwrap();
