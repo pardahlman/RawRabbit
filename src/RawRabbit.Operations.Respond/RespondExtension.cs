@@ -15,7 +15,10 @@ namespace RawRabbit
 	{
 		public static readonly Action<IPipeBuilder> ConsumePipe = pipe => pipe
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.MessageRecieved))
-			.Use<RequestDeserializationMiddleware>()
+			.Use<MessageDeserializationMiddleware>(new MessageDeserializationOptions
+			{
+				MessageTypeFunc = context => context.GetRequestMessageType()
+			})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.MessageDeserialized))
 			.Use<RespondInvokationMiddleware>()
 			.Use<AutoAckMiddleware>()
@@ -29,7 +32,11 @@ namespace RawRabbit
 				}
 			})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.BasicPropertiesCreated))
-			.Use<ResponseSerializationMiddleware>()
+			.Use<MessageSerializationMiddleware>(new MessageSerializationOptions
+			{
+				MessageFunc = context => context.Get<object>(RespondKey.ResponseMessage),
+				SerializedMessageKey = RespondKey.SerializedResponse
+			})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ResponseSerialized))
 			.Use<ReplyToExtractionMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ReplyToExtracted))
