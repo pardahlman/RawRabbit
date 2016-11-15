@@ -95,6 +95,11 @@ namespace RawRabbit.Pipe
 			return context.Get<BasicDeliverEventArgs>(PipeKey.DeliveryEventArgs);
 		}
 
+		public static BasicGetResult GetBasicGetResult(this IPipeContext context)
+		{
+			return context.Get<BasicGetResult>(PipeKey.BasicGetResult);
+		}
+
 		public static Func<object[], Task> GetMessageHandler(this IPipeContext context)
 		{
 			return context.Get<Func<object[], Task>>(PipeKey.MessageHandler);

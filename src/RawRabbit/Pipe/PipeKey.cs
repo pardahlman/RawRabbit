@@ -13,6 +13,7 @@
 		public const string MessageHandlerArgs = "MessageHandlerArgs";
 		public const string MessageHandlerResult = "MessageHandlerResult";
 		public const string BasicProperties = "BasicProperties";
+		public const string BasicGetResult = "BasicGetResult";
 		public const string ConfigurationAction = "ConfigurationAction";
 		public const string DeliveryEventArgs = "DeliveryEventArgs";
 		public const string Consumer = "Consumer";

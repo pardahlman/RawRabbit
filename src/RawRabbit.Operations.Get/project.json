@@ -1,0 +1,23 @@
+﻿{
+	"title": "RawRabbit.Operations.Get",
+	"version": "2.0.0-*",
+	"authors": [ "pardahlman", "enrique-avalon" ],
+	"description": "A modern framework for communication over RabbitMq.",
+	"packOptions": {
+		"iconUrl": "http://pardahlman.se/raw/icon.png",
+		"projectUrl": "https://github.com/pardahlman/RawRabbit",
+		"tags": [ "rabbitmq", "raw", "rawrabbit", "attributes" ],
+		"publishExclude": [ "**.xproj", "**.user", "**.vspscc" ]
+	},
+
+	"dependencies": {
+		"RawRabbit": { "target": "project" }
+	},
+
+	"frameworks": {
+		"netstandard1.5": {},
+		"net451": {
+			"define": [ "NET451" ]
+		}
+	}
+}
