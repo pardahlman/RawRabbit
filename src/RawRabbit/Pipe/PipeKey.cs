@@ -14,6 +14,7 @@
 		public const string MessageHandlerResult = "MessageHandlerResult";
 		public const string BasicProperties = "BasicProperties";
 		public const string BasicGetResult = "BasicGetResult";
+		public const string GetConfiguration = "GetConfiguration";
 		public const string ConfigurationAction = "ConfigurationAction";
 		public const string DeliveryEventArgs = "DeliveryEventArgs";
 		public const string Consumer = "Consumer";
@@ -22,11 +23,11 @@
 		public const string PublishAcknowledger = "PublishAcknowledger";
 		public const string RoutingKey = "RoutingKey";
 		public const string QueueConfiguration = "QueueConfiguration";
+		public const string QueueName = "QueueName";
 		public const string ExchangeName = "ExchangeName";
 		public const string ExchangeConfiguration = "ExchangeConfiguration";
 		public const string Subscription = "Subscription";
 		public const string SerializedMessage = "SerializedMessage";
-		public const string PrefetchCount = "PrefetchCount";
 		public const string ReturnedMessageCallback = "ReturnedMessageCallback";
 		public const string BasicPropertyModifier = "BasicPropertyModifier";
 		public const string Operation = "Operation";

@@ -5,6 +5,7 @@
 
 	"dependencies": {
 		"RawRabbit": { "target": "project" },
+		"RawRabbit.Operations.Get": { "target": "project" },
 		"RawRabbit.Operations.Publish": { "target": "project" },
 		"RawRabbit.Operations.Subscribe": { "target": "project" },
 		"RawRabbit.Operations.Request": { "target": "project" },

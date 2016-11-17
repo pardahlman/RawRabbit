@@ -19,15 +19,15 @@ namespace RawRabbit
 			.Use<QueueDeclareMiddleware>(new QueueDeclareOptions { QueueFunc = context => context.GetResponseQueue()})
 			.Use<ExchangeDeclareMiddleware>(new ExchangeDeclareOptions { ExchangeFunc = context => context.GetResponseExchange()})
 			.Use<QueueBindMiddleware>(new QueueBindOptions { ConsumeFunc = context => context.GetResponseConfiguration() })
-			.Use<MessageSerializationMiddleware>(new MessageSerializationOptions { MessageFunc = context => context.GetMessage()})
+			.Use<BodySerializationMiddleware>(new MessageSerializationOptions { MessageFunc = context => context.GetMessage()})
 			.Use<Operations.Request.Middleware.BasicPropertiesMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.BasicPropertiesCreated))
 			.Use<ResponseConsumeMiddleware>(new ResponseConsumerOptions
 				{
 					ResponseRecieved = p => p
-						.Use<MessageDeserializationMiddleware>(new MessageDeserializationOptions
+						.Use<BodyDeserializationMiddleware>(new MessageDeserializationOptions
 						{
-							MessageTypeFunc = c => c.GetResponseMessageType(),
+							BodyTypeFunc = c => c.GetResponseMessageType(),
 							MessageKeyFunc = c => RequestKey.ResponseMessage
 						})
 				})

@@ -13,7 +13,7 @@ namespace RawRabbit
 	{
 		public static readonly Action<IPipeBuilder> ConsumePipe = consume => consume
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.MessageRecieved))
-			.Use<MessageDeserializationMiddleware>()
+			.Use<BodyDeserializationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.MessageDeserialized))
 			.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
 			{

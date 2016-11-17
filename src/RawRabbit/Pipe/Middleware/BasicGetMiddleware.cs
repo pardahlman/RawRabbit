@@ -8,11 +8,11 @@ namespace RawRabbit.Pipe.Middleware
 	{
 		public Func<IPipeContext, IModel> ChannelFunc { get; set; }
 		public Func<IPipeContext, bool> NoAckFunc { get; internal set; }
-		public Action<IPipeContext, BasicGetResult> PostExecutionAction { get; internal set; }
+		public Action<IPipeContext, BasicGetResult> PostExecutionAction { get; set; }
 		public Func<IPipeContext, string> QueueNameFunc { get; internal set; }
 	}
 
-	public class BasicGetMiddleware : Pipe.Middleware.Middleware
+	public class BasicGetMiddleware : Middleware
 	{
 		protected Func<IPipeContext, IModel> ChannelFunc;
 		protected  Func<IPipeContext, string> QueueNameFunc;
@@ -21,9 +21,9 @@ namespace RawRabbit.Pipe.Middleware
 
 		public BasicGetMiddleware(BasicGetOptions options = null)
 		{
-			ChannelFunc = options?.ChannelFunc ?? (context => context.GetTransientChannel());
-			QueueNameFunc = options?.QueueNameFunc ?? (context => context.GetConsumerConfiguration()?.Queue.QueueName);
-			NoAckFunc = options?.NoAckFunc ?? (context => context.GetConsumerConfiguration()?.NoAck ?? false);
+			ChannelFunc = options?.ChannelFunc ?? (context => context.GetChannel());
+			QueueNameFunc = options?.QueueNameFunc ?? (context => context.GetGetConfiguration()?.QueueName);
+			NoAckFunc = options?.NoAckFunc ?? (context => context.GetGetConfiguration()?.NoAck ?? false);
 			PostExecutionAction = options?.PostExecutionAction;
 		}
 
@@ -38,9 +38,9 @@ namespace RawRabbit.Pipe.Middleware
 			return Next.InvokeAsync(context);
 		}
 
-		protected virtual BasicGetResult PerformBasicGet(IModel channel, string queueNamme, bool noAck)
+		protected virtual BasicGetResult PerformBasicGet(IModel channel, string queueName, bool noAck)
 		{
-			return channel.BasicGet(queueNamme, noAck);
+			return channel.BasicGet(queueName, noAck);
 		}
 
 		protected virtual bool GetNoAck(IPipeContext context)

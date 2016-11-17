@@ -65,7 +65,7 @@ namespace RawRabbit.Pipe
 		public IPipeBuilder Remove<TMiddleware>(Predicate<object[]> predicate = null) where TMiddleware : Middleware.Middleware
 		{
 			predicate = predicate ?? (objects => true);
-			var matching = Pipe.Where(c => c.Type == typeof(TMiddleware) && predicate(c.ConstructorArgs));
+			var matching = Pipe.Where(c => c.Type == typeof(TMiddleware) && predicate(c.ConstructorArgs)).ToList();
 			foreach (var match in matching)
 			{
 				Pipe.Remove(match);

@@ -17,7 +17,7 @@ namespace RawRabbit
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.PublishConfigured))
 			.Use<ExchangeDeclareMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.ExchangeDeclared))
-			.Use<MessageSerializationMiddleware>()
+			.Use<BodySerializationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.MessageSerialized))
 			.Use<BasicPropertiesMiddleware>(new BasicPropertiesOptions { PostCreateAction = (ctx, props) =>
 			{

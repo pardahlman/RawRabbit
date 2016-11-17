@@ -40,6 +40,11 @@ namespace RawRabbit.Pipe
 			return context.Get<QueueConfiguration>(PipeKey.QueueConfiguration);
 		}
 
+		public static GetConfiguration GetGetConfiguration(this IPipeContext context)
+		{
+			return context.Get<GetConfiguration>(PipeKey.GetConfiguration);
+		}
+
 		public static ExchangeConfiguration GetExchangeConfiguration(this IPipeContext context)
 		{
 			return context.Get<ExchangeConfiguration>(PipeKey.ExchangeConfiguration);

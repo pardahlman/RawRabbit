@@ -13,7 +13,7 @@ namespace RawRabbit
 	{
 		private static readonly Action<IPipeBuilder> ConsumePipe = pipe => pipe
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(ConsumerStage.MessageRecieved))
-			.Use<MessageDeserializationMiddleware>()
+			.Use<BodyDeserializationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(ConsumerStage.MessageDeserialized))
 			.Use<SubscribeInvokationMiddleware>()
 			.Use<AutoAckMiddleware>()

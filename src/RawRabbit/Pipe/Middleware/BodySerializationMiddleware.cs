@@ -10,13 +10,13 @@ namespace RawRabbit.Pipe.Middleware
 		public string SerializedMessageKey { get; set; }
 	}
 
-	public class MessageSerializationMiddleware : Middleware
+	public class BodySerializationMiddleware : Middleware
 	{
 		private readonly ISerializer _serializer;
 		private readonly Func<IPipeContext, object> _msgFunc;
 		private readonly string _serializedMessageKey;
 
-		public MessageSerializationMiddleware(ISerializer serializer, MessageSerializationOptions options = null)
+		public BodySerializationMiddleware(ISerializer serializer, MessageSerializationOptions options = null)
 		{
 			_serializer = serializer;
 			_msgFunc = options?.MessageFunc ?? (context => context.GetMessage());
