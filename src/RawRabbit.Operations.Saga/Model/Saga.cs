@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using RawRabbit.Operations.Saga.Repository;
 using Stateless;
 
@@ -35,25 +33,15 @@ namespace RawRabbit.Operations.Saga.Model
 
 		public override Task TriggerAsync(object trigger)
 		{
-			return TriggerAsync((TTrigger) trigger);
-		}
-
-		public Task TriggerAsync(TTrigger trigger)
-		{
-			return StateMachine.FireAsync(trigger);
+			return StateMachine.FireAsync((TTrigger) trigger);
 		}
 
 		public override Task TriggerAsync<TPayload>(object trigger, TPayload payload)
 		{
-			return TriggerAsync((TTrigger) trigger, payload);
-		}
-
-		public Task TriggerAsync<TPayload>(TTrigger trigger, TPayload payload)
-		{
-			var paramTrigger = TriggerParameters.Get<TPayload>(trigger);
+			var paramTrigger = TriggerParameters.Get<TPayload>((TTrigger)trigger);
 			return StateMachine.FireAsync(paramTrigger, payload);
 		}
-
+		
 		public override SagaDto GetDto()
 		{
 			return SagaDto;

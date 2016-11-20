@@ -26,7 +26,7 @@ namespace RawRabbit
 				});
 		}
 
-		public static Task TriggerStateMachineAsync<TSaga>(this IBusClient busClient, Func<TSaga, Task> triggerFunc, Guid sagaId = default(Guid))
+		public static Task TriggerStateMachineAsync<TSaga>(this IBusClient busClient, Func<TSaga, Task> triggerFunc, Guid sagaId = default(Guid)) where TSaga : Saga
 		{
 			Func<object[], Task> genericHandler = objects => triggerFunc((TSaga) objects[0]);
 

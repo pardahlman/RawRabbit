@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 using RawRabbit.Configuration.Consume;
 using RawRabbit.Configuration.Queue;
 
