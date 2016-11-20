@@ -44,7 +44,7 @@ namespace RawRabbit.Common
 		public Task PublishAsync<T>(T message = default(T), Guid globalMessageId = new Guid(), Action<IPublishConfigurationBuilder> configuration = null)
 		{
 			var config = _configEval.GetConfiguration<T>(configuration);
-			_logger.LogDebug($"Publishing message '{typeof(T).Name}' on exchange '{config.Exchange.ExchangeName}' with routing key {config.RoutingKey}.");
+			_logger.LogDebug($"Initiating publish for message '{typeof(T).Name}' on exchange '{config.Exchange.ExchangeName}' with routing key {config.RoutingKey}.");
 			return _publisher.PublishAsync(message, globalMessageId, config);
 		}
 
