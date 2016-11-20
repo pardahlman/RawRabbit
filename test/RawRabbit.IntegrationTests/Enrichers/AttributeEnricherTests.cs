@@ -21,7 +21,7 @@ namespace RawRabbit.IntegrationTests.Enrichers
 					recievedTcs.TrySetResult(recieved);
 					return Task.FromResult(true);
 				}, cfg => cfg
-					.OnExchange(e => e
+					.OnDeclaredExchange(e => e
 						.WithName("my_topic")
 						.WithType(ExchangeType.Topic))
 					.WithRoutingKey("my_key")
@@ -52,7 +52,7 @@ namespace RawRabbit.IntegrationTests.Enrichers
 
 				/* Test */
 				await publisher.PublishAsync(new AttributedMessage(), cfg => cfg
-					.OnExchange(e => e
+					.OnDeclaredExchange(e => e
 						.WithName("my_topic")
 						.WithType(ExchangeType.Topic))
 					.WithRoutingKey("my_key")
@@ -77,7 +77,7 @@ namespace RawRabbit.IntegrationTests.Enrichers
 					recievedTcs.TrySetResult(recieved);
 					return Task.FromResult(new AttributedResponse());
 				}, cfg => cfg
-					.OnExchange(e => e
+					.OnDeclaredExchange(e => e
 						.WithName("rpc_exchange")
 						.WithType(ExchangeType.Topic))
 					.WithRoutingKey("my_request_key")
@@ -109,7 +109,7 @@ namespace RawRabbit.IntegrationTests.Enrichers
 				/* Test */
 				await requester.RequestAsync<AttributedRequest, AttributedResponse>(new AttributedRequest(), cfg => cfg
 					.PublishRequest(req => req
-						.OnExchange(e => e
+						.OnDeclaredExchange(e => e
 							.WithName("rpc_exchange")
 							.WithType(ExchangeType.Topic))
 						.WithRoutingKey("my_request_key")

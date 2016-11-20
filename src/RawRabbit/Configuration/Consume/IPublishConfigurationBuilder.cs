@@ -8,7 +8,13 @@ namespace RawRabbit.Configuration.Consume
 {
 	public interface IPublishConfigurationBuilder
 	{
-		IPublishConfigurationBuilder OnExchange(Action<IExchangeConfigurationBuilder> exchange);
+		/// <summary>
+		/// Specify the topology features of the Exchange to consume from.
+		/// Exchange will be declared.
+		/// </summary>
+		/// <param name="exchange">Builder for exchange features.</param>
+		/// <returns></returns>
+		IPublishConfigurationBuilder OnDeclaredExchange(Action<IExchangeConfigurationBuilder> exchange);
 		IPublishConfigurationBuilder WithRoutingKey(string routingKey);
 		IPublishConfigurationBuilder WithProperties(Action<IBasicProperties> properties);
 		IPublishConfigurationBuilder WithReturnCallback(Action<BasicReturnEventArgs> callback);
@@ -31,7 +37,7 @@ namespace RawRabbit.Configuration.Consume
 			Config = initial;
 		}
 
-		public IPublishConfigurationBuilder OnExchange(Action<IExchangeConfigurationBuilder> exchange)
+		public IPublishConfigurationBuilder OnDeclaredExchange(Action<IExchangeConfigurationBuilder> exchange)
 		{
 			var builder = new ExchangeConfigurationBuilder(Config.Exchange);
 			exchange(builder);

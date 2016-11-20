@@ -9,8 +9,21 @@ namespace RawRabbit.Configuration.Consume
 {
 	public interface IConsumeConfigurationBuilder
 	{
-		IConsumeConfigurationBuilder OnExchange(Action<IExchangeConfigurationBuilder> exchange);
-		IConsumeConfigurationBuilder FromQueue(Action<IQueueConfigurationBuilder> queue);
+		/// <summary>
+		/// Specify the topology features of the Exchange to consume from.
+		/// Exchange will be declared.
+		/// </summary>
+		/// <param name="exchange">Builder for exchange features.</param>
+		/// <returns></returns>
+		IConsumeConfigurationBuilder OnDeclaredExchange(Action<IExchangeConfigurationBuilder> exchange);
+
+		/// <summary>
+		/// Specify the topology features of the Queue to consume from.
+		/// Queue will be declared.
+		/// /// </summary>
+		/// <param name="queue"></param>
+		/// <returns></returns>
+		IConsumeConfigurationBuilder FromDeclaredQueue(Action<IQueueConfigurationBuilder> queue);
 		IConsumeConfigurationBuilder WithNoAck(bool noAck = true);
 		IConsumeConfigurationBuilder WithConsumerTag(string tag);
 		IConsumeConfigurationBuilder WithRoutingKey(string routingKey);
@@ -42,7 +55,7 @@ namespace RawRabbit.Configuration.Consume
 			Config = initial;
 		}
 
-		public IConsumeConfigurationBuilder OnExchange(Action<IExchangeConfigurationBuilder> exchange)
+		public IConsumeConfigurationBuilder OnDeclaredExchange(Action<IExchangeConfigurationBuilder> exchange)
 		{
 			var builder = new ExchangeConfigurationBuilder(Config.Exchange);
 			exchange(builder);
@@ -50,7 +63,7 @@ namespace RawRabbit.Configuration.Consume
 			return this;
 		}
 
-		public IConsumeConfigurationBuilder FromQueue(Action<IQueueConfigurationBuilder> queue)
+		public IConsumeConfigurationBuilder FromDeclaredQueue(Action<IQueueConfigurationBuilder> queue)
 		{
 			var builder = new QueueConfigurationBuilder(Config.Queue);
 			queue(builder);

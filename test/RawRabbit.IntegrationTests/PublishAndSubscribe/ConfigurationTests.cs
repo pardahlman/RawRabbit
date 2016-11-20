@@ -42,12 +42,12 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 				{
 					recievedTcs.TrySetResult(recieved);
 					return Task.FromResult(true);
-				}, cfg => cfg.OnExchange(e=> e.WithName("custom_exchange")));
+				}, cfg => cfg.OnDeclaredExchange(e=> e.WithName("custom_exchange")));
 
 				var message = new BasicMessage { Prop = "Hello, world!" };
 
 				/* Test */
-				await publisher.PublishAsync(message, cfg => cfg.OnExchange(e => e.WithName("custom_exchange")));
+				await publisher.PublishAsync(message, cfg => cfg.OnDeclaredExchange(e => e.WithName("custom_exchange")));
 				await recievedTcs.Task;
 
 				/* Assert */

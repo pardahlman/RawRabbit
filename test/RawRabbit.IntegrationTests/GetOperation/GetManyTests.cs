@@ -20,9 +20,9 @@ namespace RawRabbit.IntegrationTests.GetOperation
 				TestChannel.ExchangeDeclare(conventions.ExchangeNamingConvention(message.GetType()), ExchangeType.Topic);
 				TestChannel.QueueBind(conventions.QueueNamingConvention(message.GetType()), conventions.ExchangeNamingConvention(message.GetType()), conventions.RoutingKeyConvention(message.GetType()));
 
-				await client.PublishAsync(message, cfg => cfg.OnExchange(e => e.AssumeInitialized()));
-				await client.PublishAsync(message, cfg => cfg.OnExchange(e => e.AssumeInitialized()));
-				await client.PublishAsync(message, cfg => cfg.OnExchange(e => e.AssumeInitialized()));
+				await client.PublishAsync(message, cfg => cfg.OnDeclaredExchange(e => e.AssumeInitialized()));
+				await client.PublishAsync(message, cfg => cfg.OnDeclaredExchange(e => e.AssumeInitialized()));
+				await client.PublishAsync(message, cfg => cfg.OnDeclaredExchange(e => e.AssumeInitialized()));
 
 				/* Test */
 				var ackable = await client.GetManyAsync<BasicMessage>(3);
@@ -46,9 +46,9 @@ namespace RawRabbit.IntegrationTests.GetOperation
 				TestChannel.ExchangeDeclare(conventions.ExchangeNamingConvention(message.GetType()), ExchangeType.Topic);
 				TestChannel.QueueBind(conventions.QueueNamingConvention(message.GetType()), conventions.ExchangeNamingConvention(message.GetType()), conventions.RoutingKeyConvention(message.GetType()));
 
-				await client.PublishAsync(message, cfg => cfg.OnExchange(e => e.AssumeInitialized()));
-				await client.PublishAsync(message, cfg => cfg.OnExchange(e => e.AssumeInitialized()));
-				await client.PublishAsync(message, cfg => cfg.OnExchange(e => e.AssumeInitialized()));
+				await client.PublishAsync(message, cfg => cfg.OnDeclaredExchange(e => e.AssumeInitialized()));
+				await client.PublishAsync(message, cfg => cfg.OnDeclaredExchange(e => e.AssumeInitialized()));
+				await client.PublishAsync(message, cfg => cfg.OnDeclaredExchange(e => e.AssumeInitialized()));
 
 				/* Test */
 				var ackable = await client.GetManyAsync<BasicMessage>(10);
@@ -72,9 +72,9 @@ namespace RawRabbit.IntegrationTests.GetOperation
 				TestChannel.ExchangeDeclare(conventions.ExchangeNamingConvention(message.GetType()), ExchangeType.Topic);
 				TestChannel.QueueBind(conventions.QueueNamingConvention(message.GetType()), conventions.ExchangeNamingConvention(message.GetType()), conventions.RoutingKeyConvention(message.GetType()));
 
-				await client.PublishAsync(message, cfg => cfg.OnExchange(e => e.AssumeInitialized()));
-				await client.PublishAsync(message, cfg => cfg.OnExchange(e => e.AssumeInitialized()));
-				await client.PublishAsync(message, cfg => cfg.OnExchange(e => e.AssumeInitialized()));
+				await client.PublishAsync(message, cfg => cfg.OnDeclaredExchange(e => e.AssumeInitialized()));
+				await client.PublishAsync(message, cfg => cfg.OnDeclaredExchange(e => e.AssumeInitialized()));
+				await client.PublishAsync(message, cfg => cfg.OnDeclaredExchange(e => e.AssumeInitialized()));
 
 				/* Test */
 				var ackable = await client.GetManyAsync<BasicMessage>(2);
@@ -99,9 +99,9 @@ namespace RawRabbit.IntegrationTests.GetOperation
 				TestChannel.ExchangeDeclare(conventions.ExchangeNamingConvention(message.GetType()), ExchangeType.Topic);
 				TestChannel.QueueBind(conventions.QueueNamingConvention(message.GetType()), conventions.ExchangeNamingConvention(message.GetType()), conventions.RoutingKeyConvention(message.GetType()));
 
-				await client.PublishAsync(message, cfg => cfg.OnExchange(e => e.AssumeInitialized()));
-				await client.PublishAsync(message, cfg => cfg.OnExchange(e => e.AssumeInitialized()));
-				await client.PublishAsync(nacked, cfg => cfg.OnExchange(e => e.AssumeInitialized()));
+				await client.PublishAsync(message, cfg => cfg.OnDeclaredExchange(e => e.AssumeInitialized()));
+				await client.PublishAsync(message, cfg => cfg.OnDeclaredExchange(e => e.AssumeInitialized()));
+				await client.PublishAsync(nacked, cfg => cfg.OnDeclaredExchange(e => e.AssumeInitialized()));
 
 				/* Test */
 				var ackableList = await client.GetManyAsync<BasicMessage>(3);
@@ -137,9 +137,9 @@ namespace RawRabbit.IntegrationTests.GetOperation
 				TestChannel.ExchangeDeclare(conventions.ExchangeNamingConvention(message.GetType()), ExchangeType.Topic);
 				TestChannel.QueueBind(conventions.QueueNamingConvention(message.GetType()), conventions.ExchangeNamingConvention(message.GetType()), conventions.RoutingKeyConvention(message.GetType()));
 
-				await client.PublishAsync(message, cfg => cfg.OnExchange(e => e.AssumeInitialized()));
-				await client.PublishAsync(message, cfg => cfg.OnExchange(e => e.AssumeInitialized()));
-				await client.PublishAsync(message, cfg => cfg.OnExchange(e => e.AssumeInitialized()));
+				await client.PublishAsync(message, cfg => cfg.OnDeclaredExchange(e => e.AssumeInitialized()));
+				await client.PublishAsync(message, cfg => cfg.OnDeclaredExchange(e => e.AssumeInitialized()));
+				await client.PublishAsync(message, cfg => cfg.OnDeclaredExchange(e => e.AssumeInitialized()));
 
 				/* Test */
 				var ackable = await client.GetManyAsync<BasicMessage>(3);
