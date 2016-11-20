@@ -17,8 +17,8 @@ client.SubscribeAsync<BasicMessage>(async (msg, context) =>
 await client.PublishAsync(new BasicMessage { Prop = "Hello, world!"});
 ```
 
-### Request/Respond
-`RawRabbits` request/respond (`RPC`) implementation uses the [direct reply-to feature](https://www.rabbitmq.com/direct-reply-to.html) for better performance and lower resource allocation.
+### Request/Response
+`RawRabbits` request/response (`RPC`) implementation uses the [direct reply-to feature](https://www.rabbitmq.com/direct-reply-to.html) for better performance and lower resource allocation.
 ```csharp
 var client = BusClientFactory.CreateDefault();
 client.RespondAsync<BasicRequest, BasicResponse>(async (request, context) =>
