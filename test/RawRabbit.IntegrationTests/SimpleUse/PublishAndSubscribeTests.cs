@@ -10,7 +10,6 @@ using RawRabbit.Common;
 using RawRabbit.Configuration;
 using RawRabbit.Exceptions;
 using RawRabbit.IntegrationTests.TestMessages;
-using RawRabbit.vNext;
 using Xunit;
 using ExchangeType = RawRabbit.Configuration.Exchange.ExchangeType;
 
@@ -387,6 +386,26 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 				await tcs.Task;
 				/* Assert */
 				Assert.True(true);
+			}
+		}
+
+		[Fact]
+		public async Task Should_Run_Basic_Return_When_The_Manatory_Set_After_Failed_Publish()
+		{
+			/* Setup */
+			using (var client = TestClientFactory.CreateNormal())
+			{
+				var tcs = new TaskCompletionSource<bool>();
+				/* Test */
+				await client.PublishAsync(new SimpleMessage(),
+					configuration: cfg => cfg
+						.WithMandatoryDelivery((obj, evt) =>
+						{
+							tcs.SetResult(true);
+						}));
+
+				/* Assert */
+				Assert.True(tcs.Task.Result);
 			}
 		}
 	}
