@@ -221,3 +221,8 @@ FakesAssemblies/
 GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
+
+[Tt]ools/Cake.*
+.dotnet/
+[Tt]ools/Addins/
+TestResults/
