@@ -104,6 +104,10 @@ namespace RawRabbit.Configuration
 				Durable = true
 			};
 		    VirtualHost = "/";
+		    Username = "guest";
+		    Password = "guest";
+		    Port = 5672;
+		    Hostnames = new List<string> {"localhost"};
 		}
 
 		public static RawRabbitConfiguration Local => new RawRabbitConfiguration
