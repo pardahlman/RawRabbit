@@ -1,22 +1,22 @@
 ﻿{
-	"version": "1.0.0-*",
-	"authors": [ "par.dahlman" ],
-	"testRunner": "xunit",
+    "version": "1.0.0-*",
+    "authors": [ "par.dahlman" ],
+    "testRunner": "xunit",
 
-	"dependencies": {
-		"RawRabbit": { "target": "project" },
-		"RawRabbit.DependencyInjection.Autofac": { "target": "project" },
-		"RawRabbit.DependencyInjection.Ninject": { "target": "project" },
-		"RawRabbit.vNext": { "target": "project" },
-		"Moq": "4.5.16",
-		"xunit": "2.2.0-beta2-build3300",
-		"dotnet-test-xunit": "2.2.0-preview2-build1029"
-	},
-	"frameworks": {
-		"net46": {
-			"dependencies": {
-				"Microsoft.NETCore.Platforms": "1.0.1"
-			}
-		}
-	}
+    "dependencies": {
+        "RawRabbit": { "target": "project" },
+        "RawRabbit.DependencyInjection.Autofac": { "target": "project" },
+        "RawRabbit.DependencyInjection.Ninject": { "target": "project" },
+        "RawRabbit.vNext": { "target": "project" },
+        "Moq": "4.5.16",
+        "xunit": "2.2.0-beta2-build3300",
+        "dotnet-test-xunit": "2.2.0-preview2-build1029"
+    },
+    "frameworks": {
+        "net46": {
+            "dependencies": {
+                "Microsoft.NETCore.Platforms": "1.0.1"
+            }
+        }
+    }
 }

@@ -13,40 +13,40 @@ using RawRabbit.vNext;
 
 namespace RawRabbit.ConsoleApp.Sample
 {
-	public class Program
-	{
-		private static IBusClient _client;
+    public class Program
+    {
+        private static IBusClient _client;
 
-		public static void Main(string[] args)
-		{
-			_client = BusClientFactory.CreateDefault(
-				cfg => cfg
-					.SetBasePath(Directory.GetCurrentDirectory())
-					.AddJsonFile("rawrabbit.json"),
-				ioc => ioc
-					.AddSingleton<IConfigurationEvaluator, AttributeConfigEvaluator>()
-				);
+        public static void Main(string[] args)
+        {
+            _client = BusClientFactory.CreateDefault(
+                cfg => cfg
+                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("rawrabbit.json"),
+                ioc => ioc
+                    .AddSingleton<IConfigurationEvaluator, AttributeConfigEvaluator>()
+                );
 
-			_client.SubscribeAsync<ValuesRequested>(ServeValuesAsync);
-			_client.RespondAsync<ValueRequest, ValueResponse>(SendValuesThoughRpcAsync);
-		}
+            _client.SubscribeAsync<ValuesRequested>(ServeValuesAsync);
+            _client.RespondAsync<ValueRequest, ValueResponse>(SendValuesThoughRpcAsync);
+        }
 
-		private static Task<ValueResponse> SendValuesThoughRpcAsync(ValueRequest request, MessageContext context)
-		{
-			return Task.FromResult(new ValueResponse
-			{
-				Value = $"value{request.Value}"
-			});
-		}
+        private static Task<ValueResponse> SendValuesThoughRpcAsync(ValueRequest request, MessageContext context)
+        {
+            return Task.FromResult(new ValueResponse
+            {
+                Value = $"value{request.Value}"
+            });
+        }
 
-		private static Task ServeValuesAsync(ValuesRequested message, MessageContext context)
-		{
-			var values = new List<string>();
-			for (var i = 0; i < message.NumberOfValues; i++)
-			{
-				values.Add($"value{i}");
-			}
-			return _client.PublishAsync(new ValuesCalculated {Values = values});
-		}
-	}
+        private static Task ServeValuesAsync(ValuesRequested message, MessageContext context)
+        {
+            var values = new List<string>();
+            for (var i = 0; i < message.NumberOfValues; i++)
+            {
+                values.Add($"value{i}");
+            }
+            return _client.PublishAsync(new ValuesCalculated {Values = values});
+        }
+    }
 }

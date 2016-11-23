@@ -12,44 +12,44 @@ using RawRabbit.Extensions.TopologyUpdater.Model;
 
 namespace RawRabbit.Extensions.TopologyUpdater.Core
 {
-	public class BindingProvider : IBindingProvider
-	{
-		private readonly HttpClient _httpClient;
-		private const string UriEncodedDefaultVhost = "%2f";
-		private const string DefaultVhost = "/";
-		private const string BindingsPath = "bindings/source";
+    public class BindingProvider : IBindingProvider
+    {
+        private readonly HttpClient _httpClient;
+        private const string UriEncodedDefaultVhost = "%2f";
+        private const string DefaultVhost = "/";
+        private const string BindingsPath = "bindings/source";
 
-		public BindingProvider(RawRabbitConfiguration config)
-		{
-			var vHost = string.Equals(config.VirtualHost, DefaultVhost)
-					? UriEncodedDefaultVhost
-					: config.VirtualHost;
+        public BindingProvider(RawRabbitConfiguration config)
+        {
+            var vHost = string.Equals(config.VirtualHost, DefaultVhost)
+                    ? UriEncodedDefaultVhost
+                    : config.VirtualHost;
 
-			_httpClient = new HttpClient(new HttpClientHandler
-			{
-				Credentials = new NetworkCredential(config.Username, config.Password)
-			})
-			{
-				BaseAddress = new Uri($"http://{config.Hostnames.FirstOrDefault()}:15672/api/exchanges/{vHost}/")
-			};
-		}
+            _httpClient = new HttpClient(new HttpClientHandler
+            {
+                Credentials = new NetworkCredential(config.Username, config.Password)
+            })
+            {
+                BaseAddress = new Uri($"http://{config.Hostnames.FirstOrDefault()}:15672/api/exchanges/{vHost}/")
+            };
+        }
 
-		public Task<List<Binding>> GetBindingsAsync(string exchangeName)
-		{
-			return _httpClient
-				.GetAsync($"{exchangeName}/{BindingsPath}")
-				.ContinueWith(async tResponse =>
-				{
-					if (!tResponse.IsCompleted || !tResponse.Result.IsSuccessStatusCode)
-					{
-						return new List<Binding>();
-					}
+        public Task<List<Binding>> GetBindingsAsync(string exchangeName)
+        {
+            return _httpClient
+                .GetAsync($"{exchangeName}/{BindingsPath}")
+                .ContinueWith(async tResponse =>
+                {
+                    if (!tResponse.IsCompleted || !tResponse.Result.IsSuccessStatusCode)
+                    {
+                        return new List<Binding>();
+                    }
 
-					var responseStr = await tResponse.Result.Content.ReadAsStringAsync();
-					var bindings = JsonConvert.DeserializeObject<List<Binding>>(responseStr);
-					return bindings;
-				})
-				.Unwrap();
-		}
-	}
+                    var responseStr = await tResponse.Result.Content.ReadAsStringAsync();
+                    var bindings = JsonConvert.DeserializeObject<List<Binding>>(responseStr);
+                    return bindings;
+                })
+                .Unwrap();
+        }
+    }
 }

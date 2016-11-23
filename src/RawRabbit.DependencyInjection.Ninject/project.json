@@ -1,29 +1,29 @@
 ﻿{
-	"title": "RawRabbit.DependencyInjection.Ninject",
-	"version": "1.10.2-*",
-	"authors": [ "par.dahlman", "Joshua Barron" ],
-	"description": "Wire up RawRabbit with Ninject!",
+    "title": "RawRabbit.DependencyInjection.Ninject",
+    "version": "1.10.2-*",
+    "authors": [ "par.dahlman", "Joshua Barron" ],
+    "description": "Wire up RawRabbit with Ninject!",
 
-	"packOptions": {
-		"iconUrl": "http://pardahlman.se/raw/icon.png",
-		"projectUrl": "https://github.com/pardahlman/RawRabbit",
-		"tags": [ "rabbitmq", "raw", "rawrabbit", "ninject" ],
-		"publishExclude": [ "**.xproj", "**.user", "**.vspscc" ]
-	},
+    "packOptions": {
+        "iconUrl": "http://pardahlman.se/raw/icon.png",
+        "projectUrl": "https://github.com/pardahlman/RawRabbit",
+        "tags": [ "rabbitmq", "raw", "rawrabbit", "ninject" ],
+        "publishExclude": [ "**.xproj", "**.user", "**.vspscc" ]
+    },
 
-	"dependencies": {
-		"RawRabbit": { "target": "project" }
-	},
-	"frameworks": {
-		"netstandard1.5": {
-			"dependencies": {
-				"Ninject": "4.0.0-beta-0134"
-			}
-		},
-		"net451": {
-			"dependencies": {
-				"Ninject": "3.2.2"
-			}
-		}
-	}
+    "dependencies": {
+        "RawRabbit": { "target": "project" }
+    },
+    "frameworks": {
+        "netstandard1.5": {
+            "dependencies": {
+                "Ninject": "4.0.0-beta-0134"
+            }
+        },
+        "net451": {
+            "dependencies": {
+                "Ninject": "3.2.2"
+            }
+        }
+    }
 }

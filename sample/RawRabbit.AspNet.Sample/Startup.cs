@@ -13,47 +13,47 @@ using ILogger = Serilog.ILogger;
 
 namespace RawRabbit.AspNet.Sample
 {
-	public class Startup
-	{
-		private readonly string _rootPath;
+    public class Startup
+    {
+        private readonly string _rootPath;
 
-		public Startup(IHostingEnvironment env)
-		{
-			_rootPath = env.ContentRootPath;
-			var builder = new ConfigurationBuilder()
-				.SetBasePath(_rootPath)
-				.AddJsonFile("appsettings.json")
-				.AddEnvironmentVariables();
-			Configuration = builder.Build();
-		}
+        public Startup(IHostingEnvironment env)
+        {
+            _rootPath = env.ContentRootPath;
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(_rootPath)
+                .AddJsonFile("appsettings.json")
+                .AddEnvironmentVariables();
+            Configuration = builder.Build();
+        }
 
-		public IConfigurationRoot Configuration { get; }
+        public IConfigurationRoot Configuration { get; }
 
-		public void ConfigureServices(IServiceCollection services)
-		{
-			services
-				.AddRawRabbit(
-					Configuration.GetSection("RawRabbit"),
-					ioc => ioc
-						.AddSingleton(LoggingFactory.ApplicationLogger))
-						.AddSingleton<IConfigurationEvaluator, AttributeConfigEvaluator>()
-				.AddMvc();
-		}
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services
+                .AddRawRabbit(
+                    Configuration.GetSection("RawRabbit"),
+                    ioc => ioc
+                        .AddSingleton(LoggingFactory.ApplicationLogger))
+                        .AddSingleton<IConfigurationEvaluator, AttributeConfigEvaluator>()
+                .AddMvc();
+        }
 
-		public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
-		{
-			loggerFactory
-				.AddSerilog(GetConfiguredSerilogger())
-				.AddConsole(Configuration.GetSection("Logging"));
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        {
+            loggerFactory
+                .AddSerilog(GetConfiguredSerilogger())
+                .AddConsole(Configuration.GetSection("Logging"));
 
-			app.UseMvc();
-		}
+            app.UseMvc();
+        }
 
-		private ILogger GetConfiguredSerilogger()
-		{
-			return new LoggerConfiguration()
-				.WriteTo.File($"{_rootPath}/Logs/serilog.log", LogEventLevel.Debug)
-				.CreateLogger();
-		}
-	}
+        private ILogger GetConfiguredSerilogger()
+        {
+            return new LoggerConfiguration()
+                .WriteTo.File($"{_rootPath}/Logs/serilog.log", LogEventLevel.Debug)
+                .CreateLogger();
+        }
+    }
 }

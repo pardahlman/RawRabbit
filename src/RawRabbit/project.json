@@ -1,24 +1,24 @@
 {
-	"title": "RawRabbit",
-	"version": "1.10.2-*",
-	"authors": [ "pardahlman", "enrique-avalon" ],
-	"description": "A modern framework for communication over RabbitMq.",
-	"packOptions": {
-		"iconUrl": "http://pardahlman.se/raw/icon.png",
-		"projectUrl": "https://github.com/pardahlman/RawRabbit",
-		"tags": [ "rabbitmq", "raw", "rawrabbit", "attributes" ],
-		"publishExclude": [ "**.xproj", "**.user", "**.vspscc" ]
-	},
+    "title": "RawRabbit",
+    "version": "1.10.2-*",
+    "authors": [ "pardahlman", "enrique-avalon" ],
+    "description": "A modern framework for communication over RabbitMq.",
+    "packOptions": {
+        "iconUrl": "http://pardahlman.se/raw/icon.png",
+        "projectUrl": "https://github.com/pardahlman/RawRabbit",
+        "tags": [ "rabbitmq", "raw", "rawrabbit", "attributes" ],
+        "publishExclude": [ "**.xproj", "**.user", "**.vspscc" ]
+    },
 
-	"dependencies": {
-			"RabbitMQ.Client": "4.1.0",
-		"Newtonsoft.Json": "9.0.1"
-	},
+    "dependencies": {
+            "RabbitMQ.Client": "4.1.0",
+        "Newtonsoft.Json": "9.0.1"
+    },
 
-	"frameworks": {
-		"netstandard1.5": {},
-			"net451": {
-				"define": [ "NET451" ]
-			}
-	}
+    "frameworks": {
+        "netstandard1.5": {},
+            "net451": {
+                "define": [ "NET451" ]
+            }
+    }
 }

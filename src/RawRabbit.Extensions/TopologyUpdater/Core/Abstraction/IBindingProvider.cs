@@ -4,8 +4,8 @@ using RawRabbit.Extensions.TopologyUpdater.Model;
 
 namespace RawRabbit.Extensions.TopologyUpdater.Core.Abstraction
 {
-	public interface IBindingProvider
-	{
-		Task<List<Binding>> GetBindingsAsync(string exchangeName);
-	}
+    public interface IBindingProvider
+    {
+        Task<List<Binding>> GetBindingsAsync(string exchangeName);
+    }
 }

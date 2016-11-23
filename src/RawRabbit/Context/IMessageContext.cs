@@ -2,8 +2,8 @@
 
 namespace RawRabbit.Context
 {
-	public interface IMessageContext
-	{
-		Guid GlobalRequestId { get; set; }
-	}
+    public interface IMessageContext
+    {
+        Guid GlobalRequestId { get; set; }
+    }
 }

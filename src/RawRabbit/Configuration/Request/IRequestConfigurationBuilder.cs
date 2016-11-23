@@ -4,11 +4,11 @@ using RawRabbit.Configuration.Queue;
 
 namespace RawRabbit.Configuration.Request
 {
-	public interface IRequestConfigurationBuilder
-	{
-		IRequestConfigurationBuilder WithExchange(Action<IExchangeConfigurationBuilder> exchange);
-		IRequestConfigurationBuilder WithRoutingKey(string routingKey);
-		IRequestConfigurationBuilder WithReplyQueue(Action<IQueueConfigurationBuilder> replyTo);
-		IRequestConfigurationBuilder WithNoAck(bool noAck);
-	}
+    public interface IRequestConfigurationBuilder
+    {
+        IRequestConfigurationBuilder WithExchange(Action<IExchangeConfigurationBuilder> exchange);
+        IRequestConfigurationBuilder WithRoutingKey(string routingKey);
+        IRequestConfigurationBuilder WithReplyQueue(Action<IQueueConfigurationBuilder> replyTo);
+        IRequestConfigurationBuilder WithNoAck(bool noAck);
+    }
 }
