@@ -8,7 +8,7 @@ namespace RawRabbit.Configuration.Queue
 		{
 			get
 			{
-				var fullQueueName =  string.IsNullOrEmpty(NameSuffix)
+				var fullQueueName =  string.IsNullOrEmpty(NameSuffix) || AssumeInitialized
 					? QueueName
 					: $"{QueueName}_{NameSuffix}";
 
@@ -24,6 +24,7 @@ namespace RawRabbit.Configuration.Queue
 		public bool Exclusive { get; set; }
 		public bool AutoDelete { get; set; }
 		public Dictionary<string, object> Arguments { get; set; }
+        public bool AssumeInitialized { get; set; }
 
 		public QueueConfiguration()
 		{

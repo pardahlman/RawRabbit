@@ -1,4 +1,6 @@
-﻿namespace RawRabbit.Configuration.Queue
+﻿using System;
+
+namespace RawRabbit.Configuration.Queue
 {
 	public class QueueConfigurationBuilder : IQueueConfigurationBuilder
 	{
@@ -44,5 +46,11 @@
 			Configuration.Arguments.Add(key, value);
 			return this;
 		}
-	}
+
+        public IQueueConfigurationBuilder AssumeInitialized(bool asumption = true)
+        {
+            Configuration.AssumeInitialized = asumption;
+            return this;
+        }
+    }
 }

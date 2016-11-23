@@ -133,7 +133,7 @@ namespace RawRabbit.Common
 
 		public bool IsInitialized(QueueConfiguration queue)
 		{
-			return queue.IsDirectReplyTo() || _initQueues.Contains(queue.FullQueueName);
+			return queue.IsDirectReplyTo() || queue.AssumeInitialized || _initQueues.Contains(queue.FullQueueName);
 		}
 
 		private void BindQueueToExchange(ScheduledBindQueueTask bind)
