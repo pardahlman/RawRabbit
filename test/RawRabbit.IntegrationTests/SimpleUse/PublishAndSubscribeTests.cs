@@ -12,11 +12,11 @@ using RawRabbit.Exceptions;
 using RawRabbit.IntegrationTests.TestMessages;
 using Xunit;
 using ExchangeType = RawRabbit.Configuration.Exchange.ExchangeType;
+using RabbitMQ.Client.Exceptions;
 
 namespace RawRabbit.IntegrationTests.SimpleUse
 {
-    using Context;
-    using RabbitMQ.Client.Exceptions;
+
 
     public class PublishAndSubscribeTests : IntegrationTestBase
     {
@@ -447,10 +447,9 @@ namespace RawRabbit.IntegrationTests.SimpleUse
                     /* Test */
                     await client.PublishAsync(new DynamicMessage { Body = new { IsDynamic = true } },
                             configuration: cfg => cfg
-                                .WithExchange(
-                                    e => e
-                                        .AssumeInitialized()
-                                        .WithName(exchangeName)));
+                                .WithExchange(e => e
+                                    .AssumeInitialized()
+                                    .WithName(exchangeName)));
                     await tcs.Task;
 
                     /* Assert */
@@ -466,21 +465,21 @@ namespace RawRabbit.IntegrationTests.SimpleUse
         }
 
         [Fact]
-        public async Task Should_Throw_When_Subscribed_Not_Initialized_Queue()
+        public void Should_Throw_When_Subscribed_Not_Initialized_Queue()
         {
             using (var client = TestClientFactory.CreateNormal())
             {
 
                 /* Setup */
-                const string exchangeName = "initialized.exchange";
                 const string queueName = "not.initialized.queue";
                 var tcs = new TaskCompletionSource<DynamicMessage>();
-                TestChannel.ExchangeDeclare(exchangeName, RabbitMQ.Client.ExchangeType.Fanout);
+
 
                 /* Test */
-                try
-                {
-                    client.SubscribeAsync<DynamicMessage>((message, context) =>
+
+                Assert.Throws<AggregateException>(() =>
+
+                client.SubscribeAsync<DynamicMessage>((message, context) =>
                     {
                         tcs.TrySetResult(message);
                         return Task.FromResult(true);
@@ -488,34 +487,9 @@ namespace RawRabbit.IntegrationTests.SimpleUse
                         .WithQueue(q => q
                             .AssumeInitialized()
                             .WithName(queueName))
-                        .WithExchange(e => e
-                            .WithName(exchangeName)));
+                ));
 
-                    await client.PublishAsync(new DynamicMessage {Body = new {IsDynamic = true}},
-                        configuration: cfg => cfg
-                            .WithExchange(
-                                e => e
-                                    .AssumeInitialized()
-                                    .WithName(exchangeName)));
-                    await tcs.Task;
-
-                    /* Assert */
-                    Assert.True(tcs.Task.Result.Body.IsDynamic);
-                }
-                catch (AggregateException)
-                {
-                    Assert.False(tcs.Task.IsCompleted);
-                }
-                catch (OperationInterruptedException)
-                {
-                    Assert.False(tcs.Task.IsCompleted);
-                }
-                finally
-                {
-                    /* Teardown */
-                    TestChannel.QueueDelete(queueName);
-                    TestChannel.ExchangeDelete(exchangeName);
-                }
+                Assert.False(tcs.Task.IsCompleted);
             }
         }
     }
