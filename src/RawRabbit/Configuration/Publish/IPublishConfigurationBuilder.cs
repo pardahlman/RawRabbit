@@ -5,11 +5,11 @@ using RawRabbit.Configuration.Exchange;
 
 namespace RawRabbit.Configuration.Publish
 {
-	public interface IPublishConfigurationBuilder
-	{
-		IPublishConfigurationBuilder WithExchange(Action<IExchangeConfigurationBuilder> exchange);
-		IPublishConfigurationBuilder WithRoutingKey(string routingKey);
-		IPublishConfigurationBuilder WithProperties(Action<IBasicProperties> properties);
-		IPublishConfigurationBuilder WithMandatoryDelivery(EventHandler<BasicReturnEventArgs> basicReturn);
-	}
+    public interface IPublishConfigurationBuilder
+    {
+        IPublishConfigurationBuilder WithExchange(Action<IExchangeConfigurationBuilder> exchange);
+        IPublishConfigurationBuilder WithRoutingKey(string routingKey);
+        IPublishConfigurationBuilder WithProperties(Action<IBasicProperties> properties);
+        IPublishConfigurationBuilder WithMandatoryDelivery(EventHandler<BasicReturnEventArgs> basicReturn);
+    }
 }

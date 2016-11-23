@@ -9,30 +9,30 @@ using RawRabbit.Extensions.MessageSequence.Repository;
 
 namespace RawRabbit.Extensions.MessageSequence
 {
-	public static class MessageSequenceExtension
-	{
-		public static MessageSequence<TCompleteType> ExecuteSequence<TMessageContext, TCompleteType>(
-			this IBusClient<TMessageContext> client,
-			Func<IMessageChainPublisher<TMessageContext>, MessageSequence<TCompleteType>> cfg
-			) where TMessageContext : IMessageContext
-		{
-			var extended = (client as Client.IBusClient<TMessageContext>);
-			if (extended == null)
-			{
-				throw new InvalidOperationException("Extensions is only available for ExtendableBusClient");
-			}
-			if (cfg == null)
-			{
-				throw new ArgumentNullException(nameof(cfg));
-			}
+    public static class MessageSequenceExtension
+    {
+        public static MessageSequence<TCompleteType> ExecuteSequence<TMessageContext, TCompleteType>(
+            this IBusClient<TMessageContext> client,
+            Func<IMessageChainPublisher<TMessageContext>, MessageSequence<TCompleteType>> cfg
+            ) where TMessageContext : IMessageContext
+        {
+            var extended = (client as Client.IBusClient<TMessageContext>);
+            if (extended == null)
+            {
+                throw new InvalidOperationException("Extensions is only available for ExtendableBusClient");
+            }
+            if (cfg == null)
+            {
+                throw new ArgumentNullException(nameof(cfg));
+            }
 
-			var chainTopology = extended.GetService<IMessageChainTopologyUtil>();
-			var messageDispather = extended.GetService<IMessageChainDispatcher>();
-			var repo = extended.GetService<IMessageSequenceRepository>();
-			var mainCfg = extended.GetService<RawRabbitConfiguration>();
-			
-			var configBuilder = new MessageSequenceBuilder<TMessageContext>(extended, chainTopology, messageDispather, repo, mainCfg);
-			return cfg(configBuilder);
-		}
-	}
+            var chainTopology = extended.GetService<IMessageChainTopologyUtil>();
+            var messageDispather = extended.GetService<IMessageChainDispatcher>();
+            var repo = extended.GetService<IMessageSequenceRepository>();
+            var mainCfg = extended.GetService<RawRabbitConfiguration>();
+            
+            var configBuilder = new MessageSequenceBuilder<TMessageContext>(extended, chainTopology, messageDispather, repo, mainCfg);
+            return cfg(configBuilder);
+        }
+    }
 }

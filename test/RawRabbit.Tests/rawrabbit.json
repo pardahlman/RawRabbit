@@ -1,24 +1,24 @@
 ﻿{
-	"Username": "guest",
-	"Password": "guest",
-	"VirtualHost": "/",
-	"Port": 5672,
-	"Hostnames": [ "localhost" ],
-	"RequestTimeout": "00:00:10",
-	"PublishConfirmTimeout": "00:00:01",
-	"RecoveryInterval": "00:00:10",
-	"PersistentDeliveryMode": true,
-	"AutoCloseConnection": true,
-	"AutomaticRecovery": true,
-	"TopologyRecovery": true,
-	"Exchange": {
-		"Durable": true,
-		"AutoDelete": true,
-		"Type": "Topic"
-	},
-	"Queue": {
-		"AutoDelete": true,
-		"Durable": true,
-		"Exclusive": true
-	}
+    "Username": "guest",
+    "Password": "guest",
+    "VirtualHost": "/",
+    "Port": 5672,
+    "Hostnames": [ "localhost" ],
+    "RequestTimeout": "00:00:10",
+    "PublishConfirmTimeout": "00:00:01",
+    "RecoveryInterval": "00:00:10",
+    "PersistentDeliveryMode": true,
+    "AutoCloseConnection": true,
+    "AutomaticRecovery": true,
+    "TopologyRecovery": true,
+    "Exchange": {
+        "Durable": true,
+        "AutoDelete": true,
+        "Type": "Topic"
+    },
+    "Queue": {
+        "AutoDelete": true,
+        "Durable": true,
+        "Exclusive": true
+    }
 }

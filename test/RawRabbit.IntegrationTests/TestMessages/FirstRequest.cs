@@ -1,7 +1,7 @@
 ﻿namespace RawRabbit.IntegrationTests.TestMessages
 {
-	public class FirstRequest
-	{
+    public class FirstRequest
+    {
 
-	}
+    }
 }

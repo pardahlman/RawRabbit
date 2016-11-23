@@ -2,8 +2,8 @@
 
 namespace RawRabbit.Extensions.TopologyUpdater.Model
 {
-	public class TopologyUpdateResult
-	{
-		public List<ExchangeUpdateResult> Exchanges { get; set; }
-	}
+    public class TopologyUpdateResult
+    {
+        public List<ExchangeUpdateResult> Exchanges { get; set; }
+    }
 }

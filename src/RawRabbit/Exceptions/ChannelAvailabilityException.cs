@@ -2,9 +2,9 @@
 
 namespace RawRabbit.Exceptions
 {
-	public class ChannelAvailabilityException : Exception
-	{
-		public ChannelAvailabilityException(string message) : base(message)
-		{ }
-	}
+    public class ChannelAvailabilityException : Exception
+    {
+        public ChannelAvailabilityException(string message) : base(message)
+        { }
+    }
 }

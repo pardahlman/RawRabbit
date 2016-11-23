@@ -6,8 +6,8 @@ using RawRabbit.Context;
 
 namespace RawRabbit.Operations.Abstraction
 {
-	public interface IResponder<out TMessageContext> where TMessageContext : IMessageContext
-	{
-		ISubscription RespondAsync<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, ResponderConfiguration cfg);
-	}
+    public interface IResponder<out TMessageContext> where TMessageContext : IMessageContext
+    {
+        ISubscription RespondAsync<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, ResponderConfiguration cfg);
+    }
 }

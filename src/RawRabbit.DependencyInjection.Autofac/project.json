@@ -1,22 +1,22 @@
 ﻿{
-	"title": "RawRabbit.DependencyInjection.Autofac",
-	"version": "1.10.2-*",
-	"authors": [ "par.dahlman" ],
-	"description": "Wire up RawRabbit with Autfac!",
+    "title": "RawRabbit.DependencyInjection.Autofac",
+    "version": "1.10.2-*",
+    "authors": [ "par.dahlman" ],
+    "description": "Wire up RawRabbit with Autfac!",
 
-	"packOptions": {
-		"iconUrl": "http://pardahlman.se/raw/icon.png",
-		"projectUrl": "https://github.com/pardahlman/RawRabbit",
-		"tags": [ "rabbitmq", "raw", "rawrabbit", "autofac" ],
-		"publishExclude": [ "**.xproj", "**.user", "**.vspscc" ]
-	},
+    "packOptions": {
+        "iconUrl": "http://pardahlman.se/raw/icon.png",
+        "projectUrl": "https://github.com/pardahlman/RawRabbit",
+        "tags": [ "rabbitmq", "raw", "rawrabbit", "autofac" ],
+        "publishExclude": [ "**.xproj", "**.user", "**.vspscc" ]
+    },
 
-	"dependencies": {
-		"RawRabbit": { "target": "project" },
-		"Autofac": "4.1.0"
-	},
-	"frameworks": {
-		"netstandard1.5": {},
-		"net451": {}
-	}
+    "dependencies": {
+        "RawRabbit": { "target": "project" },
+        "Autofac": "4.1.0"
+    },
+    "frameworks": {
+        "netstandard1.5": {},
+        "net451": {}
+    }
 }

@@ -24,150 +24,150 @@ using RawRabbit.Serialization;
 
 namespace RawRabbit.DependencyInjection.Ninject
 {
-	public class RawRabbitModule : RawRabbitModule<MessageContext> { }
+    public class RawRabbitModule : RawRabbitModule<MessageContext> { }
 
-	public class RawRabbitModule<TMessageContext> : NinjectModule where TMessageContext : IMessageContext
-	{
-		public override void Load()
-		{
-			Kernel
-				.Bind<ISubscriber<TMessageContext>>()
-				.To<Subscriber<TMessageContext>>()
-				.InSingletonScope();
+    public class RawRabbitModule<TMessageContext> : NinjectModule where TMessageContext : IMessageContext
+    {
+        public override void Load()
+        {
+            Kernel
+                .Bind<ISubscriber<TMessageContext>>()
+                .To<Subscriber<TMessageContext>>()
+                .InSingletonScope();
 
-			Kernel
-				.Bind<IPublisher>()
-				.To<Publisher<TMessageContext>>()
-				.InSingletonScope();
+            Kernel
+                .Bind<IPublisher>()
+                .To<Publisher<TMessageContext>>()
+                .InSingletonScope();
 
-			Kernel
-				.Bind<IResponder<TMessageContext>>()
-				.To<Responder<TMessageContext>>()
-				.InSingletonScope();
+            Kernel
+                .Bind<IResponder<TMessageContext>>()
+                .To<Responder<TMessageContext>>()
+                .InSingletonScope();
 
-			Kernel
-				.Bind<IRequester>()
-				.To<Requester<TMessageContext>>()
-				.InSingletonScope();
+            Kernel
+                .Bind<IRequester>()
+                .To<Requester<TMessageContext>>()
+                .InSingletonScope();
 
-			Kernel
-				.Bind<IMessageContextProvider<TMessageContext>>()
-				.To<MessageContextProvider<TMessageContext>>()
-				.InSingletonScope()
-				.WithConstructorArgument("createContextAsync", (Func<Task<TMessageContext>>)null);
+            Kernel
+                .Bind<IMessageContextProvider<TMessageContext>>()
+                .To<MessageContextProvider<TMessageContext>>()
+                .InSingletonScope()
+                .WithConstructorArgument("createContextAsync", (Func<Task<TMessageContext>>)null);
 
-			Kernel
-				.Bind<JsonSerializer>()
-				.ToMethod(context => new JsonSerializer
-				{
-					ContractResolver = new CamelCasePropertyNamesContractResolver(),
-					ObjectCreationHandling = ObjectCreationHandling.Auto,
-					TypeNameHandling = TypeNameHandling.Objects,
-					TypeNameAssemblyFormat = FormatterAssemblyStyle.Simple
-				})
-				.InSingletonScope();
+            Kernel
+                .Bind<JsonSerializer>()
+                .ToMethod(context => new JsonSerializer
+                {
+                    ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                    ObjectCreationHandling = ObjectCreationHandling.Auto,
+                    TypeNameHandling = TypeNameHandling.Objects,
+                    TypeNameAssemblyFormat = FormatterAssemblyStyle.Simple
+                })
+                .InSingletonScope();
 
-			Kernel
-				.Bind<IContextEnhancer>()
-				.To<ContextEnhancer>()
-				.InSingletonScope();
+            Kernel
+                .Bind<IContextEnhancer>()
+                .To<ContextEnhancer>()
+                .InSingletonScope();
 
-			Kernel
-				.Bind<ITopologyProvider>()
-				.To<TopologyProvider>()
-				.InSingletonScope();
+            Kernel
+                .Bind<ITopologyProvider>()
+                .To<TopologyProvider>()
+                .InSingletonScope();
 
-			Kernel
-				.Bind<IConnectionFactory>()
-				.ToMethod(context =>
-				{
-					var cfg = context.Kernel.Get<RawRabbitConfiguration>();
-					return new ConnectionFactory
-					{
-						VirtualHost = cfg.VirtualHost,
-						UserName = cfg.Username,
-						Password = cfg.Password,
-						Port = cfg.Port,
-						HostName = cfg.Hostnames.FirstOrDefault() ?? string.Empty,
-						AutomaticRecoveryEnabled = cfg.AutomaticRecovery,
-						TopologyRecoveryEnabled = cfg.TopologyRecovery,
-						NetworkRecoveryInterval = cfg.RecoveryInterval,
-						ClientProperties = context.Kernel.Get<IClientPropertyProvider>().GetClientProperties(cfg),
-						Ssl = cfg.Ssl
-					};
-				})
-				.InSingletonScope();
+            Kernel
+                .Bind<IConnectionFactory>()
+                .ToMethod(context =>
+                {
+                    var cfg = context.Kernel.Get<RawRabbitConfiguration>();
+                    return new ConnectionFactory
+                    {
+                        VirtualHost = cfg.VirtualHost,
+                        UserName = cfg.Username,
+                        Password = cfg.Password,
+                        Port = cfg.Port,
+                        HostName = cfg.Hostnames.FirstOrDefault() ?? string.Empty,
+                        AutomaticRecoveryEnabled = cfg.AutomaticRecovery,
+                        TopologyRecoveryEnabled = cfg.TopologyRecovery,
+                        NetworkRecoveryInterval = cfg.RecoveryInterval,
+                        ClientProperties = context.Kernel.Get<IClientPropertyProvider>().GetClientProperties(cfg),
+                        Ssl = cfg.Ssl
+                    };
+                })
+                .InSingletonScope();
 
-			Kernel
-				.Bind<IClientPropertyProvider>()
-				.To<ClientPropertyProvider>()
-				.InSingletonScope();
+            Kernel
+                .Bind<IClientPropertyProvider>()
+                .To<ClientPropertyProvider>()
+                .InSingletonScope();
 
-			Kernel
-				.Bind<ILoggerFactory>()
-				.To<LoggerFactory>()
-				.InSingletonScope();
+            Kernel
+                .Bind<ILoggerFactory>()
+                .To<LoggerFactory>()
+                .InSingletonScope();
 
-			Kernel
-				.Bind<IMessageSerializer>()
-				.To<JsonMessageSerializer>()
-				.InSingletonScope()
-				.WithConstructorArgument("config", (Action<JsonSerializer>)null);
+            Kernel
+                .Bind<IMessageSerializer>()
+                .To<JsonMessageSerializer>()
+                .InSingletonScope()
+                .WithConstructorArgument("config", (Action<JsonSerializer>)null);
 
-			Kernel
-				.Bind<IConsumerFactory>()
-				.To<EventingBasicConsumerFactory>()
-				.InSingletonScope();
+            Kernel
+                .Bind<IConsumerFactory>()
+                .To<EventingBasicConsumerFactory>()
+                .InSingletonScope();
 
-			Kernel
-				.Bind<IErrorHandlingStrategy>()
-				.To<DefaultStrategy>()
-				.InSingletonScope();
+            Kernel
+                .Bind<IErrorHandlingStrategy>()
+                .To<DefaultStrategy>()
+                .InSingletonScope();
 
-			Kernel
-				.Bind<IBasicPropertiesProvider>()
-				.To<BasicPropertiesProvider>()
-				.InSingletonScope();
+            Kernel
+                .Bind<IBasicPropertiesProvider>()
+                .To<BasicPropertiesProvider>()
+                .InSingletonScope();
 
-			Kernel
-				.Bind<IChannelFactory>()
-				.To<ChannelFactory>()
-				.InSingletonScope();
+            Kernel
+                .Bind<IChannelFactory>()
+                .To<ChannelFactory>()
+                .InSingletonScope();
 
-			Kernel
-				.Bind<ChannelFactoryConfiguration>()
-				.ToConstant(ChannelFactoryConfiguration.Default)
-				.InSingletonScope();
+            Kernel
+                .Bind<ChannelFactoryConfiguration>()
+                .ToConstant(ChannelFactoryConfiguration.Default)
+                .InSingletonScope();
 
-			Kernel
-				.Bind<IConfigurationEvaluator>()
-				.To<ConfigurationEvaluator>()
-				.InSingletonScope();
+            Kernel
+                .Bind<IConfigurationEvaluator>()
+                .To<ConfigurationEvaluator>()
+                .InSingletonScope();
 
-			Kernel
-				.Bind<IPublishAcknowledger>()
-				.To<PublishAcknowledger>()
-				.InSingletonScope()
-				.WithConstructorArgument("publishTimeout",
-					context => context.Kernel.Get<RawRabbitConfiguration>().PublishConfirmTimeout);
+            Kernel
+                .Bind<IPublishAcknowledger>()
+                .To<PublishAcknowledger>()
+                .InSingletonScope()
+                .WithConstructorArgument("publishTimeout",
+                    context => context.Kernel.Get<RawRabbitConfiguration>().PublishConfirmTimeout);
 
-			Kernel
-				.Bind<INamingConventions>()
-				.To<NamingConventions>()
-				.InSingletonScope();
+            Kernel
+                .Bind<INamingConventions>()
+                .To<NamingConventions>()
+                .InSingletonScope();
 
-			Kernel
-				.Bind<IBusClient<TMessageContext>>()
-				.To<BaseBusClient<TMessageContext>>()
-				.InSingletonScope();
+            Kernel
+                .Bind<IBusClient<TMessageContext>>()
+                .To<BaseBusClient<TMessageContext>>()
+                .InSingletonScope();
 
-			if (typeof(TMessageContext) == typeof(MessageContext))
-			{
-				Kernel
-					.Bind<IBusClient>()
-					.To<BusClient>()
-					.InSingletonScope();
-			}
-		}
-	}
+            if (typeof(TMessageContext) == typeof(MessageContext))
+            {
+                Kernel
+                    .Bind<IBusClient>()
+                    .To<BusClient>()
+                    .InSingletonScope();
+            }
+        }
+    }
 }

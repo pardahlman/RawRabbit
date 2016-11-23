@@ -10,44 +10,44 @@ using RawRabbit.vNext;
 
 namespace RawRabbit.IntegrationTests
 {
-	public class TestClientFactory
-	{
-		public static vNext.Disposable.IBusClient CreateNormal(Action<IServiceCollection> action = null, Action<IConfigurationBuilder> config = null)
-		{
-			action = AddTestConfig(action);
-			return BusClientFactory.CreateDefault(config, action);
-		}
+    public class TestClientFactory
+    {
+        public static vNext.Disposable.IBusClient CreateNormal(Action<IServiceCollection> action = null, Action<IConfigurationBuilder> config = null)
+        {
+            action = AddTestConfig(action);
+            return BusClientFactory.CreateDefault(config, action);
+        }
 
-		public static vNext.Disposable.IBusClient<TMessageContext> CreateNormal<TMessageContext>(Action<IServiceCollection> action = null,
-			Action<IConfigurationBuilder> config = null) where TMessageContext : IMessageContext
-		{
-			action = AddTestConfig(action);
-			return BusClientFactory.CreateDefault<TMessageContext>(config, action);
-		}
+        public static vNext.Disposable.IBusClient<TMessageContext> CreateNormal<TMessageContext>(Action<IServiceCollection> action = null,
+            Action<IConfigurationBuilder> config = null) where TMessageContext : IMessageContext
+        {
+            action = AddTestConfig(action);
+            return BusClientFactory.CreateDefault<TMessageContext>(config, action);
+        }
 
-		public static RawRabbit.Extensions.Disposable.IBusClient CreateExtendable(Action<IServiceCollection> custom = null)
-		{
-			custom = AddTestConfig(custom);
-			return RawRabbitFactory.Create(custom);
-		}
+        public static RawRabbit.Extensions.Disposable.IBusClient CreateExtendable(Action<IServiceCollection> custom = null)
+        {
+            custom = AddTestConfig(custom);
+            return RawRabbitFactory.Create(custom);
+        }
 
-		private static Action<IServiceCollection> AddTestConfig(Action<IServiceCollection> action)
-		{
-			action = action ?? (collection => { });
-			action += collection =>
-			{
-				var prevRegged = collection
-					.LastOrDefault(c => c.ServiceType == typeof(RawRabbitConfiguration))?
-					.ImplementationFactory(null) as RawRabbitConfiguration;
-				if (prevRegged != null)
-				{
-					prevRegged.Queue.AutoDelete = true;
-					collection.AddSingleton<RawRabbitConfiguration>(p => prevRegged);
-				}
+        private static Action<IServiceCollection> AddTestConfig(Action<IServiceCollection> action)
+        {
+            action = action ?? (collection => { });
+            action += collection =>
+            {
+                var prevRegged = collection
+                    .LastOrDefault(c => c.ServiceType == typeof(RawRabbitConfiguration))?
+                    .ImplementationFactory(null) as RawRabbitConfiguration;
+                if (prevRegged != null)
+                {
+                    prevRegged.Queue.AutoDelete = true;
+                    collection.AddSingleton<RawRabbitConfiguration>(p => prevRegged);
+                }
 
-				collection.AddSingleton<ILoggerFactory, VoidLoggerFactory>();
-			};
-			return action;
-		}
-	}
+                collection.AddSingleton<ILoggerFactory, VoidLoggerFactory>();
+            };
+            return action;
+        }
+    }
 }

@@ -2,8 +2,8 @@
 
 namespace RawRabbit.IntegrationTests.TestMessages
 {
-	public class FirstResponse
-	{
-		public Guid Infered { get; set; }
-	}
+    public class FirstResponse
+    {
+        public Guid Infered { get; set; }
+    }
 }

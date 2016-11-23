@@ -1,22 +1,22 @@
 {
-	"title": "RawRabbit.Logging.Serilog",
-	"version": "1.10.2-*",
-	"authors": [ "par.dahlman" ],
-	"description": "Write RawRabbit's logs with Serilog",
+    "title": "RawRabbit.Logging.Serilog",
+    "version": "1.10.2-*",
+    "authors": [ "par.dahlman" ],
+    "description": "Write RawRabbit's logs with Serilog",
 
-	"packOptions": {
-		"iconUrl": "http://pardahlman.se/raw/icon.png",
-		"projectUrl": "https://github.com/pardahlman/RawRabbit",
-		"tags": [ "raw", "rabbit", "rawrabbit", "rabbitmq", "logger", "serilog" ],
-		"publishExclude": [ "**.xproj", "**.user", "**.vspscc" ]
-	},
+    "packOptions": {
+        "iconUrl": "http://pardahlman.se/raw/icon.png",
+        "projectUrl": "https://github.com/pardahlman/RawRabbit",
+        "tags": [ "raw", "rabbit", "rawrabbit", "rabbitmq", "logger", "serilog" ],
+        "publishExclude": [ "**.xproj", "**.user", "**.vspscc" ]
+    },
 
-	"dependencies": {
-		"RawRabbit": { "target": "project" },
-		"Serilog": "2.1.0"
-	},
-	"frameworks": {
-		"netstandard1.5": {},
-		"net451": {}
-	}
+    "dependencies": {
+        "RawRabbit": { "target": "project" },
+        "Serilog": "2.1.0"
+    },
+    "frameworks": {
+        "netstandard1.5": {},
+        "net451": {}
+    }
 }
