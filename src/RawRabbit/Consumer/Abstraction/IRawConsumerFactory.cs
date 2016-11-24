@@ -1,6 +1,6 @@
 ﻿using RabbitMQ.Client;
 using RawRabbit.Configuration.Consume;
-using RawRabbit.Configuration.Respond;
+using RawRabbit.Configuration.Legacy.Respond;
 
 namespace RawRabbit.Consumer.Abstraction
 {

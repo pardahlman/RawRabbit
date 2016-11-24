@@ -5,7 +5,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
 using RawRabbit.Configuration.Consume;
-using RawRabbit.Configuration.Respond;
+using RawRabbit.Configuration.Legacy.Respond;
 using RawRabbit.Consumer.Abstraction;
 using RawRabbit.Logging;
 

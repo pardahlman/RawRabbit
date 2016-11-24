@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using RawRabbit.Configuration.Publish;
+using RawRabbit.Configuration.Legacy.Publish;
 
 namespace RawRabbit.Operations.Abstraction
 {

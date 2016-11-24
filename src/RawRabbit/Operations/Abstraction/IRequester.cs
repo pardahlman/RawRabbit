@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using RawRabbit.Configuration.Request;
+using RawRabbit.Configuration.Legacy.Request;
 
 namespace RawRabbit.Operations.Abstraction
 {

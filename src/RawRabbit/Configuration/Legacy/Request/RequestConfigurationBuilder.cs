@@ -2,7 +2,7 @@ using System;
 using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Queue;
 
-namespace RawRabbit.Configuration.Request
+namespace RawRabbit.Configuration.Legacy.Request
 {
 	public class RequestConfigurationBuilder : IRequestConfigurationBuilder
 	{

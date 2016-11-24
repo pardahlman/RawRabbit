@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using RabbitMQ.Client.Events;
-using RawRabbit.Configuration.Respond;
-using RawRabbit.Configuration.Subscribe;
+using RawRabbit.Configuration.Legacy.Respond;
+using RawRabbit.Configuration.Legacy.Subscribe;
 using RawRabbit.Consumer.Abstraction;
 
 namespace RawRabbit.ErrorHandling

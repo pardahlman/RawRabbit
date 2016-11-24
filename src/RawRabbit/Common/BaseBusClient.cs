@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using RawRabbit.Configuration.Publish;
-using RawRabbit.Configuration.Request;
-using RawRabbit.Configuration.Respond;
-using RawRabbit.Configuration.Subscribe;
+using RawRabbit.Configuration.Legacy.Publish;
+using RawRabbit.Configuration.Legacy.Request;
+using RawRabbit.Configuration.Legacy.Respond;
+using RawRabbit.Configuration.Legacy.Subscribe;
 using RawRabbit.Context;
 using RawRabbit.Logging;
 using RawRabbit.Operations.Abstraction;

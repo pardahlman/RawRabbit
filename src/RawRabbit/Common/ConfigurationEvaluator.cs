@@ -1,11 +1,11 @@
 ﻿using System;
 using RawRabbit.Configuration;
 using RawRabbit.Configuration.Exchange;
-using RawRabbit.Configuration.Publish;
+using RawRabbit.Configuration.Legacy.Publish;
+using RawRabbit.Configuration.Legacy.Request;
+using RawRabbit.Configuration.Legacy.Respond;
+using RawRabbit.Configuration.Legacy.Subscribe;
 using RawRabbit.Configuration.Queue;
-using RawRabbit.Configuration.Request;
-using RawRabbit.Configuration.Respond;
-using RawRabbit.Configuration.Subscribe;
 
 namespace RawRabbit.Common
 {

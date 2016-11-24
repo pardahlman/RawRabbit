@@ -6,7 +6,7 @@ using RabbitMQ.Client;
 using RawRabbit.Channel.Abstraction;
 using RawRabbit.Common;
 using RawRabbit.Configuration;
-using RawRabbit.Configuration.Subscribe;
+using RawRabbit.Configuration.Legacy.Subscribe;
 using RawRabbit.Consumer.Abstraction;
 using RawRabbit.Context;
 using RawRabbit.Context.Enhancer;

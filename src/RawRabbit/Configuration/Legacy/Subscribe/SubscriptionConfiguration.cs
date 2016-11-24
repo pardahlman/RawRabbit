@@ -1,8 +1,8 @@
 ﻿using RawRabbit.Configuration.Exchange;
+using RawRabbit.Configuration.Legacy.Respond;
 using RawRabbit.Configuration.Queue;
-using RawRabbit.Configuration.Respond;
 
-namespace RawRabbit.Configuration.Subscribe
+namespace RawRabbit.Configuration.Legacy.Subscribe
 {
 	public class SubscriptionConfiguration : IConsumerConfiguration
 	{

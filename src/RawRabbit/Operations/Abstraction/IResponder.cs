@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using RawRabbit.Common;
-using RawRabbit.Configuration.Respond;
+using RawRabbit.Configuration.Legacy.Respond;
 using RawRabbit.Context;
 
 namespace RawRabbit.Operations.Abstraction

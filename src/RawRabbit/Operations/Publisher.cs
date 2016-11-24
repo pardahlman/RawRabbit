@@ -4,7 +4,7 @@ using RabbitMQ.Client;
 using RawRabbit.Channel.Abstraction;
 using RawRabbit.Common;
 using RawRabbit.Configuration;
-using RawRabbit.Configuration.Publish;
+using RawRabbit.Configuration.Legacy.Publish;
 using RawRabbit.Context;
 using RawRabbit.Context.Provider;
 using RawRabbit.Logging;

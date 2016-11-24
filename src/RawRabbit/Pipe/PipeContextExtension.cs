@@ -6,8 +6,6 @@ using RawRabbit.Configuration;
 using RawRabbit.Configuration.Consume;
 using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Queue;
-using RawRabbit.Configuration.Respond;
-using RawRabbit.Configuration.Subscribe;
 using RawRabbit.Consumer.Abstraction;
 using RawRabbit.Context;
 

@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using RabbitMQ.Client.Events;
 using RawRabbit.Common;
-using RawRabbit.Configuration.Subscribe;
+using RawRabbit.Configuration.Legacy.Subscribe;
 using RawRabbit.Consumer.Abstraction;
 using RawRabbit.Context;
 using RawRabbit.ErrorHandling;

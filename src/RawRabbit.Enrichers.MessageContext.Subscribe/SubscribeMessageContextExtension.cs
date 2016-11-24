@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using RawRabbit.Common;
-using RawRabbit.Configuration.Subscribe;
+using RawRabbit.Configuration.Legacy.Subscribe;
 using RawRabbit.Context;
 using RawRabbit.Enrichers.MessageContext.Subscribe;
 using RawRabbit.Pipe;

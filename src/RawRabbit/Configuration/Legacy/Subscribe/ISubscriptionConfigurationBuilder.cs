@@ -2,7 +2,7 @@
 using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Queue;
 
-namespace RawRabbit.Configuration.Subscribe
+namespace RawRabbit.Configuration.Legacy.Subscribe
 {
 	public interface ISubscriptionConfigurationBuilder
 	{

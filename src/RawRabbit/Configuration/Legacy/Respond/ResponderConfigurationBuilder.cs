@@ -2,7 +2,7 @@
 using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Queue;
 
-namespace RawRabbit.Configuration.Respond
+namespace RawRabbit.Configuration.Legacy.Respond
 {
 	class ResponderConfigurationBuilder : IResponderConfigurationBuilder
 	{
