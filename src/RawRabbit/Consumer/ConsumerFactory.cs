@@ -47,7 +47,7 @@ namespace RawRabbit.Consumer
 					tChannel.Result.BasicConsume(
 						queue: cfg.QueueName,
 						noAck: cfg.NoAck,
-						consumerTag: Guid.NewGuid().ToString(),
+						consumerTag: cfg.ConsumerTag,
 						noLocal: cfg.NoLocal,
 						exclusive: cfg.Exclusive,
 						arguments: cfg.Arguments,

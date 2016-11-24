@@ -33,6 +33,7 @@ namespace RawRabbit.Configuration.Consume
 				QueueName = queueName,
 				ExchangeName = exchangeName,
 				RoutingKey = routingKey,
+				ConsumerTag = Guid.NewGuid().ToString(),
 				Arguments = new Dictionary<string, object>(),
 			};
 		}
