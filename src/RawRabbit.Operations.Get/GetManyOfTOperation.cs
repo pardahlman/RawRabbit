@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Configuration.Consume;
+using RawRabbit.Configuration.Get;
 using RawRabbit.Operations.Get.Model;
 using RawRabbit.Pipe;
 using RawRabbit.Pipe.Extensions;

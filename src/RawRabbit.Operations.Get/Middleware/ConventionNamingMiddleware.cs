@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Consume;
+using RawRabbit.Configuration.Get;
 using RawRabbit.Pipe;
 
 namespace RawRabbit.Operations.Get.Middleware
