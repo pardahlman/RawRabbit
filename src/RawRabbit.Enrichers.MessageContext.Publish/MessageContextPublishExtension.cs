@@ -24,7 +24,7 @@ namespace RawRabbit
 			this IBusClient busClient,
 			TMessage message = default(TMessage),
 			TMessageContext context = default(TMessageContext),
-			Action<IPublishConfigurationBuilder> config = null,
+			Action<IPublisherConfigurationBuilder> config = null,
 			CancellationToken token = default(CancellationToken))
 		{
 			return busClient.InvokeAsync(

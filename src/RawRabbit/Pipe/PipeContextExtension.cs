@@ -68,9 +68,9 @@ namespace RawRabbit.Pipe
 			return context.Get<ConsumeConfiguration>(PipeKey.ConsumerConfiguration);
 		}
 
-		public static PublishConfiguration GetPublishConfiguration(this IPipeContext context)
+		public static PublisherConfiguration GetPublishConfiguration(this IPipeContext context)
 		{
-			return context.Get<PublishConfiguration>(PipeKey.PublishConfiguration);
+			return context.Get<PublisherConfiguration>(PipeKey.PublishConfiguration);
 		}
 
 		public static string GetRoutingKey(this IPipeContext context)

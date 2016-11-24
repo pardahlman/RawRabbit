@@ -33,7 +33,7 @@ namespace RawRabbit
 			.Use<PublishMessage>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.MessagePublished));
 
-		public static Task PublishAsync<TMessage>(this IBusClient client, TMessage message, Action<IPublishConfigurationBuilder> config = null)
+		public static Task PublishAsync<TMessage>(this IBusClient client, TMessage message, Action<IPublisherConfigurationBuilder> config = null)
 		{
 			return client.InvokeAsync(
 				PublishPipeAction,

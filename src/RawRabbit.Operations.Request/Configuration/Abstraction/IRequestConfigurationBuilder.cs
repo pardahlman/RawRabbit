@@ -5,7 +5,7 @@ namespace RawRabbit.Operations.Request.Configuration.Abstraction
 {
 	public interface IRequestConfigurationBuilder
 	{
-		IRequestConfigurationBuilder PublishRequest(Action<IPublishConfigurationBuilder> publish);
+		IRequestConfigurationBuilder PublishRequest(Action<IPublisherConfigurationBuilder> publish);
 		IRequestConfigurationBuilder ConsumeResponse(Action<IConsumeConfigurationBuilder> consume);
 	}
 }

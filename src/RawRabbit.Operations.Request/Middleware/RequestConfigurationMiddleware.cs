@@ -12,9 +12,9 @@ namespace RawRabbit.Operations.Request.Middleware
 	{
 		private readonly IRequestConfigurationFactory _factory;
 
-		public RequestConfigurationMiddleware(IPublishConfigurationFactory publish, IConsumeConfigurationFactory consume)
+		public RequestConfigurationMiddleware(IPublisherConfigurationFactory publisher, IConsumeConfigurationFactory consume)
 		{
-			_factory = new RequestConfigurationFactory(publish, consume);
+			_factory = new RequestConfigurationFactory(publisher, consume);
 		}
 
 		public RequestConfigurationMiddleware(IRequestConfigurationFactory factory)

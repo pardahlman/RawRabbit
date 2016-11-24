@@ -6,7 +6,7 @@ using RawRabbit.Configuration.Exchange;
 
 namespace RawRabbit.Configuration.Consume
 {
-	public interface IPublishConfigurationBuilder
+	public interface IPublisherConfigurationBuilder
 	{
 		/// <summary>
 		/// Specify the topology features of the Exchange to consume from.
@@ -14,13 +14,13 @@ namespace RawRabbit.Configuration.Consume
 		/// </summary>
 		/// <param name="exchange">Builder for exchange features.</param>
 		/// <returns></returns>
-		IPublishConfigurationBuilder OnDeclaredExchange(Action<IExchangeConfigurationBuilder> exchange);
-		IPublishConfigurationBuilder WithRoutingKey(string routingKey);
-		IPublishConfigurationBuilder WithProperties(Action<IBasicProperties> properties);
-		IPublishConfigurationBuilder WithReturnCallback(Action<BasicReturnEventArgs> callback);
+		IPublisherConfigurationBuilder OnDeclaredExchange(Action<IExchangeConfigurationBuilder> exchange);
+		IPublisherConfigurationBuilder WithRoutingKey(string routingKey);
+		IPublisherConfigurationBuilder WithProperties(Action<IBasicProperties> properties);
+		IPublisherConfigurationBuilder WithReturnCallback(Action<BasicReturnEventArgs> callback);
 	}
 
-	public class PublishConfiguration
+	public class PublisherConfiguration
 	{
 		public ExchangeConfiguration Exchange { get; set; }
 		public Action<BasicReturnEventArgs> MandatoryCallback { get; set; }
@@ -28,16 +28,16 @@ namespace RawRabbit.Configuration.Consume
 		public string RoutingKey { get; set; }
 	}
 
-	public class PublishConfigurationBuilder : IPublishConfigurationBuilder
+	public class PublisherConfigurationBuilder : IPublisherConfigurationBuilder
 	{
-		public PublishConfiguration Config { get; }
+		public PublisherConfiguration Config { get; }
 
-		public PublishConfigurationBuilder(PublishConfiguration initial)
+		public PublisherConfigurationBuilder(PublisherConfiguration initial)
 		{
 			Config = initial;
 		}
 
-		public IPublishConfigurationBuilder OnDeclaredExchange(Action<IExchangeConfigurationBuilder> exchange)
+		public IPublisherConfigurationBuilder OnDeclaredExchange(Action<IExchangeConfigurationBuilder> exchange)
 		{
 			var builder = new ExchangeConfigurationBuilder(Config.Exchange);
 			exchange(builder);
@@ -45,20 +45,20 @@ namespace RawRabbit.Configuration.Consume
 			return this;
 		}
 
-		public IPublishConfigurationBuilder WithRoutingKey(string routingKey)
+		public IPublisherConfigurationBuilder WithRoutingKey(string routingKey)
 		{
 			Config.RoutingKey = routingKey;
 			return this;
 		}
 
-		public IPublishConfigurationBuilder WithProperties(Action<IBasicProperties> properties)
+		public IPublisherConfigurationBuilder WithProperties(Action<IBasicProperties> properties)
 		{
 			Config.PropertyModifier = Config.PropertyModifier ?? (b => { });
 			Config.PropertyModifier += properties;
 			return this;
 		}
 
-		public IPublishConfigurationBuilder WithReturnCallback(Action<BasicReturnEventArgs> callback)
+		public IPublisherConfigurationBuilder WithReturnCallback(Action<BasicReturnEventArgs> callback)
 		{
 			Config.MandatoryCallback = Config.MandatoryCallback ?? (a => { });
 			Config.MandatoryCallback += callback;
@@ -66,39 +66,39 @@ namespace RawRabbit.Configuration.Consume
 		}
 	}
 
-	public interface IPublishConfigurationFactory
+	public interface IPublisherConfigurationFactory
 	{
-		PublishConfiguration Create<TMessage>();
-		PublishConfiguration Create(Type messageType);
-		PublishConfiguration Create(string exchangeName, string routingKey);
+		PublisherConfiguration Create<TMessage>();
+		PublisherConfiguration Create(Type messageType);
+		PublisherConfiguration Create(string exchangeName, string routingKey);
 	}
 
-	public class PublishConfigurationFactory : IPublishConfigurationFactory
+	public class PublisherConfigurationFactory : IPublisherConfigurationFactory
 	{
 		private readonly IExchangeConfigurationFactory _exchange;
 		private readonly INamingConventions _conventions;
 
-		public PublishConfigurationFactory(IExchangeConfigurationFactory exchange, INamingConventions conventions)
+		public PublisherConfigurationFactory(IExchangeConfigurationFactory exchange, INamingConventions conventions)
 		{
 			_exchange = exchange;
 			_conventions = conventions;
 		}
 
-		public PublishConfiguration Create<TMessage>()
+		public PublisherConfiguration Create<TMessage>()
 		{
 			return Create(typeof(TMessage));
 		}
 
-		public PublishConfiguration Create(Type messageType)
+		public PublisherConfiguration Create(Type messageType)
 		{
 			var exchangeName = _conventions.ExchangeNamingConvention(messageType);
 			var routingKey = _conventions.RoutingKeyConvention(messageType);
 			return Create(exchangeName, routingKey);
 		}
 
-		public PublishConfiguration Create(string exchangeName, string routingKey)
+		public PublisherConfiguration Create(string exchangeName, string routingKey)
 		{
-			return new PublishConfiguration
+			return new PublisherConfiguration
 			{
 				Exchange = _exchange.Create(exchangeName),
 				RoutingKey = routingKey

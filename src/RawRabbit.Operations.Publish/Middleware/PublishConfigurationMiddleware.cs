@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Consume;
 using RawRabbit.Pipe;
-using IPublishConfigurationBuilder = RawRabbit.Configuration.Consume.IPublishConfigurationBuilder;
 
 namespace RawRabbit.Operations.Publish.Middleware
 {
@@ -17,14 +16,14 @@ namespace RawRabbit.Operations.Publish.Middleware
 
 	public class PublishConfigurationMiddleware : Pipe.Middleware.Middleware
 	{
-		private readonly IPublishConfigurationFactory _publishFactory;
+		private readonly IPublisherConfigurationFactory _publisherFactory;
 		private readonly Func<IPipeContext, string> _exchangeFunc;
 		private readonly Func<IPipeContext, string> _routingKeyFunc;
 		private readonly Func<IPipeContext, Type> _messageTypeFunc;
 
-		public PublishConfigurationMiddleware(IPublishConfigurationFactory publishFactory, PublishConfigurationOptions options = null)
+		public PublishConfigurationMiddleware(IPublisherConfigurationFactory publisherFactory, PublishConfigurationOptions options = null)
 		{
-			_publishFactory = publishFactory;
+			_publisherFactory = publisherFactory;
 			_exchangeFunc = options?.ExchangeFunc ?? (context => context.GetPublishConfiguration()?.Exchange.ExchangeName);
 			_routingKeyFunc = options?.RoutingKeyFunc ?? (context => context.GetPublishConfiguration()?.RoutingKey);
 			_messageTypeFunc = options?.MessageTypeFunc ?? (context => context.GetMessageType());
@@ -38,10 +37,10 @@ namespace RawRabbit.Operations.Publish.Middleware
 				throw new ArgumentNullException(nameof(config));
 			}
 
-			var action = context.Get<Action<IPublishConfigurationBuilder>>(PipeKey.ConfigurationAction);
+			var action = context.Get<Action<IPublisherConfigurationBuilder>>(PipeKey.ConfigurationAction);
 			if (action != null)
 			{
-				var builder = new PublishConfigurationBuilder(config);
+				var builder = new PublisherConfigurationBuilder(config);
 				action(builder);
 				config = builder.Config;
 			}
@@ -50,19 +49,19 @@ namespace RawRabbit.Operations.Publish.Middleware
 			return Next.InvokeAsync(context);
 		}
 
-		protected virtual PublishConfiguration ExtractConfigFromStrings(IPipeContext context)
+		protected virtual PublisherConfiguration ExtractConfigFromStrings(IPipeContext context)
 		{
 			var routingKey = _routingKeyFunc(context);
 			var exchange = _exchangeFunc(context);
-			return _publishFactory.Create(exchange, routingKey);
+			return _publisherFactory.Create(exchange, routingKey);
 		}
 
-		protected virtual PublishConfiguration ExtractConfigFromMessageType(IPipeContext context)
+		protected virtual PublisherConfiguration ExtractConfigFromMessageType(IPipeContext context)
 		{
 			var messageType = _messageTypeFunc(context);
 			return messageType == null
 				? null
-				: _publishFactory.Create(messageType);
+				: _publisherFactory.Create(messageType);
 		}
 	}
 }

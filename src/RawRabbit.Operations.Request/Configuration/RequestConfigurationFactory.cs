@@ -6,12 +6,12 @@ namespace RawRabbit.Operations.Request.Configuration
 {
 	public class RequestConfigurationFactory : IRequestConfigurationFactory
 	{
-		private readonly IPublishConfigurationFactory _publish;
+		private readonly IPublisherConfigurationFactory _publisher;
 		private readonly IConsumeConfigurationFactory _consume;
 
-		public RequestConfigurationFactory(IPublishConfigurationFactory publish, IConsumeConfigurationFactory consume)
+		public RequestConfigurationFactory(IPublisherConfigurationFactory publisher, IConsumeConfigurationFactory consume)
 		{
-			_publish = publish;
+			_publisher = publisher;
 			_consume = consume;
 		}
 
@@ -24,7 +24,7 @@ namespace RawRabbit.Operations.Request.Configuration
 		{
 			var cfg = new RequestConfiguration
 			{
-				Request = _publish.Create(requestType),
+				Request = _publisher.Create(requestType),
 				Response = _consume.Create(responseType)
 			};
 			cfg.ToDirectRpc();
@@ -35,7 +35,7 @@ namespace RawRabbit.Operations.Request.Configuration
 		{
 			var cfg = new RequestConfiguration
 			{
-				Request = _publish.Create(requestExchange, requestRoutingKey),
+				Request = _publisher.Create(requestExchange, requestRoutingKey),
 				Response = _consume.Create(responseQueue, responseExchange, responseRoutingKey)
 			};
 			cfg.ToDirectRpc();

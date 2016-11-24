@@ -5,7 +5,7 @@ namespace RawRabbit.Operations.Request.Configuration
 	public class RequestConfiguration
 	{
 		public ConsumeConfiguration Response { get; set; }
-		public PublishConfiguration Request { get; set; }
+		public PublisherConfiguration Request { get; set; }
 	}
 
 	public static class RequestConfigurationExtensions

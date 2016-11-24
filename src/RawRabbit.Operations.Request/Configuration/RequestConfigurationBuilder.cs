@@ -13,9 +13,9 @@ namespace RawRabbit.Operations.Request.Configuration
 			Config = initial;
 		}
 
-		public IRequestConfigurationBuilder PublishRequest(Action<IPublishConfigurationBuilder> publish)
+		public IRequestConfigurationBuilder PublishRequest(Action<IPublisherConfigurationBuilder> publish)
 		{
-			var builder = new PublishConfigurationBuilder(Config.Request);
+			var builder = new PublisherConfigurationBuilder(Config.Request);
 			publish(builder);
 			Config.Request = builder.Config;
 			return this;

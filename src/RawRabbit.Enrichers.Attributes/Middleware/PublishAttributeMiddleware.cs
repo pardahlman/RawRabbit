@@ -8,13 +8,13 @@ namespace RawRabbit.Enrichers.Attributes.Middleware
 {
 	public class PublishAttributeOptions
 	{
-		public Func<IPipeContext, PublishConfiguration> ConfigFunc { get; set; }
+		public Func<IPipeContext, PublisherConfiguration> ConfigFunc { get; set; }
 		public Func<IPipeContext, Type> MessageTypeFunc { get; set; }
 	}
 
 	public class PublishAttributeMiddleware : AttributeMiddlewareBase
 	{
-		private readonly Func<IPipeContext, PublishConfiguration> _configFunc;
+		private readonly Func<IPipeContext, PublisherConfiguration> _configFunc;
 		private readonly Func<IPipeContext, Type> _messageTypeFunc;
 
 		public PublishAttributeMiddleware(PublishAttributeOptions options = null)
@@ -40,7 +40,7 @@ namespace RawRabbit.Enrichers.Attributes.Middleware
 			return Next.InvokeAsync(context);
 		}
 
-		protected virtual void UpdateRoutingConfig(PublishConfiguration config, Type type)
+		protected virtual void UpdateRoutingConfig(PublisherConfiguration config, Type type)
 		{
 			var routingAttr = GetAttribute<RoutingAttribute>(type);
 			if (routingAttr?.RoutingKey != null)
