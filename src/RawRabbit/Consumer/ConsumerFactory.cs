@@ -5,14 +5,14 @@ using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RawRabbit.Channel.Abstraction;
-using RawRabbit.Configuration.Consumer;
+using RawRabbit.Configuration.Consume;
 
 namespace RawRabbit.Consumer
 {
 	public interface IConsumerFactory
 	{
-		Task<IBasicConsumer> GetConsumerAsync(ConsumerConfiguration cfg);
-		Task<IBasicConsumer> CreateConsumerAsync(ConsumerConfiguration cfg);
+		Task<IBasicConsumer> GetConsumerAsync(ConsumeConfiguration cfg);
+		Task<IBasicConsumer> CreateConsumerAsync(ConsumeConfiguration cfg);
 	}
 
 	public class ConsumerFactory : IConsumerFactory
@@ -28,7 +28,7 @@ namespace RawRabbit.Consumer
 			_ackConsumers = new ConcurrentDictionary<string, Lazy<Task<IBasicConsumer>>>();
 		}
 
-		public Task<IBasicConsumer> GetConsumerAsync(ConsumerConfiguration cfg)
+		public Task<IBasicConsumer> GetConsumerAsync(ConsumeConfiguration cfg)
 		{
 			var cache = cfg.NoAck ? _noAckConsumers : _ackConsumers;
 			var lazyConsumerTask = cache.GetOrAdd(cfg.RoutingKey, routingKey =>
@@ -38,14 +38,14 @@ namespace RawRabbit.Consumer
 			return lazyConsumerTask.Value;
 		}
 
-		public Task<IBasicConsumer> CreateConsumerAsync(ConsumerConfiguration cfg)
+		public Task<IBasicConsumer> CreateConsumerAsync(ConsumeConfiguration cfg)
 		{
 			return GetOrCreateChannelAsync()
 				.ContinueWith(tChannel =>
 				{
 					IBasicConsumer consumer = new EventingBasicConsumer(tChannel.Result);
 					tChannel.Result.BasicConsume(
-						queue: cfg.Queue.FullQueueName,
+						queue: cfg.QueueName,
 						noAck: cfg.NoAck,
 						consumerTag: Guid.NewGuid().ToString(),
 						noLocal: cfg.NoLocal,

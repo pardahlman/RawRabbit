@@ -1,5 +1,7 @@
 ﻿using System;
+using RawRabbit.Configuration.Consume;
 using RawRabbit.Configuration.Exchange;
+using RawRabbit.Configuration.Legacy.Respond;
 using RawRabbit.Configuration.Queue;
 
 namespace RawRabbit.Configuration.Consumer
@@ -21,12 +23,7 @@ namespace RawRabbit.Configuration.Consumer
 		/// <param name="queue"></param>
 		/// <returns></returns>
 		IConsumerConfigurationBuilder FromDeclaredQueue(Action<IQueueConfigurationBuilder> queue);
-		IConsumerConfigurationBuilder WithNoAck(bool noAck = true);
-		IConsumerConfigurationBuilder WithConsumerTag(string tag);
-		IConsumerConfigurationBuilder WithRoutingKey(string routingKey);
-		IConsumerConfigurationBuilder WithNoLocal(bool noLocal = true);
-		IConsumerConfigurationBuilder WithPrefetchCount(ushort prefetch);
-		IConsumerConfigurationBuilder WithExclusive(bool exclusive = true);
-		IConsumerConfigurationBuilder WithArgument(string key, object value);
+
+		IConsumerConfigurationBuilder Consume(Action<IConsumeConfigurationBuilder> consume);
 	}
 }

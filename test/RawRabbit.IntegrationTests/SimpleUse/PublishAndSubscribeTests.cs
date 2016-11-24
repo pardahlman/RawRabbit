@@ -33,7 +33,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 					.UseMessageChaining()
 			});
 			await client.RespondAsync<BasicRequest, BasicResponse>(request => Task.FromResult(new BasicResponse {Payload = Guid.NewGuid()}), cfg => cfg.FromDeclaredQueue(q => q.WithName("my_q")));
-			var response = await client.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest { Number = 1}, cfg => cfg.ConsumeResponse(builder => builder.WithRoutingKey("custom").OnDeclaredExchange(e => e.WithName("custom_exchange")).FromDeclaredQueue(q => q.WithName("custom_queue"))));
+			var response = await client.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest { Number = 1}, cfg => cfg.ConsumeResponse(builder => builder.Consume(c => c.WithRoutingKey("custom")).OnDeclaredExchange(e => e.WithName("custom_exchange")).FromDeclaredQueue(q => q.WithName("custom_queue"))));
 
 			await client.SubscribeAsync<BasicMessage, MessageContext>(async (message, context) =>
 			{

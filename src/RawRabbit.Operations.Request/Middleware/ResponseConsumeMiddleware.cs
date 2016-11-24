@@ -30,7 +30,7 @@ namespace RawRabbit.Operations.Request.Middleware
 			var executionTsc = new TaskCompletionSource<bool>();
 
 			_consumerFactory
-				.GetConsumerAsync(respondCfg)
+				.GetConsumerAsync(respondCfg.Consume)
 				.ContinueWith(tConsumer =>
 				{
 					context.Properties.Add(PipeKey.Consumer, tConsumer.Result);

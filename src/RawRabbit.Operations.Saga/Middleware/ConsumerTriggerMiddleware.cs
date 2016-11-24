@@ -39,7 +39,7 @@ namespace RawRabbit.Operations.Saga.Middleware
 				{
 					var cfg = _consumerConfFactory.Create(msgTrigger.MessageType);
 					var consumerTask = _consumerFactory
-						.GetConsumerAsync(cfg)
+						.GetConsumerAsync(cfg.Consume)
 						.ContinueWith(tConsumer =>
 						{
 							tConsumer.Result.OnMessage((sender, args) =>

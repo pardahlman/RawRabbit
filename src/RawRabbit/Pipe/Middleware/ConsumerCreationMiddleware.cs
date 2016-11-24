@@ -25,7 +25,7 @@ namespace RawRabbit.Pipe.Middleware
 		{
 			var consumerCfg = _consumeCfgFunc(context);
 			return _consumerFactory
-				.CreateConsumerAsync(consumerCfg)
+				.CreateConsumerAsync(consumerCfg.Consume)
 				.ContinueWith(tConsumer =>
 				{
 					context.Properties.Add(PipeKey.Consumer, tConsumer.Result);

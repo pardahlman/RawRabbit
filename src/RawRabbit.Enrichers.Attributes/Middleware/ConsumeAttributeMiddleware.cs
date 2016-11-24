@@ -46,11 +46,11 @@ namespace RawRabbit.Enrichers.Attributes.Middleware
 			var routingAttr = GetAttribute<RoutingAttribute>(type);
 			if (routingAttr?.RoutingKey != null)
 			{
-				config.RoutingKey = routingAttr.RoutingKey;
+				config.Consume.RoutingKey = routingAttr.RoutingKey;
 			}
 			if (routingAttr?.NullableNoAck != null)
 			{
-				config.NoAck = routingAttr.NoAck;
+				config.Consume.NoAck = routingAttr.NoAck;
 			}
 		}
 

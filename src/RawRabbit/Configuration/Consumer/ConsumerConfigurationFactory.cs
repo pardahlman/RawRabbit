@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using RawRabbit.Common;
+using RawRabbit.Configuration.Consume;
 using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Queue;
 
@@ -10,12 +10,14 @@ namespace RawRabbit.Configuration.Consumer
 	{
 		private readonly IQueueConfigurationFactory _queue;
 		private readonly IExchangeConfigurationFactory _exchange;
+		private readonly IConsumeConfigurationFactory _consume;
 		private readonly INamingConventions _conventions;
 
-		public ConsumerConfigurationFactory(IQueueConfigurationFactory queue, IExchangeConfigurationFactory exchange, INamingConventions conventions)
+		public ConsumerConfigurationFactory(IQueueConfigurationFactory queue, IExchangeConfigurationFactory exchange, IConsumeConfigurationFactory consume, INamingConventions conventions)
 		{
 			_queue = queue;
 			_exchange = exchange;
+			_consume = consume;
 			_conventions = conventions;
 		}
 
@@ -34,13 +36,13 @@ namespace RawRabbit.Configuration.Consumer
 
 		public ConsumerConfiguration Create(string queueName, string exchangeName, string routingKey)
 		{
-			return new ConsumerConfiguration
+			var cfg =  new ConsumerConfiguration
 			{
 				Queue = _queue.Create(queueName),
 				Exchange = _exchange.Create(exchangeName),
-				RoutingKey = routingKey,
-				Arguments = new Dictionary<string, object>(),
+				Consume = _consume.Create(queueName, exchangeName, routingKey)
 			};
+			return cfg;
 		}
 	}
 }

@@ -27,7 +27,7 @@ namespace RawRabbit.Pipe.Middleware
 			_messageTypeFunc = options?.BodyTypeFunc ?? (context => context.GetMessageType());
 			_messageKeyFunc = options?.MessageKeyFunc ?? (context => PipeKey.Message);
 			_bodyFunc = options?.BodyFunc ?? (context =>context.GetDeliveryEventArgs()?.Body ?? context.GetBasicGetResult()?.Body);
-			_abortPredicate = options?.AbortPredicate ?? (context => context.GetBasicGetResult() == null);
+			_abortPredicate = options?.AbortPredicate ?? (context => false);
 		}
 
 		public override Task InvokeAsync(IPipeContext context)

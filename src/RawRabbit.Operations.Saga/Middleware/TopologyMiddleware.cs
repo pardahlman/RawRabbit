@@ -26,7 +26,7 @@ namespace RawRabbit.Operations.Saga.Middleware
 			foreach (var trigger in triggers.Values.SelectMany(v => v.OfType<MessageTypeTrigger>()))
 			{
 				var cfg = _consumerFactory.Create(trigger.MessageType);
-				var topoloyTask = _provider.BindQueueAsync(cfg.Queue, cfg.Exchange, cfg.RoutingKey);
+				var topoloyTask = _provider.BindQueueAsync(cfg.Queue, cfg.Exchange, cfg.Consume.RoutingKey);
 				topologyTasks.Add(topoloyTask);
 			}
 			return Task

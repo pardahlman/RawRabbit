@@ -25,18 +25,12 @@ namespace RawRabbit.Operations.Respond.Configuration
 
 		public RespondConfiguration Create(Type requestType, Type respondType)
 		{
-			var consumeCfg = _consumerFactory.Create(requestType);
+			var consumerCfg = _consumerFactory.Create(requestType);
 			return new RespondConfiguration
 			{
-				Queue = consumeCfg.Queue,
-				RoutingKey = consumeCfg.RoutingKey,
-				NoAck = consumeCfg.NoAck,
-				Exchange = consumeCfg.Exchange,
-				Arguments = consumeCfg.Arguments,
-				ConsumerTag = consumeCfg.ConsumerTag,
-				Exclusive = consumeCfg.Exclusive,
-				PrefetchCount = consumeCfg.PrefetchCount,
-				NoLocal = consumeCfg.NoLocal
+				Queue = consumerCfg.Queue,
+				Exchange = consumerCfg.Exchange,
+				Consume = consumerCfg.Consume
 			};
 		}
 	}

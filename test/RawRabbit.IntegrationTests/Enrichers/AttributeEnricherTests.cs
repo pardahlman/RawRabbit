@@ -21,10 +21,12 @@ namespace RawRabbit.IntegrationTests.Enrichers
 					recievedTcs.TrySetResult(recieved);
 					return Task.FromResult(true);
 				}, cfg => cfg
+					.Consume(c => c
+						.WithRoutingKey("my_key"))
 					.OnDeclaredExchange(e => e
 						.WithName("my_topic")
 						.WithType(ExchangeType.Topic))
-					.WithRoutingKey("my_key")
+
 				);
 
 				/* Test */
@@ -77,10 +79,11 @@ namespace RawRabbit.IntegrationTests.Enrichers
 					recievedTcs.TrySetResult(recieved);
 					return Task.FromResult(new AttributedResponse());
 				}, cfg => cfg
+					.Consume(c => c
+						.WithRoutingKey("my_request_key"))
 					.OnDeclaredExchange(e => e
 						.WithName("rpc_exchange")
 						.WithType(ExchangeType.Topic))
-					.WithRoutingKey("my_request_key")
 				);
 
 				/* Test */

@@ -37,7 +37,7 @@ namespace RawRabbit.Pipe.Middleware
 			var consumerCfg = _consumeFunc(context);
 
 			return _topologyProvider
-				.BindQueueAsync(consumerCfg.Queue, consumerCfg.Exchange, consumerCfg.RoutingKey)
+				.BindQueueAsync(consumerCfg.Queue, consumerCfg.Exchange, consumerCfg.Consume.RoutingKey)
 				.ContinueWith(t => Next.InvokeAsync(context))
 				.Unwrap();
 		}

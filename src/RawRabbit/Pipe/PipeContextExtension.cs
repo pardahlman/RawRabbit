@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RawRabbit.Configuration;
+using RawRabbit.Configuration.Consume;
 using RawRabbit.Configuration.Consumer;
 using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Get;
@@ -63,6 +64,11 @@ namespace RawRabbit.Pipe
 		public static EventHandler<BasicReturnEventArgs> GetReturnedMessageCallback(this IPipeContext context)
 		{
 			return context.Get<EventHandler<BasicReturnEventArgs>>(PipeKey.ReturnedMessageCallback);
+		}
+
+		public static ConsumeConfiguration GetConsumeConfiguration(this IPipeContext context)
+		{
+			return context.Get<ConsumeConfiguration>(PipeKey.ConsumeConfiguration);
 		}
 
 		public static ConsumerConfiguration GetConsumerConfiguration(this IPipeContext context)

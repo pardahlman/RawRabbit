@@ -28,7 +28,7 @@ namespace RawRabbit.Consumer.Eventing
 
 		public IRawConsumer CreateConsumer(ConsumerConfiguration cfg, IModel channel)
 		{
-			return CreateConsumer(cfg.PrefetchCount, cfg.NoAck, channel);
+			return CreateConsumer(cfg.Consume.PrefetchCount, cfg.Consume.NoAck, channel);
 		}
 
 		protected virtual IRawConsumer CreateConsumer(ushort prefetch, bool noAck, IModel channel)

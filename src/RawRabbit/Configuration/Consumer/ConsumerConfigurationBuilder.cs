@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
+using RawRabbit.Configuration.Consume;
 using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Queue;
-using RawRabbit.Pipe;
 
 namespace RawRabbit.Configuration.Consumer
 {
-	public class ConsumerConfigurationBuilder : IConsumerConfigurationBuilder
+	public class ConsumerConfigurationBuilder :  IConsumerConfigurationBuilder
 	{
 		public ConsumerConfiguration Config { get; }
 
@@ -31,46 +30,19 @@ namespace RawRabbit.Configuration.Consumer
 			return this;
 		}
 
-		public IConsumerConfigurationBuilder WithNoAck(bool noAck = true)
+		public IConsumerConfigurationBuilder Consume(Action<IConsumeConfigurationBuilder> consume)
 		{
-			Config.NoAck = noAck;
-			return this;
-		}
-
-		public IConsumerConfigurationBuilder WithConsumerTag(string tag)
-		{
-			Config.ConsumerTag = tag;
-			return this;
-		}
-
-		public IConsumerConfigurationBuilder WithRoutingKey(string routingKey)
-		{
-			Config.RoutingKey = routingKey;
-			return this;
-		}
-
-		public IConsumerConfigurationBuilder WithNoLocal(bool noLocal = true)
-		{
-			Config.NoLocal = noLocal;
-			return this;
-		}
-
-		public IConsumerConfigurationBuilder WithPrefetchCount(ushort prefetch)
-		{
-			Config.PrefetchCount = prefetch;
-			return this;
-		}
-
-		public IConsumerConfigurationBuilder WithExclusive(bool exclusive = true)
-		{
-			Config.Exclusive = exclusive;
-			return this;
-		}
-
-		public IConsumerConfigurationBuilder WithArgument(string key, object value)
-		{
-			Config.Arguments = Config.Arguments ?? new Dictionary<string, object>();
-			Config.Arguments.TryAdd(key, value);
+			var builder = new ConsumeConfigurationBuilder(Config.Consume);
+			consume(builder);
+			Config.Consume = builder.Config;
+			if (builder.ExistingExchange)
+			{
+				Config.Exchange = null;
+			}
+			if (builder.ExistingQueue)
+			{
+				Config.Queue = null;
+			}
 			return this;
 		}
 	}

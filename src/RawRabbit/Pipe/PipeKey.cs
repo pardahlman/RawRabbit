@@ -4,6 +4,7 @@
 	{
 		public const string Message = "MessageId";
 		public const string ConsumerConfiguration = "ConsumerConfiguration";
+		public const string ConsumeConfiguration = "ConsumeConfiguration";
 		public const string PublishConfiguration = "PublishConfiguration";
 		public const string MessageBytes = "MessageBytes";
 		public const string MessageId = "MessageId";
