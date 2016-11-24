@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
-using RawRabbit.Configuration.Consume;
+using RawRabbit.Configuration.Consumer;
 using RawRabbit.Configuration.Legacy.Respond;
 using RawRabbit.Consumer.Abstraction;
 using RawRabbit.Logging;
@@ -26,7 +26,7 @@ namespace RawRabbit.Consumer.Eventing
 			return CreateConsumer(cfg.PrefetchCount, cfg.NoAck, channel);
 		}
 
-		public IRawConsumer CreateConsumer(ConsumeConfiguration cfg, IModel channel)
+		public IRawConsumer CreateConsumer(ConsumerConfiguration cfg, IModel channel)
 		{
 			return CreateConsumer(cfg.PrefetchCount, cfg.NoAck, channel);
 		}

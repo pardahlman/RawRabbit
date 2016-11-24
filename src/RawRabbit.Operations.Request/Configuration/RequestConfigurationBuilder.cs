@@ -1,5 +1,5 @@
 ﻿using System;
-using RawRabbit.Configuration.Consume;
+using RawRabbit.Configuration.Consumer;
 using RawRabbit.Configuration.Publisher;
 using RawRabbit.Operations.Request.Configuration.Abstraction;
 
@@ -22,9 +22,9 @@ namespace RawRabbit.Operations.Request.Configuration
 			return this;
 		}
 
-		public IRequestConfigurationBuilder ConsumeResponse(Action<IConsumeConfigurationBuilder> consume)
+		public IRequestConfigurationBuilder ConsumeResponse(Action<IConsumerConfigurationBuilder> consume)
 		{
-			var builder = new ConsumeConfigurationBuilder(Config.Response);
+			var builder = new ConsumerConfigurationBuilder(Config.Response);
 			consume(builder);
 			Config.Response = builder.Config;
 			return this;

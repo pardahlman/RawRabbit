@@ -1,8 +1,8 @@
-﻿using RawRabbit.Configuration.Consume;
+﻿using RawRabbit.Configuration.Consumer;
 
 namespace RawRabbit.Operations.Respond.Configuration
 {
-	public class RespondConfiguration : ConsumeConfiguration
+	public class RespondConfiguration : ConsumerConfiguration
 	{
 	}
 }

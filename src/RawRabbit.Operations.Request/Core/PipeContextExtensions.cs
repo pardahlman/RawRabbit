@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing.Impl;
-using RawRabbit.Configuration.Consume;
+using RawRabbit.Configuration.Consumer;
 using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Queue;
 using RawRabbit.Operations.Request.Configuration;
@@ -57,7 +57,7 @@ namespace RawRabbit.Operations.Request.Core
 			return context.Get<RequestConfiguration>(RequestKey.Configuration);
 		}
 
-		public static ConsumeConfiguration GetResponseConfiguration(this IPipeContext context)
+		public static ConsumerConfiguration GetResponseConfiguration(this IPipeContext context)
 		{
 			return context.GetRequestConfiguration()?.Response;
 		}

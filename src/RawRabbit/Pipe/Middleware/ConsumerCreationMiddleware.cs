@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Threading.Tasks;
-using RawRabbit.Configuration.Consume;
+using RawRabbit.Configuration.Consumer;
 using RawRabbit.Consumer;
 
 namespace RawRabbit.Pipe.Middleware
 {
 	public class ConsumerCreationOptions
 	{
-		public Func<IPipeContext, ConsumeConfiguration> ConsumeFunc { get; set; }
+		public Func<IPipeContext, ConsumerConfiguration> ConsumeFunc { get; set; }
 	}
 
 	public class ConsumerCreationMiddleware : Middleware
 	{
 		private readonly IConsumerFactory _consumerFactory;
-		private readonly Func<IPipeContext, ConsumeConfiguration> _consumeCfgFunc;
+		private readonly Func<IPipeContext, ConsumerConfiguration> _consumeCfgFunc;
 
 		public ConsumerCreationMiddleware(IConsumerFactory consumerFactory, ConsumerCreationOptions options = null)
 		{

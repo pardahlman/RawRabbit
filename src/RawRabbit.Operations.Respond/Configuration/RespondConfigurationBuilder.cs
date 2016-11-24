@@ -1,14 +1,14 @@
-﻿using RawRabbit.Configuration.Consume;
+﻿using RawRabbit.Configuration.Consumer;
 
 namespace RawRabbit.Operations.Respond.Configuration
 {
-	public interface IRespondConfigurationBuilder : IConsumeConfigurationBuilder
+	public interface IRespondConfigurationBuilder : IConsumerConfigurationBuilder
 	{
 	}
 
-	public class RespondConfigurationBuilder : ConsumeConfigurationBuilder, IRespondConfigurationBuilder
+	public class RespondConfigurationBuilder : ConsumerConfigurationBuilder, IRespondConfigurationBuilder
 	{
-		public RespondConfigurationBuilder(ConsumeConfiguration initial) : base(initial)
+		public RespondConfigurationBuilder(ConsumerConfiguration initial) : base(initial)
 		{
 		}
 	}

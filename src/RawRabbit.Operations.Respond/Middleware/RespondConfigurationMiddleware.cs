@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using RawRabbit.Configuration.Consume;
+using RawRabbit.Configuration.Consumer;
 using RawRabbit.Operations.Respond.Configuration;
 using RawRabbit.Operations.Respond.Core;
 using RawRabbit.Pipe;
@@ -19,8 +19,8 @@ namespace RawRabbit.Operations.Respond.Middleware
 		private readonly Func<IPipeContext, Type> _requestTypeFunc;
 		private readonly Func<IPipeContext, Type> _responseTypeFunc;
 
-		public RespondConfigurationMiddleware(IConsumeConfigurationFactory consumeFactory, RespondConfigurationOptions options = null)
-			: this(new RespondConfigurationFactory(consumeFactory), options) { }
+		public RespondConfigurationMiddleware(IConsumerConfigurationFactory consumerFactory, RespondConfigurationOptions options = null)
+			: this(new RespondConfigurationFactory(consumerFactory), options) { }
 
 		public RespondConfigurationMiddleware(IRespondConfigurationFactory factory, RespondConfigurationOptions options = null)
 		{

@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using RawRabbit.Configuration.Consume;
+using RawRabbit.Configuration.Consumer;
 using RawRabbit.Pipe;
 
 namespace RawRabbit.Enrichers.Attributes.Middleware
 {
 	public class ConsumeAttributeOptions
 	{
-		public Func<IPipeContext, ConsumeConfiguration> ConfigFunc { get; set; }
+		public Func<IPipeContext, ConsumerConfiguration> ConfigFunc { get; set; }
 		public Func<IPipeContext, Type> MessageTypeFunc { get; set; }
 	}
 
 	public class ConsumeAttributeMiddleware : AttributeMiddlewareBase
 	{
-		private readonly Func<IPipeContext, ConsumeConfiguration> _configFunc;
+		private readonly Func<IPipeContext, ConsumerConfiguration> _configFunc;
 		private readonly Func<IPipeContext, Type> _messageTypeFunc;
 
 		public ConsumeAttributeMiddleware(ConsumeAttributeOptions options = null)
@@ -41,7 +41,7 @@ namespace RawRabbit.Enrichers.Attributes.Middleware
 			return Next.InvokeAsync(context);
 		}
 
-		private void UpdateRouting(ConsumeConfiguration config, Type type)
+		private void UpdateRouting(ConsumerConfiguration config, Type type)
 		{
 			var routingAttr = GetAttribute<RoutingAttribute>(type);
 			if (routingAttr?.RoutingKey != null)

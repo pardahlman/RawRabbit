@@ -1,5 +1,5 @@
 ﻿using System;
-using RawRabbit.Configuration.Consume;
+using RawRabbit.Configuration.Consumer;
 
 namespace RawRabbit.Operations.Respond.Configuration
 {
@@ -11,9 +11,9 @@ namespace RawRabbit.Operations.Respond.Configuration
 
 	public class RespondConfigurationFactory : IRespondConfigurationFactory
 	{
-		private readonly IConsumeConfigurationFactory _consumerFactory;
+		private readonly IConsumerConfigurationFactory _consumerFactory;
 
-		public RespondConfigurationFactory(IConsumeConfigurationFactory consumerFactory)
+		public RespondConfigurationFactory(IConsumerConfigurationFactory consumerFactory)
 		{
 			_consumerFactory = consumerFactory;
 		}

@@ -1,11 +1,11 @@
-﻿using RawRabbit.Configuration.Consume;
+﻿using RawRabbit.Configuration.Consumer;
 using RawRabbit.Configuration.Publisher;
 
 namespace RawRabbit.Operations.Request.Configuration
 {
 	public class RequestConfiguration
 	{
-		public ConsumeConfiguration Response { get; set; }
+		public ConsumerConfiguration Response { get; set; }
 		public PublisherConfiguration Request { get; set; }
 	}
 

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using RawRabbit.Common;
-using RawRabbit.Configuration.Consume;
+using RawRabbit.Configuration.Consumer;
 using RawRabbit.Operations.Subscribe.Middleware;
 using RawRabbit.Operations.Subscribe.Stages;
 using RawRabbit.Pipe;
@@ -41,7 +41,7 @@ namespace RawRabbit
 			})
 		);
 
-		public static Task SubscribeAsync<TMessage>(this IBusClient client, Func<TMessage, Task> subscribeMethod, Action<IConsumeConfigurationBuilder> configuration = null)
+		public static Task SubscribeAsync<TMessage>(this IBusClient client, Func<TMessage, Task> subscribeMethod, Action<IConsumerConfigurationBuilder> configuration = null)
 		{
 			return client.InvokeAsync(
 				AutoAckPipe,
@@ -56,7 +56,7 @@ namespace RawRabbit
 			);
 		}
 
-		public static Task SubscribeAsync<TMessage>(this IBusClient client, Func<TMessage, Task<Acknowledgement>> subscribeMethod, Action<IConsumeConfigurationBuilder> configuration = null)
+		public static Task SubscribeAsync<TMessage>(this IBusClient client, Func<TMessage, Task<Acknowledgement>> subscribeMethod, Action<IConsumerConfigurationBuilder> configuration = null)
 		{
 			return client.InvokeAsync(
 				ExplicitAckPipe,

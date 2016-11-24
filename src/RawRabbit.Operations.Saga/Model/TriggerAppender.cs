@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using RawRabbit.Configuration.Consume;
+using RawRabbit.Configuration.Consumer;
 using RawRabbit.Configuration.Queue;
 
 namespace RawRabbit.Operations.Saga.Model
@@ -29,7 +29,7 @@ namespace RawRabbit.Operations.Saga.Model
 		{
 			appender.From(new ConsumeTrigger
 			{
-				Configuration = new ConsumeConfiguration
+				Configuration = new ConsumerConfiguration
 				{
 					Queue = new QueueConfiguration
 					{

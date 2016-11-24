@@ -1,5 +1,5 @@
 ﻿using System;
-using RawRabbit.Configuration.Consume;
+using RawRabbit.Configuration.Consumer;
 using RawRabbit.Configuration.Publisher;
 using RawRabbit.Operations.Request.Configuration.Abstraction;
 
@@ -8,12 +8,12 @@ namespace RawRabbit.Operations.Request.Configuration
 	public class RequestConfigurationFactory : IRequestConfigurationFactory
 	{
 		private readonly IPublisherConfigurationFactory _publisher;
-		private readonly IConsumeConfigurationFactory _consume;
+		private readonly IConsumerConfigurationFactory _consumer;
 
-		public RequestConfigurationFactory(IPublisherConfigurationFactory publisher, IConsumeConfigurationFactory consume)
+		public RequestConfigurationFactory(IPublisherConfigurationFactory publisher, IConsumerConfigurationFactory consumer)
 		{
 			_publisher = publisher;
-			_consume = consume;
+			_consumer = consumer;
 		}
 
 		public RequestConfiguration Create<TRequest, TResponse>()
@@ -26,7 +26,7 @@ namespace RawRabbit.Operations.Request.Configuration
 			var cfg = new RequestConfiguration
 			{
 				Request = _publisher.Create(requestType),
-				Response = _consume.Create(responseType)
+				Response = _consumer.Create(responseType)
 			};
 			cfg.ToDirectRpc();
 			return cfg;
@@ -37,7 +37,7 @@ namespace RawRabbit.Operations.Request.Configuration
 			var cfg = new RequestConfiguration
 			{
 				Request = _publisher.Create(requestExchange, requestRoutingKey),
-				Response = _consume.Create(responseQueue, responseExchange, responseRoutingKey)
+				Response = _consumer.Create(responseQueue, responseExchange, responseRoutingKey)
 			};
 			cfg.ToDirectRpc();
 			return cfg;

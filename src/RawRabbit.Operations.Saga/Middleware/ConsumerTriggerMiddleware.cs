@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using RawRabbit.Common;
-using RawRabbit.Configuration.Consume;
+using RawRabbit.Configuration.Consumer;
 using RawRabbit.Consumer;
 using RawRabbit.Operations.Saga.Model;
 using RawRabbit.Operations.Saga.Repository;
@@ -15,14 +15,14 @@ namespace RawRabbit.Operations.Saga.Middleware
 	{
 		private readonly IConsumerFactory _consumerFactory;
 		private readonly IPipeContextFactory _contextFactory;
-		private readonly IConsumeConfigurationFactory _consumeConfFactory;
+		private readonly IConsumerConfigurationFactory _consumerConfFactory;
 		private readonly ISagaRepository _sagaRepo;
 
-		public ConsumerTriggerMiddleware(IConsumerFactory consumerFactory, IPipeContextFactory contextFactory, IConsumeConfigurationFactory consumeConfFactory, ISagaRepository sagaRepo)
+		public ConsumerTriggerMiddleware(IConsumerFactory consumerFactory, IPipeContextFactory contextFactory, IConsumerConfigurationFactory consumerConfFactory, ISagaRepository sagaRepo)
 		{
 			_consumerFactory = consumerFactory;
 			_contextFactory = contextFactory;
-			_consumeConfFactory = consumeConfFactory;
+			_consumerConfFactory = consumerConfFactory;
 			_sagaRepo = sagaRepo;
 		}
 		public override Task InvokeAsync(IPipeContext context)
@@ -37,7 +37,7 @@ namespace RawRabbit.Operations.Saga.Middleware
 				var msgTypeTriggers = t.Value.OfType<MessageTypeTrigger>();
 				foreach (var msgTrigger in msgTypeTriggers)
 				{
-					var cfg = _consumeConfFactory.Create(msgTrigger.MessageType);
+					var cfg = _consumerConfFactory.Create(msgTrigger.MessageType);
 					var consumerTask = _consumerFactory
 						.GetConsumerAsync(cfg)
 						.ContinueWith(tConsumer =>

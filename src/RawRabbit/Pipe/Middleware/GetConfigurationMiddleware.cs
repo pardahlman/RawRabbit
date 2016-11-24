@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using RawRabbit.Configuration.Consume;
 using RawRabbit.Configuration.Get;
 
 namespace RawRabbit.Pipe.Middleware

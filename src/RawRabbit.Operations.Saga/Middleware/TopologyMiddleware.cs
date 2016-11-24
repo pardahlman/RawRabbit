@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using RawRabbit.Common;
-using RawRabbit.Configuration.Consume;
+using RawRabbit.Configuration.Consumer;
 using RawRabbit.Operations.Saga.Model;
 using RawRabbit.Pipe;
 
@@ -11,12 +11,12 @@ namespace RawRabbit.Operations.Saga.Middleware
 	public class TopologyMiddleware : Pipe.Middleware.Middleware
 	{
 		private readonly ITopologyProvider _provider;
-		private readonly IConsumeConfigurationFactory _consumeFactory;
+		private readonly IConsumerConfigurationFactory _consumerFactory;
 
-		public TopologyMiddleware(ITopologyProvider provider, IConsumeConfigurationFactory consumeFactory)
+		public TopologyMiddleware(ITopologyProvider provider, IConsumerConfigurationFactory consumerFactory)
 		{
 			_provider = provider;
-			_consumeFactory = consumeFactory;
+			_consumerFactory = consumerFactory;
 		}
 
 		public override Task InvokeAsync(IPipeContext context)
@@ -25,7 +25,7 @@ namespace RawRabbit.Operations.Saga.Middleware
 			var topologyTasks = new List<Task>();
 			foreach (var trigger in triggers.Values.SelectMany(v => v.OfType<MessageTypeTrigger>()))
 			{
-				var cfg = _consumeFactory.Create(trigger.MessageType);
+				var cfg = _consumerFactory.Create(trigger.MessageType);
 				var topoloyTask = _provider.BindQueueAsync(cfg.Queue, cfg.Exchange, cfg.RoutingKey);
 				topologyTasks.Add(topoloyTask);
 			}

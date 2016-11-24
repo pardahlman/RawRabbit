@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using RawRabbit.Common;
-using RawRabbit.Configuration.Consume;
 using RawRabbit.Configuration.Get;
 using RawRabbit.Pipe;
 

@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Threading.Tasks;
 using RawRabbit.Common;
-using RawRabbit.Configuration.Consume;
+using RawRabbit.Configuration.Consumer;
 
 namespace RawRabbit.Pipe.Middleware
 {
 	public class QueueBindOptions
 	{
-		public Func<IPipeContext, ConsumeConfiguration> ConsumeFunc { get; set; }
+		public Func<IPipeContext, ConsumerConfiguration> ConsumeFunc { get; set; }
 
-		public static QueueBindOptions For(Func<IPipeContext, ConsumeConfiguration> func)
+		public static QueueBindOptions For(Func<IPipeContext, ConsumerConfiguration> func)
 		{
 			return new QueueBindOptions
 			{
@@ -21,7 +21,7 @@ namespace RawRabbit.Pipe.Middleware
 	public class QueueBindMiddleware : Middleware
 	{
 		private readonly ITopologyProvider _topologyProvider;
-		private readonly Func<IPipeContext, ConsumeConfiguration> _consumeFunc;
+		private readonly Func<IPipeContext, ConsumerConfiguration> _consumeFunc;
 
 		public QueueBindMiddleware(ITopologyProvider topology) : this(topology, QueueBindOptions.For(c => c.GetConsumerConfiguration()))
 		{ }
