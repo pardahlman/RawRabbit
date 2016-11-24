@@ -1,5 +1,6 @@
 ﻿using System;
 using RawRabbit.Configuration.Consume;
+using RawRabbit.Configuration.Publisher;
 using RawRabbit.Operations.Request.Configuration.Abstraction;
 
 namespace RawRabbit.Operations.Request.Configuration

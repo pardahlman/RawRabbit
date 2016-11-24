@@ -1,4 +1,5 @@
 ﻿using RawRabbit.Configuration.Consume;
+using RawRabbit.Configuration.Publisher;
 
 namespace RawRabbit.Operations.Request.Configuration
 {

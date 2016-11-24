@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using RawRabbit.Configuration.Consume;
+using RawRabbit.Configuration.Publisher;
 using RawRabbit.Operations.Request.Configuration;
 using RawRabbit.Operations.Request.Configuration.Abstraction;
 using RawRabbit.Operations.Request.Core;

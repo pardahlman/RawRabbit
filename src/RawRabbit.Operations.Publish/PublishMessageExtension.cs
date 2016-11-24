@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Consume;
+using RawRabbit.Configuration.Publisher;
 using RawRabbit.Operations.Publish;
 using RawRabbit.Operations.Publish.Middleware;
 using RawRabbit.Pipe;

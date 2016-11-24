@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Consume;
+using RawRabbit.Configuration.Publisher;
 using RawRabbit.Pipe;
 
 namespace RawRabbit.Operations.Publish.Middleware

@@ -9,6 +9,7 @@ using RawRabbit.Common;
 using RawRabbit.Configuration;
 using RawRabbit.Configuration.Consume;
 using RawRabbit.Configuration.Exchange;
+using RawRabbit.Configuration.Publisher;
 using RawRabbit.Configuration.Queue;
 using RawRabbit.Consumer;
 using RawRabbit.Consumer.Abstraction;
