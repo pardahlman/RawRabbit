@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Reflection;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
@@ -11,6 +12,7 @@ namespace RawRabbit.Common
 	{
 		IBasicProperties GetProperties<TMessage>(Action<IBasicProperties> custom = null);
 		IBasicProperties GetProperties(Type type, Action<IBasicProperties> custom = null);
+		IBasicProperties GetProperties(Action<IBasicProperties> custom = null);
 	}
 
 	public class BasicPropertiesProvider : IBasicPropertiesProvider
@@ -29,15 +31,23 @@ namespace RawRabbit.Common
 
 		public IBasicProperties GetProperties(Type msgType, Action<IBasicProperties> custom = null)
 		{
+			custom = custom ?? (basicProperties => { });
+			custom += basicProperties => basicProperties.Headers.Add(PropertyHeaders.MessageType, GetTypeName(msgType));
+			return GetProperties(custom);
+		}
+
+		public IBasicProperties GetProperties(Action<IBasicProperties> custom = null)
+		{
 			var properties = new BasicProperties
 			{
 				MessageId = Guid.NewGuid().ToString(),
-				Headers = new Dictionary<string, object>(),
+				Headers = new Dictionary<string, object>
+				{
+					{PropertyHeaders.Sent, DateTime.UtcNow.ToString("u")}
+				},
 				Persistent = _config.PersistentDeliveryMode
 			};
 			custom?.Invoke(properties);
-			properties.Headers.Add(PropertyHeaders.Sent, DateTime.UtcNow.ToString("u"));
-			properties.Headers.Add(PropertyHeaders.MessageType, GetTypeName(msgType));
 			return properties;
 		}
 
