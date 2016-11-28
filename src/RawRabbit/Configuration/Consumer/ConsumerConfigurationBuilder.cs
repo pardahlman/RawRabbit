@@ -19,6 +19,7 @@ namespace RawRabbit.Configuration.Consumer
 			var builder = new ExchangeConfigurationBuilder(Config.Exchange);
 			exchange(builder);
 			Config.Exchange = builder.Configuration;
+			Config.Consume.ExchangeName = builder.Configuration.ExchangeName;
 			return this;
 		}
 
@@ -27,6 +28,7 @@ namespace RawRabbit.Configuration.Consumer
 			var builder = new QueueConfigurationBuilder(Config.Queue);
 			queue(builder);
 			Config.Queue = builder.Configuration;
+			Config.Consume.QueueName = builder.Configuration.QueueName;
 			return this;
 		}
 

@@ -1,6 +1,8 @@
 ﻿using System;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RabbitMQ.Client.Framing;
+using RawRabbit.Configuration.BasicPublish;
 using RawRabbit.Configuration.Exchange;
 
 namespace RawRabbit.Configuration.Publisher
@@ -22,23 +24,39 @@ namespace RawRabbit.Configuration.Publisher
 			return this;
 		}
 
-		public IPublisherConfigurationBuilder WithRoutingKey(string routingKey)
+		public IPublisherConfigurationBuilder WithReturnCallback(Action<BasicReturnEventArgs> callback)
+		{
+			Config.MandatoryCallback = Config.MandatoryCallback ?? (a => { });
+			Config.MandatoryCallback += callback;
+			return this;
+		}
+
+		public IBasicPublishConfigurationBuilder OnExchange(string exchange)
+		{
+			Config.Exchange = null;
+			Config.ExchangeName = exchange;
+			return this;
+		}
+
+		public IBasicPublishConfigurationBuilder WithRoutingKey(string routingKey)
 		{
 			Config.RoutingKey = routingKey;
 			return this;
 		}
 
-		public IPublisherConfigurationBuilder WithProperties(Action<IBasicProperties> properties)
+		public IBasicPublishConfigurationBuilder AsMandatory(bool mandatory = true)
 		{
-			Config.PropertyModifier = Config.PropertyModifier ?? (b => { });
-			Config.PropertyModifier += properties;
+			Config.Mandatory = mandatory;
 			return this;
 		}
 
-		public IPublisherConfigurationBuilder WithReturnCallback(Action<BasicReturnEventArgs> callback)
+		public IBasicPublishConfigurationBuilder WithProperties(Action<IBasicProperties> propAction)
 		{
-			Config.MandatoryCallback = Config.MandatoryCallback ?? (a => { });
-			Config.MandatoryCallback += callback;
+			if (Config.BasicProperties == null)
+			{
+				Config.BasicProperties = new BasicProperties();
+			}
+			propAction?.Invoke(Config.BasicProperties);
 			return this;
 		}
 	}

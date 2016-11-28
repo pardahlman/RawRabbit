@@ -1,5 +1,6 @@
 ﻿using System;
-using RawRabbit.Common;
+using RabbitMQ.Client.Framing;
+using RawRabbit.Configuration.BasicPublish;
 using RawRabbit.Configuration.Exchange;
 
 namespace RawRabbit.Configuration.Publisher
@@ -7,12 +8,12 @@ namespace RawRabbit.Configuration.Publisher
 	public class PublisherConfigurationFactory : IPublisherConfigurationFactory
 	{
 		private readonly IExchangeConfigurationFactory _exchange;
-		private readonly INamingConventions _conventions;
+		private readonly IBasicPublishConfigurationFactory _basicPublish;
 
-		public PublisherConfigurationFactory(IExchangeConfigurationFactory exchange, INamingConventions conventions)
+		public PublisherConfigurationFactory(IExchangeConfigurationFactory exchange, IBasicPublishConfigurationFactory basicPublish)
 		{
 			_exchange = exchange;
-			_conventions = conventions;
+			_basicPublish = basicPublish;
 		}
 
 		public PublisherConfiguration Create<TMessage>()
@@ -22,9 +23,16 @@ namespace RawRabbit.Configuration.Publisher
 
 		public PublisherConfiguration Create(Type messageType)
 		{
-			var exchangeName = _conventions.ExchangeNamingConvention(messageType);
-			var routingKey = _conventions.RoutingKeyConvention(messageType);
-			return Create(exchangeName, routingKey);
+			var cfg = _basicPublish.Create(messageType);
+			return new PublisherConfiguration
+			{
+				BasicProperties = cfg.BasicProperties,
+				Body = cfg.Body,
+				Exchange = _exchange.Create(messageType),
+				ExchangeName = cfg.ExchangeName,
+				Mandatory = cfg.Mandatory,
+				RoutingKey = cfg.RoutingKey
+			};
 		}
 
 		public PublisherConfiguration Create(string exchangeName, string routingKey)
@@ -32,7 +40,9 @@ namespace RawRabbit.Configuration.Publisher
 			return new PublisherConfiguration
 			{
 				Exchange = _exchange.Create(exchangeName),
-				RoutingKey = routingKey
+				ExchangeName = exchangeName,
+				RoutingKey = routingKey,
+				BasicProperties = new BasicProperties()
 			};
 		}
 	}

@@ -26,11 +26,11 @@ namespace RawRabbit.Pipe.Middleware
 		public BasicPublishMiddleware(BasicPublishOptions options)
 		{
 			ChannelFunc = options?.ChannelFunc ?? (context => context.GetTransientChannel());
-			ExchangeNameFunc = options?.ExchangeNameFunc ?? (context => string.Empty);
-			RoutingKeyFunc = options?.RoutingKeyFunc ?? (context => string.Empty);
-			MandatoryFunc = options?.MandatoryFunc ?? (context => false);
-			BasicPropsFunc = options?.BasicPropsFunc ?? (context => context.GetBasicProperties());
-			BodyFunc = options?.BodyFunc ?? (context => new byte[0]);
+			ExchangeNameFunc = options?.ExchangeNameFunc ?? (c => c.GetBasicPublishConfiguration()?.ExchangeName);
+			RoutingKeyFunc = options?.RoutingKeyFunc ?? (c => c.GetBasicPublishConfiguration()?.RoutingKey);
+			MandatoryFunc = options?.MandatoryFunc ?? (c => c.GetBasicPublishConfiguration()?.Mandatory ?? false);
+			BasicPropsFunc = options?.BasicPropsFunc ?? (c => c.GetBasicPublishConfiguration()?.BasicProperties);
+			BodyFunc = options?.BodyFunc ?? (c => c.GetBasicPublishConfiguration()?.Body);
 		}
 
 		public override Task InvokeAsync(IPipeContext context)

@@ -5,7 +5,8 @@
 		public const string Message = "MessageId";
 		public const string ConsumerConfiguration = "ConsumerConfiguration";
 		public const string ConsumeConfiguration = "ConsumeConfiguration";
-		public const string PublishConfiguration = "PublishConfiguration";
+		public const string PublisherConfiguration = "PublisherConfiguration";
+		public const string BasicPublishConfiguration = "BasicPublishConfiguration";
 		public const string MessageBytes = "MessageBytes";
 		public const string MessageId = "MessageId";
 		public const string MessageType = "MessageType";

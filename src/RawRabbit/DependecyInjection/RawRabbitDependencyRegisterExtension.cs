@@ -7,6 +7,7 @@ using RawRabbit.Channel;
 using RawRabbit.Channel.Abstraction;
 using RawRabbit.Common;
 using RawRabbit.Configuration;
+using RawRabbit.Configuration.BasicPublish;
 using RawRabbit.Configuration.Consume;
 using RawRabbit.Configuration.Consumer;
 using RawRabbit.Configuration.Exchange;
@@ -74,6 +75,7 @@ namespace RawRabbit.DependecyInjection
 				.AddSingleton<ITopologyProvider, TopologyProvider>()
 				.AddTransient<IConfigurationEvaluator, ConfigurationEvaluator>()
 				.AddTransient<IPublisherConfigurationFactory, PublisherConfigurationFactory>()
+				.AddTransient<IBasicPublishConfigurationFactory, BasicPublishConfigurationFactory>()
 				.AddTransient<IConsumerConfigurationFactory, ConsumerConfigurationFactory>()
 				.AddTransient<IConsumeConfigurationFactory, ConsumeConfigurationFactory>()
 				.AddTransient<IExchangeConfigurationFactory, ExchangeConfigurationFactory>()

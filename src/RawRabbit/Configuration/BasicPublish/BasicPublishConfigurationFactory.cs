@@ -23,15 +23,21 @@ namespace RawRabbit.Configuration.BasicPublish
 		{
 			if (message == null)
 			{
-				throw new ArgumentNullException(nameof(message));
+				return Create();
 			}
+			var cfg = Create(message.GetType());
+			cfg.Body = GetBody(message);
+			return cfg;
+		}
+
+		public virtual BasicPublishConfiguration Create(Type type)
+		{
 			return new BasicPublishConfiguration
 			{
-				RoutingKey = GetRoutingKey(message),
-				BasicProperties = GetBasicProperties(message),
-				Body = GetBody(message),
-				ExchangeName = GetExchangeName(message),
-				Mandatory = GetMandatory(message)
+				RoutingKey = GetRoutingKey(type),
+				BasicProperties = GetBasicProperties(type),
+				ExchangeName = GetExchangeName(type),
+				Mandatory = GetMandatory(type)
 			};
 		}
 
@@ -43,24 +49,24 @@ namespace RawRabbit.Configuration.BasicPublish
 			};
 		}
 
-		protected  virtual string GetRoutingKey(object message)
+		protected  virtual string GetRoutingKey(Type type)
 		{
-			return _conventions.RoutingKeyConvention(message.GetType());
+			return _conventions.RoutingKeyConvention(type);
 		}
 
-		protected virtual bool GetMandatory(object message)
+		protected virtual bool GetMandatory(Type type)
 		{
 			return false;
 		}
 
-		protected virtual string GetExchangeName(object message)
+		protected virtual string GetExchangeName(Type type)
 		{
-			return _conventions.ExchangeNamingConvention(message.GetType());
+			return _conventions.ExchangeNamingConvention(type);
 		}
 
-		protected virtual IBasicProperties GetBasicProperties(object message)
+		protected virtual IBasicProperties GetBasicProperties(Type type)
 		{
-			return _provider.GetProperties(message.GetType());
+			return _provider.GetProperties(type);
 		}
 
 		protected virtual byte[] GetBody(object message)

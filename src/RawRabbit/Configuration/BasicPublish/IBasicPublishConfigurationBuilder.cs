@@ -5,10 +5,9 @@ namespace RawRabbit.Configuration.BasicPublish
 {
 	public interface IBasicPublishConfigurationBuilder
 	{
+		IBasicPublishConfigurationBuilder OnExchange(string exchange);
 		IBasicPublishConfigurationBuilder WithRoutingKey(string routingKey);
-		IBasicPublishConfigurationBuilder WithBody(byte[] body);
-		IBasicPublishConfigurationBuilder WithBody(string body);
 		IBasicPublishConfigurationBuilder AsMandatory(bool mandatory=true);
-		IBasicPublishConfigurationBuilder WithProperty(Action<IBasicProperties> propAction);
+		IBasicPublishConfigurationBuilder WithProperties(Action<IBasicProperties> propAction);
 	}
 }

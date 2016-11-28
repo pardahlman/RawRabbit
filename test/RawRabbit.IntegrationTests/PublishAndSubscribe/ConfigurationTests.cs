@@ -1,4 +1,6 @@
 ﻿using System.Threading.Tasks;
+using RawRabbit.Common;
+using RawRabbit.Configuration.Exchange;
 using RawRabbit.IntegrationTests.TestMessages;
 using Xunit;
 
@@ -47,7 +49,48 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 				var message = new BasicMessage { Prop = "Hello, world!" };
 
 				/* Test */
-				await publisher.PublishAsync(message, cfg => cfg.OnDeclaredExchange(e => e.WithName("custom_exchange")));
+				await publisher.PublishAsync(message, cfg => cfg.OnExchange("custom_exchange"));
+				await recievedTcs.Task;
+
+				/* Assert */
+				Assert.Equal(message.Prop, recievedTcs.Task.Result.Prop);
+			}
+		}
+
+		[Fact]
+		public async Task Should_Honor_Complex_Configuration()
+		{
+			using (var publisher = RawRabbitFactory.CreateTestClient())
+			using (var subscriber = RawRabbitFactory.CreateTestClient())
+			{
+				/* Setup */
+				var recievedTcs = new TaskCompletionSource<BasicMessage>();
+				await subscriber.SubscribeAsync<BasicMessage>(recieved =>
+				{
+					recievedTcs.TrySetResult(recieved);
+					return Task.FromResult(true);
+				}, cfg => cfg
+						.Consume(c => c
+							.WithRoutingKey("custom_key")
+							.WithConsumerTag("custom_tag")
+							.WithPrefetchCount(2)
+							.WithNoLocal(false))
+						.FromDeclaredQueue(q => q
+							.WithName("custom_queue")
+							.WithAutoDelete()
+							.WithArgument(QueueArgument.DeadLetterExchange, "dlx"))
+						.OnDeclaredExchange(e=> e
+							.WithName("custom_exchange")
+							.WithType(ExchangeType.Topic))
+				);
+
+				var message = new BasicMessage { Prop = "Hello, world!" };
+
+				/* Test */
+				await publisher.PublishAsync(message, cfg => cfg
+						.OnExchange("custom_exchange")
+						.WithRoutingKey("custom_key")
+				);
 				await recievedTcs.Task;
 
 				/* Assert */

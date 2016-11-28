@@ -14,21 +14,16 @@ namespace RawRabbit.Configuration.BasicPublish
 			Configuration = initial;
 		}
 
+		public IBasicPublishConfigurationBuilder OnExchange(string exchange)
+		{
+			Configuration.ExchangeName = exchange;
+			return this;
+		}
+
 		public IBasicPublishConfigurationBuilder WithRoutingKey(string routingKey)
 		{
 			Configuration.RoutingKey = routingKey;
 			return this;
-		}
-
-		public IBasicPublishConfigurationBuilder WithBody(byte[] body)
-		{
-			Configuration.Body = body;
-			return this;
-		}
-
-		public IBasicPublishConfigurationBuilder WithBody(string body)
-		{
-			Configuration.Body = UTF8Encoding.UTF8.GetBytes(body);
 		}
 
 		public IBasicPublishConfigurationBuilder AsMandatory(bool mandatory = true)
@@ -37,7 +32,7 @@ namespace RawRabbit.Configuration.BasicPublish
 			return this;
 		}
 
-		public IBasicPublishConfigurationBuilder WithProperty(Action<IBasicProperties> propAction)
+		public IBasicPublishConfigurationBuilder WithProperties(Action<IBasicProperties> propAction)
 		{
 			Configuration.BasicProperties = Configuration.BasicProperties ?? new BasicProperties();
 			propAction?.Invoke(Configuration.BasicProperties);

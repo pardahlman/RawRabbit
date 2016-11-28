@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RawRabbit.Configuration;
+using RawRabbit.Configuration.BasicPublish;
 using RawRabbit.Configuration.Consume;
 using RawRabbit.Configuration.Consumer;
 using RawRabbit.Configuration.Exchange;
@@ -71,6 +72,11 @@ namespace RawRabbit.Pipe
 			return context.Get<ConsumeConfiguration>(PipeKey.ConsumeConfiguration);
 		}
 
+		public static BasicPublishConfiguration GetBasicPublishConfiguration(this IPipeContext context)
+		{
+			return context.Get<BasicPublishConfiguration>(PipeKey.BasicPublishConfiguration);
+		}
+
 		public static ConsumerConfiguration GetConsumerConfiguration(this IPipeContext context)
 		{
 			return context.Get<ConsumerConfiguration>(PipeKey.ConsumerConfiguration);
@@ -78,7 +84,7 @@ namespace RawRabbit.Pipe
 
 		public static PublisherConfiguration GetPublishConfiguration(this IPipeContext context)
 		{
-			return context.Get<PublisherConfiguration>(PipeKey.PublishConfiguration);
+			return context.Get<PublisherConfiguration>(PipeKey.PublisherConfiguration);
 		}
 
 		public static string GetRoutingKey(this IPipeContext context)

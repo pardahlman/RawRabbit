@@ -45,7 +45,7 @@ namespace RawRabbit.Operations.Publish.Middleware
 				config = builder.Config;
 			}
 
-			context.Properties.Add(PipeKey.PublishConfiguration, config);
+			context.Properties.Add(PipeKey.PublisherConfiguration, config);
 			return Next.InvokeAsync(context);
 		}
 

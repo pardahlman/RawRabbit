@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using RawRabbit.Common;
 
 namespace RawRabbit.Configuration.Exchange
@@ -7,6 +8,7 @@ namespace RawRabbit.Configuration.Exchange
 	{
 		ExchangeConfiguration Create(string exchangeName);
 		ExchangeConfiguration Create<TMessage>();
+		ExchangeConfiguration Create(Type messageType);
 	}
 
 	public class ExchangeConfigurationFactory : IExchangeConfigurationFactory
@@ -34,7 +36,12 @@ namespace RawRabbit.Configuration.Exchange
 
 		public ExchangeConfiguration Create<TMessage>()
 		{
-			var exchangeName = _conventions.ExchangeNamingConvention(typeof(TMessage));
+			return Create(typeof(TMessage));
+		}
+
+		public ExchangeConfiguration Create(Type messageType)
+		{
+			var exchangeName = _conventions.ExchangeNamingConvention(messageType);
 			return Create(exchangeName);
 		}
 	}

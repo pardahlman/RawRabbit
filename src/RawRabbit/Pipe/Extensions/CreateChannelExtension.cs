@@ -10,7 +10,7 @@ namespace RawRabbit.Pipe.Extensions
 		public static readonly Action<IPipeBuilder> CreateChannelPipe = pipe => pipe
 			.Use<ChannelCreationMiddleware>();
 
-		public static Task<IModel> CreateChannelAsync(this IBusClient busClient)
+		public static Task<IModel> CreateChannelAsync(this IBusClient busClient, ChannelCreationOptions options = null)
 		{
 			return busClient.InvokeAsync(CreateChannelPipe).ContinueWith(tContext => tContext.Result.GetChannel());
 		}
