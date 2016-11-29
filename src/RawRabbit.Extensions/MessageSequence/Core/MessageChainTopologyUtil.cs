@@ -51,8 +51,8 @@ namespace RawRabbit.Extensions.MessageSequence.Core
 		{
 			var chainConfig = _configEvaluator.GetConfiguration(messageType);
 			return _topologyProvider.BindQueueAsync(
-				_queueConfig,
-				chainConfig.Exchange,
+				_queueConfig.QueueName,
+				chainConfig.Exchange.ExchangeName,
 				$"{chainConfig.RoutingKey}.{globalMessaegId}"
 			);
 		}
@@ -66,8 +66,8 @@ namespace RawRabbit.Extensions.MessageSequence.Core
 		{
 			var chainConfig = _configEvaluator.GetConfiguration(messageType);
 			return _topologyProvider.UnbindQueueAsync(
-				_queueConfig,
-				chainConfig.Exchange,
+				_queueConfig.QueueName,
+				chainConfig.Exchange.ExchangeName,
 				$"{chainConfig.RoutingKey}.{globalMessaegId}"
 			);
 		}

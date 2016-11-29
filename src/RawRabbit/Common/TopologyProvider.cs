@@ -16,17 +16,16 @@ namespace RawRabbit.Common
 	{
 		Task DeclareExchangeAsync(ExchangeConfiguration exchange);
 		Task DeclareQueueAsync(QueueConfiguration queue);
-		Task BindQueueAsync(QueueConfiguration queue, ExchangeConfiguration exchange, string routingKey);
-		Task UnbindQueueAsync(QueueConfiguration queue, ExchangeConfiguration exchange, string routingKey);
-		bool IsInitialized(ExchangeConfiguration exchange);
-		bool IsInitialized(QueueConfiguration exchange);
+		Task BindQueueAsync(string queue, string exchange, string routingKey);
+		Task UnbindQueueAsync(string queue, string exchange, string routingKey);
+		bool IsDeclared(ExchangeConfiguration exchange);
+		bool IsDeclared(QueueConfiguration exchange);
 	}
 
 	public class TopologyProvider : ITopologyProvider, IDisposable
 	{
 		private readonly IChannelFactory _channelFactory;
 		private IModel _channel;
-		private bool _processing;
 		private readonly object _processLock = new object();
 		private readonly Task _completed = Task.FromResult(true);
 		private readonly Timer _disposeTimer;
@@ -53,7 +52,7 @@ namespace RawRabbit.Common
 
 		public Task DeclareExchangeAsync(ExchangeConfiguration exchange)
 		{
-			if (IsInitialized(exchange))
+			if (IsDeclared(exchange))
 			{
 				return _completed;
 			}
@@ -66,7 +65,7 @@ namespace RawRabbit.Common
 
 		public Task DeclareQueueAsync(QueueConfiguration queue)
 		{
-			if (IsInitialized(queue))
+			if (IsDeclared(queue))
 			{
 				return _completed;
 			}
@@ -77,9 +76,9 @@ namespace RawRabbit.Common
 			return scheduled.TaskCompletionSource.Task;
 		}
 
-		public Task BindQueueAsync(QueueConfiguration queue, ExchangeConfiguration exchange, string routingKey)
+		public Task BindQueueAsync(string queue, string exchange, string routingKey)
 		{
-			if (exchange.IsDefaultExchange())
+			if (string.Equals(exchange, string.Empty))
 			{
 				/*
 					"The default exchange is implicitly bound to every queue,
@@ -88,16 +87,8 @@ namespace RawRabbit.Common
 				*/
 				return _completed;
 			}
-			if (queue.IsDirectReplyTo())
-			{
-				/*
-					"Consume from the pseudo-queue amq.rabbitmq.reply-to in no-ack mode. There is no need to
-					declare this "queue" first, although the client can do so if it wants."
-					- https://www.rabbitmq.com/direct-reply-to.html
-				*/
-				return _completed;
-			}
-			var bindKey = $"{queue.FullQueueName}_{exchange.ExchangeName}_{routingKey}";
+
+			var bindKey = $"{queue}_{exchange}_{routingKey}";
 			if (_queueBinds.Contains(bindKey))
 			{
 				return _completed;
@@ -113,7 +104,7 @@ namespace RawRabbit.Common
 			return scheduled.TaskCompletionSource.Task;
 		}
 
-		public Task UnbindQueueAsync(QueueConfiguration queue, ExchangeConfiguration exchange, string routingKey)
+		public Task UnbindQueueAsync(string queue, string exchange, string routingKey)
 		{
 			var scheduled = new ScheduledUnbindQueueTask
 			{
@@ -126,33 +117,30 @@ namespace RawRabbit.Common
 			return scheduled.TaskCompletionSource.Task;
 		}
 
-		public bool IsInitialized(ExchangeConfiguration exchange)
+		public bool IsDeclared(ExchangeConfiguration exchange)
 		{
 			return exchange.IsDefaultExchange() || exchange.AssumeInitialized || _initExchanges.Contains(exchange.ExchangeName);
 		}
 
-		public bool IsInitialized(QueueConfiguration queue)
+		public bool IsDeclared(QueueConfiguration queue)
 		{
 			return queue.IsDirectReplyTo() || _initQueues.Contains(queue.FullQueueName);
 		}
 
 		private void BindQueueToExchange(ScheduledBindQueueTask bind)
 		{
-			var bindKey = $"{bind.Queue.FullQueueName}_{bind.Exchange.ExchangeName}_{bind.RoutingKey}";
+			var bindKey = $"{bind.Queue}_{bind.Exchange}_{bind.RoutingKey}";
 			if (_queueBinds.Contains(bindKey))
 			{
 				return;
 			}
 
-			DeclareQueue(bind.Queue);
-			DeclareExchange(bind.Exchange);
-
-			_logger.LogInformation($"Binding queue '{bind.Queue.FullQueueName}' to exchange '{bind.Exchange.ExchangeName}' with routing key '{bind.RoutingKey}'");
+			_logger.LogInformation($"Binding queue '{bind.Queue}' to exchange '{bind.Exchange}' with routing key '{bind.RoutingKey}'");
 
 			var channel = GetOrCreateChannel();
 			channel.QueueBind(
-				queue: bind.Queue.FullQueueName,
-				exchange: bind.Exchange.ExchangeName,
+				queue: bind.Queue,
+				exchange: bind.Exchange,
 				routingKey: bind.RoutingKey
 				);
 			_queueBinds.Add(bindKey);
@@ -160,16 +148,16 @@ namespace RawRabbit.Common
 
 		private void UnbindQueueFromExchange(ScheduledUnbindQueueTask bind)
 		{
-			_logger.LogInformation($"Unbinding queue '{bind.Queue.FullQueueName}' from exchange '{bind.Exchange.ExchangeName}' with routing key '{bind.RoutingKey}'");
+			_logger.LogInformation($"Unbinding queue '{bind.Queue}' from exchange '{bind.Exchange}' with routing key '{bind.RoutingKey}'");
 
 			var channel = GetOrCreateChannel();
 			channel.QueueUnbind(
-				queue: bind.Queue.FullQueueName,
-				exchange: bind.Exchange.ExchangeName,
+				queue: bind.Queue,
+				exchange: bind.Exchange,
 				routingKey: bind.RoutingKey,
 				arguments: null
 			);
-			var bindKey = $"{bind.Queue.FullQueueName}_{bind.Exchange.ExchangeName}_{bind.RoutingKey}";
+			var bindKey = $"{bind.Queue}_{bind.Exchange}_{bind.RoutingKey}";
 			if (_queueBinds.Contains(bindKey))
 			{
 				_queueBinds.Remove(bindKey);
@@ -178,7 +166,7 @@ namespace RawRabbit.Common
 
 		private void DeclareQueue(QueueConfiguration queue)
 		{
-			if (IsInitialized(queue))
+			if (IsDeclared(queue))
 			{
 				return;
 			}
@@ -201,7 +189,7 @@ namespace RawRabbit.Common
 
 		private void DeclareExchange(ExchangeConfiguration exchange)
 		{
-			if (IsInitialized(exchange))
+			if (IsDeclared(exchange))
 			{
 				return;
 			}
@@ -222,18 +210,9 @@ namespace RawRabbit.Common
 
 		private void EnsureWorker()
 		{
-			if (_processing)
+			if (!Monitor.TryEnter(_processLock))
 			{
 				return;
-			}
-			lock (_processLock)
-			{
-				if (_processing)
-				{
-					return;
-				}
-				_processing = true;
-				_logger.LogDebug($"Start processing topology work.");
 			}
 
 			ScheduledTopologyTask topologyTask;
@@ -305,11 +284,9 @@ namespace RawRabbit.Common
 					
 					continue;
 				}
-
-				throw new Exception("Unable to cast topology task.");
 			}
-			_processing = false;
 			_logger.LogDebug($"Done processing topology work.");
+			Monitor.Exit(_processLock);
 		}
 
 		private IModel GetOrCreateChannel()
@@ -361,15 +338,15 @@ namespace RawRabbit.Common
 
 		private class ScheduledBindQueueTask : ScheduledTopologyTask
 		{
-			public ExchangeConfiguration Exchange { get; set; }
-			public QueueConfiguration Queue { get; set; }
+			public string Exchange { get; set; }
+			public string Queue { get; set; }
 			public string RoutingKey { get; set; }
 		}
 
 		private class ScheduledUnbindQueueTask : ScheduledTopologyTask
 		{
-			public ExchangeConfiguration Exchange { get; set; }
-			public QueueConfiguration Queue { get; set; }
+			public string Exchange { get; set; }
+			public string Queue { get; set; }
 			public string RoutingKey { get; set; }
 		}
 		#endregion

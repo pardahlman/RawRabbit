@@ -58,7 +58,7 @@ namespace RawRabbit.Operations
 
 		public Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest message, Guid globalMessageId, RequestConfiguration cfg)
 		{
-			if (!_topologyProvider.IsInitialized(cfg.Queue) || !_topologyProvider.IsInitialized(cfg.Exchange))
+			if (!_topologyProvider.IsDeclared(cfg.Queue) || !_topologyProvider.IsDeclared(cfg.Exchange))
 			{
 				var queueTask = _topologyProvider.DeclareQueueAsync(cfg.Queue);
 				var exchangeTask = _topologyProvider.DeclareExchangeAsync(cfg.Exchange);
