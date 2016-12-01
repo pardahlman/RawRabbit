@@ -46,6 +46,7 @@ namespace RawRabbit
 			{
 				ExchangeNameFunc = context => context.GetPublicationAddress()?.ExchangeName,
 				RoutingKeyFunc = context => context.GetPublicationAddress()?.RoutingKey,
+				BasicPropsFunc = context => context.GetBasicProperties(),
 				MandatoryFunc = context => true,
 				BodyFunc = context => Encoding.UTF8.GetBytes(context.Get<string>(RespondKey.SerializedResponse))
 			})
