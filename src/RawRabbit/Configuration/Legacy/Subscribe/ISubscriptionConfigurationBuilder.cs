@@ -9,8 +9,8 @@ namespace RawRabbit.Configuration.Legacy.Subscribe
 		ISubscriptionConfigurationBuilder WithRoutingKey(string routingKey);
 		ISubscriptionConfigurationBuilder WithPrefetchCount(ushort prefetchCount);
 		ISubscriptionConfigurationBuilder WithNoAck(bool noAck = true);
-		ISubscriptionConfigurationBuilder WithExchange(Action<IExchangeConfigurationBuilder> exchange);
-		ISubscriptionConfigurationBuilder WithQueue(Action<IQueueConfigurationBuilder> queue);
+		ISubscriptionConfigurationBuilder WithExchange(Action<IExchangeDeclarationBuilder> exchange);
+		ISubscriptionConfigurationBuilder WithQueue(Action<IQueueDeclarationBuilder> queue);
 
 		/// <summary>
 		/// The unique identifier for the subscriber. Note that the subscriber id must be

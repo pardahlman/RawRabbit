@@ -37,17 +37,17 @@ namespace RawRabbit.Operations.Request.Core
 			return context.Get<PublicationAddress>(RequestKey.PublicationAddress);
 		}
 
-		public static QueueConfiguration GetResponseQueue(this IPipeContext context)
+		public static QueueDeclaration GetResponseQueue(this IPipeContext context)
 		{
 			return context.GetRequestConfiguration()?.Response.Queue;
 		}
 
-		public static ExchangeConfiguration GetRequestExchange(this IPipeContext context)
+		public static ExchangeDeclaration GetRequestExchange(this IPipeContext context)
 		{
 			return context.GetRequestConfiguration()?.Request.Exchange;
 		}
 
-		public static ExchangeConfiguration GetResponseExchange(this IPipeContext context)
+		public static ExchangeDeclaration GetResponseExchange(this IPipeContext context)
 		{
 			return context.GetRequestConfiguration()?.Response.Exchange;
 		}

@@ -16,7 +16,7 @@ namespace RawRabbit.Operations.Request.Configuration
 
 		public static RequestConfiguration ToDirectRpc(this RequestConfiguration config)
 		{
-			config.Response.Queue.QueueName = DirectReplyTo;
+			config.Response.Queue.Name = DirectReplyTo;
 			config.Response.Consume.RoutingKey = DirectReplyTo;
 			config.Response.Exchange.ExchangeName = DefaultExchange;
 			config.Response.Consume.NoAck = true;

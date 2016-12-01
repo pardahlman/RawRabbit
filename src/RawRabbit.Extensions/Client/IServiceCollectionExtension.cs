@@ -25,8 +25,8 @@ namespace RawRabbit.Extensions.Client
 				.AddSingleton<IMessageChainTopologyUtil, MessageChainTopologyUtil<TMessageContext>>()
 				.AddSingleton(c =>
 				{
-					var chainQueue = QueueConfiguration.Default;
-					chainQueue.QueueName = $"rawrabbit_chain_{Guid.NewGuid()}";
+					var chainQueue = QueueDeclaration.Default;
+					chainQueue.Name = $"rawrabbit_chain_{Guid.NewGuid()}";
 					chainQueue.AutoDelete = true;
 					chainQueue.Exclusive = true;
 					return chainQueue;

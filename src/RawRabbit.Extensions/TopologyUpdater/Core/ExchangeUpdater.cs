@@ -22,7 +22,7 @@ namespace RawRabbit.Extensions.TopologyUpdater.Core
 			_channelFactory = channelFactory;
 		}
 
-		public Task<ExchangeUpdateResult> UpdateExchangeAsync(ExchangeUpdateConfiguration config)
+		public Task<ExchangeUpdateResult> UpdateExchangeAsync(ExchangeUpdateDeclaration config)
 		{
 			var channelTask = _channelFactory.GetChannelAsync();
 			var bindingsTask = _bindingProvider.GetBindingsAsync(config.ExchangeName);
@@ -53,7 +53,7 @@ namespace RawRabbit.Extensions.TopologyUpdater.Core
 				});
 		}
 
-		public Task<IEnumerable<ExchangeUpdateResult>>  UpdateExchangesAsync(IEnumerable<ExchangeUpdateConfiguration> configs)
+		public Task<IEnumerable<ExchangeUpdateResult>>  UpdateExchangesAsync(IEnumerable<ExchangeUpdateDeclaration> configs)
 		{
 			var updateTasks = configs
 				.Select(UpdateExchangeAsync)

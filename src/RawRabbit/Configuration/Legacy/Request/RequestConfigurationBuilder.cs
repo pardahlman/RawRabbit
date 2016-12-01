@@ -6,21 +6,21 @@ namespace RawRabbit.Configuration.Legacy.Request
 {
 	public class RequestConfigurationBuilder : IRequestConfigurationBuilder
 	{
-		private readonly QueueConfigurationBuilder _replyQueue;
-		private readonly ExchangeConfigurationBuilder _exchange;
+		private readonly QueueDeclarationBuilder _replyQueue;
+		private readonly ExchangeDeclarationBuilder _exchange;
 		public RequestConfiguration Configuration { get; }
 
 		public RequestConfigurationBuilder(RequestConfiguration defaultConfig)
 		{
-			_replyQueue = new QueueConfigurationBuilder(defaultConfig.ReplyQueue);
-			_exchange = new ExchangeConfigurationBuilder(defaultConfig.Exchange);
+			_replyQueue = new QueueDeclarationBuilder(defaultConfig.ReplyQueue);
+			_exchange = new ExchangeDeclarationBuilder(defaultConfig.Exchange);
 			Configuration = defaultConfig ?? new RequestConfiguration();
 		}
 
-		public IRequestConfigurationBuilder WithExchange(Action<IExchangeConfigurationBuilder> exchange)
+		public IRequestConfigurationBuilder WithExchange(Action<IExchangeDeclarationBuilder> exchange)
 		{
 			exchange(_exchange);
-			Configuration.Exchange = _exchange.Configuration;
+			Configuration.Exchange = _exchange.Declaration;
 			return this;
 		}
 
@@ -30,7 +30,7 @@ namespace RawRabbit.Configuration.Legacy.Request
 			return this;
 		}
 
-		public IRequestConfigurationBuilder WithReplyQueue(Action<IQueueConfigurationBuilder> replyTo)
+		public IRequestConfigurationBuilder WithReplyQueue(Action<IQueueDeclarationBuilder> replyTo)
 		{
 			replyTo(_replyQueue);
 			Configuration.ReplyQueue = _replyQueue.Configuration;

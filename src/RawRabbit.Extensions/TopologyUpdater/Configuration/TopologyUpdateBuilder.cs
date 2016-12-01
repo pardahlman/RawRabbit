@@ -12,26 +12,26 @@ namespace RawRabbit.Extensions.TopologyUpdater.Configuration
 	{
 		private readonly INamingConventions _conventions;
 		private readonly RawRabbitConfiguration _config;
-		public List<ExchangeUpdateConfiguration> Exchanges { get; set; }
-		private ExchangeUpdateConfiguration _current;
+		public List<ExchangeUpdateDeclaration> Exchanges { get; set; }
+		private ExchangeUpdateDeclaration _current;
 
 		public TopologyUpdateBuilder(INamingConventions conventions, RawRabbitConfiguration config)
 		{
 			_conventions = conventions;
 			_config = config;
-			Exchanges = new List<ExchangeUpdateConfiguration>();
+			Exchanges = new List<ExchangeUpdateDeclaration>();
 		}
 
 		#region ITopologySelector
 		public IExchangeUpdateBuilder ForExchange(string name)
 		{
-			_current = new ExchangeUpdateConfiguration { ExchangeName = name };
+			_current = new ExchangeUpdateDeclaration { ExchangeName = name };
 			return this;
 		}
 
 		public IExchangeUpdateBuilder ExchangeForMessage<TMessage>()
 		{
-			_current = new ExchangeUpdateConfiguration
+			_current = new ExchangeUpdateDeclaration
 			{
 				ExchangeName = _conventions.ExchangeNamingConvention(typeof(TMessage))
 			};
@@ -48,7 +48,7 @@ namespace RawRabbit.Extensions.TopologyUpdater.Configuration
 		{
 			foreach (var messageType in messageTypes)
 			{
-				Exchanges.Add(new ExchangeUpdateConfiguration(_config.Exchange)
+				Exchanges.Add(new ExchangeUpdateDeclaration(_config.Exchange)
 				{
 					ExchangeName = _conventions.ExchangeNamingConvention(messageType)
 				});
@@ -58,11 +58,11 @@ namespace RawRabbit.Extensions.TopologyUpdater.Configuration
 		#endregion
 
 		#region IExchangeUpdateBuilder
-		public ITopologySelector UseConfiguration(Action<IExchangeConfigurationBuilder> cfgAction, Func<string, string> bindingKeyTransformer = null)
+		public ITopologySelector UseConfiguration(Action<IExchangeDeclarationBuilder> cfgAction, Func<string, string> bindingKeyTransformer = null)
 		{
-			var builder = new ExchangeConfigurationBuilder(new ExchangeUpdateConfiguration(_config.Exchange));
+			var builder = new ExchangeDeclarationBuilder(new ExchangeUpdateDeclaration(_config.Exchange));
 			cfgAction(builder);
-			var cfg = builder.Configuration as ExchangeUpdateConfiguration;
+			var cfg = builder.Declaration as ExchangeUpdateDeclaration;
 			cfg.ExchangeName = _current.ExchangeName;
 			if (bindingKeyTransformer != null)
 			{
@@ -72,10 +72,10 @@ namespace RawRabbit.Extensions.TopologyUpdater.Configuration
 			return this;
 		}
 
-		public ITopologySelector UseConfiguration(ExchangeUpdateConfiguration configuration)
+		public ITopologySelector UseConfiguration(ExchangeUpdateDeclaration declaration)
 		{
-			configuration.ExchangeName = _current.ExchangeName;
-			Exchanges.Add(configuration);
+			declaration.ExchangeName = _current.ExchangeName;
+			Exchanges.Add(declaration);
 			return this;
 		}
 

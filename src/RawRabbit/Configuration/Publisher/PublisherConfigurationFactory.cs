@@ -7,10 +7,10 @@ namespace RawRabbit.Configuration.Publisher
 {
 	public class PublisherConfigurationFactory : IPublisherConfigurationFactory
 	{
-		private readonly IExchangeConfigurationFactory _exchange;
+		private readonly IExchangeDeclarationFactory _exchange;
 		private readonly IBasicPublishConfigurationFactory _basicPublish;
 
-		public PublisherConfigurationFactory(IExchangeConfigurationFactory exchange, IBasicPublishConfigurationFactory basicPublish)
+		public PublisherConfigurationFactory(IExchangeDeclarationFactory exchange, IBasicPublishConfigurationFactory basicPublish)
 		{
 			_exchange = exchange;
 			_basicPublish = basicPublish;

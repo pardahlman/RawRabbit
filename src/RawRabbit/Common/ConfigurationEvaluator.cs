@@ -57,13 +57,13 @@ namespace RawRabbit.Common
 		public SubscriptionConfiguration GetConfiguration(Type messageType, Action<ISubscriptionConfigurationBuilder> configuration = null)
 		{
 			var routingKey = _conventions.QueueNamingConvention(messageType);
-			var queueConfig = new QueueConfiguration(_clientConfig.Queue)
+			var queueConfig = new QueueDeclaration(_clientConfig.Queue)
 			{
-				QueueName = routingKey,
+				Name = routingKey,
 				NameSuffix = _conventions.SubscriberQueueSuffix(messageType)
 			};
 
-			var exchangeConfig = new ExchangeConfiguration(_clientConfig.Exchange)
+			var exchangeConfig = new ExchangeDeclaration(_clientConfig.Exchange)
 			{
 				ExchangeName = _conventions.ExchangeNamingConvention(messageType)
 			};
@@ -75,7 +75,7 @@ namespace RawRabbit.Common
 
 		public PublishConfiguration GetConfiguration(Type messageType, Action<IPublishConfigurationBuilder> configuration)
 		{
-			var exchangeConfig = new ExchangeConfiguration(_clientConfig.Exchange)
+			var exchangeConfig = new ExchangeDeclaration(_clientConfig.Exchange)
 			{
 				ExchangeName = _conventions.ExchangeNamingConvention(messageType)
 			};
@@ -87,12 +87,12 @@ namespace RawRabbit.Common
 
 		public ResponderConfiguration GetConfiguration(Type requestType, Type responseType, Action<IResponderConfigurationBuilder> configuration)
 		{
-			var queueConfig = new QueueConfiguration(_clientConfig.Queue)
+			var queueConfig = new QueueDeclaration(_clientConfig.Queue)
 			{
-				QueueName = _conventions.QueueNamingConvention(requestType)
+				Name = _conventions.QueueNamingConvention(requestType)
 			};
 
-			var exchangeConfig = new ExchangeConfiguration(_clientConfig.Exchange)
+			var exchangeConfig = new ExchangeDeclaration(_clientConfig.Exchange)
 			{
 				ExchangeName = _conventions.ExchangeNamingConvention(requestType)
 			};
@@ -105,15 +105,15 @@ namespace RawRabbit.Common
 		public RequestConfiguration GetConfiguration(Type requestType, Type responseType, Action<IRequestConfigurationBuilder> configuration)
 		{
 			// leverage direct reply to: https://www.rabbitmq.com/direct-reply-to.html
-			var replyQueueConfig = new QueueConfiguration
+			var replyQueueConfig = new QueueDeclaration
 			{
-				QueueName = _directReplyTo,
+				Name = _directReplyTo,
 				AutoDelete = true,
 				Durable = false,
 				Exclusive = true
 			};
 
-			var exchangeConfig = new ExchangeConfiguration(_clientConfig.Exchange)
+			var exchangeConfig = new ExchangeDeclaration(_clientConfig.Exchange)
 			{
 				ExchangeName = _conventions.ExchangeNamingConvention(requestType)
 			};
@@ -123,7 +123,7 @@ namespace RawRabbit.Common
 				ReplyQueue = replyQueueConfig,
 				Exchange = exchangeConfig,
 				RoutingKey = _conventions.QueueNamingConvention(requestType),
-				ReplyQueueRoutingKey = replyQueueConfig.QueueName
+				ReplyQueueRoutingKey = replyQueueConfig.Name
 			};
 
 			var builder = new RequestConfigurationBuilder(defaultConfig);

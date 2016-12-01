@@ -17,6 +17,7 @@ namespace RawRabbit.Pipe.Middleware
 		{
 			_publishTimeOut = config.PublishConfirmTimeout;
 		}
+
 		public override Task InvokeAsync(IPipeContext context)
 		{
 			var channel = context.GetTransientChannel();

@@ -31,9 +31,9 @@ namespace RawRabbit.Operations.Saga.Model
 			{
 				Configuration = new ConsumerConfiguration
 				{
-					Queue = new QueueConfiguration
+					Queue = new QueueDeclaration
 					{
-						QueueName = queueName
+						Name = queueName
 					}
 				}
 			});

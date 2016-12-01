@@ -9,14 +9,14 @@ namespace RawRabbit.Configuration.Legacy.Subscribe
 		public SubscriptionConfiguration Configuration => new SubscriptionConfiguration
 		{
 			Queue = _queueBuilder.Configuration,
-			Exchange = _exchangeBuilder.Configuration,
-			RoutingKey = _routingKey ?? _queueBuilder.Configuration.QueueName,
+			Exchange = _exchangeBuilder.Declaration,
+			RoutingKey = _routingKey ?? _queueBuilder.Configuration.Name,
 			NoAck = _noAck,
 			PrefetchCount = _prefetchCount == 0 ? (ushort)50 : _prefetchCount
 		};
 
-		private readonly ExchangeConfigurationBuilder _exchangeBuilder;
-		private readonly QueueConfigurationBuilder _queueBuilder;
+		private readonly ExchangeDeclarationBuilder _exchangeBuilder;
+		private readonly QueueDeclarationBuilder _queueBuilder;
 		private string _routingKey;
 		private ushort _prefetchCount;
 		private bool _noAck;
@@ -24,10 +24,10 @@ namespace RawRabbit.Configuration.Legacy.Subscribe
 		public SubscriptionConfigurationBuilder() : this(null, null, null)
 		{ }
 
-		public SubscriptionConfigurationBuilder(QueueConfiguration initialQueue, ExchangeConfiguration initialExchange, string routingKey)
+		public SubscriptionConfigurationBuilder(QueueDeclaration initialQueue, ExchangeDeclaration initialExchange, string routingKey)
 		{
-			_exchangeBuilder = new ExchangeConfigurationBuilder(initialExchange);
-			_queueBuilder = new QueueConfigurationBuilder(initialQueue);
+			_exchangeBuilder = new ExchangeDeclarationBuilder(initialExchange);
+			_queueBuilder = new QueueDeclarationBuilder(initialQueue);
 			_routingKey = routingKey;
 		}
 
@@ -49,13 +49,13 @@ namespace RawRabbit.Configuration.Legacy.Subscribe
 			return this;
 		}
 
-		public ISubscriptionConfigurationBuilder WithExchange(Action<IExchangeConfigurationBuilder> exchange)
+		public ISubscriptionConfigurationBuilder WithExchange(Action<IExchangeDeclarationBuilder> exchange)
 		{
 			exchange(_exchangeBuilder);
 			return this;
 		}
 
-		public ISubscriptionConfigurationBuilder WithQueue(Action<IQueueConfigurationBuilder> queue)
+		public ISubscriptionConfigurationBuilder WithQueue(Action<IQueueDeclarationBuilder> queue)
 		{
 			queue(_queueBuilder);
 			return this;

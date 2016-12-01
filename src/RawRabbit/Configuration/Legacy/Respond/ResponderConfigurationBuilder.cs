@@ -6,27 +6,27 @@ namespace RawRabbit.Configuration.Legacy.Respond
 {
 	class ResponderConfigurationBuilder : IResponderConfigurationBuilder
 	{
-		private readonly ExchangeConfigurationBuilder _exchangeBuilder;
-		private readonly QueueConfigurationBuilder _queueBuilder;
+		private readonly ExchangeDeclarationBuilder _exchangeBuilder;
+		private readonly QueueDeclarationBuilder _queueBuilder;
 
 		public ResponderConfiguration Configuration { get; }
 
-		public ResponderConfigurationBuilder(QueueConfiguration defaultQueue = null, ExchangeConfiguration defaultExchange = null)
+		public ResponderConfigurationBuilder(QueueDeclaration defaultQueue = null, ExchangeDeclaration defaultExchange = null)
 		{
-			_exchangeBuilder = new ExchangeConfigurationBuilder(defaultExchange);
-			_queueBuilder = new QueueConfigurationBuilder(defaultQueue);
+			_exchangeBuilder = new ExchangeDeclarationBuilder(defaultExchange);
+			_queueBuilder = new QueueDeclarationBuilder(defaultQueue);
 			Configuration = new ResponderConfiguration
 			{
 				Queue = _queueBuilder.Configuration,
-				Exchange = _exchangeBuilder.Configuration,
-				RoutingKey = _queueBuilder.Configuration.QueueName
+				Exchange = _exchangeBuilder.Declaration,
+				RoutingKey = _queueBuilder.Configuration.Name
 			};
 		}
 
-		public IResponderConfigurationBuilder WithExchange(Action<IExchangeConfigurationBuilder> exchange)
+		public IResponderConfigurationBuilder WithExchange(Action<IExchangeDeclarationBuilder> exchange)
 		{
 			exchange(_exchangeBuilder);
-			Configuration.Exchange = _exchangeBuilder.Configuration;
+			Configuration.Exchange = _exchangeBuilder.Declaration;
 			return this;
 		}
 
@@ -36,13 +36,13 @@ namespace RawRabbit.Configuration.Legacy.Respond
 			return this;
 		}
 
-		public IResponderConfigurationBuilder WithQueue(Action<IQueueConfigurationBuilder> queue)
+		public IResponderConfigurationBuilder WithQueue(Action<IQueueDeclarationBuilder> queue)
 		{
 			queue(_queueBuilder);
 			Configuration.Queue = _queueBuilder.Configuration;
 			if (string.IsNullOrEmpty(Configuration.RoutingKey))
 			{
-				Configuration.RoutingKey = _queueBuilder.Configuration.QueueName;
+				Configuration.RoutingKey = _queueBuilder.Configuration.Name;
 			}
 			return this;
 		}

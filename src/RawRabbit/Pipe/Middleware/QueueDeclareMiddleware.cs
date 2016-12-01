@@ -7,9 +7,9 @@ namespace RawRabbit.Pipe.Middleware
 {
 	public class QueueDeclareOptions
 	{
-		public static QueueDeclareOptions For(QueueConfiguration cfg) { return For(context => cfg); }
+		public static QueueDeclareOptions For(QueueDeclaration cfg) { return For(context => cfg); }
 
-		public static QueueDeclareOptions For(Func<IPipeContext, QueueConfiguration> func)
+		public static QueueDeclareOptions For(Func<IPipeContext, QueueDeclaration> func)
 		{
 			return new QueueDeclareOptions
 			{
@@ -17,12 +17,12 @@ namespace RawRabbit.Pipe.Middleware
 			};
 		}
 
-		public Func<IPipeContext, QueueConfiguration> QueueFunc { get; set; }
+		public Func<IPipeContext, QueueDeclaration> QueueFunc { get; set; }
 	}
 
 	public class QueueDeclareMiddleware : Middleware
 	{
-		private readonly Func<IPipeContext, QueueConfiguration> _queueFunc;
+		private readonly Func<IPipeContext, QueueDeclaration> _queueFunc;
 		private readonly ITopologyProvider _topology;
 
 		public QueueDeclareMiddleware(ITopologyProvider topology) : this(topology, QueueDeclareOptions.For(c => c.GetQueueConfiguration()))

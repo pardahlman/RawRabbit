@@ -7,8 +7,8 @@ namespace RawRabbit.Configuration.Consumer
 {
 	public class ConsumerConfiguration
 	{
-		public QueueConfiguration Queue { get; set; }
-		public ExchangeConfiguration Exchange { get; set; }
+		public QueueDeclaration Queue { get; set; }
+		public ExchangeDeclaration Exchange { get; set; }
 		public ConsumeConfiguration Consume { get; set; }
 	}
 }

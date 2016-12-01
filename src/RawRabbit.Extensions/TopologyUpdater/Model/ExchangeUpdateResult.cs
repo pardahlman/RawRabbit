@@ -6,7 +6,7 @@ namespace RawRabbit.Extensions.TopologyUpdater.Model
 {
 	public class ExchangeUpdateResult
 	{
-		public ExchangeConfiguration Exchange { get; set; }
+		public ExchangeDeclaration Exchange { get; set; }
 		public List<Binding> Bindings { get; set; }
 		public TimeSpan ExecutionTime { get; set; }
 	}

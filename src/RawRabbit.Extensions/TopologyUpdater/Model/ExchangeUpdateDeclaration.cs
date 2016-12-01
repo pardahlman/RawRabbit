@@ -4,16 +4,16 @@ using RawRabbit.Configuration.Exchange;
 
 namespace RawRabbit.Extensions.TopologyUpdater.Model
 {
-	public class ExchangeUpdateConfiguration : ExchangeConfiguration
+	public class ExchangeUpdateDeclaration : ExchangeDeclaration
 	{
 		public Func<string, string> BindingTransformer { get; set; }
 
-		public ExchangeUpdateConfiguration(GeneralExchangeConfiguration exchange) : base(exchange)
+		public ExchangeUpdateDeclaration(GeneralExchangeConfiguration exchange) : base(exchange)
 		{
 			BindingTransformer = s => s;
 		}
 
-		public ExchangeUpdateConfiguration()
+		public ExchangeUpdateDeclaration()
 		{
 			BindingTransformer = s => s;
 		}

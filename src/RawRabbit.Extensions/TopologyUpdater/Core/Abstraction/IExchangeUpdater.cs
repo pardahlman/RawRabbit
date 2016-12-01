@@ -7,7 +7,7 @@ namespace RawRabbit.Extensions.TopologyUpdater.Core.Abstraction
 {
 	public interface IExchangeUpdater
 	{
-		Task<ExchangeUpdateResult> UpdateExchangeAsync(ExchangeUpdateConfiguration config);
-		Task<IEnumerable<ExchangeUpdateResult>> UpdateExchangesAsync(IEnumerable<ExchangeUpdateConfiguration> configs);
+		Task<ExchangeUpdateResult> UpdateExchangeAsync(ExchangeUpdateDeclaration config);
+		Task<IEnumerable<ExchangeUpdateResult>> UpdateExchangesAsync(IEnumerable<ExchangeUpdateDeclaration> configs);
 	}
 }

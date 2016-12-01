@@ -14,21 +14,21 @@ namespace RawRabbit.Configuration.Consumer
 			Config = initial;
 		}
 
-		public IConsumerConfigurationBuilder OnDeclaredExchange(Action<IExchangeConfigurationBuilder> exchange)
+		public IConsumerConfigurationBuilder OnDeclaredExchange(Action<IExchangeDeclarationBuilder> exchange)
 		{
-			var builder = new ExchangeConfigurationBuilder(Config.Exchange);
+			var builder = new ExchangeDeclarationBuilder(Config.Exchange);
 			exchange(builder);
-			Config.Exchange = builder.Configuration;
-			Config.Consume.ExchangeName = builder.Configuration.ExchangeName;
+			Config.Exchange = builder.Declaration;
+			Config.Consume.ExchangeName = builder.Declaration.ExchangeName;
 			return this;
 		}
 
-		public IConsumerConfigurationBuilder FromDeclaredQueue(Action<IQueueConfigurationBuilder> queue)
+		public IConsumerConfigurationBuilder FromDeclaredQueue(Action<IQueueDeclarationBuilder> queue)
 		{
-			var builder = new QueueConfigurationBuilder(Config.Queue);
+			var builder = new QueueDeclarationBuilder(Config.Queue);
 			queue(builder);
 			Config.Queue = builder.Configuration;
-			Config.Consume.QueueName = builder.Configuration.QueueName;
+			Config.Consume.QueueName = builder.Configuration.Name;
 			return this;
 		}
 

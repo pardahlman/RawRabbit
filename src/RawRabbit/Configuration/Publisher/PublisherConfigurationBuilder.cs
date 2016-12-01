@@ -16,18 +16,19 @@ namespace RawRabbit.Configuration.Publisher
 			Config = initial;
 		}
 
-		public IPublisherConfigurationBuilder OnDeclaredExchange(Action<IExchangeConfigurationBuilder> exchange)
+		public IPublisherConfigurationBuilder OnDeclaredExchange(Action<IExchangeDeclarationBuilder> exchange)
 		{
-			var builder = new ExchangeConfigurationBuilder(Config.Exchange);
+			var builder = new ExchangeDeclarationBuilder(Config.Exchange);
 			exchange(builder);
-			Config.Exchange = builder.Configuration;
+			Config.Exchange = builder.Declaration;
 			return this;
 		}
 
 		public IPublisherConfigurationBuilder WithReturnCallback(Action<BasicReturnEventArgs> callback)
 		{
-			Config.MandatoryCallback = Config.MandatoryCallback ?? (a => { });
-			Config.MandatoryCallback += callback;
+			Config.MandatoryCallback = Config.MandatoryCallback ?? ((sender, args) =>{}) ;
+			Config.MandatoryCallback += (sender, args) => callback(args);
+			Config.Mandatory = true;
 			return this;
 		}
 

@@ -6,8 +6,8 @@ namespace RawRabbit.Extensions.TopologyUpdater.Configuration.Abstraction
 {
 	public interface IExchangeUpdateBuilder
 	{
-		ITopologySelector UseConfiguration(Action<IExchangeConfigurationBuilder> cfgAction, Func<string, string> bindingKeyTransformer = null);
-		ITopologySelector UseConfiguration(ExchangeUpdateConfiguration configuration);
+		ITopologySelector UseConfiguration(Action<IExchangeDeclarationBuilder> cfgAction, Func<string, string> bindingKeyTransformer = null);
+		ITopologySelector UseConfiguration(ExchangeUpdateDeclaration declaration);
 		ITopologySelector UseConventions<TMessage>(Func<string, string> bindingKeyTransformer = null);
 	}
 }

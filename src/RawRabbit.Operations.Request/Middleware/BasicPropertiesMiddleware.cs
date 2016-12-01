@@ -16,7 +16,7 @@ namespace RawRabbit.Operations.Request.Middleware
 
 			if (consumeCfg.Queue.IsDirectReplyTo())
 			{
-				props.ReplyTo = consumeCfg.Queue.QueueName;
+				props.ReplyTo = consumeCfg.Queue.Name;
 			}
 			else
 			{

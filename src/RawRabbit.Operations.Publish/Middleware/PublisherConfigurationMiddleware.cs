@@ -45,8 +45,10 @@ namespace RawRabbit.Operations.Publish.Middleware
 				config = builder.Config;
 			}
 
-			context.Properties.Add(PipeKey.PublisherConfiguration, config);
 			context.Properties.Add(PipeKey.BasicPublishConfiguration, config);
+			context.Properties.Add(PipeKey.ExchangeDeclaration, config.Exchange);
+			context.Properties.Add(PipeKey.ReturnedMessageCallback, config.MandatoryCallback);
+
 			return Next.InvokeAsync(context);
 		}
 

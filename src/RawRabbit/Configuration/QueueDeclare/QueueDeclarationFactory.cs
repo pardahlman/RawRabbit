@@ -5,34 +5,34 @@ namespace RawRabbit.Configuration.Queue
 {
 	public interface IQueueConfigurationFactory
 	{
-		QueueConfiguration Create(string queueName);
-		QueueConfiguration Create<TMessageType>();
+		QueueDeclaration Create(string queueName);
+		QueueDeclaration Create<TMessageType>();
 	}
 
-	public class QueueConfigurationFactory : IQueueConfigurationFactory
+	public class QueueDeclarationFactory : IQueueConfigurationFactory
 	{
 		private readonly RawRabbitConfiguration _config;
 		private readonly INamingConventions _conventions;
 
-		public QueueConfigurationFactory(RawRabbitConfiguration config, INamingConventions conventions)
+		public QueueDeclarationFactory(RawRabbitConfiguration config, INamingConventions conventions)
 		{
 			_config = config;
 			_conventions = conventions;
 		}
 
-		public QueueConfiguration Create(string queueName)
+		public QueueDeclaration Create(string queueName)
 		{
-			return new QueueConfiguration
+			return new QueueDeclaration
 			{
 				AutoDelete = _config.Queue.AutoDelete,
 				Durable = _config.Queue.Durable,
 				Exclusive = _config.Queue.Exclusive,
-				QueueName = queueName,
+				Name = queueName,
 				Arguments = new Dictionary<string, object>()
 			};
 		}
 
-		public QueueConfiguration Create<TMessageType>()
+		public QueueDeclaration Create<TMessageType>()
 		{
 			var queueName = _conventions.QueueNamingConvention(typeof(TMessageType));
 			return Create(queueName);

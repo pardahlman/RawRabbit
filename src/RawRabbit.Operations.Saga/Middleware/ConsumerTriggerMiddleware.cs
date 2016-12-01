@@ -54,7 +54,7 @@ namespace RawRabbit.Operations.Saga.Middleware
 									return saga.TriggerAsync(trigger, childContext);
 								});
 							});
-							subscriptions.Add(new Subscription(tConsumer.Result, cfg.Queue.QueueName));
+							subscriptions.Add(new Subscription(tConsumer.Result, cfg.Queue.Name));
 						});
 					consumerTasks.Add(consumerTask);
 				}

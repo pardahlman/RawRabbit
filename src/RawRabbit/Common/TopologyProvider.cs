@@ -14,12 +14,12 @@ namespace RawRabbit.Common
 {
 	public interface ITopologyProvider
 	{
-		Task DeclareExchangeAsync(ExchangeConfiguration exchange);
-		Task DeclareQueueAsync(QueueConfiguration queue);
+		Task DeclareExchangeAsync(ExchangeDeclaration exchange);
+		Task DeclareQueueAsync(QueueDeclaration queue);
 		Task BindQueueAsync(string queue, string exchange, string routingKey);
 		Task UnbindQueueAsync(string queue, string exchange, string routingKey);
-		bool IsDeclared(ExchangeConfiguration exchange);
-		bool IsDeclared(QueueConfiguration exchange);
+		bool IsDeclared(ExchangeDeclaration exchange);
+		bool IsDeclared(QueueDeclaration exchange);
 	}
 
 	public class TopologyProvider : ITopologyProvider, IDisposable
@@ -50,7 +50,7 @@ namespace RawRabbit.Common
 			}, null, TimeSpan.FromSeconds(2), new TimeSpan(-1));
 		}
 
-		public Task DeclareExchangeAsync(ExchangeConfiguration exchange)
+		public Task DeclareExchangeAsync(ExchangeDeclaration exchange)
 		{
 			if (IsDeclared(exchange))
 			{
@@ -63,7 +63,7 @@ namespace RawRabbit.Common
 			return scheduled.TaskCompletionSource.Task;
 		}
 
-		public Task DeclareQueueAsync(QueueConfiguration queue)
+		public Task DeclareQueueAsync(QueueDeclaration queue)
 		{
 			if (IsDeclared(queue))
 			{
@@ -117,12 +117,12 @@ namespace RawRabbit.Common
 			return scheduled.TaskCompletionSource.Task;
 		}
 
-		public bool IsDeclared(ExchangeConfiguration exchange)
+		public bool IsDeclared(ExchangeDeclaration exchange)
 		{
 			return exchange.IsDefaultExchange() || exchange.AssumeInitialized || _initExchanges.Contains(exchange.ExchangeName);
 		}
 
-		public bool IsDeclared(QueueConfiguration queue)
+		public bool IsDeclared(QueueDeclaration queue)
 		{
 			return queue.IsDirectReplyTo() || _initQueues.Contains(queue.FullQueueName);
 		}
@@ -164,7 +164,7 @@ namespace RawRabbit.Common
 			}
 		}
 
-		private void DeclareQueue(QueueConfiguration queue)
+		private void DeclareQueue(QueueDeclaration queue)
 		{
 			if (IsDeclared(queue))
 			{
@@ -187,7 +187,7 @@ namespace RawRabbit.Common
 			}
 		}
 
-		private void DeclareExchange(ExchangeConfiguration exchange)
+		private void DeclareExchange(ExchangeDeclaration exchange)
 		{
 			if (IsDeclared(exchange))
 			{
@@ -223,12 +223,12 @@ namespace RawRabbit.Common
 				{
 					try
 					{
-						DeclareExchange(exchange.Configuration);
+						DeclareExchange(exchange.Declaration);
 						exchange.TaskCompletionSource.TrySetResult(true);
 					}
 					catch (Exception e)
 					{
-						_logger.LogError($"Unable to declare exchange {exchange.Configuration.ExchangeName}", e);
+						_logger.LogError($"Unable to declare exchange {exchange.Declaration.ExchangeName}", e);
 						exchange.TaskCompletionSource.TrySetException(e);
 					}
 
@@ -320,20 +320,20 @@ namespace RawRabbit.Common
 
 		private class ScheduledQueueTask : ScheduledTopologyTask
 		{
-			public ScheduledQueueTask(QueueConfiguration queue)
+			public ScheduledQueueTask(QueueDeclaration queue)
 			{
 				Configuration = queue;
 			}
-			public QueueConfiguration Configuration { get; }
+			public QueueDeclaration Configuration { get; }
 		}
 
 		private class ScheduledExchangeTask : ScheduledTopologyTask
 		{
-			public ScheduledExchangeTask(ExchangeConfiguration exchange)
+			public ScheduledExchangeTask(ExchangeDeclaration exchange)
 			{
-				Configuration = exchange;
+				Declaration = exchange;
 			}
-			public ExchangeConfiguration Configuration { get; }
+			public ExchangeDeclaration Declaration { get; }
 		}
 
 		private class ScheduledBindQueueTask : ScheduledTopologyTask

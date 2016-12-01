@@ -58,7 +58,7 @@ namespace RawRabbit.Operations
 				? $"{config.RoutingKey}.#"
 				: config.RoutingKey;
 
-			var topologyTask = _topologyProvider.BindQueueAsync(config.Queue.QueueName, config.Exchange.ExchangeName, routingKey);
+			var topologyTask = _topologyProvider.BindQueueAsync(config.Queue.Name, config.Exchange.ExchangeName, routingKey);
 			var channelTask = _channelFactory.CreateChannelAsync();
 
 			var subscriberTask = Task
@@ -78,7 +78,7 @@ namespace RawRabbit.Operations
 						return subscribeMethod(body, context);
 					}, exception => _errorHandling.OnSubscriberExceptionAsync(consumer, config, args, exception));
 					consumer.Model.BasicConsume(config.Queue.FullQueueName, config.NoAck, consumer);
-					_logger.LogDebug($"Setting up a consumer on channel '{channelTask.Result.ChannelNumber}' for queue {config.Queue.QueueName} with NoAck set to {config.NoAck}.");
+					_logger.LogDebug($"Setting up a consumer on channel '{channelTask.Result.ChannelNumber}' for queue {config.Queue.Name} with NoAck set to {config.NoAck}.");
 					return new Subscription(consumer, config.Queue.FullQueueName);
 				});
 			Task.WaitAll(subscriberTask);

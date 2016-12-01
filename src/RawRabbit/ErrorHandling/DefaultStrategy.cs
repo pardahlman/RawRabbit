@@ -23,7 +23,7 @@ namespace RawRabbit.ErrorHandling
 		private readonly IChannelFactory _channelFactory;
 		private readonly ILogger _logger = LogManager.GetLogger<DefaultStrategy>();
 		private readonly string _messageExceptionName = typeof(MessageHandlerException).Name;
-		private readonly ExchangeConfiguration _errorExchangeCfg;
+		private readonly ExchangeDeclaration _errorExchangeCfg;
 
 		public DefaultStrategy(IMessageSerializer serializer, INamingConventions conventions, IBasicPropertiesProvider propertiesProvider, ITopologyProvider topologyProvider, IChannelFactory channelFactory)
 		{
@@ -31,7 +31,7 @@ namespace RawRabbit.ErrorHandling
 			_propertiesProvider = propertiesProvider;
 			_topologyProvider = topologyProvider;
 			_channelFactory = channelFactory;
-			_errorExchangeCfg = ExchangeConfiguration.Default;
+			_errorExchangeCfg = ExchangeDeclaration.Default;
 			_errorExchangeCfg.ExchangeName = conventions.ErrorExchangeNamingConvention();
 		}
 

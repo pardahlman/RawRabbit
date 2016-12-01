@@ -37,9 +37,9 @@ namespace RawRabbit.Pipe
 			return context.Get<IBasicConsumer>(PipeKey.Consumer);
 		}
 
-		public static QueueConfiguration GetQueueConfiguration(this IPipeContext context)
+		public static QueueDeclaration GetQueueConfiguration(this IPipeContext context)
 		{
-			return context.Get<QueueConfiguration>(PipeKey.QueueConfiguration);
+			return context.Get<QueueDeclaration>(PipeKey.QueueDeclaration);
 		}
 
 		public static GetConfiguration GetGetConfiguration(this IPipeContext context)
@@ -47,14 +47,14 @@ namespace RawRabbit.Pipe
 			return context.Get<GetConfiguration>(PipeKey.GetConfiguration);
 		}
 
-		public static ExchangeConfiguration GetExchangeConfiguration(this IPipeContext context)
+		public static ExchangeDeclaration GetExchangeDeclaration(this IPipeContext context)
 		{
-			return context.Get<ExchangeConfiguration>(PipeKey.ExchangeConfiguration);
+			return context.Get<ExchangeDeclaration>(PipeKey.ExchangeDeclaration);
 		}
 
 		public static string GetExchangeName(this IPipeContext context)
 		{
-			return context.Get<string>(PipeKey.ExchangeName) ?? GetExchangeConfiguration(context)?.ExchangeName;
+			return context.Get<string>(PipeKey.ExchangeName) ?? GetExchangeDeclaration(context)?.ExchangeName;
 		}
 
 		public static bool GetMandatoryPublishFlag(this IPipeContext context)

@@ -24,10 +24,10 @@
 		public const string TransientChannel = "TransientChannel";
 		public const string PublishAcknowledger = "PublishAcknowledger";
 		public const string RoutingKey = "RoutingKey";
-		public const string QueueConfiguration = "QueueConfiguration";
+		public const string QueueDeclaration = "QueueDeclaration";
 		public const string QueueName = "QueueName";
 		public const string ExchangeName = "ExchangeName";
-		public const string ExchangeConfiguration = "ExchangeConfiguration";
+		public const string ExchangeDeclaration = "ExchangeDeclaration";
 		public const string Subscription = "Subscription";
 		public const string SerializedMessage = "SerializedMessage";
 		public const string ReturnedMessageCallback = "ReturnedMessageCallback";

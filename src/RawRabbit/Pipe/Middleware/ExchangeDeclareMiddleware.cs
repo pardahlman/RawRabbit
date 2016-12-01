@@ -7,10 +7,10 @@ namespace RawRabbit.Pipe.Middleware
 {
 	public class ExchangeDeclareOptions
 	{
-		public Func<IPipeContext, ExchangeConfiguration> ExchangeFunc { get; set; }
+		public Func<IPipeContext, ExchangeDeclaration> ExchangeFunc { get; set; }
 		public bool ThrowOnFail { get; set; }
 
-		public static ExchangeDeclareOptions For(Func<IPipeContext, ExchangeConfiguration> func)
+		public static ExchangeDeclareOptions For(Func<IPipeContext, ExchangeDeclaration> func)
 		{
 			return new ExchangeDeclareOptions
 			{
@@ -22,11 +22,11 @@ namespace RawRabbit.Pipe.Middleware
 	public class ExchangeDeclareMiddleware : Middleware
 	{
 		private readonly ITopologyProvider _topologyProvider;
-		private readonly Func<IPipeContext, ExchangeConfiguration> _exchangeFunc;
+		private readonly Func<IPipeContext, ExchangeDeclaration> _exchangeFunc;
 		private readonly bool _throwOnFail;
 
 		public ExchangeDeclareMiddleware(ITopologyProvider topologyProvider)
-			: this(topologyProvider, ExchangeDeclareOptions.For(c => c.GetPublishConfiguration()?.Exchange))
+			: this(topologyProvider, ExchangeDeclareOptions.For(c => c.GetExchangeDeclaration()))
 		{
 		}
 

@@ -78,8 +78,8 @@ namespace RawRabbit.DependecyInjection
 				.AddTransient<IBasicPublishConfigurationFactory, BasicPublishConfigurationFactory>()
 				.AddTransient<IConsumerConfigurationFactory, ConsumerConfigurationFactory>()
 				.AddTransient<IConsumeConfigurationFactory, ConsumeConfigurationFactory>()
-				.AddTransient<IExchangeConfigurationFactory, ExchangeConfigurationFactory>()
-				.AddTransient<IQueueConfigurationFactory, QueueConfigurationFactory>()
+				.AddTransient<IExchangeDeclarationFactory, ExchangeDeclarationFactory>()
+				.AddTransient<IQueueConfigurationFactory, QueueDeclarationFactory>()
 				.AddSingleton<INamingConventions, NamingConventions>()
 			
 				.AddSingleton<IBusClient, BusClient>()

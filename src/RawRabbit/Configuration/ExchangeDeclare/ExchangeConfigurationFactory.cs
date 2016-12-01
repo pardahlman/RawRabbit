@@ -4,27 +4,27 @@ using RawRabbit.Common;
 
 namespace RawRabbit.Configuration.Exchange
 {
-	public interface IExchangeConfigurationFactory
+	public interface IExchangeDeclarationFactory
 	{
-		ExchangeConfiguration Create(string exchangeName);
-		ExchangeConfiguration Create<TMessage>();
-		ExchangeConfiguration Create(Type messageType);
+		ExchangeDeclaration Create(string exchangeName);
+		ExchangeDeclaration Create<TMessage>();
+		ExchangeDeclaration Create(Type messageType);
 	}
 
-	public class ExchangeConfigurationFactory : IExchangeConfigurationFactory
+	public class ExchangeDeclarationFactory : IExchangeDeclarationFactory
 	{
 		private readonly RawRabbitConfiguration _config;
 		private readonly INamingConventions _conventions;
 
-		public ExchangeConfigurationFactory(RawRabbitConfiguration config, INamingConventions conventions)
+		public ExchangeDeclarationFactory(RawRabbitConfiguration config, INamingConventions conventions)
 		{
 			_config = config;
 			_conventions = conventions;
 		}
 
-		public ExchangeConfiguration Create(string exchangeName)
+		public ExchangeDeclaration Create(string exchangeName)
 		{
-			return new ExchangeConfiguration
+			return new ExchangeDeclaration
 			{
 				Arguments = new Dictionary<string, object>(),
 				ExchangeType = _config.Exchange.Type.ToString().ToLower(),
@@ -34,12 +34,12 @@ namespace RawRabbit.Configuration.Exchange
 			};
 		}
 
-		public ExchangeConfiguration Create<TMessage>()
+		public ExchangeDeclaration Create<TMessage>()
 		{
 			return Create(typeof(TMessage));
 		}
 
-		public ExchangeConfiguration Create(Type messageType)
+		public ExchangeDeclaration Create(Type messageType)
 		{
 			var exchangeName = _conventions.ExchangeNamingConvention(messageType);
 			return Create(exchangeName);

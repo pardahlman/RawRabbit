@@ -14,7 +14,7 @@ namespace RawRabbit.Configuration.Consumer
 		/// </summary>
 		/// <param name="exchange">Builder for exchange features.</param>
 		/// <returns></returns>
-		IConsumerConfigurationBuilder OnDeclaredExchange(Action<IExchangeConfigurationBuilder> exchange);
+		IConsumerConfigurationBuilder OnDeclaredExchange(Action<IExchangeDeclarationBuilder> exchange);
 
 		/// <summary>
 		/// Specify the topology features of the Queue to consume from.
@@ -22,7 +22,7 @@ namespace RawRabbit.Configuration.Consumer
 		/// /// </summary>
 		/// <param name="queue"></param>
 		/// <returns></returns>
-		IConsumerConfigurationBuilder FromDeclaredQueue(Action<IQueueConfigurationBuilder> queue);
+		IConsumerConfigurationBuilder FromDeclaredQueue(Action<IQueueDeclarationBuilder> queue);
 
 		IConsumerConfigurationBuilder Consume(Action<IConsumeConfigurationBuilder> consume);
 	}

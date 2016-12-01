@@ -19,7 +19,7 @@ namespace RawRabbit.Operations.Subscribe.Middleware
 
 		public SubscriptionMiddleware(SubscriptionOptions options = null)
 		{
-			_queueNameFunc = options?.QueueNameFunc ?? (context => context.GetConsumerConfiguration()?.Queue.QueueName);
+			_queueNameFunc = options?.QueueNameFunc ?? (context => context.GetConsumerConfiguration()?.Queue.Name);
 			_consumerFunc = options?.ConsumeFunc ?? (context => context.GetConsumer());
 		}
 

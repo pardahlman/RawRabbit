@@ -57,7 +57,7 @@ namespace RawRabbit.Operations
 		public ISubscription RespondAsync<TRequest, TResponse>(Func<TRequest, TMessageContext, Task<TResponse>> onMessage, ResponderConfiguration cfg)
 		{
 			var routingKey = _config.RouteWithGlobalId ? $"{cfg.RoutingKey}.#" : cfg.RoutingKey;
-			var topologyTask = _topologyProvider.BindQueueAsync(cfg.Queue.QueueName, cfg.Exchange.ExchangeName, routingKey);
+			var topologyTask = _topologyProvider.BindQueueAsync(cfg.Queue.Name, cfg.Exchange.ExchangeName, routingKey);
 			var channelTask = _channelFactory.CreateChannelAsync();
 
 			var respondTask = Task.WhenAll(topologyTask, channelTask)
@@ -98,8 +98,8 @@ namespace RawRabbit.Operations
 								);
 							});
 					}, exception => _errorHandling.OnResponseHandlerExceptionAsync(consumer, cfg, args, exception)); 
-					consumer.Model.BasicConsume(cfg.Queue.QueueName, cfg.NoAck, consumer);
-					return new Subscription(consumer, cfg.Queue.QueueName);
+					consumer.Model.BasicConsume(cfg.Queue.Name, cfg.NoAck, consumer);
+					return new Subscription(consumer, cfg.Queue.Name);
 				});
 			Task.WaitAll(respondTask);
 			_subscriptions.Add(respondTask.Result);

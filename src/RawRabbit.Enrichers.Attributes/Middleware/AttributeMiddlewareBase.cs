@@ -9,7 +9,7 @@ namespace RawRabbit.Enrichers.Attributes.Middleware
 {
 	public abstract class AttributeMiddlewareBase : StagedMiddleware
 	{
-		protected virtual void UpdateExchangeConfig(ExchangeConfiguration exchange, Type type)
+		protected virtual void UpdateExchangeConfig(ExchangeDeclaration exchange, Type type)
 		{
 			var exchangeAttr = GetAttribute<ExchangeAttribute>(type);
 			if (exchangeAttr == null)
@@ -34,7 +34,7 @@ namespace RawRabbit.Enrichers.Attributes.Middleware
 			}
 		}
 
-		protected virtual void UpdateQueueConfig(QueueConfiguration queue, Type type)
+		protected virtual void UpdateQueueConfig(QueueDeclaration queue, Type type)
 		{
 			var queueAttr = GetAttribute<QueueAttribute>(type);
 			if (queueAttr == null)
@@ -43,7 +43,7 @@ namespace RawRabbit.Enrichers.Attributes.Middleware
 			}
 			if (!string.IsNullOrWhiteSpace(queueAttr.Name))
 			{
-				queue.QueueName = queueAttr.Name;
+				queue.Name = queueAttr.Name;
 			}
 			if (queueAttr.NullableDurability.HasValue)
 			{

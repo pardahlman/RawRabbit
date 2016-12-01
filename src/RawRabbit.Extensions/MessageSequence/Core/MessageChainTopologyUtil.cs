@@ -20,7 +20,7 @@ namespace RawRabbit.Extensions.MessageSequence.Core
 		private readonly IMessageSerializer _serializer;
 		private readonly IMessageContextProvider<TMessageContext> _contextProvider;
 		private readonly IMessageChainDispatcher _messageDispatcher;
-		private readonly QueueConfiguration _queueConfig;
+		private readonly QueueDeclaration _queueConfig;
 		private EventingBasicConsumer _consumer;
 
 		public MessageChainTopologyUtil(
@@ -30,7 +30,7 @@ namespace RawRabbit.Extensions.MessageSequence.Core
 			IMessageSerializer serializer,
 			IMessageContextProvider<TMessageContext> contextProvider,
 			IMessageChainDispatcher messageDispatcher,
-			QueueConfiguration queueConfig)
+			QueueDeclaration queueConfig)
 		{
 			_channelFactory = channelFactory;
 			_topologyProvider = topologyProvider;
@@ -51,7 +51,7 @@ namespace RawRabbit.Extensions.MessageSequence.Core
 		{
 			var chainConfig = _configEvaluator.GetConfiguration(messageType);
 			return _topologyProvider.BindQueueAsync(
-				_queueConfig.QueueName,
+				_queueConfig.Name,
 				chainConfig.Exchange.ExchangeName,
 				$"{chainConfig.RoutingKey}.{globalMessaegId}"
 			);
@@ -66,7 +66,7 @@ namespace RawRabbit.Extensions.MessageSequence.Core
 		{
 			var chainConfig = _configEvaluator.GetConfiguration(messageType);
 			return _topologyProvider.UnbindQueueAsync(
-				_queueConfig.QueueName,
+				_queueConfig.Name,
 				chainConfig.Exchange.ExchangeName,
 				$"{chainConfig.RoutingKey}.{globalMessaegId}"
 			);

@@ -7,14 +7,14 @@ namespace RawRabbit.Configuration.Legacy.Respond
 	{
 		public bool NoAck { get; set; }
 		public ushort PrefetchCount { get; set; }
-		public ExchangeConfiguration Exchange { get; set; }
-		public QueueConfiguration Queue { get; set; }
+		public ExchangeDeclaration Exchange { get; set; }
+		public QueueDeclaration Queue { get; set; }
 		public string RoutingKey { get; set; }
 
 		public ResponderConfiguration()
 		{
-			Exchange = new ExchangeConfiguration();
-			Queue = new QueueConfiguration();
+			Exchange = new ExchangeDeclaration();
+			Queue = new QueueDeclaration();
 			NoAck = true;
 		}
 	}
@@ -27,8 +27,8 @@ namespace RawRabbit.Configuration.Legacy.Respond
 
 	public interface IOperationConfiguration
 	{
-		ExchangeConfiguration Exchange { get; }
-		QueueConfiguration Queue { get; }
+		ExchangeDeclaration Exchange { get; }
+		QueueDeclaration Queue { get; }
 		string RoutingKey { get; }
 	}
 }

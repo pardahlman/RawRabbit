@@ -9,11 +9,11 @@ namespace RawRabbit.Configuration.Consumer
 	public class ConsumerConfigurationFactory : IConsumerConfigurationFactory
 	{
 		private readonly IQueueConfigurationFactory _queue;
-		private readonly IExchangeConfigurationFactory _exchange;
+		private readonly IExchangeDeclarationFactory _exchange;
 		private readonly IConsumeConfigurationFactory _consume;
 		private readonly INamingConventions _conventions;
 
-		public ConsumerConfigurationFactory(IQueueConfigurationFactory queue, IExchangeConfigurationFactory exchange, IConsumeConfigurationFactory consume, INamingConventions conventions)
+		public ConsumerConfigurationFactory(IQueueConfigurationFactory queue, IExchangeDeclarationFactory exchange, IConsumeConfigurationFactory consume, INamingConventions conventions)
 		{
 			_queue = queue;
 			_exchange = exchange;

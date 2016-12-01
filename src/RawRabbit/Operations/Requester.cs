@@ -101,7 +101,7 @@ namespace RawRabbit.Operations
 				routingKey: _config.RouteWithGlobalId ? $"{cfg.RoutingKey}.{globalMessageId}" : cfg.RoutingKey,
 				basicProperties: _propertiesProvider.GetProperties<TResponse>(p =>
 					{
-						p.ReplyTo = cfg.ReplyQueue.QueueName;
+						p.ReplyTo = cfg.ReplyQueue.Name;
 						p.CorrelationId = correlationId;
 						p.Expiration = _config.RequestTimeout.TotalMilliseconds.ToString();
 						p.Headers.Add(PropertyHeaders.Context, _contextProvider.GetMessageContext(ref globalMessageId));

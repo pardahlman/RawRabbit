@@ -13,7 +13,7 @@ namespace RawRabbit.Configuration.Publisher
 		/// </summary>
 		/// <param name="exchange">Builder for exchange features.</param>
 		/// <returns></returns>
-		IPublisherConfigurationBuilder OnDeclaredExchange(Action<IExchangeConfigurationBuilder> exchange);
+		IPublisherConfigurationBuilder OnDeclaredExchange(Action<IExchangeDeclarationBuilder> exchange);
 		IPublisherConfigurationBuilder WithReturnCallback(Action<BasicReturnEventArgs> callback);
 	}
 }

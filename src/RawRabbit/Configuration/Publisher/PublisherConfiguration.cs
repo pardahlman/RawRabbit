@@ -7,7 +7,7 @@ namespace RawRabbit.Configuration.Publisher
 {
 	public class PublisherConfiguration : BasicPublishConfiguration
 	{
-		public ExchangeConfiguration Exchange { get; set; }
-		public Action<BasicReturnEventArgs> MandatoryCallback { get; set; }
+		public ExchangeDeclaration Exchange { get; set; }
+		public EventHandler<BasicReturnEventArgs> MandatoryCallback { get; set; }
 	}
 }
