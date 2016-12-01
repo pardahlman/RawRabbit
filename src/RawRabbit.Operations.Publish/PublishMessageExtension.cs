@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Publisher;
@@ -13,7 +14,7 @@ namespace RawRabbit
 	{
 		public static readonly Action<IPipeBuilder> PublishPipeAction = pipe => pipe
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.Initiated))
-			.Use<PublishConfigurationMiddleware>()
+			.Use<PublisherConfigurationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.PublishConfigured))
 			.Use<ExchangeDeclareMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.ExchangeDeclared))
@@ -30,7 +31,10 @@ namespace RawRabbit
 			.Use<MandatoryCallbackMiddleware>()
 			.Use<PublishAcknowledgeMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.PreMessagePublish))
-			.Use<PublishMessage>()
+			.Use<BasicPublishMiddleware>(new BasicPublishOptions
+			{
+				BodyFunc = c => UTF8Encoding.UTF8.GetBytes(c.Get<string>(PipeKey.SerializedMessage))
+			})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.MessagePublished));
 
 		public static Task PublishAsync<TMessage>(this IBusClient client, TMessage message, Action<IPublisherConfigurationBuilder> config = null)

@@ -14,14 +14,14 @@ namespace RawRabbit.Operations.Publish.Middleware
 		public Func<IPipeContext, Type> MessageTypeFunc { get; set; }
 	}
 
-	public class PublishConfigurationMiddleware : Pipe.Middleware.Middleware
+	public class PublisherConfigurationMiddleware : Pipe.Middleware.Middleware
 	{
 		private readonly IPublisherConfigurationFactory _publisherFactory;
 		private readonly Func<IPipeContext, string> _exchangeFunc;
 		private readonly Func<IPipeContext, string> _routingKeyFunc;
 		private readonly Func<IPipeContext, Type> _messageTypeFunc;
 
-		public PublishConfigurationMiddleware(IPublisherConfigurationFactory publisherFactory, PublishConfigurationOptions options = null)
+		public PublisherConfigurationMiddleware(IPublisherConfigurationFactory publisherFactory, PublishConfigurationOptions options = null)
 		{
 			_publisherFactory = publisherFactory;
 			_exchangeFunc = options?.ExchangeFunc ?? (context => context.GetPublishConfiguration()?.Exchange.ExchangeName);
@@ -46,6 +46,7 @@ namespace RawRabbit.Operations.Publish.Middleware
 			}
 
 			context.Properties.Add(PipeKey.PublisherConfiguration, config);
+			context.Properties.Add(PipeKey.BasicPublishConfiguration, config);
 			return Next.InvokeAsync(context);
 		}
 

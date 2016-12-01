@@ -23,7 +23,7 @@ namespace RawRabbit.Pipe.Middleware
 		protected Func<IPipeContext, IBasicProperties> BasicPropsFunc;
 		protected Func<IPipeContext, byte[]> BodyFunc;
 
-		public BasicPublishMiddleware(BasicPublishOptions options)
+		public BasicPublishMiddleware(BasicPublishOptions options = null)
 		{
 			ChannelFunc = options?.ChannelFunc ?? (context => context.GetTransientChannel());
 			ExchangeNameFunc = options?.ExchangeNameFunc ?? (c => c.GetBasicPublishConfiguration()?.ExchangeName);
@@ -40,7 +40,7 @@ namespace RawRabbit.Pipe.Middleware
 			var routingKey = GetRoutingKey(context);
 			var mandatory = GetMandatoryOptions(context);
 			var basicProps = GetBasicProps(context);
-			var body = GetMessageBondy(context);
+			var body = GetMessageBody(context);
 
 			channel.BasicPublish(
 				exchange: exchangeName,
@@ -53,7 +53,7 @@ namespace RawRabbit.Pipe.Middleware
 			return Next.InvokeAsync(context);
 		}
 
-		protected virtual byte[] GetMessageBondy(IPipeContext context)
+		protected virtual byte[] GetMessageBody(IPipeContext context)
 		{
 			return BodyFunc(context);
 		}
