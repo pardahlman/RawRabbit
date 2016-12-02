@@ -29,7 +29,7 @@ namespace RawRabbit.Pipe.Middleware
 
 			if (queue == null)
 			{
-				throw new ArgumentNullException(nameof(queue));
+				return Next.InvokeAsync(context);
 			}
 
 			return _topology

@@ -8,20 +8,20 @@ namespace RawRabbit.Operations.Saga.Model
 	{
 		public abstract Task TriggerAsync(object trigger);
 		public abstract Task TriggerAsync<TPayload>(object trigger, TPayload payload);
-		public abstract SagaDto GetDto();
+		public abstract SagaModel GetDto();
 	}
 
-	public abstract class  Saga<TState, TTrigger> : Saga<TState, TTrigger, SagaDto<TState>> { }
+	public abstract class  Saga<TState, TTrigger> : Saga<TState, TTrigger, SagaModel<TState>> { }
 
-	public abstract class Saga<TState, TTrigger, TSagaDto> : Saga where TSagaDto : SagaDto<TState>
+	public abstract class Saga<TState, TTrigger, TModel> : Saga where TModel : SagaModel<TState>
 	{
-		protected readonly TSagaDto SagaDto;
+		protected readonly TModel SagaDto;
 		protected StateMachine<TState, TTrigger> StateMachine;
 		protected TriggerParameterRepository<TState, TTrigger> TriggerParameters;
 
-		protected Saga(TSagaDto sagaDto = null)
+		protected Saga(TModel model = null)
 		{
-			SagaDto = sagaDto ?? Initialize();
+			SagaDto = model ?? Initialize();
 			StateMachine = new StateMachine<TState, TTrigger>(() => SagaDto.State, s => SagaDto.State = s);
 			TriggerParameters = new TriggerParameterRepository<TState, TTrigger>(StateMachine);
 			ConfigureState(StateMachine);
@@ -29,7 +29,7 @@ namespace RawRabbit.Operations.Saga.Model
 
 		protected abstract void ConfigureState(StateMachine<TState, TTrigger> machine);
 
-		public abstract TSagaDto Initialize();
+		public abstract TModel Initialize();
 
 		public override Task TriggerAsync(object trigger)
 		{
@@ -42,7 +42,7 @@ namespace RawRabbit.Operations.Saga.Model
 			return StateMachine.FireAsync(paramTrigger, payload);
 		}
 		
-		public override SagaDto GetDto()
+		public override SagaModel GetDto()
 		{
 			return SagaDto;
 		}

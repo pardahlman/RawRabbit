@@ -62,7 +62,7 @@ namespace RawRabbit.Pipe.Middleware
 				config = builder.Config;
 			}
 
-			context.Properties.Add(PipeKey.ConsumerConfiguration, config);
+			context.Properties.Add(PipeKey.ConsumeConfiguration, config.Consume);
 			context.Properties.Add(PipeKey.QueueDeclaration, config.Queue);
 			context.Properties.Add(PipeKey.ExchangeDeclaration, config.Exchange);
 

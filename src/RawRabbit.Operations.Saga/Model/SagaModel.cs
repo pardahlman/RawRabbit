@@ -2,12 +2,12 @@
 
 namespace RawRabbit.Operations.Saga.Model
 {
-	public abstract class SagaDto<TState> : SagaDto
+	public abstract class SagaModel<TState> : SagaModel
 	{
 		public TState State { get; set; }
 	}
 
-	public abstract class SagaDto
+	public abstract class SagaModel
 	{
 		public Guid Id { get; set; }
 	}

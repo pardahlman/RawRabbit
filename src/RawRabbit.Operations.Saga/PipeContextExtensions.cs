@@ -18,9 +18,14 @@ namespace RawRabbit.Operations.Saga
 			return context.Get<Func<Model.Saga, Task>>(SagaKey.TriggerFunc);
 		}
 
-		public static Dictionary<object, List<ExternalTrigger>> GetExternalTriggers(this IPipeContext context)
+		public static List<TriggerInvoker> GetTriggerInvokers(this IPipeContext context)
 		{
-			return context.Get<Dictionary<object, List<ExternalTrigger>>>(SagaKey.ExternalTriggers);
+			return context.Get< List<TriggerInvoker>>(SagaKey.TriggerInvokers);
+		}
+
+		public static TriggerInvoker GetTriggerInvoker(this IPipeContext context)
+		{
+			return context.Get<TriggerInvoker>(SagaKey.TriggerInvokers);
 		}
 	}
 }

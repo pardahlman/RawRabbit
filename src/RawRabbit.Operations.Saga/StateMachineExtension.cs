@@ -16,27 +16,31 @@ namespace RawRabbit
 		{
 			return busClient.InvokeAsync(
 				builder => builder
-//					.Use<ConsumeTriggerMiddleware>()
-//					.Use<TopologyMiddleware>()
 					.Use<RepeatMiddleware>(new RepeateOptions
 					{
-						EnumerableFunc = context => context.GetExternalTriggers().OfType<MessageTypeTrigger>(),
-						RepeatContextFactory = (context, factory, trigger) => factory.CreateContext(
-								new KeyValuePair<string, object>(PipeKey.MessageType, ((MessageTypeTrigger)trigger).MessageType),
-								new KeyValuePair<string, object>(PipeKey.ConfigurationAction, ((MessageTypeTrigger)trigger).ConfigurationAction)),
+						EnumerableFunc = context => context.GetTriggerInvokers().OfType<MessageTriggerInvoker>(),
+						RepeatContextFactory = (context, factory, invoker) => factory.CreateContext(
+								new KeyValuePair<string, object>(SagaKey.TriggerInvokers, invoker),
+								new KeyValuePair<string, object>(SagaKey.SagaType, typeof(TSaga)),
+								new KeyValuePair<string, object>(PipeKey.MessageType, (invoker as MessageTriggerInvoker)?.MessageType),
+								new KeyValuePair<string, object>(PipeKey.ConfigurationAction, ((MessageTriggerInvoker)invoker).ConfigurationAction)),
 						RepeatePipe = pipe => pipe
 							.Use<ConsumeConfigurationMiddleware>()
 							.Use<QueueDeclareMiddleware>()
 							.Use<ExchangeDeclareMiddleware>()
 							.Use<QueueBindMiddleware>()
-					})
-					.Use<ConsumerTriggerMiddleware>()
-					,
+							.Use<ConsumerCreationMiddleware>()
+							.Use<MessageConsumeMiddleware>(new ConsumeOptions
+							{
+								Pipe = c => c
+								.Use<TriggerStateMiddleware>()
+								.Use<AutoAckMiddleware>()
+							})
+					}),
 				context =>
 				{
 					context.Properties.Add(SagaKey.SagaType, typeof(TSaga));
-					context.Properties.Add(SagaKey.ExternalTriggers, new TTriggerConfiguration().ConfigureTriggers());
-
+					context.Properties.Add(SagaKey.TriggerInvokers, new TTriggerConfiguration().GetTriggerInvokers());
 				});
 		}
 

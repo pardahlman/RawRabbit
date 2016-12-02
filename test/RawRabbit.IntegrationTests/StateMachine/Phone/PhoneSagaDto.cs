@@ -2,6 +2,6 @@
 
 namespace RawRabbit.IntegrationTests.StateMachine.Phone
 {
-	public class PhoneSagaDto : SagaDto<State>
+	public class PhoneSagaDto : SagaModel<State>
 	{ }
 }

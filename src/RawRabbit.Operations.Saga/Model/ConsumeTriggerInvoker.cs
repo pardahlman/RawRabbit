@@ -4,14 +4,17 @@ using RawRabbit.Configuration.Consumer;
 
 namespace RawRabbit.Operations.Saga.Model
 {
-	public abstract class ExternalTrigger { }
-
-	public class ConsumeTrigger : ExternalTrigger
+	public abstract class TriggerInvoker
 	{
-		public ConsumerConfiguration Configuration { get; set; }
+		public object Trigger { get; set; }
 	}
 
-	public class MessageTypeTrigger : ExternalTrigger
+	public class ConsumeTriggerInvoker : TriggerInvoker
+	{
+		public ConsumeConfiguration Configuration { get; set; }
+	}
+
+	public class MessageTriggerInvoker : TriggerInvoker
 	{
 		public Type MessageType { get; set; }
 		public Action<IConsumerConfigurationBuilder> ConfigurationAction { get; set; }

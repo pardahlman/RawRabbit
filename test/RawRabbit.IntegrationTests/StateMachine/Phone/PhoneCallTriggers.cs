@@ -6,7 +6,7 @@ namespace RawRabbit.IntegrationTests.StateMachine.Phone
 {
 	public class PhoneCallTriggers : TriggerConfiguration<Trigger>
 	{
-		public override Dictionary<Trigger, List<ExternalTrigger>> ConfigureTriggers(TriggerBuilder<Trigger> trigger)
+		public override List<TriggerInvoker> ConfigureTriggers(TriggerBuilder<Trigger> trigger)
 		{
 			trigger.Configure(Trigger.DialSignalSent)
 				.FromMessage<DialSignalSent>();

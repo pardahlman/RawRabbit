@@ -5,17 +5,16 @@ namespace RawRabbit.Operations.Saga.Model
 {
 	public abstract class TriggerConfiguration
 	{
-		public abstract Dictionary<object, List<ExternalTrigger>> ConfigureTriggers();
+		public abstract List<TriggerInvoker> GetTriggerInvokers();
 	}
 
 	public abstract class TriggerConfiguration<TTrigger> : TriggerConfiguration
 	{
-		public override Dictionary<object, List<ExternalTrigger>> ConfigureTriggers()
+		public override List<TriggerInvoker> GetTriggerInvokers()
 		{
-			var triggers = ConfigureTriggers(new TriggerBuilder<TTrigger>());
-			return triggers.ToDictionary(t => t.Key as object, t => t.Value);
+			return ConfigureTriggers(new TriggerBuilder<TTrigger>());
 		}
 
-		public abstract Dictionary<TTrigger, List<ExternalTrigger>> ConfigureTriggers(TriggerBuilder<TTrigger> trigger);
+		public abstract List<TriggerInvoker> ConfigureTriggers(TriggerBuilder<TTrigger> trigger);
 	}
 }

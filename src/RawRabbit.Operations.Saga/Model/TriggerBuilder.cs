@@ -5,26 +5,24 @@ namespace RawRabbit.Operations.Saga.Model
 {
 	public class TriggerBuilder<TTrigger>
 	{
-		private readonly List<TriggerAppender> _triggerAppenders;
+		private readonly List<TriggerInvokerAppender> _triggerAppenders;
 
 		public TriggerBuilder()
 		{
-			_triggerAppenders = new List<TriggerAppender>();
+			_triggerAppenders = new List<TriggerInvokerAppender>();
 		}
-		public TriggerAppender Configure(TTrigger trigger)
+		public TriggerInvokerAppender Configure(TTrigger trigger)
 		{
-			var appender = new TriggerAppender(trigger);
+			var appender = new TriggerInvokerAppender(trigger);
 			_triggerAppenders.Add(appender);
 			return appender;
 		}
 
-		public Dictionary<TTrigger, List<ExternalTrigger>> Build()
+		public List<TriggerInvoker> Build()
 		{
 			return _triggerAppenders
-				.GroupBy(t => t.Trigger)
-				.ToDictionary(
-					trigger => (TTrigger) trigger.Key,
-					trigger => trigger.SelectMany(t => t.ExternalTriggers).ToList());
+				.SelectMany(t => t.TriggerInvokers)
+				.ToList();
 		}
 	}
 }
