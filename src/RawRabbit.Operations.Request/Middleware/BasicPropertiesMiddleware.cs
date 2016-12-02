@@ -20,7 +20,7 @@ namespace RawRabbit.Operations.Request.Middleware
 			}
 			else
 			{
-				props.ReplyToAddress = new PublicationAddress(consumeCfg.Exchange.ExchangeType, consumeCfg.Exchange.ExchangeName, consumeCfg.Consume.RoutingKey);
+				props.ReplyToAddress = new PublicationAddress(consumeCfg.Exchange.ExchangeType, consumeCfg.Exchange.Name, consumeCfg.Consume.RoutingKey);
 			}
 
 			props.CorrelationId = correlationId;

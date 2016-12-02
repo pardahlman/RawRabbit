@@ -18,7 +18,7 @@ namespace RawRabbit.Enrichers.Attributes.Middleware
 			}
 			if (!string.IsNullOrWhiteSpace(exchangeAttr.Name))
 			{
-				exchange.ExchangeName = exchangeAttr.Name;
+				exchange.Name = exchangeAttr.Name;
 			}
 			if (exchangeAttr.NullableDurability.HasValue)
 			{

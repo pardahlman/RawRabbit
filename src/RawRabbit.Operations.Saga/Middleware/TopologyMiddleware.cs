@@ -19,14 +19,14 @@ namespace RawRabbit.Operations.Saga.Middleware
 			_consumerFactory = consumerFactory;
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override  Task InvokeAsync(IPipeContext context)
 		{
-			var triggers = context.Get<Dictionary<object, List<ExternalTrigger>>>(SagaKey.ExternalTriggers);
+			var triggers = context.GetExternalTriggers();
 			var topologyTasks = new List<Task>();
 			foreach (var trigger in triggers.Values.SelectMany(v => v.OfType<MessageTypeTrigger>()))
 			{
 				var cfg = _consumerFactory.Create(trigger.MessageType);
-				var topoloyTask = _provider.BindQueueAsync(cfg.Queue.Name, cfg.Exchange.ExchangeName, cfg.Consume.RoutingKey);
+				var topoloyTask = _provider.BindQueueAsync(cfg.Queue.Name, cfg.Exchange.Name, cfg.Consume.RoutingKey);
 				topologyTasks.Add(topoloyTask);
 			}
 			return Task

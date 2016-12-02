@@ -18,10 +18,10 @@ namespace RawRabbit.Operations.Respond.Middleware
 		private readonly Func<IPipeContext, IBasicConsumer> _consumerFunc;
 		private readonly Func<IPipeContext, QueueDeclaration> _queueFunc;
 
-		public SubscriptionMiddleware(SubscriptionOptions options)
+		public SubscriptionMiddleware(SubscriptionOptions options = null)
 		{
 			_consumerFunc = options?.ConsumerFunc ?? (context => context.GetConsumer());
-			_queueFunc = options?.QueueFunc ?? (context => context.GetQueueConfiguration());
+			_queueFunc = options?.QueueFunc ?? (context => context.GetQueueDeclaration());
 		}
 
 		public override Task InvokeAsync(IPipeContext context)

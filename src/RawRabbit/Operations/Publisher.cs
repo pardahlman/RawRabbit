@@ -61,7 +61,7 @@ namespace RawRabbit.Operations
 					{
 						var ackTask = _acknowledger.GetAckTask(channelTask.Result);
 						channelTask.Result.BasicPublish(
-							exchange: config.Exchange.ExchangeName,
+							exchange: config.Exchange.Name,
 							routingKey: _config.RouteWithGlobalId ? $"{config.RoutingKey}.{globalMessageId}" : config.RoutingKey,
 							basicProperties: props,
 							body: _serializer.Serialize(message)

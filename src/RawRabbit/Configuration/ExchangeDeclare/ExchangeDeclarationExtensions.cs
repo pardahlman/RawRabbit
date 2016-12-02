@@ -4,7 +4,7 @@
 	{
 		public static bool IsDefaultExchange(this ExchangeDeclaration declaration)
 		{
-			return string.IsNullOrEmpty(declaration.ExchangeName);
+			return string.IsNullOrEmpty(declaration.Name);
 		}
 	}
 }

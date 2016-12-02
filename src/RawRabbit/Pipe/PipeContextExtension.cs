@@ -37,7 +37,7 @@ namespace RawRabbit.Pipe
 			return context.Get<IBasicConsumer>(PipeKey.Consumer);
 		}
 
-		public static QueueDeclaration GetQueueConfiguration(this IPipeContext context)
+		public static QueueDeclaration GetQueueDeclaration(this IPipeContext context)
 		{
 			return context.Get<QueueDeclaration>(PipeKey.QueueDeclaration);
 		}
@@ -54,7 +54,7 @@ namespace RawRabbit.Pipe
 
 		public static string GetExchangeName(this IPipeContext context)
 		{
-			return context.Get<string>(PipeKey.ExchangeName) ?? GetExchangeDeclaration(context)?.ExchangeName;
+			return context.Get<string>(PipeKey.ExchangeName) ?? GetExchangeDeclaration(context)?.Name;
 		}
 
 		public static bool GetMandatoryPublishFlag(this IPipeContext context)

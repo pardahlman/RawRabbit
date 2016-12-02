@@ -58,7 +58,7 @@ namespace RawRabbit.Operations
 				? $"{config.RoutingKey}.#"
 				: config.RoutingKey;
 
-			var topologyTask = _topologyProvider.BindQueueAsync(config.Queue.Name, config.Exchange.ExchangeName, routingKey);
+			var topologyTask = _topologyProvider.BindQueueAsync(config.Queue.Name, config.Exchange.Name, routingKey);
 			var channelTask = _channelFactory.CreateChannelAsync();
 
 			var subscriberTask = Task

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using RawRabbit.Configuration.Consume;
 using RawRabbit.Configuration.Consumer;
 using RawRabbit.Configuration.Queue;
 
@@ -9,7 +10,7 @@ namespace RawRabbit.Operations.Saga.Model
 	{
 		public object Trigger { get; set; }
 
-		public List<ExternalTrigger> ExternalTriggers { get; private set; }
+		public List<ExternalTrigger> ExternalTriggers { get; }
 
 		public TriggerAppender(object trigger)
 		{
@@ -40,9 +41,13 @@ namespace RawRabbit.Operations.Saga.Model
 			return appender;
 		}
 
-		public static TriggerAppender FromMessage<TMessage>(this TriggerAppender appender)
+		public static TriggerAppender FromMessage<TMessage>(this TriggerAppender appender, Action<IConsumerConfigurationBuilder> config = null)
 		{
-			return appender.From(new MessageTypeTrigger {MessageType = typeof(TMessage)});
+			return appender.From(new MessageTypeTrigger
+			{
+				MessageType = typeof(TMessage),
+				ConfigurationAction = config
+			});
 		}
 
 		public static TriggerAppender FromTimeSpan(this TriggerAppender appender, TimeSpan timer, bool recurring = false)

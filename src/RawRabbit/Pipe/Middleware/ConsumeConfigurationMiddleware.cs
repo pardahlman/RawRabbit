@@ -44,8 +44,8 @@ namespace RawRabbit.Pipe.Middleware
 		public ConsumeConfigurationMiddleware(IConsumerConfigurationFactory configFactory, ConsumeConfigurationOptions options = null)
 		{
 			_configFactory = configFactory;
-			_queueFunc = options?.QueueFunc ?? (context => context.GetQueueConfiguration()?.Name);
-			_exchangeFunc = options?.ExchangeFunc ?? (context => context.GetExchangeDeclaration()?.ExchangeName);
+			_queueFunc = options?.QueueFunc ?? (context => context.GetQueueDeclaration()?.Name);
+			_exchangeFunc = options?.ExchangeFunc ?? (context => context.GetExchangeDeclaration()?.Name);
 			_routingKeyFunc = options?.RoutingKeyFunc ?? (context => context.GetRoutingKey());
 			_messageTypeFunc = options?.MessageTypeFunc ?? (context => context.GetMessageType());
 		}
@@ -63,6 +63,8 @@ namespace RawRabbit.Pipe.Middleware
 			}
 
 			context.Properties.Add(PipeKey.ConsumerConfiguration, config);
+			context.Properties.Add(PipeKey.QueueDeclaration, config.Queue);
+			context.Properties.Add(PipeKey.ExchangeDeclaration, config.Exchange);
 
 			return Next.InvokeAsync(context);
 		}

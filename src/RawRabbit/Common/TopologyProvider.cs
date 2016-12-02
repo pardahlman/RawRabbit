@@ -119,7 +119,7 @@ namespace RawRabbit.Common
 
 		public bool IsDeclared(ExchangeDeclaration exchange)
 		{
-			return exchange.IsDefaultExchange() || exchange.AssumeInitialized || _initExchanges.Contains(exchange.ExchangeName);
+			return exchange.IsDefaultExchange() || exchange.AssumeInitialized || _initExchanges.Contains(exchange.Name);
 		}
 
 		public bool IsDeclared(QueueDeclaration queue)
@@ -194,17 +194,17 @@ namespace RawRabbit.Common
 				return;
 			}
 
-			_logger.LogInformation($"Declaring exchange '{exchange.ExchangeName}'.");
+			_logger.LogInformation($"Declaring exchange '{exchange.Name}'.");
 			var channel = GetOrCreateChannel();
 			channel.ExchangeDeclare(
-				exchange.ExchangeName,
+				exchange.Name,
 				exchange.ExchangeType,
 				exchange.Durable,
 				exchange.AutoDelete,
 				exchange.Arguments);
 			if (!exchange.AutoDelete)
 			{
-				_initExchanges.Add(exchange.ExchangeName);
+				_initExchanges.Add(exchange.Name);
 			}
 		}
 
@@ -228,7 +228,7 @@ namespace RawRabbit.Common
 					}
 					catch (Exception e)
 					{
-						_logger.LogError($"Unable to declare exchange {exchange.Declaration.ExchangeName}", e);
+						_logger.LogError($"Unable to declare exchange {exchange.Declaration.Name}", e);
 						exchange.TaskCompletionSource.TrySetException(e);
 					}
 

@@ -19,7 +19,7 @@ namespace RawRabbit.Configuration.Consumer
 			var builder = new ExchangeDeclarationBuilder(Config.Exchange);
 			exchange(builder);
 			Config.Exchange = builder.Declaration;
-			Config.Consume.ExchangeName = builder.Declaration.ExchangeName;
+			Config.Consume.ExchangeName = builder.Declaration.Name;
 			return this;
 		}
 

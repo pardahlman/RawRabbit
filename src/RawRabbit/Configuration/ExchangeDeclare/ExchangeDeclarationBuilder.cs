@@ -11,7 +11,7 @@
 
 		public IExchangeDeclarationBuilder WithName(string exchangeName)
 		{
-			Declaration.ExchangeName = exchangeName;
+			Declaration.Name = exchangeName;
 			return this;
 		}
 

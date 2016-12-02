@@ -22,11 +22,11 @@ namespace RawRabbit
 		public static readonly Action<IPipeBuilder> AutoAckPipe = pipe => pipe
 			.Use<ConsumeConfigurationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(SubscribeStage.ConsumeConfigured))
-			.Use<QueueDeclareMiddleware>(new QueueDeclareOptions { QueueFunc = context => context.GetConsumerConfiguration()?.Queue})
+			.Use<QueueDeclareMiddleware>(new QueueDeclareOptions { QueueDeclarationFunc = context => context.GetConsumerConfiguration()?.Queue})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(SubscribeStage.QueueDeclared))
 			.Use<ExchangeDeclareMiddleware>(new ExchangeDeclareOptions { ExchangeFunc = context => context.GetConsumerConfiguration()?.Exchange})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(SubscribeStage.ExchangeDeclared))
-			.Use<QueueBindMiddleware>(new QueueBindOptions {ConsumeFunc = context => context.GetConsumerConfiguration()})
+			.Use<QueueBindMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(SubscribeStage.QueueBound))
 			.Use<ConsumerCreationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(SubscribeStage.ConsumerChannelCreated))

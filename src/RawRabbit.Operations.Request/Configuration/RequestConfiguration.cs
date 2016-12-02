@@ -19,7 +19,7 @@ namespace RawRabbit.Operations.Request.Configuration
 			config.Response.Queue.Name = DirectReplyTo;
 			config.Response.Consume.QueueName = DirectReplyTo;
 			config.Response.Consume.RoutingKey = DirectReplyTo;
-			config.Response.Exchange.ExchangeName = DefaultExchange;
+			config.Response.Exchange.Name = DefaultExchange;
 			config.Response.Consume.ExchangeName = DefaultExchange;
 			config.Response.Consume.NoAck = true;
 			return config;

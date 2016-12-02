@@ -56,16 +56,16 @@ namespace RawRabbit
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.Initiated))
 			.Use<RespondConfigurationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ConsumeConfigured))
-			.Use<QueueDeclareMiddleware>(new QueueDeclareOptions { QueueFunc = context => context.GetRespondConfiguration()?.Queue })
+			.Use<QueueDeclareMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.QueueDeclared))
-			.Use<ExchangeDeclareMiddleware>(new ExchangeDeclareOptions { ExchangeFunc = context => context.GetRespondConfiguration()?.Exchange })
+			.Use<ExchangeDeclareMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ExchangeDeclared))
-			.Use<QueueBindMiddleware>(new QueueBindOptions { ConsumeFunc = context => context.GetRespondConfiguration() })
+			.Use<QueueBindMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.QueueBound))
-			.Use<ConsumerCreationMiddleware>(new ConsumerCreationOptions { ConsumeFunc = context => context.GetRespondConfiguration() })
+			.Use<ConsumerCreationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ConsumerCreated))
 			.Use<MessageConsumeMiddleware>(new ConsumeOptions { Pipe = ConsumePipe })
-			.Use<SubscriptionMiddleware>(new SubscriptionOptions { QueueFunc = context => context.GetRespondConfiguration()?.Queue });
+			.Use<SubscriptionMiddleware>();
 
 		public static readonly Action<IPipeBuilder> ExplicitAckPipe = AutoAckPipe + (pipe => pipe
 			.Replace<MessageConsumeMiddleware, MessageConsumeMiddleware>(args: new ConsumeOptions

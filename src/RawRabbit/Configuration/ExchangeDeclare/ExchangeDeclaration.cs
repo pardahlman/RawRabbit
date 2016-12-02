@@ -4,7 +4,7 @@ namespace RawRabbit.Configuration.Exchange
 {
 	public class ExchangeDeclaration
 	{
-		public string ExchangeName { get; set; }
+		public string Name { get; set; }
 		public string ExchangeType { get; set; }
 		public bool Durable { get; set; }
 		public bool AutoDelete { get; set; }
@@ -25,7 +25,7 @@ namespace RawRabbit.Configuration.Exchange
 
 		public static ExchangeDeclaration Default => new ExchangeDeclaration
 		{
-			ExchangeName = "",
+			Name = "",
 			ExchangeType = RabbitMQ.Client.ExchangeType.Topic
 		};
 

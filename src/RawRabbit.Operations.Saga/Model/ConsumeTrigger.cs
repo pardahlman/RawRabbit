@@ -1,4 +1,5 @@
 ﻿using System;
+using RawRabbit.Configuration.Consume;
 using RawRabbit.Configuration.Consumer;
 
 namespace RawRabbit.Operations.Saga.Model
@@ -13,5 +14,6 @@ namespace RawRabbit.Operations.Saga.Model
 	public class MessageTypeTrigger : ExternalTrigger
 	{
 		public Type MessageType { get; set; }
+		public Action<IConsumerConfigurationBuilder> ConfigurationAction { get; set; }
 	}
 }

@@ -32,7 +32,7 @@ namespace RawRabbit.ErrorHandling
 			_topologyProvider = topologyProvider;
 			_channelFactory = channelFactory;
 			_errorExchangeCfg = ExchangeDeclaration.Default;
-			_errorExchangeCfg.ExchangeName = conventions.ErrorExchangeNamingConvention();
+			_errorExchangeCfg.Name = conventions.ErrorExchangeNamingConvention();
 		}
 
 		public virtual Task OnResponseHandlerExceptionAsync(IRawConsumer rawConsumer, IConsumerConfiguration cfg, BasicDeliverEventArgs args, Exception exception)
@@ -41,7 +41,7 @@ namespace RawRabbit.ErrorHandling
 			var innerException = UnwrapInnerException(exception);
 			var exceptionInfo = new MessageHandlerExceptionInformation
 			{
-				Message = $"An unhandled exception was thrown when consuming a message\n  MessageId: {args.BasicProperties.MessageId}\n  Queue: '{cfg.Queue.FullQueueName}'\n  Exchange: '{cfg.Exchange.ExchangeName}'\nSee inner exception for more details.",
+				Message = $"An unhandled exception was thrown when consuming a message\n  MessageId: {args.BasicProperties.MessageId}\n  Queue: '{cfg.Queue.FullQueueName}'\n  Exchange: '{cfg.Exchange.Name}'\nSee inner exception for more details.",
 				ExceptionType = innerException.GetType().FullName,
 				StackTrace = innerException.StackTrace,
 				InnerMessage = innerException.Message
@@ -141,7 +141,7 @@ namespace RawRabbit.ErrorHandling
 					Message = msg,
 				};
 				channel.BasicPublish(
-					exchange: _errorExchangeCfg.ExchangeName,
+					exchange: _errorExchangeCfg.Name,
 					routingKey: args.RoutingKey,
 					basicProperties: args.BasicProperties,
 					body: _serializer.Serialize(errorMsg)

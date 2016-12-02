@@ -25,7 +25,7 @@ namespace RawRabbit.Extensions.TopologyUpdater.Core
 		public Task<ExchangeUpdateResult> UpdateExchangeAsync(ExchangeUpdateDeclaration config)
 		{
 			var channelTask = _channelFactory.GetChannelAsync();
-			var bindingsTask = _bindingProvider.GetBindingsAsync(config.ExchangeName);
+			var bindingsTask = _bindingProvider.GetBindingsAsync(config.Name);
 
 			return Task
 				.WhenAll(channelTask, bindingsTask)
@@ -33,14 +33,14 @@ namespace RawRabbit.Extensions.TopologyUpdater.Core
 				{
 					var channel = channelTask.Result;
 					var stopWatch = Stopwatch.StartNew();
-					channel.ExchangeDelete(config.ExchangeName);
-					channel.ExchangeDeclare(config.ExchangeName, config.ExchangeType.ToString(), config.Durable, config.AutoDelete, config.Arguments);
+					channel.ExchangeDelete(config.Name);
+					channel.ExchangeDeclare(config.Name, config.ExchangeType.ToString(), config.Durable, config.AutoDelete, config.Arguments);
 					foreach (var binding in bindingsTask.Result ?? Enumerable.Empty<Binding>())
 					{
 						binding.RoutingKey = config.BindingTransformer(binding.RoutingKey);
 						if (string.Equals(binding.DestinationType, QueueDestination, StringComparison.CurrentCultureIgnoreCase))
 						{
-							channel.QueueBind(binding.Destination, config.ExchangeName, binding.RoutingKey);
+							channel.QueueBind(binding.Destination, config.Name, binding.RoutingKey);
 						}
 					}
 					stopWatch.Stop();

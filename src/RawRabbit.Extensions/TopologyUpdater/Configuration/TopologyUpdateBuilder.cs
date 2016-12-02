@@ -25,7 +25,7 @@ namespace RawRabbit.Extensions.TopologyUpdater.Configuration
 		#region ITopologySelector
 		public IExchangeUpdateBuilder ForExchange(string name)
 		{
-			_current = new ExchangeUpdateDeclaration { ExchangeName = name };
+			_current = new ExchangeUpdateDeclaration { Name = name };
 			return this;
 		}
 
@@ -33,7 +33,7 @@ namespace RawRabbit.Extensions.TopologyUpdater.Configuration
 		{
 			_current = new ExchangeUpdateDeclaration
 			{
-				ExchangeName = _conventions.ExchangeNamingConvention(typeof(TMessage))
+				Name = _conventions.ExchangeNamingConvention(typeof(TMessage))
 			};
 			return this;
 		}
@@ -50,7 +50,7 @@ namespace RawRabbit.Extensions.TopologyUpdater.Configuration
 			{
 				Exchanges.Add(new ExchangeUpdateDeclaration(_config.Exchange)
 				{
-					ExchangeName = _conventions.ExchangeNamingConvention(messageType)
+					Name = _conventions.ExchangeNamingConvention(messageType)
 				});
 			}
 			return this;
@@ -63,7 +63,7 @@ namespace RawRabbit.Extensions.TopologyUpdater.Configuration
 			var builder = new ExchangeDeclarationBuilder(new ExchangeUpdateDeclaration(_config.Exchange));
 			cfgAction(builder);
 			var cfg = builder.Declaration as ExchangeUpdateDeclaration;
-			cfg.ExchangeName = _current.ExchangeName;
+			cfg.Name = _current.Name;
 			if (bindingKeyTransformer != null)
 			{
 				cfg.BindingTransformer = bindingKeyTransformer;
@@ -74,14 +74,14 @@ namespace RawRabbit.Extensions.TopologyUpdater.Configuration
 
 		public ITopologySelector UseConfiguration(ExchangeUpdateDeclaration declaration)
 		{
-			declaration.ExchangeName = _current.ExchangeName;
+			declaration.Name = _current.Name;
 			Exchanges.Add(declaration);
 			return this;
 		}
 
 		public ITopologySelector UseConventions<TMessage>(Func<string, string> bindingKeyTransformer = null)
 		{
-			_current.ExchangeName = _conventions.ExchangeNamingConvention(typeof(TMessage));
+			_current.Name = _conventions.ExchangeNamingConvention(typeof(TMessage));
 			if (bindingKeyTransformer != null)
 			{
 				_current.BindingTransformer = bindingKeyTransformer;

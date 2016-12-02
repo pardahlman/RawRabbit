@@ -97,7 +97,7 @@ namespace RawRabbit.Operations
 			_responseDictionary.TryAdd(correlationId, responseSource);
 
 			consumer.Model.BasicPublish(
-				exchange: cfg.Exchange.ExchangeName,
+				exchange: cfg.Exchange.Name,
 				routingKey: _config.RouteWithGlobalId ? $"{cfg.RoutingKey}.{globalMessageId}" : cfg.RoutingKey,
 				basicProperties: _propertiesProvider.GetProperties<TResponse>(p =>
 					{

@@ -46,7 +46,7 @@ namespace RawRabbit.Operations.Request.Middleware
 
 			context.Properties.Add(RequestKey.Configuration, requestConfig);
 			context.Properties.Add(PipeKey.PublisherConfiguration, requestConfig.Request);
-			context.Properties.Add(PipeKey.ConsumerConfiguration, requestConfig.Response);
+			context.Properties.Add(PipeKey.ConsumeConfiguration, requestConfig.Response.Consume);
 			return Next.InvokeAsync(context);
 		}
 	}

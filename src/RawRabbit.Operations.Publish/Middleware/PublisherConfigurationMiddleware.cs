@@ -24,7 +24,7 @@ namespace RawRabbit.Operations.Publish.Middleware
 		public PublisherConfigurationMiddleware(IPublisherConfigurationFactory publisherFactory, PublishConfigurationOptions options = null)
 		{
 			_publisherFactory = publisherFactory;
-			_exchangeFunc = options?.ExchangeFunc ?? (context => context.GetPublishConfiguration()?.Exchange.ExchangeName);
+			_exchangeFunc = options?.ExchangeFunc ?? (context => context.GetPublishConfiguration()?.Exchange.Name);
 			_routingKeyFunc = options?.RoutingKeyFunc ?? (context => context.GetPublishConfiguration()?.RoutingKey);
 			_messageTypeFunc = options?.MessageTypeFunc ?? (context => context.GetMessageType());
 		}

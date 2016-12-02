@@ -30,7 +30,7 @@ namespace RawRabbit.Configuration.Exchange
 				ExchangeType = _config.Exchange.Type.ToString().ToLower(),
 				Durable = _config.Exchange.Durable,
 				AutoDelete = _config.Exchange.AutoDelete,
-				ExchangeName = exchangeName
+				Name = exchangeName
 			};
 		}
 

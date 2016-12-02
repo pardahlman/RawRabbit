@@ -65,7 +65,7 @@ namespace RawRabbit.Common
 
 			var exchangeConfig = new ExchangeDeclaration(_clientConfig.Exchange)
 			{
-				ExchangeName = _conventions.ExchangeNamingConvention(messageType)
+				Name = _conventions.ExchangeNamingConvention(messageType)
 			};
 
 			var builder = new SubscriptionConfigurationBuilder(queueConfig, exchangeConfig, routingKey);
@@ -77,7 +77,7 @@ namespace RawRabbit.Common
 		{
 			var exchangeConfig = new ExchangeDeclaration(_clientConfig.Exchange)
 			{
-				ExchangeName = _conventions.ExchangeNamingConvention(messageType)
+				Name = _conventions.ExchangeNamingConvention(messageType)
 			};
 			var routingKey = _conventions.QueueNamingConvention(messageType);
 			var builder = new PublishConfigurationBuilder(exchangeConfig, routingKey);
@@ -94,7 +94,7 @@ namespace RawRabbit.Common
 
 			var exchangeConfig = new ExchangeDeclaration(_clientConfig.Exchange)
 			{
-				ExchangeName = _conventions.ExchangeNamingConvention(requestType)
+				Name = _conventions.ExchangeNamingConvention(requestType)
 			};
 
 			var builder = new ResponderConfigurationBuilder(queueConfig, exchangeConfig);
@@ -115,7 +115,7 @@ namespace RawRabbit.Common
 
 			var exchangeConfig = new ExchangeDeclaration(_clientConfig.Exchange)
 			{
-				ExchangeName = _conventions.ExchangeNamingConvention(requestType)
+				Name = _conventions.ExchangeNamingConvention(requestType)
 			};
 
 			var defaultConfig = new RequestConfiguration
