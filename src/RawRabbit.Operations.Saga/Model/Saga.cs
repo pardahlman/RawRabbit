@@ -17,13 +17,11 @@ namespace RawRabbit.Operations.Saga.Model
 	{
 		protected readonly TModel SagaDto;
 		protected StateMachine<TState, TTrigger> StateMachine;
-		protected TriggerParameterRepository<TState, TTrigger> TriggerParameters;
 
 		protected Saga(TModel model = null)
 		{
 			SagaDto = model ?? Initialize();
 			StateMachine = new StateMachine<TState, TTrigger>(() => SagaDto.State, s => SagaDto.State = s);
-			TriggerParameters = new TriggerParameterRepository<TState, TTrigger>(StateMachine);
 			ConfigureState(StateMachine);
 		}
 
@@ -38,7 +36,7 @@ namespace RawRabbit.Operations.Saga.Model
 
 		public override Task TriggerAsync<TPayload>(object trigger, TPayload payload)
 		{
-			var paramTrigger = TriggerParameters.Get<TPayload>((TTrigger)trigger);
+			var paramTrigger = new StateMachine<TState, TTrigger>.TriggerWithParameters<TPayload>((TTrigger)trigger);
 			return StateMachine.FireAsync(paramTrigger, payload);
 		}
 		

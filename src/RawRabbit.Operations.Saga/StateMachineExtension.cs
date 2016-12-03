@@ -33,7 +33,8 @@ namespace RawRabbit
 							.Use<MessageConsumeMiddleware>(new ConsumeOptions
 							{
 								Pipe = c => c
-								.Use<TriggerStateMiddleware>()
+								.Use<BodyDeserializationMiddleware>()
+								.Use<TriggerMessageInvokationMiddleware>()
 								.Use<AutoAckMiddleware>()
 							})
 					}),
@@ -62,7 +63,10 @@ namespace RawRabbit
 					{
 						context.Properties.Add(SagaKey.SagaType, typeof(TSaga));
 						context.Properties.Add(PipeKey.MessageHandler, genericHandler);
-						context.Properties.Add(SagaKey.SagaId, sagaId);
+						if (sagaId != Guid.Empty)
+						{
+							context.Properties.Add(SagaKey.SagaId, sagaId);
+						}
 					});
 		}
 	}

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using RabbitMQ.Client.Events;
 using RawRabbit.Configuration.Consume;
 using RawRabbit.Configuration.Consumer;
 
@@ -26,10 +27,11 @@ namespace RawRabbit.Operations.Saga.Model
 
 	public static class TriggerAppenderExtensions
 	{
-		public static TriggerInvokerAppender FromQueue(this TriggerInvokerAppender appender, string queueName, bool noAck = false)
+		public static TriggerInvokerAppender FromQueue(this TriggerInvokerAppender appender, string queueName, Func<BasicDeliverEventArgs, Guid> correlation,  bool noAck = false)
 		{
 			appender.From(new ConsumeTriggerInvoker
 			{
+				CorrelationFunc = o => correlation?.Invoke((BasicDeliverEventArgs)o) ?? Guid.Empty,
 				Configuration = new ConsumeConfiguration
 				{
 					QueueName = queueName,
@@ -39,12 +41,13 @@ namespace RawRabbit.Operations.Saga.Model
 			return appender;
 		}
 
-		public static TriggerInvokerAppender FromMessage<TMessage>(this TriggerInvokerAppender appender, Action<IConsumerConfigurationBuilder> config = null)
+		public static TriggerInvokerAppender FromMessage<TMessage>(this TriggerInvokerAppender appender, Func<TMessage, Guid> correlation, Action<IConsumerConfigurationBuilder> config = null)
 		{
 			return appender.From(new MessageTriggerInvoker
 			{
 				MessageType = typeof(TMessage),
-				ConfigurationAction = config
+				ConfigurationAction = config,
+				CorrelationFunc = o => correlation?.Invoke((TMessage)o) ?? Guid.Empty
 			});
 		}
 

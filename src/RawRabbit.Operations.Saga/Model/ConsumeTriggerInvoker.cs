@@ -7,6 +7,7 @@ namespace RawRabbit.Operations.Saga.Model
 	public abstract class TriggerInvoker
 	{
 		public object Trigger { get; set; }
+		public Func<object, Guid> CorrelationFunc { get; set; }
 	}
 
 	public class ConsumeTriggerInvoker : TriggerInvoker

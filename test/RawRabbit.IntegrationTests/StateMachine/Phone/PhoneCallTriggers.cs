@@ -9,17 +9,17 @@ namespace RawRabbit.IntegrationTests.StateMachine.Phone
 		public override List<TriggerInvoker> ConfigureTriggers(TriggerBuilder<Trigger> trigger)
 		{
 			trigger.Configure(Trigger.DialSignalSent)
-				.FromMessage<DialSignalSent>();
+				.FromMessage<DialSignalSent>(sent => sent.CallId);
 
 			trigger.Configure(Trigger.CallDialed)
-				.FromMessage<PhoneCallDialed>();
+				.FromMessage<PhoneCallDialed>(dialed => dialed.CallId);
 
 			trigger.Configure(Trigger.CallConnected)
-				.FromMessage<PhonePickedUp>()
+				.FromMessage<PhonePickedUp>(up => up.CallId)
 				.FromTimeSpan(TimeSpan.FromSeconds(5));
 
 			trigger.Configure(Trigger.HungUp)
-				.FromMessage<PhoneRinging>();
+				.FromMessage<PhoneRinging>(ringing => ringing.CallId);
 
 			return trigger.Build();
 		}

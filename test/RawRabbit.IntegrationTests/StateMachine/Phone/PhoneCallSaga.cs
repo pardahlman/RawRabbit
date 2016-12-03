@@ -17,18 +17,19 @@ namespace RawRabbit.IntegrationTests.StateMachine.Phone
 
 		protected override void ConfigureState(StateMachine<State, Trigger> phoneCall)
 		{
-			var callConnectedTrigger = TriggerParameters.Get<IPipeContext>(Trigger.CallConnected);
-			var callDialed =  TriggerParameters.Get<IPipeContext>(Trigger.CallDialed);
+			var callConnectedTrigger = StateMachine.SetTriggerParameters<IPipeContext>(Trigger.CallConnected);
+			var callDialed = StateMachine.SetTriggerParameters<IPipeContext>(Trigger.CallDialed);
+			var dialSignal = StateMachine.SetTriggerParameters<DialSignalSent>(Trigger.DialSignalSent);
 
 			phoneCall.Configure(State.OnHook)
 				.Permit(Trigger.TakenOffHold, State.OffHook);
 
 			phoneCall.Configure(State.OffHook)
-				.OnEntryAsync(() => _busClient.PublishAsync(new PhonePickedUp()))
+				.OnEntryAsync(() => _busClient.PublishAsync(new PhonePickedUp { CallId = SagaDto.Id}))
 				.Permit(Trigger.DialSignalSent, State.DialTone);
 
 			phoneCall.Configure(State.DialTone)
-				.OnEntryAsync(() => _busClient.PublishAsync(new DialPhoneNumber { Number = "911"}))
+				.OnEntryFromAsync(dialSignal, (signal) => _busClient.PublishAsync(new DialPhoneNumber { Number = "911"}))
 				.Permit(Trigger.CallDialed, State.Ringing);
 				
 			phoneCall.Configure(State.Ringing)
@@ -55,7 +56,8 @@ namespace RawRabbit.IntegrationTests.StateMachine.Phone
 		{
 			return new PhoneSagaDto
 			{
-				State = State.OnHook
+				State = State.OnHook,
+				Id = Guid.NewGuid()
 			};
 		}
 
