@@ -25,7 +25,7 @@ namespace RawRabbit.Operations.Saga
 
 		public static TriggerInvoker GetTriggerInvoker(this IPipeContext context)
 		{
-			return context.Get<TriggerInvoker>(SagaKey.TriggerInvokers);
+			return context.Get<TriggerInvoker>(SagaKey.TriggerInvoker);
 		}
 	}
 }

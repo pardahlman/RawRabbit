@@ -29,7 +29,7 @@ namespace RawRabbit.Pipe.Middleware
 			ExchangeNameFunc = options?.ExchangeNameFunc ?? (c => c.GetBasicPublishConfiguration()?.ExchangeName);
 			RoutingKeyFunc = options?.RoutingKeyFunc ?? (c => c.GetBasicPublishConfiguration()?.RoutingKey);
 			MandatoryFunc = options?.MandatoryFunc ?? (c => c.GetBasicPublishConfiguration()?.Mandatory ?? false);
-			BasicPropsFunc = options?.BasicPropsFunc ?? (c => c.GetBasicPublishConfiguration()?.BasicProperties);
+			BasicPropsFunc = options?.BasicPropsFunc ?? (c => c.GetBasicProperties());
 			BodyFunc = options?.BodyFunc ?? (c => c.GetBasicPublishConfiguration()?.Body);
 		}
 

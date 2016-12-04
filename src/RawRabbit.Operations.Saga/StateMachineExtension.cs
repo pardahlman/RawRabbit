@@ -20,7 +20,7 @@ namespace RawRabbit
 					{
 						EnumerableFunc = context => context.GetTriggerInvokers().OfType<MessageTriggerInvoker>(),
 						RepeatContextFactory = (context, factory, invoker) => factory.CreateContext(
-								new KeyValuePair<string, object>(SagaKey.TriggerInvokers, invoker),
+								new KeyValuePair<string, object>(SagaKey.TriggerInvoker, invoker),
 								new KeyValuePair<string, object>(SagaKey.SagaType, typeof(TSaga)),
 								new KeyValuePair<string, object>(PipeKey.MessageType, (invoker as MessageTriggerInvoker)?.MessageType),
 								new KeyValuePair<string, object>(PipeKey.ConfigurationAction, ((MessageTriggerInvoker)invoker).ConfigurationAction)),

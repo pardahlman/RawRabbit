@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using RawRabbit.Operations.Saga.Repository;
 using Stateless;
 
 namespace RawRabbit.Operations.Saga.Model
