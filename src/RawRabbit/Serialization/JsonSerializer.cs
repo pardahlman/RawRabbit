@@ -37,6 +37,10 @@ namespace RawRabbit.Serialization
 
 		public object Deserialize(Type type, string str)
 		{
+			if (type == typeof(string))
+			{
+				return str;
+			}
 			object obj;
 			using (var jsonReader = new JsonTextReader(new StringReader(str)))
 			{

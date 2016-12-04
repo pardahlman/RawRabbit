@@ -9,6 +9,7 @@
 		public static readonly string EstimatedRetry = "approx_retry";
 		public static readonly string RetryCount = "retry_count";
 		public static readonly string Context = "message_context";
+		public static readonly string GlobalExecutionId = "global_execution_id";
 		public static readonly string ExceptionHeader = "exception";
 	}
 }

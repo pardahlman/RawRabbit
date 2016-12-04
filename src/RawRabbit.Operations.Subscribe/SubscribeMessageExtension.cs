@@ -15,6 +15,13 @@ namespace RawRabbit
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(ConsumerStage.MessageRecieved))
 			.Use<BodyDeserializationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(ConsumerStage.MessageDeserialized))
+			.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
+			{
+				HeaderKey = PropertyHeaders.GlobalExecutionId,
+				Type = typeof(string),
+				ContextSaveAction = (ctx, id) => ctx.Properties.TryAdd(PipeKey.GlobalExecutionId, id)
+			})
+			.Use<GlobalExecutionIdMiddleware>()
 			.Use<SubscribeInvokationMiddleware>()
 			.Use<AutoAckMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(ConsumerStage.HandlerInvoked));

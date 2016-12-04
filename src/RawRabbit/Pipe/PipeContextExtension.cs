@@ -92,6 +92,11 @@ namespace RawRabbit.Pipe
 			return context.Get<string>(PipeKey.RoutingKey);
 		}
 
+		public static string GetGlobalExecutionId(this IPipeContext context)
+		{
+			return context.Get<string>(PipeKey.GlobalExecutionId);
+		}
+
 		public static IModel GetChannel(this IPipeContext context)
 		{
 			return context.Get<IModel>(PipeKey.Channel);

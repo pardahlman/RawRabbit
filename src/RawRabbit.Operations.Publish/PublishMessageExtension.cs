@@ -20,10 +20,12 @@ namespace RawRabbit
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.ExchangeDeclared))
 			.Use<BodySerializationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.MessageSerialized))
+			.Use<GlobalExecutionIdMiddleware>()
 			.Use<BasicPropertiesMiddleware>(new BasicPropertiesOptions { PostCreateAction = (ctx, props) =>
 			{
 				props.Headers.TryAdd(PropertyHeaders.Sent, DateTime.UtcNow.ToString("u"));
 				props.Headers.TryAdd(PropertyHeaders.MessageType, ctx.GetMessageType().GetUserFriendlyName());
+				props.Headers.TryAdd(PropertyHeaders.GlobalExecutionId, ctx.GetGlobalExecutionId());
 			}})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.BasicPropertiesCreated))
 			.Use<TransientChannelMiddleware>()
@@ -33,7 +35,7 @@ namespace RawRabbit
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.PreMessagePublish))
 			.Use<BasicPublishMiddleware>(new BasicPublishOptions
 			{
-				BodyFunc = c => UTF8Encoding.UTF8.GetBytes(c.Get<string>(PipeKey.SerializedMessage))
+				BodyFunc = c => Encoding.UTF8.GetBytes(c.Get<string>(PipeKey.SerializedMessage))
 			})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.MessagePublished));
 
