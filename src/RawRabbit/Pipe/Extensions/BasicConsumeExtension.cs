@@ -25,7 +25,7 @@ namespace RawRabbit.Pipe.Extensions
 						{
 							ExchangeNameFunc = context => context.GetConsumeConfiguration()?.ExchangeName
 						})
-						.Use<ConsumerCreationMiddleware>()
+						.Use<ConsumerMiddleware>()
 						.Use<MessageConsumeMiddleware>(new ConsumeOptions
 						{
 							Pipe = p => p

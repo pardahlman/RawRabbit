@@ -29,7 +29,7 @@ namespace RawRabbit
 							.Use<QueueDeclareMiddleware>()
 							.Use<ExchangeDeclareMiddleware>()
 							.Use<QueueBindMiddleware>()
-							.Use<ConsumerCreationMiddleware>()
+							.Use<ConsumerMiddleware>()
 							.Use<MessageConsumeMiddleware>(new ConsumeOptions
 							{
 								Pipe = c => c
