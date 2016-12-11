@@ -7,7 +7,7 @@ namespace RawRabbit.Operations.MessageSequence.Model
 
 		public static StepOption Default => new StepOption
 		{
-			Optional = true,
+			Optional = false,
 			AbortsExecution = false
 		};
 	}
