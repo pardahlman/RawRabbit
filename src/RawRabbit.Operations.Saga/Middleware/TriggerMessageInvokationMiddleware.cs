@@ -16,14 +16,16 @@ namespace RawRabbit.Operations.Saga.Middleware
 	public class TriggerMessageInvokationMiddleware : Pipe.Middleware.Middleware
 	{
 		protected readonly ISagaRepository Repo;
+		private readonly IExclusiveLockRepo _lockRepo;
 		protected Func<IPipeContext, object> MessageFunc;
 		protected Func<IPipeContext, TriggerInvoker> TriggerInvokerFunc;
 		protected Func<IPipeContext, Type> SagaTypeFunc;
 		protected Func<IPipeContext, Model.Saga> SagaFunc;
 
-		public TriggerMessageInvokationMiddleware(ISagaRepository repo, TriggerMessageInvokationOptions options = null)
+		public TriggerMessageInvokationMiddleware(ISagaRepository repo, IExclusiveLockRepo lockRepo, TriggerMessageInvokationOptions options = null)
 		{
 			Repo = repo;
+			_lockRepo = lockRepo;
 			MessageFunc = options?.MessageFunc ?? (context => context.GetMessage());
 			TriggerInvokerFunc = options?.TriggerInvokerFunc ?? (context => context.GetTriggerInvoker());
 			SagaTypeFunc = options?.SagaTypeFunc ?? (context => context.Get<Type>(SagaKey.SagaType));
@@ -36,8 +38,14 @@ namespace RawRabbit.Operations.Saga.Middleware
 			var invoker = GetTriggerInvoker(context);
 			var sagaId = GetSagaId(context, triggerMsg, invoker);
 			var sagaType = GetSagaType(context);
-			var saga = await GetSagaAsync(context, sagaId, sagaType);
-			await saga.TriggerAsync(invoker.Trigger, triggerMsg);
+
+			await _lockRepo.ExecuteAsync(sagaId, async () =>
+			{
+				var saga = await GetSagaAsync(context, sagaId, sagaType);
+				await saga.TriggerAsync(invoker.Trigger, triggerMsg);
+			});
+			
+
 			await Next.InvokeAsync(context);
 		}
 

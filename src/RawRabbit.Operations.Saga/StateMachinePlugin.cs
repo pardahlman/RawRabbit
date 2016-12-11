@@ -10,7 +10,10 @@ namespace RawRabbit.Operations.Saga
 		{
 			builder.Register(
 				pipe => {},
-				ioc => ioc.AddSingleton<ISagaRepository, InMemoryRepository>());
+				ioc => ioc
+					.AddSingleton<IExclusiveLockRepo, ExclusiveLockRepo>()
+					.AddSingleton<ISagaRepository, InMemoryRepository>()
+				);
 			return builder;
 		}
 	}

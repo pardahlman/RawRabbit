@@ -13,12 +13,15 @@ namespace RawRabbit.Operations.Saga.Repository
 
 	public class InMemoryRepository : ISagaRepository
 	{
+		private readonly IExclusiveLockRepo _lockRepo;
+
 		private readonly IDependecyResolver _resolver;
 		private readonly Dictionary<Guid, object> _dtoDictionary;
 
-		public InMemoryRepository(IDependecyResolver resolver)
+		public InMemoryRepository(IDependecyResolver resolver, IExclusiveLockRepo lockRepo)
 		{
 			_resolver = resolver;
+			_lockRepo = lockRepo;
 			_dtoDictionary = new Dictionary<Guid, object>();
 		}
 
@@ -36,7 +39,7 @@ namespace RawRabbit.Operations.Saga.Repository
 			_dtoDictionary.Add(newSagaDto.Id, newSagaDto);
 			return Task.FromResult(newSaga);
 		}
-
+		
 		public Task UpdateAsync(Model.Saga saga)
 		{
 			var id = saga.GetDto().Id;

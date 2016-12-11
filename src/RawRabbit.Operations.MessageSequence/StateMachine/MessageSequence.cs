@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using RawRabbit.Configuration.Consume;
 using RawRabbit.Context;
 using RawRabbit.Operations.MessageSequence.Configuration;
 using RawRabbit.Operations.MessageSequence.Configuration.Abstraction;
@@ -22,11 +23,13 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 		private readonly IBusClient _client;
 		private Action _fireAction;
 		private readonly TriggerBuilder<Type> _triggerBuilder;
+		private readonly Queue<StepDefinition> _stepDefinitions;
 
 		public MessageSequence(IBusClient client, SequenceModel model = null) : base(model)
 		{
 			_client = client;
 			_triggerBuilder = new TriggerBuilder<Type>();
+			_stepDefinitions = new Queue<StepDefinition>();
 		}
 
 		protected override void ConfigureState(StateMachine<SequenceState, Type> machine)
@@ -57,7 +60,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 
 			StateMachine
 				.Configure(SequenceState.Active)
-				.OnEntryFromAsync(entryTrigger, msg => _client.PublishAsync(message, new TMessageContext { GlobalRequestId = SagaDto.Id}));
+				.OnEntryFromAsync(entryTrigger, msg => _client.PublishAsync(message, context: c => c.Properties.Add(PipeKey.GlobalExecutionId, SagaDto.Id.ToString())));
 
 			_fireAction = () => StateMachine.FireAsync(entryTrigger, message);
 			return this;
@@ -67,15 +70,51 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 		{
 			var optionBuilder = new StepOptionBuilder();
 			options?.Invoke(optionBuilder);
+			_stepDefinitions.Enqueue(new StepDefinition
+			{
+				Type = typeof(TMessage),
+				AbortsExecution = optionBuilder.Configuration.AbortsExecution,
+				Optional =  optionBuilder.Configuration.Optional
+			});
 
 			var trigger = StateMachine.SetTriggerParameters<TMessage>(typeof(TMessage));
 			StateMachine
 				.Configure(SequenceState.Active)
 				.InternalTransitionAsync(trigger, (message, transition) =>
 				{
+					var matchFound = false;
+					do
+					{
+						if (_stepDefinitions.Peek() == null)
+						{
+							return Task.FromResult(0);
+						}
+						var step = _stepDefinitions.Dequeue();
+						if (step.Type != typeof(TMessage))
+						{
+							if (step.Optional)
+							{
+								SagaDto.Skipped.Add(new ExecutionResult
+								{
+									Type = step.Type,
+									Time = DateTime.Now
+								});
+							}
+							else
+							{
+								return Task.FromResult(0);
+							}
+						}
+						else
+						{
+							matchFound = true;
+						}
+					} while (!matchFound);
+
 					return func(message, default(TMessageContext))
 						.ContinueWith(t =>
 						{
+							
 							SagaDto.Completed.Add(new ExecutionResult
 							{
 								Type = typeof(TMessage),
@@ -93,7 +132,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 				.Configure(typeof(TMessage))
 				.FromMessage<TMessage>(message => SagaDto.Id, cfg => cfg
 					.FromDeclaredQueue(q => q.WithName($"state_machine_{SagaDto.Id}"))
-					.Consume(c => c.WithRoutingKey($"{typeof(TMessage).Name}.{SagaDto.Id}")));
+					.Consume(c => c.WithRoutingKey($"{typeof(TMessage).Name.ToLower()}.{SagaDto.Id}")));
 			return this;
 		}
 
@@ -119,45 +158,75 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 					tsc.TrySetResult(message);
 				});
 
+			StateMachine
+				.Configure(SequenceState.Canceled)
+				.OnEntry(() =>
+				{
+					tsc.TrySetResult(default(TMessage));
+					sequence.Completed = SagaDto.Completed;
+					sequence.Skipped = SagaDto.Skipped;
+					sequence.Aborted = true;
+				});
+
 			_triggerBuilder
 				.Configure(typeof(TMessage))
 				.FromMessage<TMessage>(message => SagaDto.Id, cfg => cfg
 					.FromDeclaredQueue(q => q.WithName($"state_machine_{SagaDto.Id}"))
-					.Consume(c => c.WithRoutingKey($"{(typeof(TMessage).Name)}.{SagaDto.Id}")));
+					.Consume(c => c.WithRoutingKey($"{(typeof(TMessage).Name.ToLower())}.{SagaDto.Id}")));
 
-			foreach (var invoker in _triggerBuilder.Build().OfType<MessageTriggerInvoker>())
+			var triggerInvokers = _triggerBuilder.Build().OfType<MessageTriggerInvoker>().ToList();
+			foreach (var invoker in triggerInvokers)
 			{
 				_client.InvokeAsync(p => p
-						.Use<ConsumeConfigurationMiddleware>()
-						.Use<QueueDeclareMiddleware>()
-						.Use<ExchangeDeclareMiddleware>()
-						.Use<QueueBindMiddleware>()
-						.Use<ConsumerCreationMiddleware>()
-						.Use<MessageConsumeMiddleware>(new ConsumeOptions
+							.Use<ConsumeConfigurationMiddleware>()
+							.Use<QueueDeclareMiddleware>()
+							.Use<ExchangeDeclareMiddleware>()
+							.Use<QueueBindMiddleware>(),
+						context =>
 						{
-							Pipe = c => c
-								.Use<BodyDeserializationMiddleware>()
-								.Use<TriggerMessageInvokationMiddleware>(new TriggerMessageInvokationOptions { SagaFunc = context => this})
-								.Use<AutoAckMiddleware>()
-						}),
-					context =>
-					{
-						context.Properties.Add(SagaKey.TriggerInvoker, invoker);
-						context.Properties.Add(PipeKey.ConfigurationAction, invoker.ConfigurationAction);
-						context.Properties.Add(PipeKey.MessageType, invoker.MessageType);
-						context.Properties.Add(SagaKey.SagaType, GetType());
-					}
-				);
+							context.Properties.Add(SagaKey.TriggerInvoker, invoker);
+							context.Properties.Add(PipeKey.ConfigurationAction, invoker.ConfigurationAction);
+							context.Properties.Add(PipeKey.MessageType, invoker.MessageType);
+						}
+					)
+					.GetAwaiter()
+					.GetResult();
 			}
+			_client.InvokeAsync(p => p
+					.Use<ConsumerMiddleware>(new ConsumerOptions
+					{
+						ConfigurationFunc = context => new ConsumeConfiguration
+						{
+							QueueName = $"state_machine_{SagaDto.Id}",
+							ConsumerTag = Guid.NewGuid().ToString()
+						}
+					})
+					.Use<MessageConsumeMiddleware>(new ConsumeOptions
+					{
+						Pipe = c => c
+							.Use<BodyDeserializationMiddleware>()
+							.Use<TriggerMessageInvokationMiddleware>(new TriggerMessageInvokationOptions
+							{
+								SagaFunc = context => this,
+								TriggerInvokerFunc = context =>
+								{
+									var msgType = Type.GetType(context.GetDeliveryEventArgs().BasicProperties.Type);
+									return triggerInvokers.FirstOrDefault(i => i.MessageType == msgType);
+								}
+							})
+							.Use<AutoAckMiddleware>()
+					}),
+				context =>
+				{
+					context.Properties.Add(SagaKey.SagaType, GetType());
+				});
 
 			_fireAction();
 
 			return sequence;
 		}
-	}
 
-	public class CancelSequence
-	{
+		private class CancelSequence { }
 	}
 
 	public enum SequenceState
