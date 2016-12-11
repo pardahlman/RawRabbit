@@ -14,17 +14,18 @@ namespace RawRabbit
 	{
 		public static readonly Action<IPipeBuilder> PublishPipeAction = pipe => pipe
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.Initiated))
+			.Use<GlobalExecutionIdMiddleware>()
 			.Use<PublisherConfigurationMiddleware>()
+			.Use<ExecutionIdRoutingMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.PublishConfigured))
 			.Use<ExchangeDeclareMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.ExchangeDeclared))
 			.Use<BodySerializationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.MessageSerialized))
-			.Use<GlobalExecutionIdMiddleware>()
 			.Use<BasicPropertiesMiddleware>(new BasicPropertiesOptions { PostCreateAction = (ctx, props) =>
 			{
+				props.Type = ctx.GetMessageType().GetUserFriendlyName();
 				props.Headers.TryAdd(PropertyHeaders.Sent, DateTime.UtcNow.ToString("u"));
-				props.Headers.TryAdd(PropertyHeaders.MessageType, ctx.GetMessageType().GetUserFriendlyName());
 				props.Headers.TryAdd(PropertyHeaders.GlobalExecutionId, ctx.GetGlobalExecutionId());
 			}})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.BasicPropertiesCreated))
@@ -39,7 +40,7 @@ namespace RawRabbit
 			})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.MessagePublished));
 
-		public static Task PublishAsync<TMessage>(this IBusClient client, TMessage message, Action<IPublisherConfigurationBuilder> config = null)
+		public static Task PublishAsync<TMessage>(this IBusClient client, TMessage message, Action<IPublisherConfigurationBuilder> config = null, Action<IPipeContext> context = null)
 		{
 			return client.InvokeAsync(
 				PublishPipeAction,
@@ -49,6 +50,7 @@ namespace RawRabbit
 					ctx.Properties.Add(PipeKey.Message, message);
 					ctx.Properties.Add(PipeKey.Operation, PublishKey.Publish);
 					ctx.Properties.Add(PipeKey.ConfigurationAction, config);
+					context?.Invoke(ctx);
 				});
 		}
 	}
