@@ -24,7 +24,11 @@ namespace RawRabbit.Pipe.Middleware
 		public BodyDeserializationMiddleware(ISerializer serializer, MessageDeserializationOptions options = null)
 		{
 			_serializer = serializer;
-			_messageTypeFunc = options?.BodyTypeFunc ?? (context => context.GetMessageType());
+			_messageTypeFunc = options?.BodyTypeFunc ?? (context =>
+			{
+				var type = context.GetDeliveryEventArgs()?.BasicProperties?.Type;
+				return !string.IsNullOrWhiteSpace(type) ? Type.GetType(type, false) : context.GetMessageType();
+			});
 			_messageKeyFunc = options?.MessageKeyFunc ?? (context => PipeKey.Message);
 			_bodyFunc = options?.BodyFunc ?? (context =>context.GetDeliveryEventArgs()?.Body ?? context.GetBasicGetResult()?.Body);
 			_abortPredicate = options?.AbortPredicate ?? (context => false);
