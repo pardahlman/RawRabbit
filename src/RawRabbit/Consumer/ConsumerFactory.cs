@@ -11,8 +11,9 @@ namespace RawRabbit.Consumer
 {
 	public interface IConsumerFactory
 	{
-		Task<IBasicConsumer> GetConsumerAsync(ConsumeConfiguration cfg);
-		Task<IBasicConsumer> CreateConsumerAsync(ConsumeConfiguration cfg);
+		Task<IBasicConsumer> GetConsumerAsync(ConsumeConfiguration cfg, IModel channel = null);
+		Task<IBasicConsumer> CreateConsumerAsync(IModel channel = null);
+		IBasicConsumer ConfigureConsume(IBasicConsumer consumer, ConsumeConfiguration cfg);
 	}
 
 	public class ConsumerFactory : IConsumerFactory
@@ -28,32 +29,44 @@ namespace RawRabbit.Consumer
 			_ackConsumers = new ConcurrentDictionary<string, Lazy<Task<IBasicConsumer>>>();
 		}
 
-		public Task<IBasicConsumer> GetConsumerAsync(ConsumeConfiguration cfg)
+		public Task<IBasicConsumer> GetConsumerAsync(ConsumeConfiguration cfg, IModel channel = null)
 		{
 			var cache = cfg.NoAck ? _noAckConsumers : _ackConsumers;
 			var lazyConsumerTask = cache.GetOrAdd(cfg.RoutingKey, routingKey =>
 			{
-				return new Lazy<Task<IBasicConsumer>>(() => CreateConsumerAsync(cfg));
+				return new Lazy<Task<IBasicConsumer>>(() =>
+				{
+					return CreateConsumerAsync(channel)
+						.ContinueWith(tChannel =>
+						{
+							ConfigureConsume(tChannel.Result, cfg);
+							return tChannel.Result;
+						});
+				});
 			});
 			return lazyConsumerTask.Value;
 		}
 
-		public Task<IBasicConsumer> CreateConsumerAsync(ConsumeConfiguration cfg)
+		public Task<IBasicConsumer> CreateConsumerAsync(IModel channel = null)
 		{
-			return GetOrCreateChannelAsync()
-				.ContinueWith(tChannel =>
-				{
-					IBasicConsumer consumer = new EventingBasicConsumer(tChannel.Result);
-					tChannel.Result.BasicConsume(
-						queue: cfg.QueueName,
-						noAck: cfg.NoAck,
-						consumerTag: cfg.ConsumerTag,
-						noLocal: cfg.NoLocal,
-						exclusive: cfg.Exclusive,
-						arguments: cfg.Arguments,
-						consumer: consumer);
-					return consumer;
-				});
+			var channelTask = channel != null
+				? Task.FromResult(channel)
+				: GetOrCreateChannelAsync();
+			return channelTask
+				.ContinueWith(tChannel => new EventingBasicConsumer(tChannel.Result) as IBasicConsumer);
+		}
+
+		public IBasicConsumer ConfigureConsume(IBasicConsumer consumer, ConsumeConfiguration cfg)
+		{
+			consumer.Model.BasicConsume(
+				queue: cfg.QueueName,
+				noAck: cfg.NoAck,
+				consumerTag: cfg.ConsumerTag,
+				noLocal: cfg.NoLocal,
+				exclusive: cfg.Exclusive,
+				arguments: cfg.Arguments,
+				consumer: consumer);
+			return consumer;
 		}
 
 		protected virtual Task<IModel> GetOrCreateChannelAsync()
