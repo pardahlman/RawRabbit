@@ -16,7 +16,7 @@ namespace RawRabbit
 		{
 			return busClient.InvokeAsync(
 				builder => builder
-					.Use<RepeatMiddleware>(new RepeateOptions
+					.Use<RepeatMiddleware>(new RepeatOptions
 					{
 						EnumerableFunc = context => context.GetTriggerInvokers().OfType<MessageTriggerInvoker>(),
 						RepeatContextFactory = (context, factory, invoker) => factory.CreateContext(

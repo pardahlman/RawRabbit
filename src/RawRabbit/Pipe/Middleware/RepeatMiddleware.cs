@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace RawRabbit.Pipe.Middleware
 {
-	public class RepeateOptions
+	public class RepeatOptions
 	{
 		public Action<IPipeBuilder> RepeatePipe { get; set; }
 		public Func<IPipeContext, IEnumerable> EnumerableFunc { get; set; }
@@ -18,7 +18,7 @@ namespace RawRabbit.Pipe.Middleware
 		protected Func<IPipeContext, IEnumerable> EnumerableFunc;
 		protected Func<IPipeContext, IPipeContextFactory, object, IPipeContext> RepeateContextFactory;
 
-		public RepeatMiddleware(IPipeBuilderFactory factroy, IPipeContextFactory contextFactory, RepeateOptions options)
+		public RepeatMiddleware(IPipeBuilderFactory factroy, IPipeContextFactory contextFactory, RepeatOptions options)
 		{
 			RepeatPipe = factroy.Create(options.RepeatePipe);
 			_contextFactory = contextFactory;
