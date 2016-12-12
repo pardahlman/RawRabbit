@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Configuration.Consume;
 using RawRabbit.Context;
@@ -220,6 +221,20 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 				{
 					context.Properties.Add(SagaKey.SagaType, GetType());
 				});
+
+			var requestTimeout = _client
+				.InvokeAsync(builder => { })
+				.ContinueWith(tContext => tContext.Result.GetClientConfiguration().RequestTimeout)
+				.GetAwaiter()
+				.GetResult();
+
+			Timer requestTimer = null;
+			requestTimer = new Timer(state =>
+			{
+				requestTimer?.Dispose();
+				tsc.TrySetException(new TimeoutException(
+					$"Unable to complete sequence {SagaDto.Id} in {requestTimeout:g}. Operation Timed out."));
+			}, null, requestTimeout, new TimeSpan(-1));
 
 			_fireAction();
 

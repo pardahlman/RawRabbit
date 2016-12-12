@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Testing.Abstractions;
+using RawRabbit.Configuration;
 using RawRabbit.Context;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.Operations.MessageSequence;
@@ -269,6 +271,32 @@ namespace RawRabbit.IntegrationTests.MessageSequence
 				/* Assert */
 				Assert.False(secondTcs.Task.IsCompleted);
 				Assert.False(thirdTcs.Task.IsCompleted);
+			}
+		}
+
+		[Fact]
+		public async Task Should_Honor_Timeout()
+		{
+			/* Setup */
+			var cfg = RawRabbitConfiguration.Local;
+			cfg.RequestTimeout = TimeSpan.FromMilliseconds(200);
+			using (var client = RawRabbitFactory.CreateTestClient(new RawRabbitOptions
+			{
+				Plugins = p => p
+					.PublishMessageContext<MessageContext>()
+					.UseStateMachine()
+					.UseMessageChaining(),
+				DependencyInjection = ioc => ioc.AddSingleton(cfg)
+			}))
+			{
+				/* Test */
+				var chain = client.ExecuteSequence<MessageContext, SecondMessage>(c => c
+					.PublishAsync<FirstMessage>()
+					.Complete<SecondMessage>()
+				);
+
+				/* Assert */
+				await Assert.ThrowsAsync<TimeoutException>(async () => await chain.Task);
 			}
 		}
 	}
