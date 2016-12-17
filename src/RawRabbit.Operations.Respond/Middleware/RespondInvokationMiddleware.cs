@@ -6,9 +6,9 @@ using RawRabbit.Pipe.Middleware;
 
 namespace RawRabbit.Operations.Respond.Middleware
 {
-	public class RespondInvokationMiddleware : MessageHandlerInvokationMiddleware
+	public class RespondInvokationMiddleware : HandlerInvokationMiddleware
 	{
-		public RespondInvokationMiddleware() : base(new MessageHandlerInvokationOptions
+		public RespondInvokationMiddleware() : base(new HandlerInvokationOptions
 		{
 			HandlerArgsFunc = context => new []{ context.GetMessage()},
 			PostInvokeAction = (context, task) =>

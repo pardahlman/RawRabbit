@@ -29,7 +29,7 @@ namespace RawRabbit
 			})
 			.Use<GlobalExecutionIdMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.MessageContextDeserialized))
-			.Use<MessageHandlerInvokationMiddleware>(new MessageHandlerInvokationOptions { HandlerArgsFunc = context => new [] {context.GetMessage(), context.GetMessageContext()}})
+			.Use<HandlerInvokationMiddleware>(new HandlerInvokationOptions { HandlerArgsFunc = context => new [] {context.GetMessage(), context.GetMessageContext()}})
 			.Use<AutoAckMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.HandlerInvoked));
 

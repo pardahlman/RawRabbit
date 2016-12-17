@@ -3,20 +3,20 @@ using System.Threading.Tasks;
 
 namespace RawRabbit.Pipe.Middleware
 {
-	public class MessageHandlerInvokationOptions
+	public class HandlerInvokationOptions
 	{
 		public Func<IPipeContext, Func<object[], Task>> MessageHandlerFunc { get; set; }
 		public Func<IPipeContext, object[]> HandlerArgsFunc { get; set; }
 		public Action<IPipeContext, Task> PostInvokeAction { get; set; }
 	}
 
-	public class MessageHandlerInvokationMiddleware : Middleware
+	public class HandlerInvokationMiddleware : Middleware
 	{
 		protected Func<IPipeContext, object[]> HandlerArgsFunc;
 		protected Action<IPipeContext, Task> PostInvokeAction;
 		protected Func<IPipeContext, Func<object[], Task>> MessageHandlerFunc;
 
-		public MessageHandlerInvokationMiddleware(MessageHandlerInvokationOptions options = null)
+		public HandlerInvokationMiddleware(HandlerInvokationOptions options = null)
 		{
 			HandlerArgsFunc = options?.HandlerArgsFunc ?? (context => context.GetMessageHandlerArgs()) ;
 			MessageHandlerFunc = options?.MessageHandlerFunc ?? (context => context.GetMessageHandler());

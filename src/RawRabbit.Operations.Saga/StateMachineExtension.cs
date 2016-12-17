@@ -52,7 +52,7 @@ namespace RawRabbit
 			return busClient.InvokeAsync(
 					builder => builder
 						.Use<RetrieveSagaMiddleware>()
-						.Use<MessageHandlerInvokationMiddleware>(new MessageHandlerInvokationOptions
+						.Use<HandlerInvokationMiddleware>(new HandlerInvokationOptions
 						{
 							HandlerArgsFunc = context => new object[] {context.GetSaga()},
 							MessageHandlerFunc = context => context.GetMessageHandler()

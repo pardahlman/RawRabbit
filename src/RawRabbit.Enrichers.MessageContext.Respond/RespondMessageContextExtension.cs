@@ -17,7 +17,7 @@ namespace RawRabbit
 			pipe.Replace<MessageConsumeMiddleware, MessageConsumeMiddleware>(args: new ConsumeOptions
 			{
 				Pipe = RespondExtension.ConsumePipe + (consume => consume
-					.Replace<RespondInvokationMiddleware, MessageHandlerInvokationMiddleware>(args: new MessageHandlerInvokationOptions
+					.Replace<RespondInvokationMiddleware, HandlerInvokationMiddleware>(args: new HandlerInvokationOptions
 					{
 						HandlerArgsFunc = context => new []{context.GetMessage(), context.GetMessageContext()}
 					})

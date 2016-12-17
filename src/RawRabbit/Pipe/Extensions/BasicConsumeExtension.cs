@@ -29,7 +29,7 @@ namespace RawRabbit.Pipe.Extensions
 						.Use<MessageConsumeMiddleware>(new ConsumeOptions
 						{
 							Pipe = p => p
-								.Use<MessageHandlerInvokationMiddleware>(new MessageHandlerInvokationOptions
+								.Use<HandlerInvokationMiddleware>(new HandlerInvokationOptions
 								{
 									HandlerArgsFunc = context => new object[] {context.GetDeliveryEventArgs()},
 								})
