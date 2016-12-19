@@ -19,36 +19,9 @@ using ExchangeType = RawRabbit.Configuration.Exchange.ExchangeType;
 
 namespace RawRabbit.IntegrationTests.SimpleUse
 {
+
 	public class PublishAndSubscribeTests : IntegrationTestBase
 	{
-		[Fact]
-		public async Task Should()
-		{
-			var firstMsgContext = new TaskCompletionSource<MessageContext>();
-			var secondMsgContext = new TaskCompletionSource<MessageContext>();
-			var client = Instantiation.RawRabbitFactory.CreateSingleton(new RawRabbitOptions
-			{
-				Plugins = plugin => plugin
-					.PublishMessageContext<MessageContext>()
-					.UseMessageChaining()
-			});
-			await client.RespondAsync<BasicRequest, BasicResponse>(request => Task.FromResult(new BasicResponse {Payload = Guid.NewGuid()}), cfg => cfg.FromDeclaredQueue(q => q.WithName("my_q")));
-			var response = await client.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest { Number = 1}, cfg => cfg.ConsumeResponse(builder => builder.Consume(c => c.WithRoutingKey("custom")).OnDeclaredExchange(e => e.WithName("custom_exchange")).FromDeclaredQueue(q => q.WithName("custom_queue"))));
-
-			await client.SubscribeAsync<BasicMessage, MessageContext>(async (message, context) =>
-			{
-				firstMsgContext.TrySetResult(context);
-				await client.PublishAsync(new SimpleMessage());
-			});
-			await client.SubscribeAsync<SimpleMessage, MessageContext>((message, context) =>
-			{
-				secondMsgContext.TrySetResult(context);
-				return Task.FromResult(0);
-			});
-			await client.PublishAsync(new BasicMessage());
-			await secondMsgContext.Task;
-			Assert.Equal(firstMsgContext.Task.Result.GlobalRequestId, secondMsgContext.Task.Result.GlobalRequestId);
-		}
 
 		[Fact]
 		public async Task Should_Be_Able_To_Subscribe_Without_Any_Additional_Config()
@@ -57,7 +30,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			using (var publisher = TestClientFactory.CreateNormal())
 			using (var subscriber = TestClientFactory.CreateNormal())
 			{
-				var message = new BasicMessage { Prop = "Hello, world!" };
+				var message = new BasicMessage {Prop = "Hello, world!"};
 				var recievedTcs = new TaskCompletionSource<BasicMessage>();
 
 				subscriber.SubscribeAsync<BasicMessage>((msg, info) =>
@@ -282,8 +255,10 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 					.WithPrefetchCount(1));
 
 				/* Test */
-				await publisher.PublishAsync(new BasicMessage { Prop = "I will be delivered" });
-				await publisher.PublishAsync(new BasicMessage { Prop = "Someone will pass me in the queue" }, configuration: cfg => cfg.WithProperties(p => p.Priority = 0));
+				await publisher.PublishAsync(new BasicMessage {Prop = "I will be delivered"});
+				await
+					publisher.PublishAsync(new BasicMessage {Prop = "Someone will pass me in the queue"},
+						configuration: cfg => cfg.WithProperties(p => p.Priority = 0));
 				queueBuilt.SetResult(true);
 				await priorityTcs.Task;
 
@@ -299,8 +274,8 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			using (var publisher = TestClientFactory.CreateNormal())
 			using (var subscriber = TestClientFactory.CreateNormal())
 			{
-				var firstMessage = new BasicMessage { Prop = "Value" };
-				var secondMessage = new BasicMessage { Prop = "AnotherValue" };
+				var firstMessage = new BasicMessage {Prop = "Value"};
+				var secondMessage = new BasicMessage {Prop = "AnotherValue"};
 				var firstRecievedTcs = new TaskCompletionSource<BasicMessage>();
 				var secondRecievedTcs = new TaskCompletionSource<BasicMessage>();
 				var recievedCount = 0;
@@ -340,7 +315,9 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		public async Task Should_Be_Able_To_Subscibe_To_Pure_Json_Message()
 		{
 			var conventions = new NamingConventions();
-			using (var client = TestClientFactory.CreateNormal(ioc => ioc.AddSingleton<INamingConventions>(c => conventions)))
+			using (
+				var client =
+					TestClientFactory.CreateNormal(ioc => ioc.AddSingleton<INamingConventions>(c => conventions)))
 			{
 				/* Setup */
 				var tcs = new TaskCompletionSource<BasicMessage>();
@@ -350,7 +327,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 					return Task.FromResult(true);
 				});
 				var uniqueValue = Guid.NewGuid().ToString();
-				var jsonMsg = JsonConvert.SerializeObject(new BasicMessage { Prop = uniqueValue });
+				var jsonMsg = JsonConvert.SerializeObject(new BasicMessage {Prop = uniqueValue});
 
 				/* Test */
 				TestChannel.BasicPublish(
@@ -380,7 +357,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 				});
 
 				/* Test */
-				client.PublishAsync(new DynamicMessage { Body = new { IsDynamic = true } });
+				client.PublishAsync(new DynamicMessage {Body = new {IsDynamic = true}});
 				await tcs.Task;
 
 				/* Assert */
@@ -391,7 +368,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		[Fact]
 		public async Task Should_Be_Able_To_Publish_Message_After_Failed_Publish()
 		{
-			using(var firstClient = TestClientFactory.CreateNormal())
+			using (var firstClient = TestClientFactory.CreateNormal())
 			using (var secondClient = TestClientFactory.CreateNormal())
 			{
 				/* Setup */
@@ -420,6 +397,26 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 				Assert.True(true);
 			}
 		}
+
+		[Fact]
+		public async Task Should_Run_Basic_Return_When_The_Manatory_Set_After_Failed_Publish()
+		{
+			/* Setup */
+			using (var client = TestClientFactory.CreateNormal())
+			{
+				var tcs = new TaskCompletionSource<bool>();
+				/* Test */
+				await client.PublishAsync(new SimpleMessage(),
+					configuration: cfg => cfg
+						.WithMandatoryDelivery((obj, evt) =>
+						{
+							tcs.SetResult(true);
+						}));
+
+				/* Assert */
+				Assert.True(tcs.Task.Result);
+			}
+		}
+
 	}
 }
-

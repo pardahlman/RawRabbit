@@ -39,7 +39,7 @@ namespace RawRabbit.ErrorHandling
 		{
 			_logger.LogError($"An unhandled exception was thrown in the response handler for message '{args.BasicProperties.MessageId}'.", exception);
 			var innerException = UnwrapInnerException(exception);
-			var exceptionInfo = new MessageHandlerExceptionInformation
+			var exceptionInfo = new ExceptionInformation
 			{
 				Message = $"An unhandled exception was thrown when consuming a message\n  MessageId: {args.BasicProperties.MessageId}\n  Queue: '{cfg.Queue.FullQueueName}'\n  Exchange: '{cfg.Exchange.Name}'\nSee inner exception for more details.",
 				ExceptionType = innerException.GetType().FullName,
@@ -50,7 +50,7 @@ namespace RawRabbit.ErrorHandling
 			rawConsumer.Model.BasicPublish(
 				exchange: string.Empty,
 				routingKey: args.BasicProperties?.ReplyTo ?? string.Empty,
-				basicProperties: _propertiesProvider.GetProperties<MessageHandlerExceptionInformation>(p =>
+				basicProperties: _propertiesProvider.GetProperties<ExceptionInformation>(p =>
 				{
 					p.CorrelationId = args.BasicProperties?.CorrelationId ?? string.Empty;
 					p.Headers.Add(PropertyHeaders.ExceptionHeader, _messageExceptionName);
@@ -82,7 +82,7 @@ namespace RawRabbit.ErrorHandling
 			if (containsException)
 			{
 				_logger.LogInformation($"Message '{args.BasicProperties.MessageId}' withh CorrelationId '{args.BasicProperties.CorrelationId}' contains exception. Deserialize and re-throw.");
-				var exceptionInfo = _serializer.Deserialize<MessageHandlerExceptionInformation>(args.Body);
+				var exceptionInfo = _serializer.Deserialize<ExceptionInformation>(args.Body);
 				var exception = new MessageHandlerException(exceptionInfo.Message)
 				{
 					InnerExceptionType = exceptionInfo.ExceptionType,
@@ -133,9 +133,16 @@ namespace RawRabbit.ErrorHandling
 				await _topologyProvider.DeclareExchangeAsync(_errorExchangeCfg);
 				var channel = await _channelFactory.GetChannelAsync();
 				var msg = _serializer.Deserialize(args);
+				var actualException = UnwrapInnerException(exception);
 				var errorMsg = new HandlerExceptionMessage
 				{
-					Exception = exception,
+					Exception = new ExceptionInformation
+					{
+						ExceptionType = actualException.GetType().FullName,
+						InnerMessage = actualException.InnerException?.Message,
+						Message = actualException.Message,
+						StackTrace = actualException.StackTrace
+					},
 					Time = DateTime.Now,
 					Host = Environment.MachineName,
 					Message = msg,

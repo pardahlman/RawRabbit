@@ -1,3 +1,21 @@
+# 1.10.3
+
+ - [#163](https://github.com/pardahlman/RawRabbit/pull/163) - Added queue assume initialized and tests contributed by Cemre Mengu ([cemremengu](https://github.com/cemremengu))
+ - [#162](https://github.com/pardahlman/RawRabbit/pull/162) - Converted tabs to 4 spaces contributed by Cemre Mengu ([cemremengu](https://github.com/cemremengu))
+ - [#161](https://github.com/pardahlman/RawRabbit/pull/161) - added editorconfig for uniform editing contributed by Cemre Mengu ([cemremengu](https://github.com/cemremengu))
+ - [#160](https://github.com/pardahlman/RawRabbit/issues/160) - Add"AssumeInitialized" functionality for queues
+ - [#159](https://github.com/pardahlman/RawRabbit/pull/159) - Added default broker connection values for RawRabbitConfig class contributed by Cemre Mengu ([cemremengu](https://github.com/cemremengu))
+ - [#150](https://github.com/pardahlman/RawRabbit/issues/150) - StackOverflowException occures when subscribeMethod throws an exception using dotnet core
+ - [#143](https://github.com/pardahlman/RawRabbit/issues/143) - Failure Recovery Issue with PublishAsync
+ - [#142](https://github.com/pardahlman/RawRabbit/issues/142) - Failure Recovery
+ - [#140](https://github.com/pardahlman/RawRabbit/pull/140) - (#129) Expose Mandatory Option For Publish contributed by Richard Tasker ([ritasker](https://github.com/ritasker))
+ - [#136](https://github.com/pardahlman/RawRabbit/issues/136) - Newtonsoft.Json.JsonSerializationException: Error getting value from 'ScopeId' on 'System.Net.IPAddress'.
+ - [#132](https://github.com/pardahlman/RawRabbit/issues/132) - Default connection timeout
+ - [#129](https://github.com/pardahlman/RawRabbit/issues/129) - Expose mandatory option for publish
+ - [#116](https://github.com/pardahlman/RawRabbit/issues/116) - Unable to publish message to default error exchange.
+
+Commits: 4b6e57e351...52573f4164
+
 # 1.10.2
 
  - [#117](https://github.com/pardahlman/RawRabbit/issues/117) - Propegate Topology Exception for Consumers
@@ -5,7 +23,6 @@
  - [#111](https://github.com/pardahlman/RawRabbit/issues/111) - Guard against OperationInteruptedException in TopologyProvider
 
 Commits: af0bda979e...331e174a02
-
 
 # 1.10.1
 

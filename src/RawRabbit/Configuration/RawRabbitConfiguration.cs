@@ -71,7 +71,7 @@ namespace RawRabbit.Configuration
 		/// </summary>
 		public SslOption Ssl { get; set; }
 
-		public string VirtualHost { get; set; }
+	    public string VirtualHost { get; set; }
 		public string Username { get; set; }
 		public string Password { get; set; }
 		public int Port { get; set; }
@@ -103,6 +103,11 @@ namespace RawRabbit.Configuration
 				AutoDelete = false,
 				Durable = true
 			};
+		    VirtualHost = "/";
+		    Username = "guest";
+		    Password = "guest";
+		    Port = 5672;
+		    Hostnames = new List<string> {"localhost"};
 		}
 
 		public static RawRabbitConfiguration Local => new RawRabbitConfiguration

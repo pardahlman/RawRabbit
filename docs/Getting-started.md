@@ -12,8 +12,8 @@ Install the latest version of [`RawRabbit`](https://www.nuget.org/packages/RawRa
 ```
 The `vNext` package contains the convenience class `BusClientFactory` that can be used to create a default instance of the `RawRabbit` client. It makes life easier, but is not necesary.
 
-## Creating instanse
-Depending on the scenario, there are a few different ways to instansiate the `RawRabbit` client. The methods described below all have optional arguments for registering specific subdependeices.
+## Creating instance
+Depending on the scenario, there are a few different ways to instantiate the `RawRabbit` client. The methods described below all have optional arguments for registering specific subdependeices.
 
 ### vNext Application wire-up
 If the application is bootstrapped from a `vNext` application, the dependecies and client can be registed by using the `AddRawRabbit` extension for `IServiceCollection`
@@ -52,7 +52,7 @@ kernel.RegisterRawRabbit("guest:guest@localhost:5672/");
 ``` 
 
 ## Broker connection
-As soon as the client is instansiated, it will try to connect to the broker.  By default `RawRabbit` will try to connect to `localhost`. Configuration can be provided in different ways.
+As soon as the client is instantiated, it will try to connect to the broker.  By default `RawRabbit` will try to connect to `localhost`. Configuration can be provided in different ways.
 
 ### Configuration object
 The main configuration object for `RawRabbit` is `RawRabbitConfiguration`.

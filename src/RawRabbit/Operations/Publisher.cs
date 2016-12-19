@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using RabbitMQ.Client;
 using RawRabbit.Channel.Abstraction;
 using RawRabbit.Common;
 using RawRabbit.Configuration;
@@ -57,6 +56,9 @@ namespace RawRabbit.Operations
 					{
 						throw t.Exception;
 					}
+
+					channelTask.Result.BasicReturn += config.BasicReturn;
+
 					lock (_publishLock)
 					{
 						var ackTask = _acknowledger.GetAckTask(channelTask.Result);
@@ -64,9 +66,13 @@ namespace RawRabbit.Operations
 							exchange: config.Exchange.Name,
 							routingKey: _config.RouteWithGlobalId ? $"{config.RoutingKey}.{globalMessageId}" : config.RoutingKey,
 							basicProperties: props,
-							body: _serializer.Serialize(message)
-							);
-						return ackTask;
+							body: _serializer.Serialize(message),
+							mandatory: (config.BasicReturn != null)
+						);
+						return ackTask
+						.ContinueWith(a => {
+							channelTask.Result.BasicReturn -= config.BasicReturn;
+						});
 					}
 				})
 				.Unwrap();

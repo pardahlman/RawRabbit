@@ -3,7 +3,7 @@
 	/// <summary>
 	/// Holds information about exception thrown in a remote message handler. 
 	/// </summary>
-	public class MessageHandlerExceptionInformation
+	public class ExceptionInformation
 	{
 		public string Message { get; set; }
 		public string ExceptionType { get; set; }

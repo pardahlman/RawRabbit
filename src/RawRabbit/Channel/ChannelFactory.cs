@@ -8,6 +8,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 using RawRabbit.Channel.Abstraction;
 using RawRabbit.Configuration;
+using RawRabbit.Exceptions;
 using RawRabbit.Logging;
 
 namespace RawRabbit.Channel
@@ -15,7 +16,7 @@ namespace RawRabbit.Channel
 	public class ChannelFactory : IChannelFactory
 	{
 		private readonly ConcurrentQueue<TaskCompletionSource<IModel>> _requestQueue;
-		private readonly ILogger _logger = LogManager.GetLogger<ThreadBasedChannelFactory>();
+		private readonly ILogger _logger = LogManager.GetLogger<ChannelFactory>();
 		internal readonly ChannelFactoryConfiguration _channelConfig;
 		private readonly IConnectionFactory _connectionFactory;
 		private readonly RawRabbitConfiguration _config;
@@ -29,22 +30,45 @@ namespace RawRabbit.Channel
 
 		public ChannelFactory(IConnectionFactory connectionFactory, RawRabbitConfiguration config, ChannelFactoryConfiguration channelConfig)
 		{
-			try
-			{
-				_connection = connectionFactory.CreateConnection(config.Hostnames);
-			}
-			catch (BrokerUnreachableException e)
-			{
-				_logger.LogError("Unable to connect to broker", e);
-				throw e.InnerException;
-			}
 			_connectionFactory = connectionFactory;
 			_config = config;
 			_channelConfig = channelConfig;
 			_requestQueue = new ConcurrentQueue<TaskCompletionSource<IModel>>();
 			_channels = new LinkedList<IModel>();
 
+			ConnectToBroker();
 			Initialize();
+		}
+
+		protected virtual void ConnectToBroker()
+		{
+			try
+			{
+				_connection = _connectionFactory.CreateConnection(_config.Hostnames);
+				SetupConnectionRecovery(_connection);
+			}
+			catch (BrokerUnreachableException e)
+			{
+				_logger.LogError("Unable to connect to broker", e);
+				throw e.InnerException;
+			}
+		}
+
+		protected virtual void SetupConnectionRecovery(IConnection connection = null)
+		{
+			connection = connection ?? _connection;
+			var recoverable = connection as IRecoverable;
+			if (recoverable == null)
+			{
+				_logger.LogInformation("Connection is not Recoverable. Failed connection will cause unhandled exception to be thrown.");
+				return;
+			}
+			_logger.LogDebug("Setting up Connection Recovery");
+			recoverable.Recovery += (sender, args) =>
+			{
+				_logger.LogInformation($"Connection has been recovered. Starting channel processing.");
+				EnsureRequestsAreHandled();
+			};
 		}
 
 		internal virtual void Initialize()
@@ -132,7 +156,18 @@ namespace RawRabbit.Channel
 		{
 			var tcs = new TaskCompletionSource<IModel>();
 			_requestQueue.Enqueue(tcs);
-			EnsureRequestsAreHandled();
+			if (_connection.IsOpen)
+			{
+				EnsureRequestsAreHandled();
+			}
+			else
+			{
+				var recoverable = _connection as IRecoverable;
+				if (recoverable == null)
+				{
+					throw new ChannelAvailabilityException("Unable to retrieve chanel. Connection to broker is closed and not recoverable.");
+				}
+			}
 			return tcs.Task;
 		}
 
@@ -203,7 +238,8 @@ namespace RawRabbit.Channel
 				var isRecoverable = _channels.Any(c => c is IRecoverable);
 				if (!isRecoverable)
 				{
-					throw new Exception("Unable to retreive channel. All existing channels are closed and none of them are recoverable.");
+					_processingRequests = false;
+					throw new ChannelAvailabilityException("Unable to retreive channel. All existing channels are closed and none of them are recoverable.");
 				}
 
 				_logger.LogInformation("Unable to find an open channel. Requeue TaskCompletionSource for future process and abort execution.");
