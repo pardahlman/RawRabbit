@@ -15,6 +15,7 @@ using ExchangeType = RawRabbit.Configuration.Exchange.ExchangeType;
 
 namespace RawRabbit.IntegrationTests.SimpleUse
 {
+
 	public class PublishAndSubscribeTests : IntegrationTestBase
 	{
 
@@ -25,7 +26,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			using (var publisher = TestClientFactory.CreateNormal())
 			using (var subscriber = TestClientFactory.CreateNormal())
 			{
-				var message = new BasicMessage { Prop = "Hello, world!" };
+				var message = new BasicMessage {Prop = "Hello, world!"};
 				var recievedTcs = new TaskCompletionSource<BasicMessage>();
 
 				subscriber.SubscribeAsync<BasicMessage>((msg, info) =>
@@ -250,8 +251,10 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 					.WithPrefetchCount(1));
 
 				/* Test */
-				await publisher.PublishAsync(new BasicMessage { Prop = "I will be delivered" });
-				await publisher.PublishAsync(new BasicMessage { Prop = "Someone will pass me in the queue" }, configuration: cfg => cfg.WithProperties(p => p.Priority = 0));
+				await publisher.PublishAsync(new BasicMessage {Prop = "I will be delivered"});
+				await
+					publisher.PublishAsync(new BasicMessage {Prop = "Someone will pass me in the queue"},
+						configuration: cfg => cfg.WithProperties(p => p.Priority = 0));
 				queueBuilt.SetResult(true);
 				await priorityTcs.Task;
 
@@ -267,8 +270,8 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 			using (var publisher = TestClientFactory.CreateNormal())
 			using (var subscriber = TestClientFactory.CreateNormal())
 			{
-				var firstMessage = new BasicMessage { Prop = "Value" };
-				var secondMessage = new BasicMessage { Prop = "AnotherValue" };
+				var firstMessage = new BasicMessage {Prop = "Value"};
+				var secondMessage = new BasicMessage {Prop = "AnotherValue"};
 				var firstRecievedTcs = new TaskCompletionSource<BasicMessage>();
 				var secondRecievedTcs = new TaskCompletionSource<BasicMessage>();
 				var recievedCount = 0;
@@ -308,7 +311,9 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		public async Task Should_Be_Able_To_Subscibe_To_Pure_Json_Message()
 		{
 			var conventions = new NamingConventions();
-			using (var client = TestClientFactory.CreateNormal(ioc => ioc.AddSingleton<INamingConventions>(c => conventions)))
+			using (
+				var client =
+					TestClientFactory.CreateNormal(ioc => ioc.AddSingleton<INamingConventions>(c => conventions)))
 			{
 				/* Setup */
 				var tcs = new TaskCompletionSource<BasicMessage>();
@@ -318,7 +323,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 					return Task.FromResult(true);
 				});
 				var uniqueValue = Guid.NewGuid().ToString();
-				var jsonMsg = JsonConvert.SerializeObject(new BasicMessage { Prop = uniqueValue });
+				var jsonMsg = JsonConvert.SerializeObject(new BasicMessage {Prop = uniqueValue});
 
 				/* Test */
 				TestChannel.BasicPublish(
@@ -348,7 +353,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 				});
 
 				/* Test */
-				client.PublishAsync(new DynamicMessage { Body = new { IsDynamic = true } });
+				client.PublishAsync(new DynamicMessage {Body = new {IsDynamic = true}});
 				await tcs.Task;
 
 				/* Assert */
@@ -359,7 +364,7 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 		[Fact]
 		public async Task Should_Be_Able_To_Publish_Message_After_Failed_Publish()
 		{
-			using(var firstClient = TestClientFactory.CreateNormal())
+			using (var firstClient = TestClientFactory.CreateNormal())
 			using (var secondClient = TestClientFactory.CreateNormal())
 			{
 				/* Setup */
@@ -408,6 +413,83 @@ namespace RawRabbit.IntegrationTests.SimpleUse
 				Assert.True(tcs.Task.Result);
 			}
 		}
+
+		[Fact]
+		public async Task Should_Be_Able_To_Subscribe_Initialized_Queue_And_Exchange()
+		{
+			using (var client = TestClientFactory.CreateNormal())
+			{
+
+				/* Setup */
+				const string exchangeName = "initialized.exchange";
+				const string queueName = "initialized.queue";
+
+				try
+				{
+					TestChannel.ExchangeDeclare(exchangeName, RabbitMQ.Client.ExchangeType.Fanout);
+					TestChannel.QueueDeclare(queueName, true, false, false);
+
+					var tcs = new TaskCompletionSource<DynamicMessage>();
+					client.SubscribeAsync<DynamicMessage>((message, context) =>
+					{
+						tcs.TrySetResult(message);
+						return Task.FromResult(true);
+					}, cfg => cfg
+					.WithQueue(q => q
+						.AssumeInitialized()
+						.WithName(queueName))
+						.WithSubscriberId(string.Empty)
+					.WithExchange(e => e
+						.AssumeInitialized()
+						.WithName(exchangeName)));
+
+					/* Test */
+					await client.PublishAsync(new DynamicMessage { Body = new { IsDynamic = true } },
+							configuration: cfg => cfg
+								.WithExchange(e => e
+									.AssumeInitialized()
+									.WithName(exchangeName)));
+					await tcs.Task;
+
+					/* Assert */
+					Assert.True(tcs.Task.Result.Body.IsDynamic);
+				}
+				finally
+				{
+					/* Teardown */
+					TestChannel.QueueDelete(queueName);
+					TestChannel.ExchangeDelete(exchangeName);
+				}
+			}
+		}
+
+		[Fact]
+		public void Should_Throw_When_Subscribed_Not_Initialized_Queue()
+		{
+			using (var client = TestClientFactory.CreateNormal())
+			{
+
+				/* Setup */
+				const string queueName = "not.initialized.queue";
+				var tcs = new TaskCompletionSource<DynamicMessage>();
+
+
+				/* Test */
+
+				Assert.Throws<AggregateException>(() =>
+
+				client.SubscribeAsync<DynamicMessage>((message, context) =>
+					{
+						tcs.TrySetResult(message);
+						return Task.FromResult(true);
+					}, cfg => cfg
+						.WithQueue(q => q
+							.AssumeInitialized()
+							.WithName(queueName))
+				));
+
+				Assert.False(tcs.Task.IsCompleted);
+			}
+		}
 	}
 }
-
