@@ -1,10 +1,8 @@
-﻿using System;
-
-namespace RawRabbit.Configuration.Queue
+﻿namespace RawRabbit.Configuration.Queue
 {
 	public class QueueConfigurationBuilder : IQueueConfigurationBuilder
 	{
-		public QueueConfiguration Configuration { get;}
+		public QueueConfiguration Configuration { get; }
 
 		public QueueConfigurationBuilder(QueueConfiguration initialQueue = null)
 		{
@@ -47,10 +45,10 @@ namespace RawRabbit.Configuration.Queue
 			return this;
 		}
 
-        public IQueueConfigurationBuilder AssumeInitialized(bool asumption = true)
-        {
-            Configuration.AssumeInitialized = asumption;
-            return this;
-        }
-    }
+		public IQueueConfigurationBuilder AssumeInitialized(bool asumption = true)
+		{
+			Configuration.AssumeInitialized = asumption;
+			return this;
+		}
+	}
 }
