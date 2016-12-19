@@ -10,8 +10,6 @@ namespace RawRabbit.Operations.Saga.Model
 		public abstract SagaModel GetDto();
 	}
 
-	public abstract class  Saga<TState, TTrigger> : Saga<TState, TTrigger, SagaModel<TState>> { }
-
 	public abstract class Saga<TState, TTrigger, TModel> : Saga where TModel : SagaModel<TState>
 	{
 		protected readonly TModel SagaDto;

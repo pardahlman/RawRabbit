@@ -12,6 +12,7 @@
 
 	"dependencies": {
 		"RawRabbit": { "target": "project" },
+		"RawRabbit.Operations.Subscribe": { "target": "project" },
 		"Stateless": "3.0.0"
 	},
 

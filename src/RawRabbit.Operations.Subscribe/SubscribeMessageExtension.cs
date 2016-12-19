@@ -11,7 +11,7 @@ namespace RawRabbit
 {
 	public static class SubscribeMessageExtension
 	{
-		private static readonly Action<IPipeBuilder> ConsumePipe = pipe => pipe
+		public static readonly Action<IPipeBuilder> ConsumePipe = pipe => pipe
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(ConsumerStage.MessageRecieved))
 			.Use<BodyDeserializationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(ConsumerStage.MessageDeserialized))

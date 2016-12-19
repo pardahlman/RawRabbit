@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using RawRabbit.Operations.Saga.Middleware;
 using RawRabbit.Operations.Saga.Model;
+using RawRabbit.Operations.Saga.Trigger;
 using RawRabbit.Pipe;
 
 namespace RawRabbit.Operations.Saga
@@ -13,19 +15,29 @@ namespace RawRabbit.Operations.Saga
 			return context.Get<Model.Saga>(SagaKey.Saga);
 		}
 
-		public static Func<Model.Saga, Task> GetSagaTriggerFunc(this IPipeContext context)
+		public static Guid GetSagaId(this IPipeContext context)
 		{
-			return context.Get<Func<Model.Saga, Task>>(SagaKey.TriggerFunc);
+			return context.Get<Guid>(SagaKey.SagaId);
 		}
 
-		public static List<TriggerInvoker> GetTriggerInvokers(this IPipeContext context)
+		public static List<SagaSubscriberOptions> GetSagaSubscriberOptions(this IPipeContext context)
 		{
-			return context.Get< List<TriggerInvoker>>(SagaKey.TriggerInvokers);
+			return context.Get<List<SagaSubscriberOptions>>(SagaKey.SagaSubscriberOptions);
 		}
 
-		public static TriggerInvoker GetTriggerInvoker(this IPipeContext context)
+		public static Action<IPipeContext> GetContextAction(this IPipeContext context)
 		{
-			return context.Get<TriggerInvoker>(SagaKey.TriggerInvoker);
+			return context.Get<Action<IPipeContext>>(SagaKey.ContextAction);
+		}
+
+		public static Action<IPipeBuilder> GetPipeBuilderAction(this IPipeContext context)
+		{
+			return context.Get<Action<IPipeBuilder>>(SagaKey.PipeBuilderAction);
+		}
+
+		public static Func<object, Guid> GetIdCorrelationFunc(this IPipeContext context)
+		{
+			return context.Get<Func<object, Guid>>(SagaKey.CorrelationFunc);
 		}
 	}
 }

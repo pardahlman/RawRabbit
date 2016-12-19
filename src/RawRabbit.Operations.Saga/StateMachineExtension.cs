@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using RawRabbit.Operations.Saga;
 using RawRabbit.Operations.Saga.Middleware;
 using RawRabbit.Operations.Saga.Model;
+using RawRabbit.Operations.Saga.Trigger;
 using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
 
@@ -18,30 +18,21 @@ namespace RawRabbit
 				builder => builder
 					.Use<RepeatMiddleware>(new RepeatOptions
 					{
-						EnumerableFunc = context => context.GetTriggerInvokers().OfType<MessageTriggerInvoker>(),
-						RepeatContextFactory = (context, factory, invoker) => factory.CreateContext(
-								new KeyValuePair<string, object>(SagaKey.TriggerInvoker, invoker),
-								new KeyValuePair<string, object>(SagaKey.SagaType, typeof(TSaga)),
-								new KeyValuePair<string, object>(PipeKey.MessageType, (invoker as MessageTriggerInvoker)?.MessageType),
-								new KeyValuePair<string, object>(PipeKey.ConfigurationAction, ((MessageTriggerInvoker)invoker).ConfigurationAction)),
-						RepeatePipe = pipe => pipe
-							.Use<ConsumeConfigurationMiddleware>()
-							.Use<QueueDeclareMiddleware>()
-							.Use<ExchangeDeclareMiddleware>()
-							.Use<QueueBindMiddleware>()
-							.Use<ConsumerMiddleware>()
-							.Use<MessageConsumeMiddleware>(new ConsumeOptions
-							{
-								Pipe = c => c
-								.Use<BodyDeserializationMiddleware>()
-								.Use<TriggerMessageInvokationMiddleware>()
-								.Use<AutoAckMiddleware>()
-							})
+						EnumerableFunc = context => context.GetSagaSubscriberOptions(),
+						RepeatContextFactory = (context, factory, enumerated) =>
+						{
+							var options = enumerated as SagaSubscriberOptions;
+							var childContext = factory.CreateContext(context.Properties.ToArray());
+							childContext.Properties.TryAdd(SagaKey.PipeBuilderAction, options?.PipeActionFunc(childContext));
+							childContext.Properties.TryAdd(SagaKey.ContextAction, options?.ContextActionFunc(childContext));
+							return childContext;
+						},
+						RepeatePipe = pipe => pipe.Use<SagaSubscriberMiddleware>()
 					}),
 				context =>
 				{
 					context.Properties.Add(SagaKey.SagaType, typeof(TSaga));
-					context.Properties.Add(SagaKey.TriggerInvokers, new TTriggerConfiguration().GetTriggerInvokers());
+					context.Properties.Add(SagaKey.SagaSubscriberOptions, new TTriggerConfiguration().GetSagaSubscriberOptions());
 				});
 		}
 
@@ -49,7 +40,8 @@ namespace RawRabbit
 		{
 			Func<object[], Task> genericHandler = objects => triggerFunc((TSaga) objects[0]);
 
-			return busClient.InvokeAsync(
+			return busClient
+				.InvokeAsync(
 					builder => builder
 						.Use<RetrieveSagaMiddleware>()
 						.Use<HandlerInvokationMiddleware>(new HandlerInvokationOptions
@@ -67,7 +59,8 @@ namespace RawRabbit
 						{
 							context.Properties.Add(SagaKey.SagaId, sagaId);
 						}
-					});
+					}
+				);
 		}
 	}
 }

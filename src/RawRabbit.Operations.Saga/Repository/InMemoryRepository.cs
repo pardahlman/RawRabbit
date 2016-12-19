@@ -13,15 +13,12 @@ namespace RawRabbit.Operations.Saga.Repository
 
 	public class InMemoryRepository : ISagaRepository
 	{
-		private readonly IExclusiveLockRepo _lockRepo;
-
 		private readonly IDependecyResolver _resolver;
 		private readonly Dictionary<Guid, object> _dtoDictionary;
 
-		public InMemoryRepository(IDependecyResolver resolver, IExclusiveLockRepo lockRepo)
+		public InMemoryRepository(IDependecyResolver resolver)
 		{
 			_resolver = resolver;
-			_lockRepo = lockRepo;
 			_dtoDictionary = new Dictionary<Guid, object>();
 		}
 

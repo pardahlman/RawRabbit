@@ -1,5 +1,4 @@
 ﻿using RawRabbit.Instantiation;
-using RawRabbit.Operations.Saga.Middleware;
 using RawRabbit.Operations.Saga.Repository;
 
 namespace RawRabbit.Operations.Saga

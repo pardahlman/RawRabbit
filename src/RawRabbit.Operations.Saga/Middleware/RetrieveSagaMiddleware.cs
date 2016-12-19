@@ -9,6 +9,7 @@ namespace RawRabbit.Operations.Saga.Middleware
 	{
 		public Func<IPipeContext, Guid> SagaIdFunc { get; set; }
 		public Func<IPipeContext, Type> SagaTypeFunc { get; set; }
+		public Func<IPipeContext, Model.Saga> SagaFunc { get; set; }
 		public Action<Model.Saga, IPipeContext> PostExecuteAction { get; set; }
 	}
 
@@ -18,12 +19,14 @@ namespace RawRabbit.Operations.Saga.Middleware
 		protected Func<IPipeContext, Guid> SagaIdFunc;
 		protected Func<IPipeContext, Type> SagaTypeFunc;
 		protected Action<Model.Saga, IPipeContext> PostExecuteAction;
+		protected Func<IPipeContext, Model.Saga> SagaFunc;
 
 		public RetrieveSagaMiddleware(ISagaRepository sagaRepo, RetrieveSagaOptions options = null)
 		{
 			_sagaRepo = sagaRepo;
 			SagaIdFunc = options?.SagaIdFunc ?? (context => context.Get(SagaKey.SagaId, Guid.NewGuid()));
 			SagaTypeFunc = options?.SagaTypeFunc ?? (context => context.Get<Type>(SagaKey.SagaType));
+			SagaFunc = options?.SagaFunc;
 			PostExecuteAction = options?.PostExecuteAction;
 		}
 
@@ -31,7 +34,7 @@ namespace RawRabbit.Operations.Saga.Middleware
 		{
 			var id = GetSagaId(context);
 			var sagaType = GetSagaType(context);
-			var sagaTasks = GetSagaAsync(id, sagaType);
+			var sagaTasks = GetSagaAsync(context, id, sagaType);
 			return sagaTasks
 				.ContinueWith(tSaga =>
 				{
@@ -42,9 +45,12 @@ namespace RawRabbit.Operations.Saga.Middleware
 				.Unwrap();
 		}
 
-		protected virtual Task<Model.Saga> GetSagaAsync(Guid id, Type sagaType)
+		protected virtual Task<Model.Saga> GetSagaAsync(IPipeContext context, Guid id, Type sagaType)
 		{
-			return _sagaRepo.GetAsync(id, sagaType);
+			var fromContext = SagaFunc?.Invoke(context);
+			return fromContext != null
+				? Task.FromResult(fromContext)
+				: _sagaRepo.GetAsync(id, sagaType);
 		}
 
 		protected virtual Type GetSagaType(IPipeContext context)

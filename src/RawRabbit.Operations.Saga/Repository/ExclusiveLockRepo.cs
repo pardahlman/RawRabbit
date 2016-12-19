@@ -15,29 +15,34 @@ namespace RawRabbit.Operations.Saga.Repository
 	public class ExclusiveLockRepo : IExclusiveLockRepo
 	{
 		private readonly ConcurrentDictionary<Guid, object> _lockDictionary;
+		private readonly ConcurrentDictionary<Guid, TaskCompletionSource<Guid>> _exitDictionary;
 
 		public ExclusiveLockRepo()
 		{
 			_lockDictionary = new ConcurrentDictionary<Guid, object>();
+			_exitDictionary = new ConcurrentDictionary<Guid, TaskCompletionSource<Guid>>();
 		}
 		public Task AcquireAsync(Guid sagaId)
 		{
 			var sagaLock = _lockDictionary.GetOrAdd(sagaId, valueFactory: guid => new object());
-			var tcs = new TaskCompletionSource<object>();
+			var enterTsc = new TaskCompletionSource<object>();
 			Task.Run(() =>
 			{
 				Monitor.Enter(sagaLock);
-				tcs.TrySetResult(sagaLock);
+				enterTsc.TrySetResult(sagaLock);
+				var exitTsc = _exitDictionary.GetOrAdd(sagaId, guid => new TaskCompletionSource<Guid>());
+				exitTsc.Task.Wait();
+				Monitor.Exit(sagaLock);
 			});
-			return tcs.Task;
+			return enterTsc.Task;
 		}
 
 		public Task ReleaseAsync(Guid sagaId)
 		{
-			object sagaLock;
-			if (_lockDictionary.TryGetValue(sagaId, out sagaLock))
+			TaskCompletionSource<Guid> sagaLock;
+			if (_exitDictionary.TryGetValue(sagaId, out sagaLock))
 			{
-				Monitor.Exit(sagaLock);
+				sagaLock.TrySetResult(sagaId);
 			}
 			return Task.FromResult(0);
 		}
