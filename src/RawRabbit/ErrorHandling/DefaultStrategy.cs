@@ -133,9 +133,16 @@ namespace RawRabbit.ErrorHandling
 				await _topologyProvider.DeclareExchangeAsync(_errorExchangeCfg);
 				var channel = await _channelFactory.GetChannelAsync();
 				var msg = _serializer.Deserialize(args);
+				var actualException = UnwrapInnerException(exception);
 				var errorMsg = new HandlerExceptionMessage
 				{
-					Exception = exception,
+					Exception = new ExceptionInformation
+					{
+						ExceptionType = actualException.GetType().FullName,
+						InnerMessage = actualException.InnerException?.Message,
+						Message = actualException.Message,
+						StackTrace = actualException.StackTrace
+					},
 					Time = DateTime.Now,
 					Host = Environment.MachineName,
 					Message = msg,
