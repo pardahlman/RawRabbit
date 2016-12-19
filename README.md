@@ -1,6 +1,7 @@
 # RawRabbit
 
 [![Build Status](https://img.shields.io/appveyor/ci/pardahlman/rawrabbit.svg?style=flat-square)](https://ci.appveyor.com/project/pardahlman/rawrabbit) [![Documentation Status](https://readthedocs.org/projects/rawrabbit/badge/?version=latest&style=flat-square)](http://rawrabbit.readthedocs.org/) [![NuGet](https://img.shields.io/nuget/v/RawRabbit.svg?style=flat-square)](https://www.nuget.org/packages/RawRabbit) [![GitHub release](https://img.shields.io/github/release/pardahlman/rawrabbit.svg?style=flat-square)](https://github.com/pardahlman/rawrabbit/releases/latest)
+[![Slack Status](https://rawrabbit.herokuapp.com/badge.svg)](https://rawrabbit.herokuapp.com)
 ## Quick introduction
 `RawRabbit` is a modern .NET client for communication over [RabbitMq](http://rabbitmq.com/). It is written for [`.NET Core`](http://dot.net) and uses Microsoft’s new frameworks for [logging](https://github.com/aspnet/Logging), [configuration](https://github.com/aspnet/Configuration) and [dependecy injection](https://github.com/aspnet/DependencyInjection). Full documentation available at [`rawrabbit.readthedocs.org`](http://rawrabbit.readthedocs.org/).
 
@@ -17,8 +18,8 @@ client.SubscribeAsync<BasicMessage>(async (msg, context) =>
 await client.PublishAsync(new BasicMessage { Prop = "Hello, world!"});
 ```
 
-### Request/Respond
-`RawRabbits` request/respond (`RPC`) implementation uses the [direct reply-to feature](https://www.rabbitmq.com/direct-reply-to.html) for better performance and lower resource allocation.
+### Request/Response
+`RawRabbits` request/response (`RPC`) implementation uses the [direct reply-to feature](https://www.rabbitmq.com/direct-reply-to.html) for better performance and lower resource allocation.
 ```csharp
 var client = BusClientFactory.CreateDefault();
 client.RespondAsync<BasicRequest, BasicResponse>(async (request, context) =>

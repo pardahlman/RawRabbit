@@ -2,7 +2,7 @@
 {
 	public class QueueConfigurationBuilder : IQueueConfigurationBuilder
 	{
-		public QueueConfiguration Configuration { get;}
+		public QueueConfiguration Configuration { get; }
 
 		public QueueConfigurationBuilder(QueueConfiguration initialQueue = null)
 		{
@@ -42,6 +42,12 @@
 		public IQueueConfigurationBuilder WithArgument(string key, object value)
 		{
 			Configuration.Arguments.Add(key, value);
+			return this;
+		}
+
+		public IQueueConfigurationBuilder AssumeInitialized(bool asumption = true)
+		{
+			Configuration.AssumeInitialized = asumption;
 			return this;
 		}
 	}
