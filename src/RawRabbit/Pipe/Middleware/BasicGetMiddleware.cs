@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 
@@ -27,7 +28,7 @@ namespace RawRabbit.Pipe.Middleware
 			PostExecutionAction = options?.PostExecutionAction;
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var channel = GetChannel(context);
 			var queueNamme = GetQueueName(context);
@@ -35,7 +36,7 @@ namespace RawRabbit.Pipe.Middleware
 			var getResult = PerformBasicGet(channel, queueNamme, noAck);
 			context.Properties.TryAdd(PipeKey.BasicGetResult, getResult);
 			PostExecutionAction?.Invoke(context, getResult);
-			return Next.InvokeAsync(context);
+			return Next.InvokeAsync(context, token);
 		}
 
 		protected virtual BasicGetResult PerformBasicGet(IModel channel, string queueName, bool noAck)

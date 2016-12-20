@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Configuration.Get;
 
@@ -23,14 +24,14 @@ namespace RawRabbit.Pipe.Middleware
 			PostExecutionAction = options?.PostExecuteAction;
 			ConfigBuilderFunc = options?.ConfigBuilderFunc ?? (context => context.Get<Action<IGetConfigurationBuilder>>(PipeKey.ConfigurationAction));
 		}
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var defaultCfg = CreateConfiguration(context);
 			var configAction = GetConfigurationAction(context);
 			var config = GetConfiguredConfiguration(defaultCfg, configAction);
 			PostExecutionAction?.Invoke(context, config);
 			context.Properties.TryAdd(PipeKey.GetConfiguration, config);
-			return Next.InvokeAsync(context);
+			return Next.InvokeAsync(context, token);
 		}
 
 		protected virtual GetConfiguration CreateConfiguration(IPipeContext context)

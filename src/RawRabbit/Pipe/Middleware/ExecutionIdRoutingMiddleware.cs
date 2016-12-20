@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RawRabbit.Pipe.Middleware
@@ -36,16 +37,16 @@ namespace RawRabbit.Pipe.Middleware
 			});
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var enabled = GetRoutingEnabled(context);
 			if (!enabled)
 			{
-				return Next.InvokeAsync(context);
+				return Next.InvokeAsync(context, token);
 			}
 			var executionId = GetExecutionId(context);
 			UpdateRoutingKey(context, executionId);
-			return Next.InvokeAsync(context);
+			return Next.InvokeAsync(context, token);
 		}
 
 		protected virtual void UpdateRoutingKey(IPipeContext context, string executionId)

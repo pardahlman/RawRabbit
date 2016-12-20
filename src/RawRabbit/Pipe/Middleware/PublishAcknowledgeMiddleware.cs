@@ -18,7 +18,7 @@ namespace RawRabbit.Pipe.Middleware
 			_publishTimeOut = config.PublishConfirmTimeout;
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var channel = context.GetTransientChannel();
 			if (channel.NextPublishSeqNo == 0UL)
@@ -34,7 +34,7 @@ namespace RawRabbit.Pipe.Middleware
 			{
 				ackTcs.TrySetException(
 					new PublishConfirmException(
-						$"The broker did not send a publish acknowledgement for message {thisSequence} on channel {channel.ChannelNumber} within {_publishTimeOut.ToString("g")}."));
+						$"The broker did not send a publish acknowledgement for message {thisSequence} on channel {channel.ChannelNumber} within {_publishTimeOut:g}."));
 				ackTimer?.Dispose();
 			}, channel, _publishTimeOut, new TimeSpan(-1));
 
@@ -60,7 +60,10 @@ namespace RawRabbit.Pipe.Middleware
 			};
 			channel.BasicAcks += channelBasicAck;
 			context.Properties.Add(PipeKey.PublishAcknowledger, ackTcs.Task);
-			return Next.InvokeAsync(context).ContinueWith(t => ackTcs.Task).Unwrap();
+			return Next
+				.InvokeAsync(context, token)
+				.ContinueWith(t => ackTcs.Task, token)
+				.Unwrap();
 		}
 	}
 }

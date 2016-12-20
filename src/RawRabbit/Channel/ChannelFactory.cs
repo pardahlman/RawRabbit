@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 using RawRabbit.Channel.Abstraction;
+using RawRabbit.Common;
 using RawRabbit.Configuration;
 using RawRabbit.Exceptions;
 using RawRabbit.Logging;
@@ -147,14 +148,10 @@ namespace RawRabbit.Channel
 			return GetChannelAsync().Result;
 		}
 
-		public IModel CreateChannel(IConnection connection = null)
-		{
-			return CreateChannelAsync(connection).Result;
-		}
-
-		public Task<IModel> GetChannelAsync()
+		public Task<IModel> GetChannelAsync(CancellationToken token = default(CancellationToken))
 		{
 			var tcs = new TaskCompletionSource<IModel>();
+			token.Register(() => tcs.TrySetCanceled());
 			_requestQueue.Enqueue(tcs);
 			if (_connection.IsOpen)
 			{
@@ -195,6 +192,10 @@ namespace RawRabbit.Channel
 			TaskCompletionSource<IModel> channelTcs;
 			while (_requestQueue.TryDequeue(out channelTcs))
 			{
+				if (channelTcs.Task.IsCanceled)
+				{
+					continue;
+				}
 				lock (_channelLock)
 				{
 					if (_current == null && _channelConfig.InitialChannelCount == 0)
@@ -251,16 +252,20 @@ namespace RawRabbit.Channel
 			_logger.LogDebug("'GetChannel' has been processed.");
 		}
 
-		public Task<IModel> CreateChannelAsync(IConnection connection = null)
+		public Task<IModel> CreateChannelAsync(CancellationToken token = default(CancellationToken))
 		{
-			return connection != null
-				? Task.FromResult(connection.CreateModel())
-				: GetConnectionAsync().ContinueWith(tConnection => tConnection.Result.CreateModel());
+			if (token.IsCancellationRequested)
+			{
+				return TaskUtil.FromCancelled<IModel>();
+			}
+
+			return GetConnectionAsync(token)
+				.ContinueWith(tConnection => tConnection.Result.CreateModel(), token);
 		}
 
-		internal virtual Task<IModel> CreateAndWireupAsync()
+		internal virtual Task<IModel> CreateAndWireupAsync(CancellationToken token = default(CancellationToken))
 		{
-			return GetConnectionAsync()
+			return GetConnectionAsync(token)
 				.ContinueWith(tConnection =>
 				{
 					var channel = tConnection.Result.CreateModel();
@@ -279,11 +284,15 @@ namespace RawRabbit.Channel
 					}
 					_channels.AddLast(new LinkedListNode<IModel>(channel));
 					return channel;
-				});
+				}, token);
 		}
 
-		private Task<IConnection> GetConnectionAsync()
+		private Task<IConnection> GetConnectionAsync(CancellationToken token = default(CancellationToken))
 		{
+			if (token.IsCancellationRequested)
+			{
+				return TaskUtil.FromCancelled<IConnection>();
+			}
 			if (_connection == null)
 			{
 				_logger.LogDebug($"Creating a new connection for {_config.Hostnames.Count} hosts.");

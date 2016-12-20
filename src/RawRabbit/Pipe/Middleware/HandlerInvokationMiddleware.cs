@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RawRabbit.Pipe.Middleware
@@ -23,10 +24,10 @@ namespace RawRabbit.Pipe.Middleware
 			PostInvokeAction = options?.PostInvokeAction;
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token = default(CancellationToken))
 		{
 			return InvokeMessageHandler(context)
-				.ContinueWith(t => Next.InvokeAsync(context))
+				.ContinueWith(t => Next.InvokeAsync(context, token), token)
 				.Unwrap();
 		}
 

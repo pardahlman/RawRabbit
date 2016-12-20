@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client.Events;
 using RawRabbit.Serialization;
@@ -31,7 +32,7 @@ namespace RawRabbit.Pipe.Middleware
 			_serializer = serializer;
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token = default(CancellationToken))
 		{
 			var args = _deliveryArgsFunc(context);
 			if (args == null)
@@ -41,7 +42,7 @@ namespace RawRabbit.Pipe.Middleware
 			object headerBytes;
 			if (!args.BasicProperties.Headers.TryGetValue(_headerKey, out headerBytes))
 			{
-				return Next.InvokeAsync(context);
+				return Next.InvokeAsync(context, token);
 			}
 
 			var serializedHeader = Encoding.UTF8.GetString((byte[])headerBytes);
@@ -51,7 +52,7 @@ namespace RawRabbit.Pipe.Middleware
 				throw new Exception();
 			}
 			_contextSaveAction(context, deserializedHeader);
-			return Next.InvokeAsync(context);
+			return Next.InvokeAsync(context, token);
 		}
 
 		public override string StageMarker => Pipe.StageMarker.MessageRecieved;

@@ -82,7 +82,7 @@ namespace RawRabbit.Pipe
 				.SelectMany(info => info.ConstructorArgs.OfType<StageMarkerOptions>());
 
 			var stageMwInfo = Pipe
-				.Where(info => typeof(StagedMiddleware).IsAssignableFrom(info.Type))
+				.Where(info => typeof(StagedMiddleware).GetTypeInfo().IsAssignableFrom(info.Type))
 				.ToList();
 			var stagedMiddleware = stageMwInfo
 				.Select(CreateInstance)
@@ -104,8 +104,10 @@ namespace RawRabbit.Pipe
 			Middleware.Middleware next = new NoOpMiddleware();
 			for (var i = middlewares.Count - 1; i >= 0; i--)
 			{
+				Middleware.Middleware cancellation = new CancellationMiddleware();
 				var current = middlewares[i];
-				current.Next = next;
+				current.Next = cancellation;
+				cancellation.Next = next;
 				next = current;
 			}
 			return next;

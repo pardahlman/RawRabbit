@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Pipe;
 
@@ -26,7 +27,7 @@ namespace RawRabbit.Operations.Saga.Middleware
 			PipeActionFunc = options?.PipeActionFunc ?? (context => context.GetPipeBuilderAction());
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var childContext = CreateChildContext(context);
 			var contextAction = GetPipeContextAction(context);
@@ -36,8 +37,8 @@ namespace RawRabbit.Operations.Saga.Middleware
 			var childPipe = BuildPipe(pipeBuilderAction);
 
 			return childPipe
-				.InvokeAsync(childContext)
-				.ContinueWith(t => Next.InvokeAsync(context))
+				.InvokeAsync(childContext, token)
+				.ContinueWith(t => Next.InvokeAsync(context, token), token)
 				.Unwrap();
 		}
 

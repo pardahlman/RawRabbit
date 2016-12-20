@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Get;
@@ -25,17 +26,17 @@ namespace RawRabbit.Operations.Get.Middleware
 			MessageTypeFunc = options?.MessageTypeFunc ?? (context => context.GetMessageType());
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var config = GetGetConfiguration(context);
 			if (!string.IsNullOrWhiteSpace(config.QueueName))
 			{
-				return Next.InvokeAsync(context);
+				return Next.InvokeAsync(context, token);
 			}
 
 			var messageType = GetMessageType(context);
 			config.QueueName = _conventions.QueueNamingConvention(messageType);
-			return Next.InvokeAsync(context);
+			return Next.InvokeAsync(context, token);
 		}
 
 		protected virtual GetConfiguration GetGetConfiguration(IPipeContext context)

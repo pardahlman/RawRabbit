@@ -31,22 +31,22 @@ namespace RawRabbit.Pipe.Middleware
 			PersistAction = options?.PersistAction ?? ((context, id) => context.Properties.TryAdd(PipeKey.GlobalExecutionId, id));
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var fromContext = GetExecutionIdFromContext(context);
 			if (!string.IsNullOrWhiteSpace(fromContext))
 			{
-				return Next.InvokeAsync(context);
+				return Next.InvokeAsync(context, token);
 			}
 			var fromProcess = GetExecutionIdFromProcess();
 			if (!string.IsNullOrWhiteSpace(fromProcess))
 			{
 				PersistAction(context, fromProcess);
-				return Next.InvokeAsync(context);
+				return Next.InvokeAsync(context, token);
 			}
 			var created = CreateExecutionId(context);
 			PersistAction(context, created);
-			return Next.InvokeAsync(context);
+			return Next.InvokeAsync(context, token);
 		}
 
 		protected virtual string CreateExecutionId(IPipeContext context)

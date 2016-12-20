@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RawRabbit.Pipe.Middleware
@@ -26,19 +27,19 @@ namespace RawRabbit.Pipe.Middleware
 			RepeateContextFactory = options.RepeatContextFactory ?? ((context, factory, obj) => context);
 		}
 		
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var childTasks = new List<Task>();
 			var enumerable = EnumerableFunc(context);
 			foreach (var enumerated in enumerable)
 			{
 				var childContext = RepeateContextFactory(context, _contextFactory, enumerated);
-				var childTask = RepeatPipe.InvokeAsync(childContext);
+				var childTask = RepeatPipe.InvokeAsync(childContext, token);
 				childTasks.Add(childTask);
 			}
 			return Task
 				.WhenAll(childTasks)
-				.ContinueWith(t => Next.InvokeAsync(context))
+				.ContinueWith(t => Next.InvokeAsync(context, token), token)
 				.Unwrap();
 		}
 	}

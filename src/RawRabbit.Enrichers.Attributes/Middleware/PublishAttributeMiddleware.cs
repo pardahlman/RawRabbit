@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Configuration.Publisher;
 using RawRabbit.Pipe;
@@ -23,7 +24,7 @@ namespace RawRabbit.Enrichers.Attributes.Middleware
 			_messageTypeFunc = options?.MessageTypeFunc ?? (context => context.GetMessageType());
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var msgType = _messageTypeFunc(context);
 			var config = _configFunc(context);
@@ -37,7 +38,7 @@ namespace RawRabbit.Enrichers.Attributes.Middleware
 			}
 			UpdateExchangeConfig(config.Exchange, msgType);
 			UpdateRoutingConfig(config, msgType);
-			return Next.InvokeAsync(context);
+			return Next.InvokeAsync(context, token);
 		}
 
 		protected virtual void UpdateRoutingConfig(PublisherConfiguration config, Type type)

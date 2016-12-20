@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Consumer;
 using RawRabbit.Operations.Request.Core;
@@ -22,7 +23,7 @@ namespace RawRabbit.Operations.Request.Middleware
 			_responsePipe = factory.Create(options.ResponseRecieved);
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var respondCfg = context.GetResponseConfiguration();
 			var correlationId = context.GetBasicProperties()?.CorrelationId;
@@ -30,7 +31,7 @@ namespace RawRabbit.Operations.Request.Middleware
 			var executionTsc = new TaskCompletionSource<bool>();
 
 			_consumerFactory
-				.GetConsumerAsync(respondCfg.Consume)
+				.GetConsumerAsync(respondCfg.Consume, token: token)
 				.ContinueWith(tConsumer =>
 				{
 					context.Properties.Add(PipeKey.Consumer, tConsumer.Result);
@@ -42,11 +43,11 @@ namespace RawRabbit.Operations.Request.Middleware
 						}
 						context.Properties.Add(PipeKey.DeliveryEventArgs, args);
 						_responsePipe
-							.InvokeAsync(context)
-							.ContinueWith(t => executionTsc.TrySetResult(t.IsCompleted));
+							.InvokeAsync(context, token)
+							.ContinueWith(t => executionTsc.TrySetResult(t.IsCompleted), token);
 					}, abort: args => string.Equals(args.BasicProperties.CorrelationId, correlationId));
-					Next.InvokeAsync(context);
-				});
+					Next.InvokeAsync(context, token);
+				}, token);
 
 			return executionTsc.Task;
 		}

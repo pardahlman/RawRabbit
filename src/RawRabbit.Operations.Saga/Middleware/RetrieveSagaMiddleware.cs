@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Operations.Saga.Repository;
 using RawRabbit.Pipe;
@@ -30,7 +31,7 @@ namespace RawRabbit.Operations.Saga.Middleware
 			PostExecuteAction = options?.PostExecuteAction;
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var id = GetSagaId(context);
 			var sagaType = GetSagaType(context);
@@ -40,8 +41,8 @@ namespace RawRabbit.Operations.Saga.Middleware
 				{
 					context.Properties.TryAdd(SagaKey.Saga, tSaga.Result);
 					PostExecuteAction?.Invoke(tSaga.Result, context);
-					return Next.InvokeAsync(context);
-				})
+					return Next.InvokeAsync(context, token);
+				}, token)
 				.Unwrap();
 		}
 

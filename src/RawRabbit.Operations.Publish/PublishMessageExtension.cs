@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Publisher;
@@ -40,7 +41,7 @@ namespace RawRabbit
 			})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.MessagePublished));
 
-		public static Task PublishAsync<TMessage>(this IBusClient client, TMessage message, Action<IPublisherConfigurationBuilder> config = null, Action<IPipeContext> context = null)
+		public static Task PublishAsync<TMessage>(this IBusClient client, TMessage message, Action<IPublisherConfigurationBuilder> config = null, Action<IPipeContext> context = null, CancellationToken token = default(CancellationToken))
 		{
 			return client.InvokeAsync(
 				PublishPipeAction,
@@ -51,7 +52,7 @@ namespace RawRabbit
 					ctx.Properties.Add(PipeKey.Operation, PublishKey.Publish);
 					ctx.Properties.Add(PipeKey.ConfigurationAction, config);
 					context?.Invoke(ctx);
-				});
+				}, token);
 		}
 	}
 }

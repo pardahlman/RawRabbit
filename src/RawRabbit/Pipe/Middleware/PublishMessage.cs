@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 
@@ -27,7 +28,7 @@ namespace RawRabbit.Pipe.Middleware
 			_channelFunc = options?.ChannelFunc ?? (context =>context.GetTransientChannel());
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var exchange = _exchangeFunc(context);
 			var routingKey = _routingKeyFunc(context);

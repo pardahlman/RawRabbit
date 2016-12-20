@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -37,7 +38,7 @@ namespace RawRabbit.Pipe.Middleware
 			_synchronousExecutionFunc = consumeOptions?.SynchronousExecutionFunc ?? (context => false);
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var consumer = _consumeFunc(context);
 
@@ -56,7 +57,7 @@ namespace RawRabbit.Pipe.Middleware
 				}
 			});
 
-			return Next.InvokeAsync(context);
+			return Next.InvokeAsync(context, token);
 		}
 
 		protected Task InvokeConsumePipeAsync(IPipeContext context, BasicDeliverEventArgs args)

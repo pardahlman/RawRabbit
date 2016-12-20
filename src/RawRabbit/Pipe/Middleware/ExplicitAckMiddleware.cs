@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -33,12 +34,12 @@ namespace RawRabbit.Pipe.Middleware
 			_abortExecution = options?.AbortExecution ?? (acknowledgement => !(acknowledgement is Ack));
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var ack = AcknowledgeMessage(context);
 			return _abortExecution(ack)
 				? Task.FromResult(0)
-				: Next.InvokeAsync(context);
+				: Next.InvokeAsync(context, token);
 		}
 		
 		protected virtual Acknowledgement AcknowledgeMessage(IPipeContext context)

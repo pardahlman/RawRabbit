@@ -22,31 +22,31 @@ namespace RawRabbit.Consumer
 			_ackConsumers = new ConcurrentDictionary<string, Lazy<Task<IBasicConsumer>>>();
 		}
 
-		public Task<IBasicConsumer> GetConsumerAsync(ConsumeConfiguration cfg, IModel channel = null)
+		public Task<IBasicConsumer> GetConsumerAsync(ConsumeConfiguration cfg, IModel channel = null, CancellationToken token = default(CancellationToken))
 		{
 			var cache = cfg.NoAck ? _noAckConsumers : _ackConsumers;
 			var lazyConsumerTask = cache.GetOrAdd(cfg.RoutingKey, routingKey =>
 			{
 				return new Lazy<Task<IBasicConsumer>>(() =>
 				{
-					return CreateConsumerAsync(channel)
+					return CreateConsumerAsync(channel, token)
 						.ContinueWith(tChannel =>
 						{
 							ConfigureConsume(tChannel.Result, cfg);
 							return tChannel.Result;
-						});
+						}, token);
 				});
 			});
 			return lazyConsumerTask.Value;
 		}
 
-		public Task<IBasicConsumer> CreateConsumerAsync(IModel channel = null)
+		public Task<IBasicConsumer> CreateConsumerAsync(IModel channel = null, CancellationToken token = default(CancellationToken))
 		{
 			var channelTask = channel != null
 				? Task.FromResult(channel)
-				: GetOrCreateChannelAsync();
+				: GetOrCreateChannelAsync(token);
 			return channelTask
-				.ContinueWith(tChannel => new EventingBasicConsumer(tChannel.Result) as IBasicConsumer);
+				.ContinueWith(tChannel => new EventingBasicConsumer(tChannel.Result) as IBasicConsumer, token);
 		}
 
 		public IBasicConsumer ConfigureConsume(IBasicConsumer consumer, ConsumeConfiguration cfg)
@@ -62,9 +62,9 @@ namespace RawRabbit.Consumer
 			return consumer;
 		}
 
-		protected virtual Task<IModel> GetOrCreateChannelAsync()
+		protected virtual Task<IModel> GetOrCreateChannelAsync(CancellationToken token = default(CancellationToken))
 		{
-			return _channelFactory.CreateChannelAsync();
+			return _channelFactory.CreateChannelAsync(token);
 		}
 	}
 

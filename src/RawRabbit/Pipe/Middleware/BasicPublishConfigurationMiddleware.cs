@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Configuration.BasicPublish;
 
@@ -23,7 +24,7 @@ namespace RawRabbit.Pipe.Middleware
 			PostInvokeAction = options?.PostInvokeAction;
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var config = GetInitialConfig(context);
 			var configAction = GetConfigurationAction(context);
@@ -35,7 +36,7 @@ namespace RawRabbit.Pipe.Middleware
 			}
 			PostInvokeAction?.Invoke(context, config);
 			context.Properties.TryAdd(PipeKey.BasicPublishConfiguration, config);
-			return Next.InvokeAsync(context);
+			return Next.InvokeAsync(context, token);
 		}
 
 		protected virtual BasicPublishConfiguration GetInitialConfig(IPipeContext context)

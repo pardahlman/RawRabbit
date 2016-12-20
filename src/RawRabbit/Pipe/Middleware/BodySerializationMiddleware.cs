@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Serialization;
 
@@ -23,12 +24,12 @@ namespace RawRabbit.Pipe.Middleware
 			_serializedMessageKey = options?.SerializedMessageKey ?? PipeKey.SerializedMessage;
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var message = _msgFunc(context);
 			var serialized = _serializer.Serialize(message);
 			context.Properties.Add(_serializedMessageKey, serialized);
-			return Next.InvokeAsync(context);
+			return Next.InvokeAsync(context, token);
 		}
 	}
 }

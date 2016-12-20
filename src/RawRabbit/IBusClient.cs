@@ -7,7 +7,6 @@ namespace RawRabbit
 {
 	public interface IBusClient
 	{
-		Task<IPipeContext> InvokeAsync(Action<IPipeBuilder> pipeCfg, CancellationToken token = default(CancellationToken));
-		Task<IPipeContext> InvokeAsync(Action<IPipeBuilder> pipeCfg, Action<IPipeContext> contextCfg, CancellationToken token = default(CancellationToken));
+		Task<IPipeContext> InvokeAsync(Action<IPipeBuilder> pipeCfg, Action<IPipeContext> contextCfg = null, CancellationToken token = default(CancellationToken));
 	}
 }

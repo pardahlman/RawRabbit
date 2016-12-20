@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RawRabbit.Pipe.Middleware
@@ -19,11 +20,11 @@ namespace RawRabbit.Pipe.Middleware
 			_pipe = options.EntryPoint;
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			return _pipe
-				.InvokeAsync(context)
-				.ContinueWith(t => Next.InvokeAsync(context))
+				.InvokeAsync(context, token)
+				.ContinueWith(t => Next.InvokeAsync(context, token), token)
 				.Unwrap();
 		}
 	}

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Configuration.Consumer;
 using RawRabbit.Configuration.Publisher;
@@ -23,7 +24,7 @@ namespace RawRabbit.Operations.Request.Middleware
 			_factory = factory;
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var requestType = context.GetRequestMessageType();
 			var responseType = context.GetResponseMessageType();
@@ -47,7 +48,7 @@ namespace RawRabbit.Operations.Request.Middleware
 			context.Properties.Add(RequestKey.Configuration, requestConfig);
 			context.Properties.Add(PipeKey.PublisherConfiguration, requestConfig.Request);
 			context.Properties.Add(PipeKey.ConsumeConfiguration, requestConfig.Response.Consume);
-			return Next.InvokeAsync(context);
+			return Next.InvokeAsync(context, token);
 		}
 	}
 }

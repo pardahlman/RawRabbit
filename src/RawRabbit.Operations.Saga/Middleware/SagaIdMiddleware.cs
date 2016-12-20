@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Pipe;
 
@@ -24,13 +25,13 @@ namespace RawRabbit.Operations.Saga.Middleware
 			SagaIdFunc = options?.SagaIdFunc ?? (context => context.GetSagaId());
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var corrFunc = GetCorrelationFunc(context);
 			var msg = GetMessage(context);
 			var id = GetSagaId(context, corrFunc, msg);
 			context.Properties.TryAdd(SagaKey.SagaId, id);
-			return Next.InvokeAsync(context);
+			return Next.InvokeAsync(context, token);
 		}
 
 		protected virtual Func<object, Guid> GetCorrelationFunc(IPipeContext context)

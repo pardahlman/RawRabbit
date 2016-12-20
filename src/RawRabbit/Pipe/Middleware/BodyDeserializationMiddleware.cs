@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Serialization;
 
@@ -34,11 +35,11 @@ namespace RawRabbit.Pipe.Middleware
 			_abortPredicate = options?.AbortPredicate ?? (context => false);
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			if (_abortPredicate(context))
 			{
-				return Next.InvokeAsync(context);
+				return Next.InvokeAsync(context, token);
 			}
 			var bodyBytes = _bodyFunc(context);
 			var body = Encoding.UTF8.GetString(bodyBytes);
@@ -47,7 +48,7 @@ namespace RawRabbit.Pipe.Middleware
 
 			var message = _serializer.Deserialize(messageType, body);
 			context.Properties.Add(messageKey, message);
-			return Next.InvokeAsync(context);
+			return Next.InvokeAsync(context, token);
 		}
 	}
 }

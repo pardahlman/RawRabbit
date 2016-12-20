@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RawRabbit.Operations.Get.Model;
@@ -37,7 +38,7 @@ namespace RawRabbit.Operations.Get.Middleware
 			DeliveryTagFunc = options?.DeliveryTagFunc;
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var channel = GetChannel(context);
 			var getResult = GetResult(context);
@@ -45,7 +46,7 @@ namespace RawRabbit.Operations.Get.Middleware
 			var ackableResult = CreateAckableResult(channel, getResult, deliveryTag);
 			context.Properties.TryAdd(GetKey.AckableResult, ackableResult);
 			PostExecutionAction?.Invoke(context, ackableResult);
-			return Next.InvokeAsync(context);
+			return Next.InvokeAsync(context, token);
 		}
 
 		protected virtual ulong GetDeliveryTag(IPipeContext context)

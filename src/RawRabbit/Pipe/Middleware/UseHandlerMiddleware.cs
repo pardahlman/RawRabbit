@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
-using RawRabbit.Configuration;
 
 namespace RawRabbit.Pipe.Middleware
 {
@@ -13,9 +13,9 @@ namespace RawRabbit.Pipe.Middleware
 			_handler = handler;
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
-			return _handler(context, () => Next.InvokeAsync(context));
+			return _handler(context, () => Next.InvokeAsync(context, token));
 		}
 	}
 }

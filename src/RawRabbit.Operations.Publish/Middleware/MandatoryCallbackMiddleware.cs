@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -26,26 +27,26 @@ namespace RawRabbit.Operations.Publish.Middleware
 			PostInvoke = options?.PostInvokeAction;
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var callback = GetCallback(context);
 			if (callback == null)
 			{
-				return Next.InvokeAsync(context);
+				return Next.InvokeAsync(context, token);
 			}
 
 			var channel = GetChannel(context);
 			if (channel == null)
 			{
-				return Next.InvokeAsync(context);
+				return Next.InvokeAsync(context, token);
 			}
 
 			channel.BasicReturn += callback;
 			PostInvoke?.Invoke(context, callback);
 
 			return Next
-				.InvokeAsync(context)
-				.ContinueWith(t => channel.BasicReturn -= callback);
+				.InvokeAsync(context, token)
+				.ContinueWith(t => channel.BasicReturn -= callback, token);
 		}
 
 		protected virtual IModel GetChannel(IPipeContext context)

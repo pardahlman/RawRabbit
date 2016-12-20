@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Publisher;
@@ -29,7 +30,7 @@ namespace RawRabbit.Operations.Publish.Middleware
 			_messageTypeFunc = options?.MessageTypeFunc ?? (context => context.GetMessageType());
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var config = ExtractConfigFromMessageType(context) ?? ExtractConfigFromStrings(context);
 			if (config == null)
@@ -49,7 +50,7 @@ namespace RawRabbit.Operations.Publish.Middleware
 			context.Properties.Add(PipeKey.ExchangeDeclaration, config.Exchange);
 			context.Properties.Add(PipeKey.ReturnedMessageCallback, config.MandatoryCallback);
 
-			return Next.InvokeAsync(context);
+			return Next.InvokeAsync(context, token);
 		}
 
 		protected virtual PublisherConfiguration ExtractConfigFromStrings(IPipeContext context)

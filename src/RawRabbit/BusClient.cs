@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using RawRabbit.Common;
 using RawRabbit.Pipe;
 
 namespace RawRabbit
@@ -16,21 +18,24 @@ namespace RawRabbit
 			_contextFactory = contextFactory;
 		}
 
-		public Task<IPipeContext> InvokeAsync(Action<IPipeBuilder> pipeCfg, CancellationToken token)
-		{
-			return InvokeAsync(pipeCfg, context => { }, token);
-		}
-
-		public Task<IPipeContext> InvokeAsync(Action<IPipeBuilder> pipeCfg, Action<IPipeContext> contextCfg, CancellationToken token = new CancellationToken())
+		public Task<IPipeContext> InvokeAsync(Action<IPipeBuilder> pipeCfg, Action<IPipeContext> contextCfg = null, CancellationToken token = default(CancellationToken))
 		{
 			var builder = _pipeBuilderFactory.Create();
 			pipeCfg(builder);
 			var pipe = builder.Build();
 			var context = _contextFactory.CreateContext();
-			contextCfg(context);
+			contextCfg?.Invoke(context);
 			return pipe
-				.InvokeAsync(context)
-				.ContinueWith(t => context, token);
+				.InvokeAsync(context, token)
+				.ContinueWith(t =>
+				{
+					if (t.IsCanceled)
+					{
+						return TaskUtil.FromCancelled<IPipeContext>();
+					}
+					return Task.FromResult(context);
+				}, token)
+				.Unwrap();
 		}
 	}
 }

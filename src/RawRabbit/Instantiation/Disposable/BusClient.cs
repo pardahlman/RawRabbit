@@ -20,12 +20,6 @@ namespace RawRabbit.Instantiation.Disposable
 			_busClient = instanceFactory.Create();
 		}
 
-
-		public Task<IPipeContext> InvokeAsync(Action<IPipeBuilder> pipeCfg, CancellationToken token = new CancellationToken())
-		{
-			return _busClient.InvokeAsync(pipeCfg, token);
-		}
-
 		public Task<IPipeContext> InvokeAsync(Action<IPipeBuilder> pipeCfg, Action<IPipeContext> contextCfg, CancellationToken token = new CancellationToken())
 		{
 			return _busClient.InvokeAsync(pipeCfg, contextCfg, token);

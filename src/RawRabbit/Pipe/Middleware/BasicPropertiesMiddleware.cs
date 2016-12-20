@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
@@ -31,13 +32,13 @@ namespace RawRabbit.Pipe.Middleware
 			});
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var props = CreateBasicProperties(context);
 			ModifyBasicProperties(context, props);
 			InvokePostCreateAction(context, props);
 			context.Properties.TryAdd(PipeKey.BasicProperties, props);
-			return Next.InvokeAsync(context);
+			return Next.InvokeAsync(context, token);
 		}
 
 		protected virtual void ModifyBasicProperties(IPipeContext context, IBasicProperties props)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Exchange;
@@ -37,7 +38,7 @@ namespace RawRabbit.Pipe.Middleware
 			_throwOnFail = (bool) options?.ThrowOnFail;
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var exchangeCfg = _exchangeFunc(context);
 
@@ -45,7 +46,7 @@ namespace RawRabbit.Pipe.Middleware
 			{
 				return _topologyProvider
 					.DeclareExchangeAsync(exchangeCfg)
-					.ContinueWith(t => Next.InvokeAsync(context))
+					.ContinueWith(t => Next.InvokeAsync(context, token), token)
 					.Unwrap();
 			}
 
@@ -53,7 +54,7 @@ namespace RawRabbit.Pipe.Middleware
 			{
 				throw new ArgumentNullException(nameof(exchangeCfg));
 			}
-			return Next.InvokeAsync(context);
+			return Next.InvokeAsync(context, token);
 		}
 	}
 }

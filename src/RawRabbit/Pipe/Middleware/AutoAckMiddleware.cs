@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -22,10 +23,10 @@ namespace RawRabbit.Pipe.Middleware
 			ConsumerFunc = options?.ConsumerFunc ?? (context => context.GetConsumer());
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token = default(CancellationToken))
 		{
 			AutoAckMessage(context);
-			return Next.InvokeAsync(context);
+			return Next.InvokeAsync(context, token);
 		}
 
 		protected virtual void AutoAckMessage(IPipeContext context)

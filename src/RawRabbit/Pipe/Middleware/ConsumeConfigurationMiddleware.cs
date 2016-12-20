@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Configuration.Consumer;
 using RawRabbit.Configuration.Exchange;
@@ -49,9 +50,11 @@ namespace RawRabbit.Pipe.Middleware
 			_messageTypeFunc = options?.MessageTypeFunc ?? (context => context.GetMessageType());
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
-			var config = ExtractConfigFromMessageType(context) ?? ExtractConfigFromStrings(context) ?? CreateDefaultConfig(context);
+			var config = ExtractConfigFromMessageType(context)
+				?? ExtractConfigFromStrings(context)
+				?? CreateDefaultConfig(context);
 
 			var action = context.Get<Action<IConsumerConfigurationBuilder>>(PipeKey.ConfigurationAction);
 			if (action != null)
@@ -65,7 +68,7 @@ namespace RawRabbit.Pipe.Middleware
 			context.Properties.Add(PipeKey.QueueDeclaration, config.Queue);
 			context.Properties.Add(PipeKey.ExchangeDeclaration, config.Exchange);
 
-			return Next.InvokeAsync(context);
+			return Next.InvokeAsync(context, token);
 		}
 
 		protected  virtual ConsumerConfiguration CreateDefaultConfig(IPipeContext context)

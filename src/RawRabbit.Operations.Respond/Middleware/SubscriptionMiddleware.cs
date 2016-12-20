@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RawRabbit.Common;
@@ -24,7 +25,7 @@ namespace RawRabbit.Operations.Respond.Middleware
 			_queueFunc = options?.QueueFunc ?? (context => context.GetQueueDeclaration());
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var consumer = _consumerFunc(context);
 			var queue = _queueFunc(context);

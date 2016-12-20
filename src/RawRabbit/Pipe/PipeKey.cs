@@ -2,13 +2,13 @@
 {
 	public static class PipeKey
 	{
-		public const string Message = "MessageId";
+		public const string Message = "Message";
+		public const string CancellationToken = "CancellationToken";
 		public const string ConsumerConfiguration = "ConsumerConfiguration";
 		public const string ConsumeConfiguration = "ConsumeConfiguration";
 		public const string PublisherConfiguration = "PublisherConfiguration";
 		public const string BasicPublishConfiguration = "BasicPublishConfiguration";
 		public const string MessageBytes = "MessageBytes";
-		public const string MessageId = "MessageId";
 		public const string MessageType = "MessageType";
 		public const string MessageContext = "MessageContext";
 		public const string MessageHandler = "MessageHandler";

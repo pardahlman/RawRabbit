@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Configuration.Consumer;
 using RawRabbit.Operations.Respond.Configuration;
@@ -29,7 +30,7 @@ namespace RawRabbit.Operations.Respond.Middleware
 			_responseTypeFunc = options?.RequestTypeFunc ?? (context => context.GetResponseMessageType());
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var requestType = _requestTypeFunc(context);
 			var responseType = _responseTypeFunc(context);
@@ -53,7 +54,7 @@ namespace RawRabbit.Operations.Respond.Middleware
 			context.Properties.Add(PipeKey.QueueDeclaration, respondCfg.Queue);
 			context.Properties.Add(PipeKey.ExchangeDeclaration, respondCfg.Exchange);
 
-			return Next.InvokeAsync(context);
+			return Next.InvokeAsync(context, token);
 		}
 	}
 }

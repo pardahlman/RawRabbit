@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using RawRabbit.Operations.Saga.Repository;
 using RawRabbit.Pipe;
 
@@ -13,12 +14,12 @@ namespace RawRabbit.Operations.Saga.Middleware
 			_sagaRepo = sagaRepo;
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var saga = context.GetSaga();
 			return _sagaRepo
 				.UpdateAsync(saga)
-				.ContinueWith(t => Next.InvokeAsync(context))
+				.ContinueWith(t => Next.InvokeAsync(context, token), token)
 				.Unwrap();
 		}
 	}

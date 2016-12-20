@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 
@@ -33,7 +34,7 @@ namespace RawRabbit.Pipe.Middleware
 			BodyFunc = options?.BodyFunc ?? (c => c.GetBasicPublishConfiguration()?.Body);
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var channel = GetOrCreateChannel(context);
 			var exchangeName = GetExchangeName(context);
@@ -50,7 +51,7 @@ namespace RawRabbit.Pipe.Middleware
 				body: body
 			);
 
-			return Next.InvokeAsync(context);
+			return Next.InvokeAsync(context, token);
 		}
 
 		protected virtual byte[] GetMessageBody(IPipeContext context)

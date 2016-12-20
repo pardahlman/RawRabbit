@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RawRabbit.Common;
@@ -34,23 +35,23 @@ namespace RawRabbit.Pipe.Middleware
 			_createItemFunc = options?.CreateItemFunc;
 		}
 
-		public override Task InvokeAsync(IPipeContext context)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token = default(CancellationToken))
 		{
 			if (!_executePredicate(context))
 			{
-				return Next.InvokeAsync(context);
+				return Next.InvokeAsync(context, token);
 			}
 			var properties = _basicPropsFunc(context);
 			if (properties.Headers.ContainsKey(_headerKey))
 			{
-				return Next.InvokeAsync(context);
+				return Next.InvokeAsync(context, token);
 			}
 
 			var item = _retrieveItemFunc(context) ?? _createItemFunc(context);
 
 			var serializedItem = _serializer.Serialize(item);
 			properties.Headers.Add(PropertyHeaders.Context, serializedItem);
-			return Next.InvokeAsync(context);
+			return Next.InvokeAsync(context, token);
 		}
 
 		public override string StageMarker => Pipe.StageMarker.BasicPropertiesCreated;
