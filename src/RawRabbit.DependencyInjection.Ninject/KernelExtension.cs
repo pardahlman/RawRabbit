@@ -1,52 +1,31 @@
 ﻿using Ninject;
-using RawRabbit.Common;
-using RawRabbit.Configuration;
-using RawRabbit.Context;
+using RawRabbit.Instantiation;
 
 namespace RawRabbit.DependencyInjection.Ninject
 {
 	public static class KernelExtension
 	{
-		public static IKernel RegisterRawRabbit<TMessageContext>(this IKernel kernel)
-			where TMessageContext : IMessageContext
+#if NETSTANDARD1_5
+		public static IKernelConfiguration RegisterRawRabbit(this IKernelConfiguration config, RawRabbitOptions options = null)
 		{
-			kernel.Load(new RawRabbitModule<TMessageContext>());
-			return kernel;
+			if (options != null)
+			{
+				config.Bind<RawRabbitOptions>().ToConstant(options);
+			}
+			config.Load<RawRabbitModule>();
+			return config;
 		}
-
-		public static IKernel RegisterRawRabbit(this IKernel kernel)
+#endif
+#if NET451
+		public static IKernel RegisterRawRabbit(this IKernel config, RawRabbitOptions options = null)
 		{
-			kernel.Load(new RawRabbitModule());
-			return kernel;
+			if (options != null)
+			{
+				config.Bind<RawRabbitOptions>().ToConstant(options);
+			}
+			config.Load<RawRabbitModule>();
+			return config;
 		}
-
-		public static IKernel RegisterRawRabbit<TMessageContext>(this IKernel kernel, RawRabbitConfiguration configuration)
-			where TMessageContext : IMessageContext
-		{
-			kernel
-				.Bind<RawRabbitConfiguration>()
-				.ToConstant(configuration)
-				.InSingletonScope();
-
-			kernel.Load(new RawRabbitModule<TMessageContext>());
-			return kernel;
-		}
-
-		public static IKernel RegisterRawRabbit(this IKernel kernel, RawRabbitConfiguration configuration)
-		{
-			return RegisterRawRabbit<MessageContext>(kernel, configuration);
-		}
-
-		public static IKernel RegisterRawRabbit<TMessageContext>(this IKernel kernel, string connectionString)
-			where TMessageContext : IMessageContext
-		{
-			var config = ConnectionStringParser.Parse(connectionString);
-			return RegisterRawRabbit<TMessageContext>(kernel, config);
-		}
-
-		public static IKernel RegisterRawRabbit(this IKernel kernel, string connectionString)
-		{
-			return RegisterRawRabbit<MessageContext>(kernel, connectionString);
-		}
+#endif
 	}
 }

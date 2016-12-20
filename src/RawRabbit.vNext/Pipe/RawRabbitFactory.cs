@@ -17,9 +17,9 @@ namespace RawRabbit.vNext.Pipe
 			return new Instantiation.Disposable.BusClient(factory);
 		}
 
-		public static InstanceFactory CreateInstanceFactory(RawRabbitOptions options = null)
+		public static InstanceFactory CreateInstanceFactory(RawRabbitOptions options = null, IServiceCollection applicationCollection = null)
 		{
-			var collection = new ServiceCollection();
+			var collection = applicationCollection ?? new ServiceCollection();
 			var ioc = new ServiceCollectionAdapter(collection);
 
 			if (options?.Configuration != null)

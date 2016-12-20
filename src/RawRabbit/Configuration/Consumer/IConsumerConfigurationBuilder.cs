@@ -1,7 +1,6 @@
 ﻿using System;
 using RawRabbit.Configuration.Consume;
 using RawRabbit.Configuration.Exchange;
-using RawRabbit.Configuration.Legacy.Respond;
 using RawRabbit.Configuration.Queue;
 
 namespace RawRabbit.Configuration.Consumer

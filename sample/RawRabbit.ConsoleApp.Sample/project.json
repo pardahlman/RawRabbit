@@ -6,8 +6,9 @@
 
 	"dependencies": {
 		"RawRabbit": { "target": "project" },
-		"RawRabbit.Extensions": { "target": "project" },
-		"RawRabbit.vNext": { "target": "project" },
+		"RawRabbit.Operations.Subscribe": { "target": "project" },
+		"RawRabbit.Operations.Publish": { "target": "project" },
+		"RawRabbit.Operations.Respond": { "target": "project" },
 		"RawRabbit.Messages.Sample": { "target": "project" },
 		"Microsoft.Extensions.Configuration.Json": "1.0.0"
 	},

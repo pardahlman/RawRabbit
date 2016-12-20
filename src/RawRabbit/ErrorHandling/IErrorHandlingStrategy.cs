@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using RawRabbit.Configuration.Legacy.Respond;
-using RawRabbit.Configuration.Legacy.Subscribe;
-using RawRabbit.Consumer.Abstraction;
+using RawRabbit.Configuration.Consume;
 
 namespace RawRabbit.ErrorHandling
 {
@@ -25,7 +24,7 @@ namespace RawRabbit.ErrorHandling
 		/// <param name="args">The recieved args</param>
 		/// <param name="exception">The thrown exception</param>
 		/// <returns></returns>
-		Task OnResponseHandlerExceptionAsync(IRawConsumer consumer, IConsumerConfiguration config, BasicDeliverEventArgs args,  Exception exception);
+		Task OnResponseHandlerExceptionAsync(IBasicConsumer consumer, ConsumeConfiguration config, BasicDeliverEventArgs args, Exception exception);
 
 		/// <summary>
 		/// Error strategy for unhandled exceptions thrown within SubscribeAsync message handler
@@ -35,7 +34,7 @@ namespace RawRabbit.ErrorHandling
 		/// <param name="args">The recieved args</param>
 		/// <param name="exception">The thrown exception</param>
 		/// <returns></returns>
-		Task OnSubscriberExceptionAsync(IRawConsumer consumer, SubscriptionConfiguration config, BasicDeliverEventArgs args, Exception exception);
+		Task OnSubscriberExceptionAsync(IBasicConsumer consumer, ConsumeConfiguration config, BasicDeliverEventArgs args, Exception exception);
 
 		/// <summary>
 		/// Method called when response is recieved. This method can be used to re-throw exceptions from the responder.
@@ -54,6 +53,6 @@ namespace RawRabbit.ErrorHandling
 		/// <param name="responseTcs">The TaskCompletionSource to the return task from RequestAsync</param>
 		/// <param name="exception">The thrown exception</param>
 		/// <returns></returns>
-		Task OnResponseRecievedException(IRawConsumer consumer, IConsumerConfiguration config, BasicDeliverEventArgs args, TaskCompletionSource<object> responseTcs, Exception exception);
+		Task OnResponseRecievedException(IBasicConsumer consumer, ConsumeConfiguration config, BasicDeliverEventArgs args, TaskCompletionSource<object> responseTcs, Exception exception);
 	}
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using RabbitMQ.Client;
 using RawRabbit.Consumer;
-using RawRabbit.Consumer.Abstraction;
 
 namespace RawRabbit.Common
 {

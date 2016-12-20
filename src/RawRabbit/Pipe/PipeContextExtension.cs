@@ -10,7 +10,6 @@ using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Get;
 using RawRabbit.Configuration.Publisher;
 using RawRabbit.Configuration.Queue;
-using RawRabbit.Consumer.Abstraction;
 using RawRabbit.Context;
 
 namespace RawRabbit.Pipe

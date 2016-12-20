@@ -21,6 +21,7 @@
 			}
 		},
 		"net451": {
+			"define": [ "NET451" ],
 			"dependencies": {
 				"Ninject": "3.2.2"
 			}

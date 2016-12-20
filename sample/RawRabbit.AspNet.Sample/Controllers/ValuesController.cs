@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using RawRabbit.Extensions.Client;
-using RawRabbit.Extensions.MessageSequence;
+using RawRabbit.Context;
 using RawRabbit.Messages.Sample;
+using RawRabbit.Operations.MessageSequence;
 using Serilog;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
@@ -13,11 +13,11 @@ namespace RawRabbit.AspNet.Sample.Controllers
 {
 	public class ValuesController : Controller
 	{
-		private readonly ILegacyBusClient _busClient;
+		private readonly IBusClient _busClient;
 		private readonly Random _random;
 		private readonly ILogger<ValuesController> _logger;
 
-		public ValuesController(ILegacyBusClient legacyBusClient, ILoggerFactory loggerFactory)
+		public ValuesController(IBusClient legacyBusClient, ILoggerFactory loggerFactory)
 		{
 			_busClient = legacyBusClient;
 			_logger = loggerFactory.CreateLogger<ValuesController>();
@@ -29,7 +29,7 @@ namespace RawRabbit.AspNet.Sample.Controllers
 		public Task<List<string>> GetAsync()
 		{
 			_logger.LogDebug("Recieved Value Request.");
-			var valueSequence = _busClient.ExecuteSequence(s => s
+			var valueSequence = _busClient.ExecuteSequence<MessageContext, ValuesCalculated>(s => s
 				.PublishAsync(new ValuesRequested
 					{
 						NumberOfValues = _random.Next(1,10)

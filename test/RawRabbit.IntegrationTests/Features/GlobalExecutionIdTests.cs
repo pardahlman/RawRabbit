@@ -8,7 +8,7 @@ using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.Pipe.Extensions;
 using Xunit;
 
-namespace RawRabbit.IntegrationTests.V2.Features
+namespace RawRabbit.IntegrationTests.Features
 {
 	public class GlobalExecutionIdTests
 	{

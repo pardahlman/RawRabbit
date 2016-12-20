@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using RawRabbit.Extensions.Client;
+using RawRabbit.Operations.Saga;
+using RawRabbit.vNext;
 using RawRabbit.vNext.Logging;
+using RawRabbit.vNext.Pipe;
 using Serilog;
 using Serilog.Events;
 using ILogger = Serilog.ILogger;
@@ -30,10 +32,12 @@ namespace RawRabbit.AspNet.Sample
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services
-				.AddRawRabbit(
-					Configuration.GetSection("RawRabbit"),
-					ioc => ioc
-						.AddSingleton(LoggingFactory.ApplicationLogger))
+				.AddRawRabbit(new RawRabbitOptions
+					{
+						Configuration = builder => Configuration.GetSection("RawRabbit"),
+						DependencyInjection = ioc => ioc.AddSingleton(LoggingFactory.ApplicationLogger),
+						Plugins = p => p.UseStateMachine()
+					})
 				.AddMvc();
 		}
 

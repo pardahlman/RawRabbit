@@ -9,8 +9,8 @@
 		"Microsoft.Extensions.Logging": "1.0.0",
 		"Microsoft.Extensions.Logging.Console": "1.0.0",
 		"RawRabbit": { "target": "project" },
-		"RawRabbit.Extensions": { "target": "project" },
-		"RawRabbit.vNext": { "target": "project" },
+		"RawRabbit.Operations.MessageSequence": { "target": "project" },
+		"RawRabbit.Operations.Request" : { "target": "project" },
 		"RawRabbit.Messages.Sample": { "target": "project" },
 		"Serilog.Extensions.Logging": "1.0.0",
 		"Serilog.Sinks.File": "2.2.0"

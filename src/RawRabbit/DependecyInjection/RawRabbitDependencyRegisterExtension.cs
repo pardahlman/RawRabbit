@@ -14,9 +14,6 @@ using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Publisher;
 using RawRabbit.Configuration.Queue;
 using RawRabbit.Consumer;
-using RawRabbit.Consumer.Abstraction;
-using RawRabbit.Consumer.Eventing;
-using RawRabbit.Context.Enhancer;
 using RawRabbit.ErrorHandling;
 using RawRabbit.Logging;
 using RawRabbit.Pipe;
@@ -65,15 +62,12 @@ namespace RawRabbit.DependecyInjection
 					NullValueHandling = NullValueHandling.Ignore
 
 				})
-				.AddTransient<IRawConsumerFactory, EventingBasicConsumerFactory>()
 				.AddTransient<IConsumerFactory, ConsumerFactory>()
 				.AddTransient<IErrorHandlingStrategy, DefaultStrategy>()
-				.AddSingleton<IContextEnhancer, ContextEnhancer>()
 				.AddSingleton<IBasicPropertiesProvider, BasicPropertiesProvider>()
 				.AddSingleton<IChannelFactory, ChannelFactory>()
 				.AddSingleton<ChannelFactoryConfiguration, ChannelFactoryConfiguration>(c => ChannelFactoryConfiguration.Default)
 				.AddSingleton<ITopologyProvider, TopologyProvider>()
-				.AddTransient<IConfigurationEvaluator, ConfigurationEvaluator>()
 				.AddTransient<IPublisherConfigurationFactory, PublisherConfigurationFactory>()
 				.AddTransient<IBasicPublishConfigurationFactory, BasicPublishConfigurationFactory>()
 				.AddTransient<IConsumerConfigurationFactory, ConsumerConfigurationFactory>()

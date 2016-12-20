@@ -9,13 +9,6 @@ using RawRabbit.Configuration.Consume;
 
 namespace RawRabbit.Consumer
 {
-	public interface IConsumerFactory
-	{
-		Task<IBasicConsumer> GetConsumerAsync(ConsumeConfiguration cfg, IModel channel = null);
-		Task<IBasicConsumer> CreateConsumerAsync(IModel channel = null);
-		IBasicConsumer ConfigureConsume(IBasicConsumer consumer, ConsumeConfiguration cfg);
-	}
-
 	public class ConsumerFactory : IConsumerFactory
 	{
 		private readonly IChannelFactory _channelFactory;

@@ -5,26 +5,33 @@ using Microsoft.Extensions.Configuration;
 using RawRabbit.Context;
 using RawRabbit.Messages.Sample;
 using RawRabbit.vNext;
+using RawRabbit.vNext.Pipe;
 
 namespace RawRabbit.ConsoleApp.Sample
 {
 	public class Program
 	{
-		private static ILegacyBusClient _client;
+		private static IBusClient _client;
 
 		public static void Main(string[] args)
 		{
-			_client = BusClientFactory.CreateDefault(
-				cfg => cfg
-					.SetBasePath(Directory.GetCurrentDirectory())
-					.AddJsonFile("rawrabbit.json"),
-				ioc => {});
-
-			_client.SubscribeAsync<ValuesRequested>(ServeValuesAsync);
-			_client.RespondAsync<ValueRequest, ValueResponse>(SendValuesThoughRpcAsync);
+			RunAsync().GetAwaiter().GetResult();
 		}
 
-		private static Task<ValueResponse> SendValuesThoughRpcAsync(ValueRequest request, MessageContext context)
+		public static async Task RunAsync()
+		{
+			_client = RawRabbitFactory.CreateSingleton(new RawRabbitOptions
+			{
+				Configuration = cfg => cfg
+					.SetBasePath(Directory.GetCurrentDirectory())
+					.AddJsonFile("rawrabbit.json")
+			});
+
+			await _client.SubscribeAsync<ValuesRequested>(requested => ServeValuesAsync(requested));
+			await _client.RespondAsync<ValueRequest, ValueResponse>(request => SendValuesThoughRpcAsync(request));
+		}
+
+		private static Task<ValueResponse> SendValuesThoughRpcAsync(ValueRequest request)
 		{
 			return Task.FromResult(new ValueResponse
 			{
@@ -32,14 +39,14 @@ namespace RawRabbit.ConsoleApp.Sample
 			});
 		}
 
-		private static Task ServeValuesAsync(ValuesRequested message, MessageContext context)
+		private static Task ServeValuesAsync(ValuesRequested message)
 		{
 			var values = new List<string>();
 			for (var i = 0; i < message.NumberOfValues; i++)
 			{
 				values.Add($"value{i}");
 			}
-			return _client.PublishAsync(new ValuesCalculated {Values = values});
+			return _client.PublishAsync(new ValuesCalculated { Values = values });
 		}
 	}
 }

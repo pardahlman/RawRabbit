@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Runtime.ExceptionServices;
+using System.Text;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RawRabbit.Channel.Abstraction;
 using RawRabbit.Common;
+using RawRabbit.Configuration.Consume;
 using RawRabbit.Configuration.Exchange;
-using RawRabbit.Configuration.Legacy.Respond;
-using RawRabbit.Configuration.Legacy.Subscribe;
-using RawRabbit.Consumer.Abstraction;
 using RawRabbit.Exceptions;
 using RawRabbit.Logging;
 using RawRabbit.Serialization;
@@ -17,7 +16,7 @@ namespace RawRabbit.ErrorHandling
 {
 	public class DefaultStrategy : IErrorHandlingStrategy
 	{
-		private readonly IMessageSerializer _serializer;
+		private readonly ISerializer _serializer;
 		private readonly IBasicPropertiesProvider _propertiesProvider;
 		private readonly ITopologyProvider _topologyProvider;
 		private readonly IChannelFactory _channelFactory;
@@ -25,7 +24,7 @@ namespace RawRabbit.ErrorHandling
 		private readonly string _messageExceptionName = typeof(MessageHandlerException).Name;
 		private readonly ExchangeDeclaration _errorExchangeCfg;
 
-		public DefaultStrategy(IMessageSerializer serializer, INamingConventions conventions, IBasicPropertiesProvider propertiesProvider, ITopologyProvider topologyProvider, IChannelFactory channelFactory)
+		public DefaultStrategy(ISerializer serializer, INamingConventions conventions, IBasicPropertiesProvider propertiesProvider, ITopologyProvider topologyProvider, IChannelFactory channelFactory)
 		{
 			_serializer = serializer;
 			_propertiesProvider = propertiesProvider;
@@ -35,19 +34,19 @@ namespace RawRabbit.ErrorHandling
 			_errorExchangeCfg.Name = conventions.ErrorExchangeNamingConvention();
 		}
 
-		public virtual Task OnResponseHandlerExceptionAsync(IRawConsumer rawConsumer, IConsumerConfiguration cfg, BasicDeliverEventArgs args, Exception exception)
+		public virtual Task OnResponseHandlerExceptionAsync(IBasicConsumer consumer, ConsumeConfiguration cfg, BasicDeliverEventArgs args, Exception exception)
 		{
 			_logger.LogError($"An unhandled exception was thrown in the response handler for message '{args.BasicProperties.MessageId}'.", exception);
 			var innerException = UnwrapInnerException(exception);
 			var exceptionInfo = new ExceptionInformation
 			{
-				Message = $"An unhandled exception was thrown when consuming a message\n  MessageId: {args.BasicProperties.MessageId}\n  Queue: '{cfg.Queue.FullQueueName}'\n  Exchange: '{cfg.Exchange.Name}'\nSee inner exception for more details.",
+				Message = $"An unhandled exception was thrown when consuming a message\n  MessageId: {args.BasicProperties.MessageId}\n  Queue: '{cfg.QueueName}'\n  Exchange: '{cfg.ExchangeName}'\nSee inner exception for more details.",
 				ExceptionType = innerException.GetType().FullName,
 				StackTrace = innerException.StackTrace,
 				InnerMessage = innerException.Message
 			};
 			_logger.LogInformation($"Sending MessageHandlerException with CorrelationId '{args.BasicProperties.CorrelationId}'");
-			rawConsumer.Model.BasicPublish(
+			consumer.Model.BasicPublish(
 				exchange: string.Empty,
 				routingKey: args.BasicProperties?.ReplyTo ?? string.Empty,
 				basicProperties: _propertiesProvider.GetProperties<ExceptionInformation>(p =>
@@ -55,13 +54,13 @@ namespace RawRabbit.ErrorHandling
 					p.CorrelationId = args.BasicProperties?.CorrelationId ?? string.Empty;
 					p.Headers.Add(PropertyHeaders.ExceptionHeader, _messageExceptionName);
 				}),
-				body: _serializer.Serialize(exceptionInfo)
+				body: Encoding.UTF8.GetBytes(_serializer.Serialize(exceptionInfo))
 			);
 
 			if (!cfg.NoAck)
 			{
 				_logger.LogDebug($"Nack'ing message with delivery tag '{args.DeliveryTag}'.");
-				rawConsumer.Model.BasicNack(args.DeliveryTag, false, false);
+				consumer.Model.BasicNack(args.DeliveryTag, false, false);
 			}
 			return Task.FromResult(true);
 		}
@@ -82,7 +81,7 @@ namespace RawRabbit.ErrorHandling
 			if (containsException)
 			{
 				_logger.LogInformation($"Message '{args.BasicProperties.MessageId}' withh CorrelationId '{args.BasicProperties.CorrelationId}' contains exception. Deserialize and re-throw.");
-				var exceptionInfo = _serializer.Deserialize<ExceptionInformation>(args.Body);
+				var exceptionInfo = _serializer.Deserialize<ExceptionInformation>(Encoding.UTF8.GetString(args.Body));
 				var exception = new MessageHandlerException(exceptionInfo.Message)
 				{
 					InnerExceptionType = exceptionInfo.ExceptionType,
@@ -95,7 +94,7 @@ namespace RawRabbit.ErrorHandling
 			return Task.FromResult(true);
 		}
 
-		public virtual Task OnResponseRecievedException(IRawConsumer rawConsumer, IConsumerConfiguration cfg, BasicDeliverEventArgs args, TaskCompletionSource<object> responseTcs, Exception exception)
+		public virtual Task OnResponseRecievedException(IBasicConsumer consumer, ConsumeConfiguration cfg, BasicDeliverEventArgs args, TaskCompletionSource<object> responseTcs, Exception exception)
 		{
 			_logger.LogError($"An exception was thrown when recieving response to messaeg '{args.BasicProperties.MessageId}' with CorrelationId '{args.BasicProperties.CorrelationId}'.", exception);
 			responseTcs.TrySetException(exception);
@@ -118,12 +117,11 @@ namespace RawRabbit.ErrorHandling
 			}
 		}
 
-		public virtual async Task OnSubscriberExceptionAsync(IRawConsumer consumer, SubscriptionConfiguration config, BasicDeliverEventArgs args, Exception exception)
+		public virtual async Task OnSubscriberExceptionAsync(IBasicConsumer consumer, ConsumeConfiguration config, BasicDeliverEventArgs args, Exception exception)
 		{
 			if (!config.NoAck)
 			{
 				consumer.Model.BasicAck(args.DeliveryTag, false);
-				consumer.AcknowledgedTags.Add(args.DeliveryTag);
 			}
 			try
 			{
@@ -132,7 +130,7 @@ namespace RawRabbit.ErrorHandling
 
 				await _topologyProvider.DeclareExchangeAsync(_errorExchangeCfg);
 				var channel = await _channelFactory.GetChannelAsync();
-				var msg = _serializer.Deserialize(args);
+				var msg = _serializer.Deserialize(typeof(object), Encoding.UTF8.GetString(args.Body));
 				var actualException = UnwrapInnerException(exception);
 				var errorMsg = new HandlerExceptionMessage
 				{
@@ -151,7 +149,7 @@ namespace RawRabbit.ErrorHandling
 					exchange: _errorExchangeCfg.Name,
 					routingKey: args.RoutingKey,
 					basicProperties: args.BasicProperties,
-					body: _serializer.Serialize(errorMsg)
+					body: Encoding.UTF8.GetBytes(_serializer.Serialize(errorMsg))
 					);
 				channel.Close();
 			}

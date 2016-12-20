@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using RawRabbit.Common;
-using RawRabbit.Configuration.Legacy.Subscribe;
+using RawRabbit.Configuration.Consume;
 using RawRabbit.Context;
 using RawRabbit.Enrichers.MessageContext.Subscribe;
 using RawRabbit.Pipe;
@@ -45,7 +45,7 @@ namespace RawRabbit
 			})
 		);
 
-		public static Task SubscribeAsync<TMessage, TMessageContext>(this IBusClient client, Func<TMessage, TMessageContext, Task> subscribeMethod, Action<ISubscriptionConfigurationBuilder> configuration = null)
+		public static Task SubscribeAsync<TMessage, TMessageContext>(this IBusClient client, Func<TMessage, TMessageContext, Task> subscribeMethod, Action<IConsumeConfigurationFactory> configuration = null)
 		{
 			return client
 				.InvokeAsync(
@@ -61,7 +61,7 @@ namespace RawRabbit
 				);
 		}
 
-		public static Task SubscribeAsync<TMessage, TMessageContext>(this IBusClient client, Func<TMessage, TMessageContext, Task<Acknowledgement>> subscribeMethod, Action<ISubscriptionConfigurationBuilder> configuration = null)
+		public static Task SubscribeAsync<TMessage, TMessageContext>(this IBusClient client, Func<TMessage, TMessageContext, Task<Acknowledgement>> subscribeMethod, Action<IConsumeConfigurationFactory> configuration = null)
 		{
 			return client
 				.InvokeAsync(
