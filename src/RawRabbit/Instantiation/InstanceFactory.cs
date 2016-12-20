@@ -21,8 +21,7 @@ namespace RawRabbit.Instantiation
 
 		public IBusClient Create()
 		{
-			var pipeBuliderFactory = new PipeBuilderFactory(() => new PipeBuilder(_resolver));
-			return new BusClient(pipeBuliderFactory, _resolver.GetService<IPipeContextFactory>());
+			return new BusClient(_resolver.GetService<IPipeBuilderFactory>(), _resolver.GetService<IPipeContextFactory>());
 		}
 
 		public void Dispose()

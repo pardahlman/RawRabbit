@@ -20,9 +20,7 @@ namespace RawRabbit
 
 		public Task<IPipeContext> InvokeAsync(Action<IPipeBuilder> pipeCfg, Action<IPipeContext> contextCfg = null, CancellationToken token = default(CancellationToken))
 		{
-			var builder = _pipeBuilderFactory.Create();
-			pipeCfg(builder);
-			var pipe = builder.Build();
+			var pipe = _pipeBuilderFactory.Create(pipeCfg);
 			var context = _contextFactory.CreateContext();
 			contextCfg?.Invoke(context);
 			return pipe
