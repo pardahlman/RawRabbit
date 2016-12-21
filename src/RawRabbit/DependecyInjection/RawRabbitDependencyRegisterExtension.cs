@@ -75,6 +75,7 @@ namespace RawRabbit.DependecyInjection
 				.AddTransient<IExchangeDeclarationFactory, ExchangeDeclarationFactory>()
 				.AddTransient<IQueueConfigurationFactory, QueueDeclarationFactory>()
 				.AddSingleton<INamingConventions, NamingConventions>()
+				.AddSingleton<IExclusiveLock, ExclusiveLock>()
 			
 				.AddSingleton<IBusClient, BusClient>()
 				.AddSingleton<IResourceDisposer, ResourceDisposer>()

@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client.Events;
+using RawRabbit.Common;
 using RawRabbit.Configuration;
 using RawRabbit.Exceptions;
 using RawRabbit.Logging;
@@ -10,11 +11,13 @@ namespace RawRabbit.Pipe.Middleware
 {
 	public class PublishAcknowledgeMiddleware : Middleware
 	{
+		private readonly IExclusiveLock _exclusive;
 		private TimeSpan _publishTimeOut;
 		private readonly ILogger _logger = LogManager.GetLogger<PublishAcknowledgeMiddleware>();
 
-		public PublishAcknowledgeMiddleware(RawRabbitConfiguration config)
+		public PublishAcknowledgeMiddleware(IExclusiveLock exclusive, RawRabbitConfiguration config)
 		{
+			_exclusive = exclusive;
 			_publishTimeOut = config.PublishConfirmTimeout;
 		}
 
@@ -24,7 +27,7 @@ namespace RawRabbit.Pipe.Middleware
 			if (channel.NextPublishSeqNo == 0UL)
 			{
 				_logger.LogInformation($"Setting 'Publish Acknowledge' for channel '{channel.ChannelNumber}'");
-				channel.ConfirmSelect();
+				_exclusive.Execute(channel, c => c.ConfirmSelect(), token);
 			}
 
 			var thisSequence = channel.NextPublishSeqNo;

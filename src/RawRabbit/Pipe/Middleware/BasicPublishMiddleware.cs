@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
+using RawRabbit.Common;
 
 namespace RawRabbit.Pipe.Middleware
 {
@@ -17,6 +18,7 @@ namespace RawRabbit.Pipe.Middleware
 
 	public class BasicPublishMiddleware : Middleware
 	{
+		protected readonly IExclusiveLock Exclusive;
 		protected Func<IPipeContext, IModel> ChannelFunc;
 		protected Func<IPipeContext, string> ExchangeNameFunc;
 		protected Func<IPipeContext, string> RoutingKeyFunc;
@@ -24,8 +26,9 @@ namespace RawRabbit.Pipe.Middleware
 		protected Func<IPipeContext, IBasicProperties> BasicPropsFunc;
 		protected Func<IPipeContext, byte[]> BodyFunc;
 
-		public BasicPublishMiddleware(BasicPublishOptions options = null)
+		public BasicPublishMiddleware(IExclusiveLock exclusive, BasicPublishOptions options = null)
 		{
+			Exclusive = exclusive;
 			ChannelFunc = options?.ChannelFunc ?? (context => context.GetTransientChannel());
 			ExchangeNameFunc = options?.ExchangeNameFunc ?? (c => c.GetBasicPublishConfiguration()?.ExchangeName);
 			RoutingKeyFunc = options?.RoutingKeyFunc ?? (c => c.GetBasicPublishConfiguration()?.RoutingKey);
@@ -43,15 +46,20 @@ namespace RawRabbit.Pipe.Middleware
 			var basicProps = GetBasicProps(context);
 			var body = GetMessageBody(context);
 
-			channel.BasicPublish(
+			ExclusiveExecute(channel, c => c.BasicPublish(
 				exchange: exchangeName,
 				routingKey: routingKey,
 				mandatory: mandatory,
 				basicProperties: basicProps,
 				body: body
-			);
+			), token);
 
 			return Next.InvokeAsync(context, token);
+		}
+
+		protected virtual void ExclusiveExecute(IModel channel, Action<IModel> action, CancellationToken token)
+		{
+			Exclusive.Execute(channel, action, token);
 		}
 
 		protected virtual byte[] GetMessageBody(IPipeContext context)
