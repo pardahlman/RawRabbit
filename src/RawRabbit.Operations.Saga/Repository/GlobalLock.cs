@@ -5,19 +5,19 @@ using System.Threading.Tasks;
 
 namespace RawRabbit.Operations.Saga.Repository
 {
-	public interface IExclusiveLockRepo
+	public interface IGlobalLock
 	{
 		Task AcquireAsync(Guid sagaId);
 		Task ReleaseAsync(Guid sagaId);
 		Task ExecuteAsync(Guid sagaId, Func<Task> handler);
 	}
 
-	public class ExclusiveLockRepo : IExclusiveLockRepo
+	public class GlobalLock : IGlobalLock
 	{
 		private readonly ConcurrentDictionary<Guid, object> _lockDictionary;
 		private readonly ConcurrentDictionary<Guid, TaskCompletionSource<Guid>> _exitDictionary;
 
-		public ExclusiveLockRepo()
+		public GlobalLock()
 		{
 			_lockDictionary = new ConcurrentDictionary<Guid, object>();
 			_exitDictionary = new ConcurrentDictionary<Guid, TaskCompletionSource<Guid>>();

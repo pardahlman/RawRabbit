@@ -16,7 +16,7 @@ namespace RawRabbit.Operations.Saga.Trigger
 		public static readonly Action<IPipeBuilder> ConsumePipe = pipe => pipe
 			.Use<BodyDeserializationMiddleware>()
 			.Use<SagaIdMiddleware>()
-			.Use<ExclusiveLockMiddleware>()
+			.Use<GlobalLockMiddleware>()
 			.Use<RetrieveSagaMiddleware>()
 			.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
 			{
