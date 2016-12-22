@@ -7,9 +7,9 @@ namespace RawRabbit.Operations.Saga.Middleware
 {
 	public class PersistSagaMiddleware : Pipe.Middleware.Middleware
 	{
-		private readonly ISagaRepository _sagaRepo;
+		private readonly ISagaActivator _sagaRepo;
 
-		public PersistSagaMiddleware(ISagaRepository sagaRepo)
+		public PersistSagaMiddleware(ISagaActivator sagaRepo)
 		{
 			_sagaRepo = sagaRepo;
 		}
@@ -18,7 +18,7 @@ namespace RawRabbit.Operations.Saga.Middleware
 		{
 			var saga = context.GetSaga();
 			return _sagaRepo
-				.UpdateAsync(saga)
+				.PersistAsync(saga)
 				.ContinueWith(t => Next.InvokeAsync(context, token), token)
 				.Unwrap();
 		}

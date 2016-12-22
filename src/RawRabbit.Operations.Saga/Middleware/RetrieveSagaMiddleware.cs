@@ -16,13 +16,13 @@ namespace RawRabbit.Operations.Saga.Middleware
 
 	public class RetrieveSagaMiddleware : Pipe.Middleware.Middleware
 	{
-		private readonly ISagaRepository _sagaRepo;
+		private readonly ISagaActivator _sagaRepo;
 		protected Func<IPipeContext, Guid> SagaIdFunc;
 		protected Func<IPipeContext, Type> SagaTypeFunc;
 		protected Action<Model.Saga, IPipeContext> PostExecuteAction;
 		protected Func<IPipeContext, Model.Saga> SagaFunc;
 
-		public RetrieveSagaMiddleware(ISagaRepository sagaRepo, RetrieveSagaOptions options = null)
+		public RetrieveSagaMiddleware(ISagaActivator sagaRepo, RetrieveSagaOptions options = null)
 		{
 			_sagaRepo = sagaRepo;
 			SagaIdFunc = options?.SagaIdFunc ?? (context => context.Get(SagaKey.SagaId, Guid.NewGuid()));
@@ -51,7 +51,7 @@ namespace RawRabbit.Operations.Saga.Middleware
 			var fromContext = SagaFunc?.Invoke(context);
 			return fromContext != null
 				? Task.FromResult(fromContext)
-				: _sagaRepo.GetAsync(id, sagaType);
+				: _sagaRepo.ActivateAsync(id, sagaType);
 		}
 
 		protected virtual Type GetSagaType(IPipeContext context)
