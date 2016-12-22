@@ -7,37 +7,47 @@ namespace RawRabbit.Operations.Saga.Repository
 {
 	public interface IGlobalLock
 	{
-		Task AcquireAsync(Guid sagaId);
-		Task ReleaseAsync(Guid sagaId);
-		Task ExecuteAsync(Guid sagaId, Func<Task> handler);
+		Task AcquireAsync(Guid sagaId, CancellationToken token = default(CancellationToken));
+		Task ReleaseAsync(Guid sagaId, CancellationToken token = default(CancellationToken));
+		Task ExecuteAsync(Guid sagaId, Func<Task> handler, CancellationToken token = default(CancellationToken));
 	}
 
 	public class GlobalLock : IGlobalLock
 	{
-		private readonly ConcurrentDictionary<Guid, object> _lockDictionary;
+		private readonly ConcurrentDictionary<Guid, SemaphoreSlim> _semaphores;
 		private readonly ConcurrentDictionary<Guid, TaskCompletionSource<Guid>> _exitDictionary;
 
 		public GlobalLock()
 		{
-			_lockDictionary = new ConcurrentDictionary<Guid, object>();
+			_semaphores = new ConcurrentDictionary<Guid, SemaphoreSlim>();
 			_exitDictionary = new ConcurrentDictionary<Guid, TaskCompletionSource<Guid>>();
 		}
-		public Task AcquireAsync(Guid sagaId)
+
+		public Task AcquireAsync(Guid sagaId, CancellationToken token = default(CancellationToken))
 		{
-			var sagaLock = _lockDictionary.GetOrAdd(sagaId, valueFactory: guid => new object());
 			var enterTsc = new TaskCompletionSource<object>();
-			Task.Run(() =>
+			var exitTsc = _exitDictionary.GetOrAdd(sagaId, guid => new TaskCompletionSource<Guid>());
+			
+			var semanphore = _semaphores.GetOrAdd(sagaId, guid => new SemaphoreSlim(1, 1));
+			token.Register(() =>
 			{
-				Monitor.Enter(sagaLock);
-				enterTsc.TrySetResult(sagaLock);
-				var exitTsc = _exitDictionary.GetOrAdd(sagaId, guid => new TaskCompletionSource<Guid>());
-				exitTsc.Task.Wait();
-				Monitor.Exit(sagaLock);
+				if (semanphore.CurrentCount == 0)
+					semanphore.Release();
 			});
+			semanphore
+				.WaitAsync(token)
+				.ContinueWith(t =>
+				{
+					enterTsc.TrySetResult(null);
+					exitTsc.Task.ContinueWith(done =>
+					{
+						semanphore.Release();
+					}, token);
+				}, token);
 			return enterTsc.Task;
 		}
 
-		public Task ReleaseAsync(Guid sagaId)
+		public Task ReleaseAsync(Guid sagaId, CancellationToken token = default(CancellationToken))
 		{
 			TaskCompletionSource<Guid> sagaLock;
 			if (_exitDictionary.TryGetValue(sagaId, out sagaLock))
@@ -47,15 +57,13 @@ namespace RawRabbit.Operations.Saga.Repository
 			return Task.FromResult(0);
 		}
 
-		public Task ExecuteAsync(Guid sagaId, Func<Task> handler)
+		public Task ExecuteAsync(Guid sagaId, Func<Task> handler, CancellationToken token = default(CancellationToken))
 		{
-			return Task.Run(() =>
-			{
-				var sagaLock = _lockDictionary.GetOrAdd(sagaId, valueFactory: guid => new object());
-				Monitor.Enter(sagaLock);
-				handler().Wait();
-				Monitor.Exit(sagaLock);
-			});
+			var semaphore = _semaphores.GetOrAdd(sagaId, guid => new SemaphoreSlim(1, 1));
+			return semaphore
+				.WaitAsync(token)
+				.ContinueWith(t => handler().ContinueWith(done => semaphore.Release(), token), token)
+				.Unwrap();
 		}
 	}
 }
