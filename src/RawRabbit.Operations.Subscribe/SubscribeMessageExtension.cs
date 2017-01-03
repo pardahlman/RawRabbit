@@ -22,7 +22,7 @@ namespace RawRabbit
 				ContextSaveAction = (ctx, id) => ctx.Properties.TryAdd(PipeKey.GlobalExecutionId, id)
 			})
 			.Use<GlobalExecutionIdMiddleware>()
-			.Use<SubscribeInvokationMiddleware>()
+			.Use<SubscriptionExceptionMiddleware>(new SubscriptionExceptionOptions { InnerPipe = p => p.Use<SubscribeInvokationMiddleware>()})
 			.Use<AutoAckMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(ConsumerStage.HandlerInvoked));
 

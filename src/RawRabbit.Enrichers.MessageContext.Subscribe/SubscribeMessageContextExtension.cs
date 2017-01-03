@@ -2,8 +2,10 @@
 using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Consume;
+using RawRabbit.Configuration.Consumer;
 using RawRabbit.Context;
 using RawRabbit.Enrichers.MessageContext.Subscribe;
+using RawRabbit.Operations.Subscribe.Middleware;
 using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
 
@@ -29,7 +31,13 @@ namespace RawRabbit
 			})
 			.Use<GlobalExecutionIdMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.MessageContextDeserialized))
-			.Use<HandlerInvokationMiddleware>(new HandlerInvokationOptions { HandlerArgsFunc = context => new [] {context.GetMessage(), context.GetMessageContext()}})
+			.Use<SubscriptionExceptionMiddleware>(new SubscriptionExceptionOptions
+			{
+				InnerPipe = p => p.Use<HandlerInvokationMiddleware>(new HandlerInvokationOptions
+				{
+					HandlerArgsFunc = context => new[] { context.GetMessage(), context.GetMessageContext() }
+				})
+			})
 			.Use<AutoAckMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.HandlerInvoked));
 
@@ -45,7 +53,7 @@ namespace RawRabbit
 			})
 		);
 
-		public static Task SubscribeAsync<TMessage, TMessageContext>(this IBusClient client, Func<TMessage, TMessageContext, Task> subscribeMethod, Action<IConsumeConfigurationFactory> configuration = null)
+		public static Task SubscribeAsync<TMessage, TMessageContext>(this IBusClient client, Func<TMessage, TMessageContext, Task> subscribeMethod, Action<IConsumerConfigurationBuilder> configuration = null)
 		{
 			return client
 				.InvokeAsync(
