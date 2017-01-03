@@ -31,6 +31,10 @@ namespace RawRabbit
 					{
 						return TaskUtil.FromCancelled<IPipeContext>();
 					}
+					if (t.IsFaulted)
+					{
+						return TaskUtil.FromException<IPipeContext>(t.Exception.InnerException);
+					}
 					return Task.FromResult(context);
 				}, token)
 				.Unwrap();

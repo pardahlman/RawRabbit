@@ -17,16 +17,19 @@ namespace RawRabbit
 			pipe.Replace<MessageConsumeMiddleware, MessageConsumeMiddleware>(args: new ConsumeOptions
 			{
 				Pipe = RespondExtension.ConsumePipe + (consume => consume
-					.Replace<RespondInvokationMiddleware, HandlerInvokationMiddleware>(args: new HandlerInvokationOptions
-					{
-						HandlerArgsFunc = context => new []{context.GetMessage(), context.GetMessageContext()}
-					})
-					.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
-					{
-						Type = typeof(IMessageContext),
-						HeaderKey = PropertyHeaders.Context,
-						ContextSaveAction = (pipeCtx, msgCtx) => pipeCtx.Properties.TryAdd(PipeKey.MessageContext, msgCtx)
-					}))
+						.Replace<RespondExceptionMiddleware, RespondExceptionMiddleware>(args: new RespondExceptionOptions
+						{
+							InnerPipe = p => p.Use<HandlerInvokationMiddleware>(new HandlerInvokationOptions
+							{
+								HandlerArgsFunc = context => new[] { context.GetMessage(), context.GetMessageContext() }
+							})
+						})
+						.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
+						{
+							Type = typeof(IMessageContext),
+							HeaderKey = PropertyHeaders.Context,
+							ContextSaveAction = (pipeCtx, msgCtx) => pipeCtx.Properties.TryAdd(PipeKey.MessageContext, msgCtx)
+						}))
 			});
 		});
 

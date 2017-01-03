@@ -27,6 +27,7 @@ namespace RawRabbit.Pipe.Middleware
 			CreateFunc = options?.CreateFunc ?? ((factory, token) => factory.CreateChannelAsync(token));
 			PostExecuteAction = options?.PostExecuteAction;
 		}
+
 		public override Task InvokeAsync(IPipeContext context, CancellationToken token = default(CancellationToken))
 		{
 			if (!ShouldCreateChannel(context))

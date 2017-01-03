@@ -17,6 +17,11 @@ namespace RawRabbit.Operations.Request.Core
 			return context.Get<Type>(RequestKey.ResponseMessageType);
 		}
 
+		public static object GetResponseMessage(this IPipeContext context)
+		{
+			return context.Get<object>(RequestKey.ResponseMessage);
+		}
+
 		public static string GetCorrelationId(this IPipeContext context)
 		{
 			return context.Get<string>(RequestKey.CorrelationId);

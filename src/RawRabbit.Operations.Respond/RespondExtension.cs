@@ -2,6 +2,7 @@
 using System.Text;
 using System.Threading.Tasks;
 using RawRabbit.Common;
+using RawRabbit.Exceptions;
 using RawRabbit.Operations.Respond.Acknowledgement;
 using RawRabbit.Operations.Respond.Configuration;
 using RawRabbit.Operations.Respond.Core;
@@ -20,7 +21,7 @@ namespace RawRabbit
 				BodyTypeFunc = context => context.GetRequestMessageType()
 			})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.MessageDeserialized))
-			.Use<RespondInvokationMiddleware>()
+			.Use<RespondExceptionMiddleware>(new RespondExceptionOptions { InnerPipe = p => p.Use<RespondInvokationMiddleware>() })
 			.Use<AutoAckMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.HandlerInvoked))
 			.Use<BasicPropertiesMiddleware>(new BasicPropertiesOptions
@@ -28,7 +29,7 @@ namespace RawRabbit
 				PropertyModier = (context, properties) =>
 				{
 					properties.CorrelationId = context.GetDeliveryEventArgs()?.BasicProperties.CorrelationId;
-					properties.Type = context.GetResponseMessageType()?.GetUserFriendlyName();
+					properties.Type = context.GetResponseMessage()?.GetType().GetUserFriendlyName();
 				}
 			})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.BasicPropertiesCreated))

@@ -33,9 +33,10 @@ namespace RawRabbit
 					ResponseRecieved = p => p
 						.Use<BodyDeserializationMiddleware>(new MessageDeserializationOptions
 						{
-							BodyTypeFunc = c => c.GetResponseMessageType(),
+							BodyTypeFunc = c => Type.GetType(c.GetDeliveryEventArgs()?.BasicProperties?.Type ?? string.Empty, false),
 							MessageKeyFunc = c => RequestKey.ResponseMessage
 						})
+						.Use<ResponderExceptionMiddleware>()
 				})
 			.Use<PublishMessage>(new PublishOptions
 				{
@@ -55,7 +56,14 @@ namespace RawRabbit
 					ctx.Properties.Add(PipeKey.Message, message);
 					ctx.Properties.Add(PipeKey.ConfigurationAction, configuration);
 				})
-				.ContinueWith(tContext => tContext.Result.Get<TResponse>(RequestKey.ResponseMessage));
+				.ContinueWith(tContext =>
+				{
+					if (tContext.IsFaulted)
+					{
+						throw tContext?.Exception?.InnerException ?? new Exception();
+					}
+					return tContext.Result.Get<TResponse>(RequestKey.ResponseMessage);
+				});
 		}
 	}
 }

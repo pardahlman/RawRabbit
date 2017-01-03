@@ -44,7 +44,17 @@ namespace RawRabbit.Operations.Request.Middleware
 						context.Properties.Add(PipeKey.DeliveryEventArgs, args);
 						_responsePipe
 							.InvokeAsync(context, token)
-							.ContinueWith(t => executionTsc.TrySetResult(t.IsCompleted), token);
+							.ContinueWith(t =>
+							{
+								if (t.IsFaulted)
+								{
+									executionTsc.TrySetException(t.Exception?.InnerException);
+								}
+								else
+								{
+									executionTsc.TrySetResult(t.IsCompleted);
+								}
+							}, token);
 					}, abort: args => string.Equals(args.BasicProperties.CorrelationId, correlationId));
 					Next.InvokeAsync(context, token);
 				}, token);

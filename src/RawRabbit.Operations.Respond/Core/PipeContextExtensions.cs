@@ -13,6 +13,11 @@ namespace RawRabbit.Operations.Respond.Core
 			return context.Get<Type>(RespondKey.ResponseMessageType);
 		}
 
+		public static object GetResponseMessage(this IPipeContext context)
+		{
+			return context.Get<object>(RespondKey.ResponseMessage);
+		}
+
 		public static Type GetRequestMessageType(this IPipeContext context)
 		{
 			return context.Get<Type>(RespondKey.RequestMessageType);

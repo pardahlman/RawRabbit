@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace RawRabbit.Common
 {
@@ -14,6 +15,18 @@ namespace RawRabbit.Common
 		public static Task FromCancelled()
 		{
 			return FromCancelled<object>();
+		}
+
+		public static Task FromException(Exception exception)
+		{
+			return FromException<object>(exception);
+		}
+
+		public static Task<T> FromException<T>(Exception exception)
+		{
+			var tsc = new TaskCompletionSource<T>();
+			tsc.TrySetException(exception);
+			return tsc.Task;
 		}
 	}
 }
