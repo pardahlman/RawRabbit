@@ -21,6 +21,7 @@ namespace RawRabbit.Configuration.Publisher
 			var builder = new ExchangeDeclarationBuilder(Config.Exchange);
 			exchange(builder);
 			Config.Exchange = builder.Declaration;
+			Config.ExchangeName = builder.Declaration.Name;
 			return this;
 		}
 

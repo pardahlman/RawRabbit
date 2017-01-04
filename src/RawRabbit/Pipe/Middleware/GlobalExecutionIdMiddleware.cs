@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Common;
+using RawRabbit.Logging;
 #if NET451
 using System.Runtime.Remoting.Messaging;
 #endif
@@ -18,12 +19,12 @@ namespace RawRabbit.Pipe.Middleware
 	{
 		protected Func<IPipeContext, string> IdFunc;
 		protected Action<IPipeContext, string> PersistAction;
-
 #if NETSTANDARD1_5
 		protected static readonly AsyncLocal<string> ExecutionId = new AsyncLocal<string>();
 #elif NET451
 		protected const string GlobalExecutionId = "RawRabbit:GlobalExecutionId";
 #endif
+		private readonly ILogger _logger = LogManager.GetLogger<GlobalExecutionIdMiddleware>();
 
 		public GlobalExecutionIdMiddleware(GlobalExecutionOptions options = null)
 		{
@@ -36,15 +37,18 @@ namespace RawRabbit.Pipe.Middleware
 			var fromContext = GetExecutionIdFromContext(context);
 			if (!string.IsNullOrWhiteSpace(fromContext))
 			{
+				_logger.LogInformation($"GlobalExecutionId '{fromContext}' was allready found in PipeContext.");
 				return Next.InvokeAsync(context, token);
 			}
 			var fromProcess = GetExecutionIdFromProcess();
 			if (!string.IsNullOrWhiteSpace(fromProcess))
 			{
+				_logger.LogInformation($"Using GlobalExecutionId '{fromProcess}' that was found in the execution process.");
 				PersistAction(context, fromProcess);
 				return Next.InvokeAsync(context, token);
 			}
 			var created = CreateExecutionId(context);
+			_logger.LogInformation($"Creating new GlobalExecutionId '{created}' for this execution.");
 			PersistAction(context, created);
 			return Next.InvokeAsync(context, token);
 		}

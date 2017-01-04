@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Consumer;
@@ -17,8 +18,8 @@ namespace RawRabbit
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.MessageDeserialized))
 			.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
 			{
-				HeaderKey = PropertyHeaders.GlobalExecutionId,
-				Type = typeof(string),
+				HeaderKeyFunc = c =>  PropertyHeaders.GlobalExecutionId,
+				HeaderTypeFunc = c => typeof(string),
 				ContextSaveAction = (ctx, id) => ctx.Properties.TryAdd(PipeKey.GlobalExecutionId, id)
 			})
 			.Use<GlobalExecutionIdMiddleware>()
@@ -28,8 +29,8 @@ namespace RawRabbit
 
 		public static readonly Action<IPipeBuilder> AutoAckPipe = pipe => pipe
 			.Use<ConsumeConfigurationMiddleware>()
-			.Use<ExecutionIdRoutingMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(SubscribeStage.ConsumeConfigured))
+			.Use<ExecutionIdRoutingMiddleware>()
 			.Use<QueueDeclareMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(SubscribeStage.QueueDeclared))
 			.Use<ExchangeDeclareMiddleware>()
@@ -49,19 +50,19 @@ namespace RawRabbit
 			})
 		);
 
-		public static Task SubscribeAsync<TMessage>(this IBusClient client, Func<TMessage, Task> subscribeMethod, Action<IConsumerConfigurationBuilder> configuration = null)
+		public static Task SubscribeAsync<TMessage>(this IBusClient client, Func<TMessage, Task> subscribeMethod, Action<IConsumerConfigurationBuilder> configuration = null, Action<IPipeContext> context = null, CancellationToken ct = default(CancellationToken))
 		{
 			return client.InvokeAsync(
 				AutoAckPipe,
-				context =>
+				ctx =>
 				{
 					Func<object[], Task> genericHandler = args => subscribeMethod((TMessage) args[0]);
 
-					context.Properties.Add(PipeKey.MessageType, typeof(TMessage));
-					context.Properties.Add(PipeKey.MessageHandler, genericHandler);
-					context.Properties.Add(PipeKey.ConfigurationAction, configuration);
-				}
-			);
+					ctx.Properties.Add(PipeKey.MessageType, typeof(TMessage));
+					ctx.Properties.Add(PipeKey.MessageHandler, genericHandler);
+					ctx.Properties.Add(PipeKey.ConfigurationAction, configuration);
+					context?.Invoke(ctx);
+				}, ct);
 		}
 
 		public static Task SubscribeAsync<TMessage>(this IBusClient client, Func<TMessage, Task<Acknowledgement>> subscribeMethod, Action<IConsumerConfigurationBuilder> configuration = null)

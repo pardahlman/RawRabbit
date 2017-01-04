@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Consumer;
+using RawRabbit.Logging;
 using RawRabbit.Operations.Request.Core;
 using RawRabbit.Pipe;
 
@@ -16,6 +17,7 @@ namespace RawRabbit.Operations.Request.Middleware
 	{
 		private readonly IConsumerFactory _consumerFactory;
 		private readonly Pipe.Middleware.Middleware _responsePipe;
+		private readonly ILogger _logger = LogManager.GetLogger<ResponseConsumeMiddleware>();
 
 		public ResponseConsumeMiddleware(IConsumerFactory consumerFactory, IPipeBuilderFactory factory, ResponseConsumerOptions options)
 		{
@@ -41,6 +43,7 @@ namespace RawRabbit.Operations.Request.Middleware
 						{
 							return;
 						}
+						_logger.LogInformation($"Message '{args.BasicProperties.MessageId}' for correlatrion '{correlationId}' recieved.");
 						context.Properties.Add(PipeKey.DeliveryEventArgs, args);
 						_responsePipe
 							.InvokeAsync(context, token)
@@ -48,6 +51,7 @@ namespace RawRabbit.Operations.Request.Middleware
 							{
 								if (t.IsFaulted)
 								{
+									_logger.LogError($"Response pipe for message '{args.BasicProperties.MessageId}' executed unsuccessfully.", t.Exception);
 									executionTsc.TrySetException(t.Exception?.InnerException);
 								}
 								else

@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Exceptions;
+using RawRabbit.Logging;
 using RawRabbit.Operations.Request.Core;
 using RawRabbit.Pipe;
 
@@ -18,6 +19,7 @@ namespace RawRabbit.Operations.Request.Middleware
 	{
 		protected Func<IPipeContext, object> MessageFunc;
 		protected Func<ExceptionInformation, IPipeContext, Task> HandlerFunc;
+		private readonly ILogger _logger = LogManager.GetLogger<ResponderExceptionMiddleware>();
 
 		public ResponderExceptionMiddleware(ResponderExceptionOptions options = null)
 		{
@@ -42,6 +44,8 @@ namespace RawRabbit.Operations.Request.Middleware
 
 		protected virtual Task HandleRespondException(ExceptionInformation exceptionInfo, IPipeContext context)
 		{
+			_logger.LogInformation($"An unhandled exception occured when remote tried to handle request.\n  Message: {exceptionInfo.Message}\n  Stack Trace: {exceptionInfo.StackTrace}");
+
 			if (HandlerFunc != null)
 			{
 				return HandlerFunc(exceptionInfo, context);

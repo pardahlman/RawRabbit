@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RawRabbit.Logging;
 using RawRabbit.Pipe;
 
 namespace RawRabbit.Operations.Publish.Middleware
@@ -19,6 +20,7 @@ namespace RawRabbit.Operations.Publish.Middleware
 		protected Func<IPipeContext, EventHandler<BasicReturnEventArgs>> CallbackFunc;
 		protected Func<IPipeContext, IModel> ChannelFunc;
 		protected Action<IPipeContext, EventHandler<BasicReturnEventArgs>> PostInvoke;
+		private readonly ILogger _logger = LogManager.GetLogger<MandatoryCallbackMiddleware>();
 
 		public MandatoryCallbackMiddleware(MandatoryCallbackOptions options = null)
 		{
@@ -32,21 +34,28 @@ namespace RawRabbit.Operations.Publish.Middleware
 			var callback = GetCallback(context);
 			if (callback == null)
 			{
+				_logger.LogDebug("No Mandatory Callback registered.");
 				return Next.InvokeAsync(context, token);
 			}
 
 			var channel = GetChannel(context);
 			if (channel == null)
 			{
+				_logger.LogWarning("Channel not found in Pipe Context. Mandatory Callback not registered.");
 				return Next.InvokeAsync(context, token);
 			}
 
+			_logger.LogDebug($"Register Mandatory Callback on channel '{channel.ChannelNumber}'");
 			channel.BasicReturn += callback;
 			PostInvoke?.Invoke(context, callback);
 
 			return Next
 				.InvokeAsync(context, token)
-				.ContinueWith(t => channel.BasicReturn -= callback, token);
+				.ContinueWith(t =>
+				{
+					_logger.LogDebug($"Removing Mandatory Callback on channel '{channel.ChannelNumber}'");
+					channel.BasicReturn -= callback;
+				}, token);
 		}
 
 		protected virtual IModel GetChannel(IPipeContext context)

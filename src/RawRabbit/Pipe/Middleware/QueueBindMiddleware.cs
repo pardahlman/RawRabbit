@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Common;
-using RawRabbit.Configuration.Consumer;
+using RawRabbit.Logging;
 
 namespace RawRabbit.Pipe.Middleware
 {
@@ -15,14 +15,15 @@ namespace RawRabbit.Pipe.Middleware
 
 	public class QueueBindMiddleware : Middleware
 	{
-		private readonly ITopologyProvider _topologyProvider;
+		protected readonly ITopologyProvider TopologyProvider;
 		protected Func<IPipeContext, string> QueueNameFunc;
 		protected Func<IPipeContext, string> ExchangeNameFunc;
 		protected Func<IPipeContext, string> RoutingKeyFunc;
+		private readonly ILogger _logger = LogManager.GetLogger<QueueBindMiddleware>();
 
 		public QueueBindMiddleware(ITopologyProvider topologyProvider, QueueBindOptions options = null)
 		{
-			_topologyProvider = topologyProvider;
+			TopologyProvider = topologyProvider;
 			QueueNameFunc = options?.QueueNameFunc ?? (context => context.GetQueueDeclaration()?.Name);
 			ExchangeNameFunc = options?.ExchangeNameFunc ?? (context => context.GetExchangeDeclaration()?.Name);
 			RoutingKeyFunc = options?.RoutingKeyFunc ?? (context => context.GetConsumeConfiguration()?.RoutingKey);
@@ -41,22 +42,37 @@ namespace RawRabbit.Pipe.Middleware
 
 		protected virtual Task BindQueueAsync(string queueName, string exchangeName, string routingKey)
 		{
-			return _topologyProvider.BindQueueAsync(queueName, exchangeName, routingKey);
+			return TopologyProvider.BindQueueAsync(queueName, exchangeName, routingKey);
 		}
 
 		protected virtual string GetRoutingKey(IPipeContext context)
 		{
-			return RoutingKeyFunc(context);
+			var routingKey = RoutingKeyFunc(context);
+			if (routingKey == null)
+			{
+				_logger.LogWarning("Routing key not found in Pipe context.");
+			}
+			return routingKey;
 		}
 
 		protected virtual string GetExchangeName(IPipeContext context)
 		{
-			return ExchangeNameFunc(context);
+			var exchange = ExchangeNameFunc(context);
+			if (exchange == null)
+			{
+				_logger.LogWarning("Exchange name not found in Pipe context.");
+			}
+			return exchange;
 		}
 
 		protected virtual string GetQueueName(IPipeContext context)
 		{
-			return QueueNameFunc(context);
+			var queue = QueueNameFunc(context);
+			if (queue == null)
+			{
+				_logger.LogWarning("Queue name not found in Pipe context.");
+			}
+			return queue;
 		}
 	}
 }

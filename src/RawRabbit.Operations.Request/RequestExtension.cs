@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
+using RawRabbit.Common;
 using RawRabbit.Operations.Request.Configuration.Abstraction;
 using RawRabbit.Operations.Request.Core;
 using RawRabbit.Operations.Request.Middleware;
@@ -13,6 +14,7 @@ namespace RawRabbit
 	{
 		public static readonly Action<IPipeBuilder> RequestPipe = pipe => pipe
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.Initialized))
+			.Use<GlobalExecutionIdMiddleware>()
 			.Use<RequestConfigurationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.PublishConfigured))
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.ConsumeConfigured))
@@ -26,7 +28,15 @@ namespace RawRabbit
 					RoutingKeyFunc = context => context.GetConsumeConfiguration()?.RoutingKey
 				})
 			.Use<BodySerializationMiddleware>(new MessageSerializationOptions { MessageFunc = context => context.GetMessage()})
-			.Use<Operations.Request.Middleware.BasicPropertiesMiddleware>()
+			.Use<Operations.Request.Middleware.BasicPropertiesMiddleware>(new BasicPropertiesOptions
+				{
+					PostCreateAction = (ctx, props) =>
+					{
+						props.Type = ctx.GetRequestMessageType().GetUserFriendlyName();
+						props.Headers.TryAdd(PropertyHeaders.Sent, DateTime.UtcNow.ToString("u"));
+						props.Headers.TryAdd(PropertyHeaders.GlobalExecutionId, ctx.GetGlobalExecutionId());
+					}
+				})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.BasicPropertiesCreated))
 			.Use<ResponseConsumeMiddleware>(new ResponseConsumerOptions
 				{
@@ -34,13 +44,13 @@ namespace RawRabbit
 						.Use<BodyDeserializationMiddleware>(new MessageDeserializationOptions
 						{
 							BodyTypeFunc = c => Type.GetType(c.GetDeliveryEventArgs()?.BasicProperties?.Type ?? string.Empty, false),
-							MessageKeyFunc = c => RequestKey.ResponseMessage
+							PersistAction = (ctx, msg) => ctx.Properties.TryAdd(RequestKey.ResponseMessage, msg)
 						})
 						.Use<ResponderExceptionMiddleware>()
 				})
-			.Use<PublishMessage>(new PublishOptions
-				{
-					ExchangeFunc = c => c.GetRequestConfiguration()?.Request.Exchange.Name,
+			.Use<BasicPublishMiddleware>(new BasicPublishOptions
+			{
+					ExchangeNameFunc = c => c.GetRequestConfiguration()?.Request.Exchange.Name,
 					RoutingKeyFunc = c => c.GetRequestConfiguration()?.Request.RoutingKey,
 					ChannelFunc = c => c.Get<IBasicConsumer>(PipeKey.Consumer)?.Model
 				})

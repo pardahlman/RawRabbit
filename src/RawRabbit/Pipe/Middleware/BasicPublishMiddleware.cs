@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RawRabbit.Common;
+using RawRabbit.Logging;
 
 namespace RawRabbit.Pipe.Middleware
 {
@@ -25,6 +26,7 @@ namespace RawRabbit.Pipe.Middleware
 		protected Func<IPipeContext, bool> MandatoryFunc;
 		protected Func<IPipeContext, IBasicProperties> BasicPropsFunc;
 		protected Func<IPipeContext, byte[]> BodyFunc;
+		private ILogger _logger = LogManager.GetLogger<BasicPublishMiddleware>();
 
 		public BasicPublishMiddleware(IExclusiveLock exclusive, BasicPublishOptions options = null)
 		{
@@ -46,6 +48,8 @@ namespace RawRabbit.Pipe.Middleware
 			var basicProps = GetBasicProps(context);
 			var body = GetMessageBody(context);
 
+			_logger.LogInformation($"Performing basic publish with routing key {routingKey} on exchange {exchangeName}.");
+
 			ExclusiveExecute(channel, c => c.BasicPublish(
 				exchange: exchangeName,
 				routingKey: routingKey,
@@ -64,12 +68,22 @@ namespace RawRabbit.Pipe.Middleware
 
 		protected virtual byte[] GetMessageBody(IPipeContext context)
 		{
-			return BodyFunc(context);
+			var body = BodyFunc(context);
+			if (body == null)
+			{
+				_logger.LogWarning("No body found in the Pipe context.");
+			}
+			return body;
 		}
 
 		protected virtual IBasicProperties GetBasicProps(IPipeContext context)
 		{
-			return BasicPropsFunc(context);
+			var props = BasicPropsFunc(context);
+			if (props == null)
+			{
+				_logger.LogWarning("No basic properties found in the Pipe context.");
+			}
+			return props;
 		}
 
 		protected virtual bool GetMandatoryOptions(IPipeContext context)
@@ -79,17 +93,32 @@ namespace RawRabbit.Pipe.Middleware
 
 		protected virtual string GetRoutingKey(IPipeContext context)
 		{
-			return RoutingKeyFunc(context);
+			var routingKey =  RoutingKeyFunc(context);
+			if (routingKey == null)
+			{
+				_logger.LogWarning("No routing key found in the Pipe context.");
+			}
+			return routingKey;
 		}
 
 		protected virtual string GetExchangeName(IPipeContext context)
 		{
-			return ExchangeNameFunc(context);
+			var exchange = ExchangeNameFunc(context);
+			if (exchange == null)
+			{
+				_logger.LogWarning("No exchange name found in the Pipe context.");
+			}
+			return exchange;
 		}
 
 		protected virtual IModel GetOrCreateChannel(IPipeContext context)
 		{
-			return ChannelFunc(context);
+			var channel = ChannelFunc(context);
+			if (channel == null)
+			{
+				_logger.LogWarning("No channel to perform publish found.");
+			}
+			return channel;
 		}
 	}
 }

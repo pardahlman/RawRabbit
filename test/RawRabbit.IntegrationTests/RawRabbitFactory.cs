@@ -22,8 +22,7 @@ namespace RawRabbit.IntegrationTests
 					prevRegged.Exchange.AutoDelete = true;
 					collection.AddSingleton(p => prevRegged);
 				}
-
-				collection.AddSingleton<ILoggerFactory, VoidLoggerFactory>();
+				LogManager.CurrentFactory = new VoidLoggerFactory();
 			};
 			options.DependencyInjection = action;
 			return vNext.Pipe.RawRabbitFactory.CreateSingleton(options);

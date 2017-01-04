@@ -38,8 +38,15 @@ namespace RawRabbit.Enrichers.Attributes.Middleware
 			}
 			UpdateExchangeConfig(config.Exchange, msgType);
 			UpdateQueueConfig(config.Queue, msgType);
+			AlginConsumeProps(config);
 			UpdateRouting(config, msgType);
 			return Next.InvokeAsync(context, token);
+		}
+
+		protected virtual void AlginConsumeProps(ConsumerConfiguration config)
+		{
+			config.Consume.ExchangeName = config.Exchange?.Name ?? config.Consume.ExchangeName;
+			config.Consume.QueueName = config.Queue?.Name ?? config.Consume.QueueName;
 		}
 
 		private void UpdateRouting(ConsumerConfiguration config, Type type)

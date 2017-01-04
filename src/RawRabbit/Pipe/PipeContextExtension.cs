@@ -108,7 +108,7 @@ namespace RawRabbit.Pipe
 
 		public static IBasicProperties GetBasicProperties(this IPipeContext context)
 		{
-			return GetDeliveryEventArgs(context)?.BasicProperties ?? context.Get<IBasicProperties>(PipeKey.BasicProperties);
+			return context.Get<IBasicProperties>(PipeKey.BasicProperties) ?? GetDeliveryEventArgs(context)?.BasicProperties;
 		}
 
 		public static BasicDeliverEventArgs GetDeliveryEventArgs(this IPipeContext context)

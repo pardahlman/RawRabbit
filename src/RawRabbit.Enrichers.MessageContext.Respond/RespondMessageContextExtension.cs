@@ -19,15 +19,15 @@ namespace RawRabbit
 				Pipe = RespondExtension.ConsumePipe + (consume => consume
 						.Replace<RespondExceptionMiddleware, RespondExceptionMiddleware>(args: new RespondExceptionOptions
 						{
-							InnerPipe = p => p.Use<HandlerInvokationMiddleware>(new HandlerInvokationOptions
+							InnerPipe = p => p.Use<RespondInvokationMiddleware>(new HandlerInvokationOptions
 							{
 								HandlerArgsFunc = context => new[] { context.GetMessage(), context.GetMessageContext() }
 							})
 						})
 						.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
 						{
-							Type = typeof(IMessageContext),
-							HeaderKey = PropertyHeaders.Context,
+							HeaderTypeFunc = c => typeof(IMessageContext),
+							HeaderKeyFunc = c=> PropertyHeaders.Context,
 							ContextSaveAction = (pipeCtx, msgCtx) => pipeCtx.Properties.TryAdd(PipeKey.MessageContext, msgCtx)
 						}))
 			});

@@ -1,20 +1,76 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
+using RawRabbit.Logging;
 using RawRabbit.Operations.Respond.Core;
 using RawRabbit.Pipe;
 
 namespace RawRabbit.Operations.Respond.Middleware
 {
+	public class ReplyToExtractionOptions
+	{
+		public Func<IPipeContext, BasicDeliverEventArgs> DeliveryArgsFunc { get; set; }
+		public Func<BasicDeliverEventArgs, PublicationAddress> ReplyToFunc { get; set; }
+		public Action<IPipeContext, PublicationAddress> ContextSaveAction { get; set; }
+	}
+
 	public class ReplyToExtractionMiddleware : Pipe.Middleware.Middleware
 	{
+		protected Func<IPipeContext, BasicDeliverEventArgs> DeliveryArgsFunc;
+		protected Func<BasicDeliverEventArgs, PublicationAddress> ReplyToFunc;
+		protected Action<IPipeContext, PublicationAddress> ContextSaveAction;
+		private readonly ILogger _logger = LogManager.GetLogger<ReplyToExtractionMiddleware>();
+
+		public ReplyToExtractionMiddleware(ReplyToExtractionOptions options = null)
+		{
+			ContextSaveAction = options?.ContextSaveAction ?? ((ctx, addr) => ctx.Properties.Add(RespondKey.PublicationAddress, addr));
+			DeliveryArgsFunc = options?.DeliveryArgsFunc ?? (ctx => ctx.GetDeliveryEventArgs());
+			ReplyToFunc = options?.ReplyToFunc ?? (args =>
+				args.BasicProperties.ReplyToAddress ?? new PublicationAddress(ExchangeType.Direct, string.Empty, args.BasicProperties.ReplyTo));
+		}
+
 		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
-			var args = context.GetDeliveryEventArgs();
-			var replyTo = args.BasicProperties.ReplyToAddress ?? new PublicationAddress(ExchangeType.Direct, string.Empty, args.BasicProperties.ReplyTo);
-			args.BasicProperties.ReplyTo = replyTo.RoutingKey;
-			context.Properties.Add(RespondKey.PublicationAddress, replyTo);
+			var args = GetDeliveryArgs(context);
+			var replyTo = GetReplyTo(args);
+			SaveInContext(context, replyTo);
 			return Next.InvokeAsync(context, token);
+		}
+
+		protected virtual BasicDeliverEventArgs GetDeliveryArgs(IPipeContext context)
+		{
+			var args = DeliveryArgsFunc(context);
+			if (args == null)
+			{
+				_logger.LogWarning("Delivery args not found in Pipe context.");
+			}
+			return args;
+		}
+
+		protected virtual PublicationAddress GetReplyTo(BasicDeliverEventArgs args)
+		{
+			var replyTo = ReplyToFunc(args);
+			if (replyTo == null)
+			{
+				_logger.LogWarning("Reply to address not found in Pipe context.");
+			}
+			else
+			{
+				args.BasicProperties.ReplyTo = replyTo.RoutingKey;
+				_logger.LogInformation($"Using reply address with exchange '{replyTo.ExchangeName}' and routing key '{replyTo.RoutingKey}'");
+			}
+			return replyTo;
+		}
+
+		protected virtual void SaveInContext(IPipeContext context, PublicationAddress replyTo)
+		{
+			if (ContextSaveAction == null)
+			{
+				_logger.LogWarning("No context save action found. Reply to address will not be saved.");
+			}
+			ContextSaveAction?.Invoke(context, replyTo);
 		}
 	}
 }

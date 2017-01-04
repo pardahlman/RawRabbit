@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Publisher;
 using RawRabbit.Pipe;
 
@@ -38,7 +39,13 @@ namespace RawRabbit.Enrichers.Attributes.Middleware
 			}
 			UpdateExchangeConfig(config.Exchange, msgType);
 			UpdateRoutingConfig(config, msgType);
+			AlignExchangeName(config);
 			return Next.InvokeAsync(context, token);
+		}
+
+		protected virtual void AlignExchangeName(PublisherConfiguration config)
+		{
+			config.ExchangeName = config.Exchange?.Name ?? config.ExchangeName;
 		}
 
 		protected virtual void UpdateRoutingConfig(PublisherConfiguration config, Type type)

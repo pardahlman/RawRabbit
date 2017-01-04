@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using RawRabbit.Logging;
 
 namespace RawRabbit.Pipe.Middleware
 {
@@ -8,14 +9,15 @@ namespace RawRabbit.Pipe.Middleware
 	{
 		public Func<IPipeContext, bool> EnableRoutingFunc { get; set; }
 		public Func<IPipeContext, string> ExecutionIdFunc { get; set; }
-		public Action<IPipeContext, string> UpdateAction { get; set; }
+		public Func<IPipeContext, string, string> UpdateAction { get; set; }
 	}
 
 	public class ExecutionIdRoutingMiddleware : Middleware
 	{
 		protected Func<IPipeContext, bool> EnableRoutingFunc;
 		protected Func<IPipeContext, string> ExecutionIdFunc;
-		protected Action<IPipeContext, string> UpdateAction;
+		protected Func<IPipeContext, string, string> UpdateAction;
+		private readonly ILogger _logger = LogManager.GetLogger<ExecutionIdRoutingMiddleware>();
 
 		public ExecutionIdRoutingMiddleware(ExecutionIdRoutingOptions options = null)
 		{
@@ -27,13 +29,15 @@ namespace RawRabbit.Pipe.Middleware
 				if (pubConfig != null)
 				{
 					pubConfig.RoutingKey = $"{pubConfig.RoutingKey}.{executionId}";
-					return;
+					return pubConfig.RoutingKey;
 				}
 				var consumeConfig = context.GetConsumeConfiguration();
 				if (consumeConfig != null)
 				{
 					consumeConfig.RoutingKey = $"{consumeConfig.RoutingKey}.#";
+					return consumeConfig.RoutingKey;
 				}
+				return string.Empty;
 			});
 		}
 
@@ -42,6 +46,7 @@ namespace RawRabbit.Pipe.Middleware
 			var enabled = GetRoutingEnabled(context);
 			if (!enabled)
 			{
+				_logger.LogDebug("Routing with GlobalExecutionId disabled.");
 				return Next.InvokeAsync(context, token);
 			}
 			var executionId = GetExecutionId(context);
@@ -51,7 +56,9 @@ namespace RawRabbit.Pipe.Middleware
 
 		protected virtual void UpdateRoutingKey(IPipeContext context, string executionId)
 		{
-			UpdateAction(context, executionId);
+			_logger.LogDebug($"Updating routing key with GlobalExecutionId '{executionId}'");
+			var updated = UpdateAction(context, executionId);
+			_logger.LogInformation($"Routing key updated with GlobalExecutionId: {updated}.");
 		}
 
 		protected virtual bool GetRoutingEnabled(IPipeContext pipeContext)

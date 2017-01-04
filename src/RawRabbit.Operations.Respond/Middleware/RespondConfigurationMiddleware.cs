@@ -50,6 +50,7 @@ namespace RawRabbit.Operations.Respond.Middleware
 			action?.Invoke(builder);
 
 			var respondCfg = builder.Config;
+			context.Properties.Add(PipeKey.ConsumerConfiguration, respondCfg);
 			context.Properties.Add(PipeKey.ConsumeConfiguration, respondCfg.Consume);
 			context.Properties.Add(PipeKey.QueueDeclaration, respondCfg.Queue);
 			context.Properties.Add(PipeKey.ExchangeDeclaration, respondCfg.Exchange);

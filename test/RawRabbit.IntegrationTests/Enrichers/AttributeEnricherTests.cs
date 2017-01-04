@@ -1,6 +1,8 @@
 ﻿using System.Threading.Tasks;
 using RawRabbit.Configuration.Exchange;
 using RawRabbit.Enrichers.Attributes;
+using RawRabbit.Enrichers.Attributes.Middleware;
+using RawRabbit.Operations.Request.Core;
 using RawRabbit.vNext.Pipe;
 using Xunit;
 
@@ -11,7 +13,7 @@ namespace RawRabbit.IntegrationTests.Enrichers
 		[Fact]
 		public async Task Should_Work_For_Publish()
 		{
-			using (var publisher = RawRabbitFactory.CreateTestClient(new RawRabbitOptions { Plugins = plugin => plugin.UseAttributeRouting()}))
+			using (var publisher = RawRabbitFactory.CreateTestClient(new RawRabbitOptions { Plugins = plugin => plugin.UseAttributeRouting() }))
 			using (var subscriber = RawRabbitFactory.CreateTestClient())
 			{
 				/* Setup */
@@ -69,7 +71,22 @@ namespace RawRabbit.IntegrationTests.Enrichers
 		[Fact]
 		public async Task Should_Work_For_Request()
 		{
-			using (var requester = RawRabbitFactory.CreateTestClient(new RawRabbitOptions { Plugins = plugin => plugin.UseAttributeRouting() }))
+			using (var requester = RawRabbitFactory.CreateTestClient(new RawRabbitOptions
+			{
+				Plugins = plugin => plugin.UseAttributeRouting(
+				//new PublishAttributeOptions
+				//{
+				//	ConfigFunc = context => context.GetRequestConfiguration()?.Request,
+				//	MessageTypeFunc = context => context.GetRequestMessageType()
+				//},
+				//new ConsumeAttributeOptions
+				//{
+				//	ConfigFunc = context => context.GetRequestConfiguration()?.Response,
+				//	MessageTypeFunc = context => context.GetResponseMessageType()
+				//}
+				)
+			}
+			))
 			using (var responder = RawRabbitFactory.CreateTestClient())
 			{
 				/* Setup */

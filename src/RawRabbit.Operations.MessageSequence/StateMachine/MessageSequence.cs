@@ -166,10 +166,10 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 				.Configure(SequenceState.Canceled)
 				.OnEntry(() =>
 				{
-					tsc.TrySetResult(default(TMessage));
 					sequence.Completed = SagaDto.Completed;
 					sequence.Skipped = SagaDto.Skipped;
 					sequence.Aborted = true;
+					tsc.TrySetResult(default(TMessage));
 				});
 
 			_triggerConfigurer

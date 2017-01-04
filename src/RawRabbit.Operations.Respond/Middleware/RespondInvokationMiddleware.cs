@@ -8,10 +8,10 @@ namespace RawRabbit.Operations.Respond.Middleware
 {
 	public class RespondInvokationMiddleware : HandlerInvokationMiddleware
 	{
-		public RespondInvokationMiddleware() : base(new HandlerInvokationOptions
+		public RespondInvokationMiddleware(HandlerInvokationOptions options = null) : base(new HandlerInvokationOptions
 		{
-			HandlerArgsFunc = context => new []{ context.GetMessage()},
-			PostInvokeAction = (context, task) =>
+			HandlerArgsFunc = options?.HandlerArgsFunc ?? (context => new []{ context.GetMessage()}),
+			PostInvokeAction = options?.PostInvokeAction ?? ((context, task) =>
 			{
 				var responseTask = task as Task<object>;
 				if (responseTask != null)
@@ -26,7 +26,7 @@ namespace RawRabbit.Operations.Respond.Middleware
 				{
 					context.Properties.TryAdd(RespondKey.ResponseMessage, ack.Response);
 				}
-			}
+			})
 		})
 		{ }
 	}

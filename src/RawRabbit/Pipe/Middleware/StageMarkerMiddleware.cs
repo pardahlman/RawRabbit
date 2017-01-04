@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using RawRabbit.Logging;
 
 namespace RawRabbit.Pipe.Middleware
 {
@@ -8,6 +9,7 @@ namespace RawRabbit.Pipe.Middleware
 	{
 		public readonly string Stage;
 		private readonly Middleware _pipe;
+		private readonly ILogger _logger = LogManager.GetLogger<StageMarkerMiddleware>();
 
 		public StageMarkerMiddleware(StageMarkerOptions options)
 		{
@@ -22,6 +24,13 @@ namespace RawRabbit.Pipe.Middleware
 
 		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
+			if (_pipe is NoOpMiddleware)
+			{
+				_logger.LogDebug($"Stage '{Stage}' has no additional middlewares registered.");
+				return Next.InvokeAsync(context, token);
+			}
+
+			_logger.LogInformation($"Invoking additional middlewares on stage '{Stage}'.");
 			return _pipe
 				.InvokeAsync(context, token)
 				.ContinueWith(t => Next.InvokeAsync(context, token), token)

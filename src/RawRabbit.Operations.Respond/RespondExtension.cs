@@ -2,7 +2,6 @@
 using System.Text;
 using System.Threading.Tasks;
 using RawRabbit.Common;
-using RawRabbit.Exceptions;
 using RawRabbit.Operations.Respond.Acknowledgement;
 using RawRabbit.Operations.Respond.Configuration;
 using RawRabbit.Operations.Respond.Core;
@@ -21,6 +20,13 @@ namespace RawRabbit
 				BodyTypeFunc = context => context.GetRequestMessageType()
 			})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.MessageDeserialized))
+			.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
+			{
+				HeaderKeyFunc = c => PropertyHeaders.GlobalExecutionId,
+				HeaderTypeFunc = c => typeof(string),
+				ContextSaveAction = (ctx, id) => ctx.Properties.TryAdd(PipeKey.GlobalExecutionId, id)
+			})
+			.Use<GlobalExecutionIdMiddleware>()
 			.Use<RespondExceptionMiddleware>(new RespondExceptionOptions { InnerPipe = p => p.Use<RespondInvokationMiddleware>() })
 			.Use<AutoAckMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.HandlerInvoked))
@@ -35,8 +41,8 @@ namespace RawRabbit
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.BasicPropertiesCreated))
 			.Use<BodySerializationMiddleware>(new MessageSerializationOptions
 			{
-				MessageFunc = context => context.Get<object>(RespondKey.ResponseMessage),
-				SerializedMessageKey = RespondKey.SerializedResponse
+				MessageFunc = ctx => ctx.Get<object>(RespondKey.ResponseMessage),
+				PersistAction = (ctx, msg) => ctx.Properties.TryAdd(RespondKey.SerializedResponse, msg)
 			})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ResponseSerialized))
 			.Use<ReplyToExtractionMiddleware>()
@@ -47,7 +53,6 @@ namespace RawRabbit
 			{
 				ExchangeNameFunc = context => context.GetPublicationAddress()?.ExchangeName,
 				RoutingKeyFunc = context => context.GetPublicationAddress()?.RoutingKey,
-				BasicPropsFunc = context => context.GetBasicProperties(),
 				MandatoryFunc = context => true,
 				BodyFunc = context => Encoding.UTF8.GetBytes(context.Get<string>(RespondKey.SerializedResponse))
 			})
@@ -85,6 +90,7 @@ namespace RawRabbit
 
 						ctx.Properties.Add(RespondKey.RequestMessageType, typeof(TRequest));
 						ctx.Properties.Add(RespondKey.ResponseMessageType, typeof(TResponse));
+						ctx.Properties.Add(PipeKey.MessageType, typeof(TRequest));
 						ctx.Properties.Add(PipeKey.ConfigurationAction, configuration);
 						ctx.Properties.Add(PipeKey.MessageHandler, genericHandler);
 					}

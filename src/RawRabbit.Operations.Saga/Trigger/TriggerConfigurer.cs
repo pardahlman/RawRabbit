@@ -20,8 +20,8 @@ namespace RawRabbit.Operations.Saga.Trigger
 			.Use<RetrieveSagaMiddleware>()
 			.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
 			{
-				HeaderKey = PropertyHeaders.GlobalExecutionId,
-				Type = typeof(string),
+				HeaderKeyFunc = context => PropertyHeaders.GlobalExecutionId,
+				HeaderTypeFunc = context => typeof(string),
 				ContextSaveAction = (ctx, id) => ctx.Properties.TryAdd(PipeKey.GlobalExecutionId, id)
 			})
 			.Use<GlobalExecutionIdMiddleware>()

@@ -101,7 +101,7 @@ namespace RawRabbit.IntegrationTests.Features
 				);
 
 				/* Test */
-				await requester.PublishAsync(new FirstMessage());
+				await requester.RequestAsync<FirstRequest, FirstResponse>();
 				Task.WaitAll(taskCompletionSources.Select(t => t.Task).ToArray<Task>());
 
 				var results = new List<string>();

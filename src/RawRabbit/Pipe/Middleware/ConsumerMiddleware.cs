@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RawRabbit.Configuration.Consume;
 using RawRabbit.Consumer;
+using RawRabbit.Logging;
 
 namespace RawRabbit.Pipe.Middleware
 {
@@ -18,6 +19,7 @@ namespace RawRabbit.Pipe.Middleware
 		protected IConsumerFactory ConsumerFactory;
 		protected Func<IPipeContext, ConsumeConfiguration> ConfigFunc;
 		protected Func<IConsumerFactory, CancellationToken, IPipeContext, Task<IBasicConsumer>> ConsumerFunc;
+		private readonly ILogger _logger = LogManager.GetLogger<ConsumerMiddleware>();
 
 		public ConsumerMiddleware(IConsumerFactory consumerFactory, ConsumerOptions options = null)
 		{
@@ -44,12 +46,22 @@ namespace RawRabbit.Pipe.Middleware
 
 		protected virtual ConsumeConfiguration GetConfiguration(IPipeContext context)
 		{
-			return ConfigFunc(context);
+			var config = ConfigFunc(context);
+			if (config == null)
+			{
+				_logger.LogInformation("Consumer configuration not found in Pipe context.");
+			}
+			return config;
 		}
 
 		protected virtual Task<IBasicConsumer> GetOrCreateConsumerAsync(IPipeContext context, CancellationToken token)
 		{
-			return ConsumerFunc(ConsumerFactory, token, context);
+			var consumerTask = ConsumerFunc(ConsumerFactory, token, context);
+			if (consumerTask == null)
+			{
+				_logger.LogWarning("No Consumer creation task found in Pipe context.");
+			}
+			return consumerTask;
 		}
 	}
 }

@@ -18,7 +18,7 @@ namespace RawRabbit.IntegrationTests.GetOperation
 				var conventions = new NamingConventions();
 				TestChannel.QueueDeclare(conventions.QueueNamingConvention(message.GetType()), true, false, false, null);
 				TestChannel.ExchangeDeclare(conventions.ExchangeNamingConvention(message.GetType()), ExchangeType.Topic);
-				TestChannel.QueueBind(conventions.QueueNamingConvention(message.GetType()), conventions.ExchangeNamingConvention(message.GetType()), conventions.RoutingKeyConvention(message.GetType()));
+				TestChannel.QueueBind(conventions.QueueNamingConvention(message.GetType()), conventions.ExchangeNamingConvention(message.GetType()), conventions.RoutingKeyConvention(message.GetType()) + ".#");
 
 				await client.PublishAsync(message, cfg => cfg.OnDeclaredExchange(e => e.AssumeInitialized()));
 				await client.PublishAsync(message, cfg => cfg.OnDeclaredExchange(e => e.AssumeInitialized()));
@@ -44,7 +44,7 @@ namespace RawRabbit.IntegrationTests.GetOperation
 				var conventions = new NamingConventions();
 				TestChannel.QueueDeclare(conventions.QueueNamingConvention(message.GetType()), true, false, false, null);
 				TestChannel.ExchangeDeclare(conventions.ExchangeNamingConvention(message.GetType()), ExchangeType.Topic);
-				TestChannel.QueueBind(conventions.QueueNamingConvention(message.GetType()), conventions.ExchangeNamingConvention(message.GetType()), conventions.RoutingKeyConvention(message.GetType()));
+				TestChannel.QueueBind(conventions.QueueNamingConvention(message.GetType()), conventions.ExchangeNamingConvention(message.GetType()), conventions.RoutingKeyConvention(message.GetType()) + ".#");
 
 				await client.PublishAsync(message, cfg => cfg.OnDeclaredExchange(e => e.AssumeInitialized()));
 				await client.PublishAsync(message, cfg => cfg.OnDeclaredExchange(e => e.AssumeInitialized()));
@@ -70,7 +70,7 @@ namespace RawRabbit.IntegrationTests.GetOperation
 				var conventions = new NamingConventions();
 				TestChannel.QueueDeclare(conventions.QueueNamingConvention(message.GetType()), true, false, false, null);
 				TestChannel.ExchangeDeclare(conventions.ExchangeNamingConvention(message.GetType()), ExchangeType.Topic);
-				TestChannel.QueueBind(conventions.QueueNamingConvention(message.GetType()), conventions.ExchangeNamingConvention(message.GetType()), conventions.RoutingKeyConvention(message.GetType()));
+				TestChannel.QueueBind(conventions.QueueNamingConvention(message.GetType()), conventions.ExchangeNamingConvention(message.GetType()), conventions.RoutingKeyConvention(message.GetType()) + ".#");
 
 				await client.PublishAsync(message, cfg => cfg.OnDeclaredExchange(e => e.AssumeInitialized()));
 				await client.PublishAsync(message, cfg => cfg.OnDeclaredExchange(e => e.AssumeInitialized()));
@@ -97,7 +97,7 @@ namespace RawRabbit.IntegrationTests.GetOperation
 				var conventions = new NamingConventions();
 				TestChannel.QueueDeclare(conventions.QueueNamingConvention(message.GetType()), true, false, false, null);
 				TestChannel.ExchangeDeclare(conventions.ExchangeNamingConvention(message.GetType()), ExchangeType.Topic);
-				TestChannel.QueueBind(conventions.QueueNamingConvention(message.GetType()), conventions.ExchangeNamingConvention(message.GetType()), conventions.RoutingKeyConvention(message.GetType()));
+				TestChannel.QueueBind(conventions.QueueNamingConvention(message.GetType()), conventions.ExchangeNamingConvention(message.GetType()), conventions.RoutingKeyConvention(message.GetType()) + ".#");
 
 				await client.PublishAsync(message, cfg => cfg.OnDeclaredExchange(e => e.AssumeInitialized()));
 				await client.PublishAsync(message, cfg => cfg.OnDeclaredExchange(e => e.AssumeInitialized()));
@@ -135,7 +135,7 @@ namespace RawRabbit.IntegrationTests.GetOperation
 				var conventions = new NamingConventions();
 				TestChannel.QueueDeclare(conventions.QueueNamingConvention(message.GetType()), true, false, false, null);
 				TestChannel.ExchangeDeclare(conventions.ExchangeNamingConvention(message.GetType()), ExchangeType.Topic);
-				TestChannel.QueueBind(conventions.QueueNamingConvention(message.GetType()), conventions.ExchangeNamingConvention(message.GetType()), conventions.RoutingKeyConvention(message.GetType()));
+				TestChannel.QueueBind(conventions.QueueNamingConvention(message.GetType()), conventions.ExchangeNamingConvention(message.GetType()), conventions.RoutingKeyConvention(message.GetType()) + ".#");
 
 				await client.PublishAsync(message, cfg => cfg.OnDeclaredExchange(e => e.AssumeInitialized()));
 				await client.PublishAsync(message, cfg => cfg.OnDeclaredExchange(e => e.AssumeInitialized()));

@@ -19,14 +19,14 @@ namespace RawRabbit
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.MessageDeserialized))
 			.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
 			{
-				Type = typeof(IMessageContext),
-				HeaderKey = PropertyHeaders.Context,
+				HeaderTypeFunc = c => typeof(IMessageContext),
+				HeaderKeyFunc = c => PropertyHeaders.Context,
 				ContextSaveAction = (pipeCtx, msgCtx) => pipeCtx.Properties.TryAdd(PipeKey.MessageContext, msgCtx)
 			})
 			.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
 			{
-				HeaderKey = PropertyHeaders.GlobalExecutionId,
-				Type = typeof(string),
+				HeaderKeyFunc = c => PropertyHeaders.GlobalExecutionId,
+				HeaderTypeFunc = c => typeof(string),
 				ContextSaveAction = (ctx, id) => ctx.Properties.TryAdd(PipeKey.GlobalExecutionId, id)
 			})
 			.Use<GlobalExecutionIdMiddleware>()
