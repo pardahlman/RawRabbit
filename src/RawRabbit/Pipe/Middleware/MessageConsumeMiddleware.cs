@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RawRabbit.Consumer;
+using RawRabbit.Logging;
 
 namespace RawRabbit.Pipe.Middleware
 {
@@ -12,59 +13,72 @@ namespace RawRabbit.Pipe.Middleware
 	{
 		public Action<IPipeBuilder> Pipe { get; set; }
 		public Func<IPipeContext, IBasicConsumer> ConsumerFunc { get; set; }
-		public Func<IPipeContext, bool> SynchronousExecutionFunc { get; set; }
-	}
-
-	public static class PipeBuilderConsumeExtension
-	{
-		public static IPipeBuilder UseMessageConsume(this IPipeBuilder pipe, Action<IPipeBuilder> consumeBuilder)
-		{
-			return pipe.Use<MessageConsumeMiddleware>(new ConsumeOptions {Pipe = consumeBuilder});
-		}
+		public Func<IPipeContext, SemaphoreSlim> SemaphoreFunc { get; set; }
 	}
 
 	public class MessageConsumeMiddleware : Middleware
 	{
-		private readonly IPipeContextFactory _contextFactory;
-		private readonly Middleware _consumePipe;
-		private readonly Func<IPipeContext, IBasicConsumer> _consumeFunc;
-		private Func<IPipeContext, bool> _synchronousExecutionFunc;
+		protected IPipeContextFactory ContextFactory;
+		protected Middleware ConsumePipe;
+		protected Func<IPipeContext, IBasicConsumer> ConsumeFunc;
+		protected Func<IPipeContext, SemaphoreSlim> SemaphoreFunc;
+		private readonly ILogger _logger = LogManager.GetLogger<MessageConsumeMiddleware>();
 
-		public MessageConsumeMiddleware(IPipeBuilderFactory pipeBuilderFactory, IPipeContextFactory contextFactory, ConsumeOptions consumeOptions)
+		public MessageConsumeMiddleware(IPipeBuilderFactory pipeBuilderFactory, IPipeContextFactory contextFactory, ConsumeOptions options = null)
 		{
-			_contextFactory = contextFactory;
-			_consumeFunc = consumeOptions.ConsumerFunc ?? (context =>context.GetConsumer());
-			_consumePipe = pipeBuilderFactory.Create(consumeOptions.Pipe);
-			_synchronousExecutionFunc = consumeOptions?.SynchronousExecutionFunc ?? (context => false);
+			ContextFactory = contextFactory;
+			ConsumeFunc = options?.ConsumerFunc ?? (context =>context.GetConsumer());
+			ConsumePipe = pipeBuilderFactory.Create(options?.Pipe ?? (builder => {}));
+			SemaphoreFunc = options?.SemaphoreFunc ?? (context => context.Get<SemaphoreSlim>(PipeKey.ConsumeSemaphore));
 		}
 
 		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
-			var consumer = _consumeFunc(context);
-
+			var consumer = ConsumeFunc(context);
+			var semaphore = GetOrCreateSemaphore(context);
 			consumer.OnMessage((sender, args) =>
 			{
-				var sync = _synchronousExecutionFunc(context);
-				if (sync)
-				{
-					InvokeConsumePipeAsync(context, args)
-						.GetAwaiter()
-						.GetResult();
-				}
-				else
-				{
-					Task.Run(() => InvokeConsumePipeAsync(context, args));
-				}
+				ThrottledExecution(() => InvokeConsumePipeAsync(context, args), semaphore, token);
 			});
 
 			return Next.InvokeAsync(context, token);
 		}
 
-		protected Task InvokeConsumePipeAsync(IPipeContext context, BasicDeliverEventArgs args)
+		protected virtual SemaphoreSlim GetOrCreateSemaphore(IPipeContext context)
 		{
-			var consumeContext = _contextFactory.CreateContext(context.Properties.ToArray());
+			return SemaphoreFunc(context);
+		}
+
+		protected virtual Task InvokeConsumePipeAsync(IPipeContext context, BasicDeliverEventArgs args)
+		{
+			var consumeContext = ContextFactory.CreateContext(context.Properties.ToArray());
 			consumeContext.Properties.Add(PipeKey.DeliveryEventArgs, args);
-			return _consumePipe.InvokeAsync(consumeContext);
+			return ConsumePipe.InvokeAsync(consumeContext);
+		}
+
+		protected virtual void ThrottledExecution(Func<Task> asyncAction, SemaphoreSlim semaphore, CancellationToken ct)
+		{
+			if (semaphore == null)
+			{
+				_logger.LogDebug("Consuming messages without throttle.");
+				Task.Run(asyncAction, ct);
+				return;
+			}
+			semaphore
+				.WaitAsync(ct)
+				.ContinueWith(tEnter =>
+				{
+					try
+					{
+						Task.Run(asyncAction, ct)
+							.ContinueWith(tDone => semaphore.Release(), ct);
+					}
+					catch (Exception e)
+					{
+						_logger.LogError("An unhandled exception was thrown when consuming message", e);
+						semaphore.Release();
+					}
+				}, ct);
 		}
 	}
 }
