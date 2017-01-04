@@ -18,9 +18,14 @@ namespace RawRabbit
 			{
 				genericCreateFunc = context =>
 				{
+					Guid globalMsgId;
+					if (!Guid.TryParse(context.GetGlobalExecutionId(), out globalMsgId))
+					{
+						globalMsgId = Guid.NewGuid();
+					}
 					var msgContext = new TMessageContext
 					{
-						GlobalRequestId = Guid.NewGuid()
+						GlobalRequestId = globalMsgId
 					};
 					context.Properties.TryAdd(PipeKey.MessageContext, msgContext);
 					return msgContext;
