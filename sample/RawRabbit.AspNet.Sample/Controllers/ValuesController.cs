@@ -55,7 +55,7 @@ namespace RawRabbit.AspNet.Sample.Controllers
 			});
 		}
 
-		[HttpGet("{id}")]
+		[HttpGet("api/values/{id}")]
 		public Task<string> GetAsync(int id)
 		{
 			_logger.LogInformation("Requesting Value with id {valueId}", id);
