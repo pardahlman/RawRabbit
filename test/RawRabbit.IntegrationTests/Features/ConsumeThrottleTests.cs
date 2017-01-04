@@ -46,7 +46,8 @@ namespace RawRabbit.IntegrationTests.Features
 				var exitTimes = concurrentExitTimes.ToList();
 				for (var i = concurrencyLevel; i < messageCount-1; i++)
 				{
-					Assert.True(entryTimes[i] > exitTimes[i-1], $"Entry {entryTimes[i]} is before previous exit {exitTimes[i - 1]}");
+					var timeDiff = entryTimes[i] - exitTimes[i - 1];
+					Assert.True(timeDiff.TotalMilliseconds > 0, $"Entry {entryTimes[i]} is before previous exit {exitTimes[i - 1]}");
 				}
 			}
 		}
