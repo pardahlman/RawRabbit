@@ -20,7 +20,6 @@
 		"RawRabbit.Enrichers.MessageContext.Chaining": {"target": "project"},
 		"RawRabbit.DependencyInjection.Autofac": { "target": "project" },
 		"RawRabbit.DependencyInjection.Ninject": { "target": "project" },
-		"RawRabbit.Extensions": { "target": "project" },
 		"RawRabbit.vNext": { "target": "project" },
 		"Moq": "4.6.38-alpha",
 		"xunit": "2.2.0-beta2-build3300",
