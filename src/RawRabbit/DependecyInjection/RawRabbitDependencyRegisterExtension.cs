@@ -14,7 +14,6 @@ using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Publisher;
 using RawRabbit.Configuration.Queue;
 using RawRabbit.Consumer;
-using RawRabbit.ErrorHandling;
 using RawRabbit.Logging;
 using RawRabbit.Pipe;
 using RawRabbit.Serialization;
@@ -63,7 +62,6 @@ namespace RawRabbit.DependecyInjection
 
 				})
 				.AddTransient<IConsumerFactory, ConsumerFactory>()
-				.AddTransient<IErrorHandlingStrategy, DefaultStrategy>()
 				.AddSingleton<IBasicPropertiesProvider, BasicPropertiesProvider>()
 				.AddSingleton<IChannelFactory, ChannelFactory>()
 				.AddSingleton<ChannelFactoryConfiguration, ChannelFactoryConfiguration>(c => ChannelFactoryConfiguration.Default)
