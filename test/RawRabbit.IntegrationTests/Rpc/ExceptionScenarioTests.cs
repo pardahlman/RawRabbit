@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using RawRabbit.Context;
 using RawRabbit.Exceptions;
 using RawRabbit.IntegrationTests.TestMessages;
+using RawRabbit.Pipe;
 using RawRabbit.vNext.Pipe;
 using Xunit;
 
@@ -74,10 +75,11 @@ namespace RawRabbit.IntegrationTests.Rpc
 				{
 					tsc.TrySetResult(msg);
 					return Task.FromResult(0);
-				}, cfg => cfg
-					.FromDeclaredQueue(q => q.WithName("custom_error_queue"))
-					.OnDeclaredExchange(e => e.WithName("default_error_exchange"))
-				);
+				}, ctx => ctx
+					.ConsumerConfiguration(cfg => cfg
+						.FromDeclaredQueue(q => q.WithName("custom_error_queue"))
+						.OnDeclaredExchange(e => e.WithName("default_error_exchange"))
+				));
 
 				/* Test */
 				await publisher.PublishAsync(message);
@@ -109,10 +111,10 @@ namespace RawRabbit.IntegrationTests.Rpc
 				{
 					tsc.TrySetResult(msg);
 					return Task.FromResult(0);
-				}, cfg => cfg
+				}, ctx => ctx.ConsumerConfiguration(cfg => cfg
 					.FromDeclaredQueue(q => q.WithName("custom_error_queue"))
 					.OnDeclaredExchange(e => e.WithName("default_error_exchange"))
-				);
+				));
 
 				/* Test */
 				await publisher.PublishAsync(message);

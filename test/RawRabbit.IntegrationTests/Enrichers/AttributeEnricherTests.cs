@@ -3,6 +3,7 @@ using RawRabbit.Configuration.Exchange;
 using RawRabbit.Enrichers.Attributes;
 using RawRabbit.Enrichers.Attributes.Middleware;
 using RawRabbit.Operations.Request.Core;
+using RawRabbit.Pipe;
 using RawRabbit.vNext.Pipe;
 using Xunit;
 
@@ -22,14 +23,14 @@ namespace RawRabbit.IntegrationTests.Enrichers
 				{
 					recievedTcs.TrySetResult(recieved);
 					return Task.FromResult(true);
-				}, cfg => cfg
-					.Consume(c => c
-						.WithRoutingKey("my_key"))
-					.OnDeclaredExchange(e => e
-						.WithName("my_topic")
-						.WithType(ExchangeType.Topic))
-
-				);
+				}, ctx => ctx
+					.ConsumerConfiguration(cfg => cfg
+						.Consume(c => c
+							.WithRoutingKey("my_key"))
+						.OnDeclaredExchange(e => e
+							.WithName("my_topic")
+							.WithType(ExchangeType.Topic))
+				));
 
 				/* Test */
 				await publisher.PublishAsync(new AttributedMessage());

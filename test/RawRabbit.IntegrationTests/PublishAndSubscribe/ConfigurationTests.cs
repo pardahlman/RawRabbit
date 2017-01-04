@@ -2,6 +2,7 @@
 using RawRabbit.Common;
 using RawRabbit.Configuration.Exchange;
 using RawRabbit.IntegrationTests.TestMessages;
+using RawRabbit.Pipe;
 using Xunit;
 
 namespace RawRabbit.IntegrationTests.PublishAndSubscribe
@@ -44,7 +45,12 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 				{
 					recievedTcs.TrySetResult(recieved);
 					return Task.FromResult(true);
-				}, cfg => cfg.OnDeclaredExchange(e=> e.WithName("custom_exchange")));
+				}, ctx => ctx
+					.ConsumerConfiguration(cfg => cfg
+						.OnDeclaredExchange(e=> e
+							.WithName("custom_exchange")
+						))
+				);
 
 				var message = new BasicMessage { Prop = "Hello, world!" };
 
@@ -69,7 +75,8 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 				{
 					recievedTcs.TrySetResult(recieved);
 					return Task.FromResult(true);
-				}, cfg => cfg
+				}, ctx => ctx
+					.ConsumerConfiguration(cfg => cfg
 						.Consume(c => c
 							.WithRoutingKey("custom_key")
 							.WithConsumerTag("custom_tag")
@@ -82,7 +89,7 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 						.OnDeclaredExchange(e=> e
 							.WithName("custom_exchange")
 							.WithType(ExchangeType.Topic))
-				);
+				));
 
 				var message = new BasicMessage { Prop = "Hello, world!" };
 

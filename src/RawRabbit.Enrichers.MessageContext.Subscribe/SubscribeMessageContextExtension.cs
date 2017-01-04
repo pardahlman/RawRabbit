@@ -1,8 +1,7 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Common;
-using RawRabbit.Configuration.Consume;
-using RawRabbit.Configuration.Consumer;
 using RawRabbit.Context;
 using RawRabbit.Enrichers.MessageContext.Subscribe;
 using RawRabbit.Operations.Subscribe.Middleware;
@@ -38,51 +37,40 @@ namespace RawRabbit
 					HandlerArgsFunc = context => new[] { context.GetMessage(), context.GetMessageContext() }
 				})
 			})
-			.Use<AutoAckMiddleware>()
+			.Use<ExplicitAckMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.HandlerInvoked));
 
-		public static readonly Action<IPipeBuilder> AutoAckPipe = SubscribeMessageExtension.AutoAckPipe + (pipe =>
+		public static readonly Action<IPipeBuilder> SubscribePipe = SubscribeMessageExtension.SubscribePipe + (pipe =>
 		{
 			pipe.Replace<MessageConsumeMiddleware, MessageConsumeMiddleware>(args: new ConsumeOptions { Pipe = ConsumePipe });
 		});
 
-		public static readonly Action<IPipeBuilder> ExplicitAckPipe = AutoAckPipe + (pipe =>
-			pipe.Replace<MessageConsumeMiddleware, MessageConsumeMiddleware>(args: new ConsumeOptions
-			{
-				Pipe = ConsumePipe + (builder => builder.Replace<AutoAckMiddleware, ExplicitAckMiddleware>())
-			})
-		);
-
-		public static Task SubscribeAsync<TMessage, TMessageContext>(this IBusClient client, Func<TMessage, TMessageContext, Task> subscribeMethod, Action<IConsumerConfigurationBuilder> configuration = null)
+		public static Task SubscribeAsync<TMessage, TMessageContext>(this IBusClient client, Func<TMessage, TMessageContext, Task> subscribeMethod, Action<IPipeContext> context = null, CancellationToken ct = default(CancellationToken))
 		{
-			return client
-				.InvokeAsync(
-					AutoAckPipe,
-					context =>
-					{
-						Func<object[], Task> genericHandler = args => subscribeMethod((TMessage)args[0], (TMessageContext)args[1]);
-
-						context.Properties.Add(PipeKey.MessageType, typeof(TMessage));
-						context.Properties.Add(PipeKey.MessageHandler, genericHandler);
-						context.Properties.Add(PipeKey.ConfigurationAction, configuration);
-					}
-				);
+			return client.SubscribeAsync<TMessage, TMessageContext>(
+					(msg, ctx) => subscribeMethod?
+						.Invoke(msg, ctx)
+						.ContinueWith<Acknowledgement>(t => new Ack(), ct),
+					context, ct);
 		}
 
-		public static Task SubscribeAsync<TMessage, TMessageContext>(this IBusClient client, Func<TMessage, TMessageContext, Task<Acknowledgement>> subscribeMethod, Action<IConsumeConfigurationFactory> configuration = null)
+		public static Task SubscribeAsync<TMessage, TMessageContext>(
+			this IBusClient client,
+			Func<TMessage, TMessageContext, Task<Acknowledgement>> subscribeMethod,
+			Action<IPipeContext> context = null,
+			CancellationToken token = default(CancellationToken))
 		{
 			return client
 				.InvokeAsync(
-					ExplicitAckPipe,
-					context =>
+					SubscribePipe,
+					ctx =>
 					{
 						Func<object[], Task> genericHandler = args => subscribeMethod((TMessage)args[0], (TMessageContext)args[1]);
 
-						context.Properties.Add(PipeKey.MessageType, typeof(TMessage));
-						context.Properties.Add(PipeKey.MessageHandler, genericHandler);
-						context.Properties.Add(PipeKey.ConfigurationAction, configuration);
-					}
-				);
+						ctx.Properties.Add(PipeKey.MessageType, typeof(TMessage));
+						ctx.Properties.Add(PipeKey.MessageHandler, genericHandler);
+						context?.Invoke(ctx);
+					}, token);
 		}
 	}
 }

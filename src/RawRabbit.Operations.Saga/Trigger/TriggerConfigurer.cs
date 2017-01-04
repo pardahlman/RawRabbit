@@ -31,7 +31,7 @@ namespace RawRabbit.Operations.Saga.Trigger
 			})
 			.Use<AutoAckMiddleware>();
 
-		public static readonly Action<IPipeBuilder> AutoAckPipe = SubscribeMessageExtension.AutoAckPipe + (builder => builder
+		public static readonly Action<IPipeBuilder> AutoAckPipe = SubscribeMessageExtension.SubscribePipe + (builder => builder
 			.Replace<MessageConsumeMiddleware, MessageConsumeMiddleware>(args: new ConsumeOptions
 			{
 				Pipe = ConsumePipe
@@ -61,7 +61,7 @@ namespace RawRabbit.Operations.Saga.Trigger
 			Func<TSaga, TMessage, Task> sagaFunc,
 			Action<IConsumerConfigurationBuilder> consumeConfig = null)
 		{
-			Func<object[], Task> genericHandler = args => sagaFunc((TSaga)args[0], (TMessage)args[1]);
+			Func<object[], Task> genericHandler = args => sagaFunc((TSaga)args[0], (TMessage)args[1]).ContinueWith<Acknowledgement>(t => new Ack());
 			Func<object, Guid> genericCorrFunc = o => correlationFunc((TMessage) o);
 
 			SagaSubscribeOptions.Add(new SagaSubscriberOptions
