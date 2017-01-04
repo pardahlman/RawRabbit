@@ -7,5 +7,7 @@
 		public const string ConsumeConfigured = "ConsumeConfigured";
 		public const string BasicPropertiesCreated = "BasicPropertiesCreated";
 		public const string MessageRecieved = "MessageRecieved";
+		public const string MessageDeserialized = "MessageDeserialized";
+		public const string HandlerInvoked = "HandlerInvoked";
 	}
 }

@@ -12,9 +12,9 @@ namespace RawRabbit
 	public static class SubscribeMessageExtension
 	{
 		public static readonly Action<IPipeBuilder> ConsumePipe = pipe => pipe
-			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(ConsumerStage.MessageRecieved))
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.MessageRecieved))
 			.Use<BodyDeserializationMiddleware>()
-			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(ConsumerStage.MessageDeserialized))
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.MessageDeserialized))
 			.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
 			{
 				HeaderKey = PropertyHeaders.GlobalExecutionId,
@@ -24,7 +24,7 @@ namespace RawRabbit
 			.Use<GlobalExecutionIdMiddleware>()
 			.Use<SubscriptionExceptionMiddleware>(new SubscriptionExceptionOptions { InnerPipe = p => p.Use<SubscribeInvokationMiddleware>()})
 			.Use<AutoAckMiddleware>()
-			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(ConsumerStage.HandlerInvoked));
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.HandlerInvoked));
 
 		public static readonly Action<IPipeBuilder> AutoAckPipe = pipe => pipe
 			.Use<ConsumeConfigurationMiddleware>()
