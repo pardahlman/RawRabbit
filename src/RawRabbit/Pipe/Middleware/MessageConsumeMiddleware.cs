@@ -61,7 +61,7 @@ namespace RawRabbit.Pipe.Middleware
 			if (semaphore == null)
 			{
 				_logger.LogDebug("Consuming messages without throttle.");
-				Task.Run(asyncAction, ct);
+				Task.Run(asyncAction, ct).ConfigureAwait(false);
 				return;
 			}
 			semaphore

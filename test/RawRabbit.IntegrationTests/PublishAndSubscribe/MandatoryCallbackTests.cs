@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using RabbitMQ.Client.Events;
 using RawRabbit.IntegrationTests.TestMessages;
+using RawRabbit.Pipe;
 using Xunit;
 
 namespace RawRabbit.IntegrationTests.PublishAndSubscribe
@@ -17,12 +18,13 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 				var callbackTcs = new TaskCompletionSource<BasicReturnEventArgs>();
 
 				/* Test */
-				await publisher.PublishAsync(new BasicMessage {Prop = "Hello, world!"}, cfg => cfg
-					.WithReturnCallback(args =>
+				await publisher.PublishAsync(new BasicMessage {Prop = "Hello, world!"}, ctx => ctx
+					.PublisherConfiguration(cfg => cfg
+						.WithReturnCallback(args =>
 						{
 							callbackTcs.TrySetResult(args);
 						})
-				);
+					));
 				await callbackTcs.Task;
 
 				/* Assert */
@@ -46,12 +48,13 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 				});
 
 					/* Test */
-				await publisher.PublishAsync(new BasicMessage {Prop = "Hello, world!"}, cfg => cfg
+				await publisher.PublishAsync(new BasicMessage {Prop = "Hello, world!"}, ctx => ctx
+					.PublisherConfiguration(cfg => cfg
 						.WithReturnCallback(args =>
 						{
 							callbackTcs.TrySetResult(args);
 						})
-				);
+					));
 				await deliveredTcs.Task;
 				callbackTcs.Task.Wait(TimeSpan.FromMilliseconds(200));
 

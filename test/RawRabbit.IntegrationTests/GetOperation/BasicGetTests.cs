@@ -2,6 +2,7 @@
 using RabbitMQ.Client;
 using RawRabbit.Common;
 using RawRabbit.IntegrationTests.TestMessages;
+using RawRabbit.Pipe;
 using Xunit;
 
 namespace RawRabbit.IntegrationTests.GetOperation
@@ -20,7 +21,7 @@ namespace RawRabbit.IntegrationTests.GetOperation
 				TestChannel.ExchangeDeclare(conventions.ExchangeNamingConvention(message.GetType()), ExchangeType.Topic);
 				TestChannel.QueueBind(conventions.QueueNamingConvention(message.GetType()), conventions.ExchangeNamingConvention(message.GetType()), conventions.RoutingKeyConvention(message.GetType()) + ".#");
 
-				await client.PublishAsync(message, cfg => cfg.OnDeclaredExchange(e => e.AssumeInitialized()));
+				await client.PublishAsync(message, ctx => ctx.PublisherConfiguration(cfg => cfg.OnDeclaredExchange(e => e.AssumeInitialized())));
 
 				/* Test */
 				var ackable = await client.GetAsync<BasicMessage>();

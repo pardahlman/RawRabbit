@@ -48,7 +48,7 @@ namespace RawRabbit
 		public static Task SubscribeAsync<TMessage, TMessageContext>(this IBusClient client, Func<TMessage, TMessageContext, Task> subscribeMethod, Action<IPipeContext> context = null, CancellationToken ct = default(CancellationToken))
 		{
 			return client.SubscribeAsync<TMessage, TMessageContext>(
-					(msg, ctx) => subscribeMethod?
+					(msg, ctx) => subscribeMethod
 						.Invoke(msg, ctx)
 						.ContinueWith<Acknowledgement>(t => new Ack(), ct),
 					context, ct);

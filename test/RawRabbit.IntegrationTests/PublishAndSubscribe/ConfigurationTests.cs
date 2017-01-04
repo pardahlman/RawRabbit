@@ -55,7 +55,7 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 				var message = new BasicMessage { Prop = "Hello, world!" };
 
 				/* Test */
-				await publisher.PublishAsync(message, cfg => cfg.OnExchange("custom_exchange"));
+				await publisher.PublishAsync(message, ctx => ctx.PublisherConfiguration(cfg => cfg.OnExchange("custom_exchange")));
 				await recievedTcs.Task;
 
 				/* Assert */
@@ -94,10 +94,11 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 				var message = new BasicMessage { Prop = "Hello, world!" };
 
 				/* Test */
-				await publisher.PublishAsync(message, cfg => cfg
+				await publisher.PublishAsync(message, ctx => ctx
+					.PublisherConfiguration(cfg => cfg
 						.OnExchange("custom_exchange")
 						.WithRoutingKey("custom_key")
-				);
+				));
 				await recievedTcs.Task;
 
 				/* Assert */

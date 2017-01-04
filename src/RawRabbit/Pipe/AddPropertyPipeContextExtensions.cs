@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using RawRabbit.Configuration.Consumer;
+using RawRabbit.Configuration.Publisher;
 
 namespace RawRabbit.Pipe
 {
@@ -19,6 +20,12 @@ namespace RawRabbit.Pipe
 		}
 
 		public static IPipeContext ConsumerConfiguration(this IPipeContext context, Action<IConsumerConfigurationBuilder> configuration)
+		{
+			context.Properties.Add(PipeKey.ConfigurationAction, configuration);
+			return context;
+		}
+
+		public static IPipeContext PublisherConfiguration(this IPipeContext context, Action<IPublisherConfigurationBuilder> configuration)
 		{
 			context.Properties.Add(PipeKey.ConfigurationAction, configuration);
 			return context;

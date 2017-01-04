@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using RawRabbit.Context;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.vNext.Pipe;
@@ -16,22 +17,22 @@ namespace RawRabbit.IntegrationTests.MessageContextArgument
 			{
 				/* Setup */
 				var msgTcs = new TaskCompletionSource<BasicMessage>();
-				var ctxTcs = new TaskCompletionSource<MessageContext>();
+				MessageContext recievedContext = null;
 				await subscriber.SubscribeAsync<BasicMessage, MessageContext>((msg, context) =>
 				{
-					msgTcs.TrySetResult(msg);
-					ctxTcs.TrySetResult(context);
+					recievedContext = context;
+					msgTcs.SetResult(msg);
 					return Task.FromResult(0);
 				});
 				var message = new BasicMessage { Prop = "Hello, world!" };
 
 				/* Test */
-				await publisher.PublishAsync(message);
+				publisher.PublishAsync(message);
 				await msgTcs.Task;
 
 				/* Assert */
 				Assert.Equal(message.Prop, msgTcs.Task.Result.Prop);
-				Assert.NotNull(ctxTcs.Task.Result);
+				Assert.NotNull(recievedContext);
 			}
 		}
 	}

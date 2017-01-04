@@ -56,12 +56,13 @@ namespace RawRabbit.IntegrationTests.Enrichers
 				});
 
 				/* Test */
-				await publisher.PublishAsync(new AttributedMessage(), cfg => cfg
-					.OnDeclaredExchange(e => e
-						.WithName("my_topic")
-						.WithType(ExchangeType.Topic))
-					.WithRoutingKey("my_key")
-				);
+				await publisher.PublishAsync(new AttributedMessage(), ctx => ctx
+						.PublisherConfiguration(cfg => cfg
+							.OnDeclaredExchange(e => e
+								.WithName("my_topic")
+								.WithType(ExchangeType.Topic))
+							.WithRoutingKey("my_key")
+				));
 				await recievedTcs.Task;
 
 				/* Assert */
@@ -75,16 +76,6 @@ namespace RawRabbit.IntegrationTests.Enrichers
 			using (var requester = RawRabbitFactory.CreateTestClient(new RawRabbitOptions
 			{
 				Plugins = plugin => plugin.UseAttributeRouting(
-				//new PublishAttributeOptions
-				//{
-				//	ConfigFunc = context => context.GetRequestConfiguration()?.Request,
-				//	MessageTypeFunc = context => context.GetRequestMessageType()
-				//},
-				//new ConsumeAttributeOptions
-				//{
-				//	ConfigFunc = context => context.GetRequestConfiguration()?.Response,
-				//	MessageTypeFunc = context => context.GetResponseMessageType()
-				//}
 				)
 			}
 			))
