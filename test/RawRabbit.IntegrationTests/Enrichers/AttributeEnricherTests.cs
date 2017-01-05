@@ -120,14 +120,15 @@ namespace RawRabbit.IntegrationTests.Enrichers
 				});
 
 				/* Test */
-				await requester.RequestAsync<AttributedRequest, AttributedResponse>(new AttributedRequest(), cfg => cfg
-					.PublishRequest(req => req
-						.OnDeclaredExchange(e => e
-							.WithName("rpc_exchange")
-							.WithType(ExchangeType.Topic))
-						.WithRoutingKey("my_request_key")
+				await requester.RequestAsync<AttributedRequest, AttributedResponse>(new AttributedRequest(), ctx => ctx
+					.RequestConfiguration(cfg => cfg
+						.PublishRequest(req => req
+							.OnDeclaredExchange(e => e
+								.WithName("rpc_exchange")
+								.WithType(ExchangeType.Topic))
+							.WithRoutingKey("my_request_key")
 					)
-				);
+				));
 				await recievedTcs.Task;
 
 				/* Assert */

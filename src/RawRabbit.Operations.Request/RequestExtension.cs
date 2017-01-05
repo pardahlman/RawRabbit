@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RawRabbit.Common;
@@ -56,7 +57,7 @@ namespace RawRabbit
 				})
 			;
 
-		public static Task<TResponse> RequestAsync<TRequest, TResponse>(this IBusClient client, TRequest message = default(TRequest), Action<IRequestConfigurationBuilder> configuration = null)
+		public static Task<TResponse> RequestAsync<TRequest, TResponse>(this IBusClient client, TRequest message = default(TRequest), Action<IPipeContext> context = null, CancellationToken ct = default(CancellationToken))
 		{
 			return client
 				.InvokeAsync(RequestPipe, ctx =>
@@ -64,8 +65,8 @@ namespace RawRabbit
 					ctx.Properties.Add(RequestKey.RequestMessageType, typeof(TRequest));
 					ctx.Properties.Add(RequestKey.ResponseMessageType, typeof(TResponse));
 					ctx.Properties.Add(PipeKey.Message, message);
-					ctx.Properties.Add(PipeKey.ConfigurationAction, configuration);
-				})
+					context?.Invoke(ctx);
+				}, ct)
 				.ContinueWith(tContext =>
 				{
 					if (tContext.IsFaulted)
@@ -73,7 +74,7 @@ namespace RawRabbit
 						throw tContext?.Exception?.InnerException ?? new Exception();
 					}
 					return tContext.Result.Get<TResponse>(RequestKey.ResponseMessage);
-				});
+				}, ct);
 		}
 	}
 }

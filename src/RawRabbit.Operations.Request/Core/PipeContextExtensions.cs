@@ -6,6 +6,7 @@ using RawRabbit.Configuration.Consumer;
 using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Queue;
 using RawRabbit.Operations.Request.Configuration;
+using RawRabbit.Operations.Request.Configuration.Abstraction;
 using RawRabbit.Pipe;
 
 namespace RawRabbit.Operations.Request.Core
@@ -65,6 +66,12 @@ namespace RawRabbit.Operations.Request.Core
 		public static ConsumerConfiguration GetResponseConfiguration(this IPipeContext context)
 		{
 			return context.GetRequestConfiguration()?.Response;
+		}
+
+		public static IPipeContext RequestConfiguration(this IPipeContext context, Action<IRequestConfigurationBuilder> configuration)
+		{
+			context.Properties.Add(PipeKey.ConfigurationAction, configuration);
+			return context;
 		}
 	}
 }
