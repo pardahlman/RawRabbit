@@ -39,6 +39,7 @@ namespace RawRabbit
 					}
 				})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.BasicPropertiesCreated))
+			.Use<RequestTimeoutMiddleware>()
 			.Use<ResponseConsumeMiddleware>(new ResponseConsumerOptions
 				{
 					ResponseRecieved = p => p
