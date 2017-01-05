@@ -17,7 +17,7 @@ namespace RawRabbit.Pipe.Middleware
 		public Func<IPipeContext, Action<IConsumerConfigurationBuilder>> ConfigActionFunc { get; set; }
 	}
 
-	public class ConsumeConfigurationMiddleware : Middleware
+	public class ConsumeConfigurationMiddleware : ConfigurationMiddlewareBase
 	{
 		protected IConsumerConfigurationFactory ConfigFactory;
 		protected Func<IPipeContext, string> QueueFunc;
@@ -43,16 +43,10 @@ namespace RawRabbit.Pipe.Middleware
 				?? ExtractConfigFromStrings(context)
 				?? CreateDefaultConfig(context);
 
-			foreach (var queueAction in context.GetQueueActions())
-			{
-				var queue = new QueueDeclarationBuilder(config.Queue);
-				queueAction?.Invoke(queue);
-			}
-			foreach (var exchangeAction in context.GetExchangeActions())
-			{
-				var exchange = new ExchangeDeclarationBuilder(config.Exchange);
-				exchangeAction?.Invoke(exchange);
-			}
+			var msgType = GetMessageType(context);
+			InvokeQueueActions(context, msgType, config.Queue);
+			InvokeExchangeActions(context, msgType, config.Exchange);
+			InvokeConsumeActions(context, msgType, config.Consume);
 			config.Consume.ExchangeName = config.Exchange.Name;
 			config.Consume.QueueName = config.Queue.Name;
 
@@ -64,7 +58,6 @@ namespace RawRabbit.Pipe.Middleware
 				action(builder);
 				config = builder.Config;
 			}
-			
 
 			context.Properties.TryAdd(PipeKey.ConsumerConfiguration, config);
 			context.Properties.TryAdd(PipeKey.ConsumeConfiguration, config.Consume);
@@ -72,6 +65,11 @@ namespace RawRabbit.Pipe.Middleware
 			context.Properties.TryAdd(PipeKey.ExchangeDeclaration, config.Exchange);
 
 			return Next.InvokeAsync(context, token);
+		}
+
+		protected virtual Type GetMessageType(IPipeContext context)
+		{
+			return MessageTypeFunc(context);
 		}
 
 		protected Action<IConsumerConfigurationBuilder> GetConfigurationAction(IPipeContext context)

@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using RawRabbit.Common;
+using RawRabbit.Configuration.BasicPublish;
+using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Publisher;
 using RawRabbit.Logging;
 using RawRabbit.Pipe;
+using RawRabbit.Pipe.Middleware;
 
 namespace RawRabbit.Operations.Publish.Middleware
 {
@@ -16,7 +19,7 @@ namespace RawRabbit.Operations.Publish.Middleware
 		public Func<IPipeContext, Type> MessageTypeFunc { get; set; }
 	}
 
-	public class PublisherConfigurationMiddleware : Pipe.Middleware.Middleware
+	public class PublisherConfigurationMiddleware : ConfigurationMiddlewareBase
 	{
 		protected readonly IPublisherConfigurationFactory PublisherFactory;
 		protected readonly Func<IPipeContext, string> ExchangeFunc;
@@ -41,6 +44,10 @@ namespace RawRabbit.Operations.Publish.Middleware
 				throw new ArgumentNullException(nameof(config));
 			}
 
+			var msgType = GetMessageType(context);
+			InvokeExchangeActions(context, msgType, config.Exchange);
+			InvokePublishActions(context, msgType, config);
+			config.ExchangeName = config.Exchange.Name;
 			var action = context.Get<Action<IPublisherConfigurationBuilder>>(PipeKey.ConfigurationAction);
 			if (action != null)
 			{
@@ -58,6 +65,11 @@ namespace RawRabbit.Operations.Publish.Middleware
 			return Next.InvokeAsync(context, token);
 		}
 
+		protected virtual Type GetMessageType(IPipeContext context)
+		{
+			return MessageTypeFunc(context);
+		}
+
 		protected virtual PublisherConfiguration ExtractConfigFromStrings(IPipeContext context)
 		{
 			var routingKey = RoutingKeyFunc(context);
@@ -67,7 +79,7 @@ namespace RawRabbit.Operations.Publish.Middleware
 
 		protected virtual PublisherConfiguration ExtractConfigFromMessageType(IPipeContext context)
 		{
-			var messageType = MessageTypeFunc(context);
+			var messageType = GetMessageType(context);
 			return messageType == null
 				? null
 				: PublisherFactory.Create(messageType);

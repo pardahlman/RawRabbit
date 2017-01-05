@@ -28,11 +28,12 @@ namespace RawRabbit
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.HandlerInvoked));
 
 		public static readonly Action<IPipeBuilder> SubscribePipe = pipe => pipe
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.Initialized))
 			.Use<CustomQueueSuffixMiddleware>()
 			.Use<ApplicationQueueSuffixMiddleware>()
 			.Use<HostnameQueueSuffixMiddleware>()
 			.Use<ConsumeConfigurationMiddleware>()
-			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(SubscribeStage.ConsumeConfigured))
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.ConsumeConfigured))
 			.Use<ExecutionIdRoutingMiddleware>()
 			.Use<QueueDeclareMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(SubscribeStage.QueueDeclared))

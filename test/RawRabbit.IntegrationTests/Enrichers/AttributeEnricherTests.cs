@@ -75,10 +75,9 @@ namespace RawRabbit.IntegrationTests.Enrichers
 		public async Task Should_Work_For_Request()
 		{
 			using (var requester = RawRabbitFactory.CreateTestClient(new RawRabbitOptions
-			{
-				Plugins = plugin => plugin.UseAttributeRouting(
-				)
-			}
+				{
+					Plugins = plugin => plugin.UseAttributeRouting()
+				}
 			))
 			using (var responder = RawRabbitFactory.CreateTestClient())
 			{

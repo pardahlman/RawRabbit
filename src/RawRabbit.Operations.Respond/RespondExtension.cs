@@ -60,7 +60,7 @@ namespace RawRabbit
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ResponsePublished));
 
 		public static readonly Action<IPipeBuilder> RespondPipe = pipe => pipe
-			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.Initiated))
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.Initialized))
 			.Use<RespondConfigurationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ConsumeConfigured))
 			.Use<QueueDeclareMiddleware>()
