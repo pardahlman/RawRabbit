@@ -3,6 +3,7 @@ using RawRabbit.Configuration.Exchange;
 using RawRabbit.Enrichers.Attributes;
 using RawRabbit.Enrichers.Attributes.Middleware;
 using RawRabbit.Operations.Request.Core;
+using RawRabbit.Operations.Respond.Core;
 using RawRabbit.Pipe;
 using RawRabbit.vNext.Pipe;
 using Xunit;
@@ -87,13 +88,13 @@ namespace RawRabbit.IntegrationTests.Enrichers
 				{
 					recievedTcs.TrySetResult(recieved);
 					return Task.FromResult(new AttributedResponse());
-				}, cfg => cfg
+				}, ctx => ctx.RespondConfiguration(cfg => cfg
 					.Consume(c => c
 						.WithRoutingKey("my_request_key"))
 					.OnDeclaredExchange(e => e
 						.WithName("rpc_exchange")
 						.WithType(ExchangeType.Topic))
-				);
+				));
 
 				/* Test */
 				await requester.RequestAsync<AttributedRequest, AttributedResponse>(new AttributedRequest());

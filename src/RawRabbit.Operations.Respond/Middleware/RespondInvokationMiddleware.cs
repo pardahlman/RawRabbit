@@ -13,6 +13,10 @@ namespace RawRabbit.Operations.Respond.Middleware
 			HandlerArgsFunc = options?.HandlerArgsFunc ?? (context => new []{ context.GetMessage()}),
 			PostInvokeAction = options?.PostInvokeAction ?? ((context, task) =>
 			{
+				if (task.IsFaulted)
+				{
+					return;
+				}
 				var responseTask = task as Task<object>;
 				if (responseTask != null)
 				{

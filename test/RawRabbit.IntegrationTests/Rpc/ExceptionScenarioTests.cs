@@ -33,6 +33,27 @@ namespace RawRabbit.IntegrationTests.Rpc
 		}
 
 		[Fact]
+		public async Task Should_Propegate_Responder_Exception_To_Requester_When_Request_Handler_Is_Async()
+		{
+			using (var requester = RawRabbitFactory.CreateTestClient())
+			using (var responder = RawRabbitFactory.CreateTestClient())
+			{
+				/* Setup */
+				Func<BasicRequest, Task<BasicResponse>> errorHandler = async request =>
+				{
+					throw new Exception("Kaboom");
+				};
+				await responder.RespondAsync(errorHandler);
+
+				/* Test */
+				/* Assert */
+				await Assert.ThrowsAsync<MessageHandlerException>(
+					async () => await requester.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest())
+				);
+			}
+		}
+
+		[Fact]
 		public async Task Should_Propegate_Responder_Exception_To_Requester_When_Responder_Has_Context()
 		{
 			using (var requester = RawRabbitFactory.CreateTestClient())

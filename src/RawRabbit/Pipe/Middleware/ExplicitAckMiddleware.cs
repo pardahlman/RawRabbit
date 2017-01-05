@@ -13,44 +13,52 @@ namespace RawRabbit.Pipe.Middleware
 		public Func<IPipeContext, Task> InvokeMessageHandlerFunc { get; set; }
 		public Func<IPipeContext, IBasicConsumer> ConsumerFunc { get; set; }
 		public Func<IPipeContext, BasicDeliverEventArgs> DeliveryArgsFunc { get; set; }
+		public Func<IPipeContext, bool> NoAckFunc { get; set; }
 		public Func<IPipeContext, Task> InvokationResultFunc { get; set; }
 		public Predicate<Acknowledgement> AbortExecution { get; set; }
 	}
 
 	public class ExplicitAckMiddleware : Middleware
 	{
-		private readonly INamingConventions _conventions;
-		private readonly Func<IPipeContext, BasicDeliverEventArgs> _deliveryArgsFunc;
-		private readonly Func<IPipeContext, IBasicConsumer> _consumerFunc;
-		private readonly Func<IPipeContext, Task> _invokationResultFunc;
-		private readonly Predicate<Acknowledgement> _abortExecution;
+		protected INamingConventions Conventions;
+		protected Func<IPipeContext, BasicDeliverEventArgs> DeliveryArgsFunc;
+		protected Func<IPipeContext, IBasicConsumer> ConsumerFunc;
+		protected Func<IPipeContext, Task> InvokationResultFunc;
+		protected Predicate<Acknowledgement> AbortExecution;
+		protected Func<IPipeContext, bool> NoAckFunc;
 
 		public ExplicitAckMiddleware(INamingConventions conventions, ExplicitAckOptions options = null)
 		{
-			_conventions = conventions;
-			_deliveryArgsFunc = options?.DeliveryArgsFunc ?? (context => context.GetDeliveryEventArgs());
-			_consumerFunc = options?.ConsumerFunc ?? (context => context.GetConsumer());
-			_invokationResultFunc = options?.InvokationResultFunc ?? (context => context.GetMessageHandlerResult());
-			_abortExecution = options?.AbortExecution ?? (acknowledgement => !(acknowledgement is Ack));
+			Conventions = conventions;
+			DeliveryArgsFunc = options?.DeliveryArgsFunc ?? (context => context.GetDeliveryEventArgs());
+			ConsumerFunc = options?.ConsumerFunc ?? (context => context.GetConsumer());
+			InvokationResultFunc = options?.InvokationResultFunc ?? (context => context.GetMessageHandlerResult());
+			AbortExecution = options?.AbortExecution ?? (ack => !(ack is Ack));
+			NoAckFunc = options?.NoAckFunc ?? (context => context.GetConsumeConfiguration().NoAck);
 		}
 
 		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
+			var noAck = GetNoAck(context);
+			if (noAck)
+			{
+				return Next.InvokeAsync(context, token);
+			}
 			var ack = AcknowledgeMessage(context);
-			return _abortExecution(ack)
+			return AbortExecution(ack)
 				? Task.FromResult(0)
 				: Next.InvokeAsync(context, token);
 		}
 		
 		protected virtual Acknowledgement AcknowledgeMessage(IPipeContext context)
 		{
-			var ack = (_invokationResultFunc(context) as Task<Acknowledgement>)?.Result;
+			var ack = (InvokationResultFunc(context) as Task<Acknowledgement>)?.Result;
 			if (ack == null)
 			{
 				throw new NotSupportedException($"Invokation Result of Message Handler not found.");
 			}
-			var deliveryArgs = _deliveryArgsFunc(context);
-			var channel = _consumerFunc(context).Model;
+			var deliveryArgs = DeliveryArgsFunc(context);
+			var channel = ConsumerFunc(context).Model;
 
 			if (ack is Ack)
 			{
@@ -93,8 +101,8 @@ namespace RawRabbit.Pipe.Middleware
 
 		protected virtual void HandleRetry(Retry retry, IModel channel, BasicDeliverEventArgs deliveryArgs)
 		{
-			var dlxName = _conventions.RetryLaterExchangeConvention(retry.Span);
-			var dlQueueName = _conventions.RetryLaterExchangeConvention(retry.Span);
+			var dlxName = Conventions.RetryLaterExchangeConvention(retry.Span);
+			var dlQueueName = Conventions.RetryLaterExchangeConvention(retry.Span);
 			channel.ExchangeDeclare(dlxName, ExchangeType.Direct, true, true, null);
 			channel.QueueDeclare(dlQueueName, true, false, true, new Dictionary<string, object>
 				{
@@ -105,6 +113,11 @@ namespace RawRabbit.Pipe.Middleware
 			channel.QueueBind(dlQueueName, dlxName, deliveryArgs.RoutingKey, null);
 			channel.BasicPublish(dlxName, deliveryArgs.RoutingKey, deliveryArgs.BasicProperties, deliveryArgs.Body);
 			channel.QueueUnbind(dlQueueName, dlxName, deliveryArgs.RoutingKey, null);
+		}
+
+		protected virtual bool GetNoAck(IPipeContext context)
+		{
+			return NoAckFunc(context);
 		}
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Operations.Respond.Acknowledgement;
@@ -28,7 +29,7 @@ namespace RawRabbit
 			})
 			.Use<GlobalExecutionIdMiddleware>()
 			.Use<RespondExceptionMiddleware>(new RespondExceptionOptions { InnerPipe = p => p.Use<RespondInvokationMiddleware>() })
-			.Use<AutoAckMiddleware>()
+			.Use<ExplicitAckMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.HandlerInvoked))
 			.Use<BasicPropertiesMiddleware>(new BasicPropertiesOptions
 			{
@@ -58,7 +59,7 @@ namespace RawRabbit
 			})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ResponsePublished));
 
-		public static readonly Action<IPipeBuilder> AutoAckPipe = pipe => pipe
+		public static readonly Action<IPipeBuilder> RespondPipe = pipe => pipe
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.Initiated))
 			.Use<RespondConfigurationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ConsumeConfigured))
@@ -73,44 +74,48 @@ namespace RawRabbit
 			.Use<MessageConsumeMiddleware>(new ConsumeOptions { Pipe = ConsumePipe })
 			.Use<SubscriptionMiddleware>();
 
-		public static readonly Action<IPipeBuilder> ExplicitAckPipe = AutoAckPipe + (pipe => pipe
-			.Replace<MessageConsumeMiddleware, MessageConsumeMiddleware>(args: new ConsumeOptions
-			{
-				Pipe = ConsumePipe + (consume => consume.Replace<AutoAckMiddleware, ExplicitAckMiddleware>())
-			}));
-
-		public static Task RespondAsync<TRequest, TResponse>(this IBusClient client, Func<TRequest, Task<TResponse>> handler, Action<IRespondConfigurationBuilder> configuration = null)
+		public static Task RespondAsync<TRequest, TResponse>(
+			this IBusClient client,
+			Func<TRequest, Task<TResponse>> handler,
+			Action<IPipeContext> context = null,
+			CancellationToken ct = default(CancellationToken))
 		{
-			return client
-				.InvokeAsync(
-					AutoAckPipe,
-					ctx =>
+			return client.RespondAsync<TRequest, TResponse>(request => handler
+					.Invoke(request)
+					.ContinueWith<TypedAcknowlegement<TResponse>>(t =>
 					{
-						Func<object[], Task> genericHandler = args => handler((TRequest)args[0]).ContinueWith(tResponse => tResponse.Result as object);
-
-						ctx.Properties.Add(RespondKey.RequestMessageType, typeof(TRequest));
-						ctx.Properties.Add(RespondKey.ResponseMessageType, typeof(TResponse));
-						ctx.Properties.Add(PipeKey.MessageType, typeof(TRequest));
-						ctx.Properties.Add(PipeKey.ConfigurationAction, configuration);
-						ctx.Properties.Add(PipeKey.MessageHandler, genericHandler);
-					}
-				);
+						if (t.IsFaulted)
+							throw t.Exception;
+						return new Ack<TResponse>(t.Result);
+					}, ct),
+				context,
+				ct);
 		}
 
-		public static Task RespondAsync<TRequest, TResponse>(this IBusClient client, Func<TRequest, Task<TypedAcknowlegement<TResponse>>> handler, Action<IRespondConfigurationBuilder> configuration = null)
+		public static Task RespondAsync<TRequest, TResponse>(
+			this IBusClient client,
+			Func<TRequest, Task<TypedAcknowlegement<TResponse>>> handler,
+			Action<IPipeContext> context = null,
+			CancellationToken ct = default(CancellationToken))
 		{
 			return client
 				.InvokeAsync(
-					ExplicitAckPipe,
+					RespondPipe,
 					ctx =>
 					{
-						Func<object[], Task> genericHandler = args => handler((TRequest)args[0]).ContinueWith(tResponse => tResponse.Result.AsUntyped());
+						Func<object[], Task> genericHandler = args => handler((TRequest)args[0])
+							.ContinueWith(tResponse =>
+							{
+								if (tResponse.IsFaulted)
+									throw tResponse.Exception;
+								return tResponse.Result.AsUntyped();
+							}, ct);
 
 						ctx.Properties.Add(RespondKey.RequestMessageType, typeof(TRequest));
 						ctx.Properties.Add(RespondKey.ResponseMessageType, typeof(TResponse));
-						ctx.Properties.Add(PipeKey.ConfigurationAction, configuration);
 						ctx.Properties.Add(PipeKey.MessageHandler, genericHandler);
-					}
+						context?.Invoke(ctx);
+					}, ct
 				);
 		}
 	}

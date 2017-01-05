@@ -23,7 +23,7 @@ namespace RawRabbit
 			{
 				consume = new ConsumeAttributeOptions
 				{
-					MessageTypeFunc = context => context.Get<Type>(PipeKey.MessageType) ?? context.Get<Type>(ResponseMsgType)
+					MessageTypeFunc = context => context.Get<Type>(PipeKey.MessageType) ?? context.Get<Type>(RequestMsgType)
 				};
 			}
 			builder.Register(pipe => pipe

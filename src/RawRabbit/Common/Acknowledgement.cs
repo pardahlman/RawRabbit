@@ -3,7 +3,6 @@
 namespace RawRabbit.Common
 {
 	public abstract class Acknowledgement { }
-
 	public class Ack : Acknowledgement
 	{
 		
