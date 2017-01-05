@@ -38,7 +38,8 @@ namespace RawRabbit.vNext.Pipe
 			return Instantiation.RawRabbitFactory.CreateInstanceFactory(new Instantiation.RawRabbitOptions
 			{
 				Plugins = options?.Plugins,
-				DependencyInjection = di
+				DependencyInjection = di,
+				ClientConfiguration = options?.ClientConfiguration
 			}, ioc, register => new ServiceProviderAdapter((register as ServiceCollectionAdapter)?.Collection));
 		}
 	}

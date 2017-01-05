@@ -31,6 +31,11 @@ namespace RawRabbit.Instantiation
 			register.AddRawRabbit();
 			options?.DependencyInjection?.Invoke(register);
 
+			if (options?.ClientConfiguration != null)
+			{
+				register.AddSingleton(options.ClientConfiguration);
+			}
+
 			if (options?.Plugins != null)
 			{
 				var clientBuilder = new ClientBuilder();
