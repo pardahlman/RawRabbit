@@ -27,9 +27,9 @@ namespace RawRabbit.Pipe.Middleware
 		public PublishAcknowledgeMiddleware(IExclusiveLock exclusive, PublishAcknowledgeOptions options = null)
 		{
 			_exclusive = exclusive;
-			TimeOutFunc = options?.TimeOutFunc ?? (context => context.GetClientConfiguration().PublishConfirmTimeout);
+			TimeOutFunc = options?.TimeOutFunc ?? (context => context.GetPublishAcknowledgeTimeout());
 			ChannelFunc = options?.ChannelFunc ?? (context => context.GetTransientChannel());
-			EnabledFunc = options?.EnabledFunc ?? (context => context.GetClientConfiguration().PublishConfirmTimeout != TimeSpan.MaxValue);
+			EnabledFunc = options?.EnabledFunc ?? (context => context.GetPublishAcknowledgeTimeout() != TimeSpan.MaxValue);
 		}
 
 		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
@@ -112,4 +112,25 @@ namespace RawRabbit.Pipe.Middleware
 			}, null, timeout, new TimeSpan(-1));
 		}
 	}
+
+	public static class PublishAcknowledgePipeExtensions
+	{
+		public static IPipeContext PublishAcknowledgeTimeout(this IPipeContext context, TimeSpan timeout)
+		{
+			context.Properties.TryAdd(PipeKey.PublishAcknowledgeTimeout, timeout);
+			return context;
+		}
+
+		public static IPipeContext PublishAcknowledgeDisabled(this IPipeContext context)
+		{
+			return context.PublishAcknowledgeTimeout(TimeSpan.MaxValue);
+		}
+
+		public static TimeSpan GetPublishAcknowledgeTimeout(this IPipeContext context)
+		{
+			var fallback = context.GetClientConfiguration().PublishConfirmTimeout;
+			return context.Get(PipeKey.PublishAcknowledgeTimeout, fallback);
+		}
+	}
+
 }
