@@ -21,7 +21,7 @@ namespace RawRabbit.IntegrationTests.GetOperation
 				TestChannel.ExchangeDeclare(conventions.ExchangeNamingConvention(message.GetType()), ExchangeType.Topic);
 				TestChannel.QueueBind(conventions.QueueNamingConvention(message.GetType()), conventions.ExchangeNamingConvention(message.GetType()), conventions.RoutingKeyConvention(message.GetType()) + ".#");
 
-				await client.PublishAsync(message, ctx => ctx.PublisherConfiguration(cfg => cfg.OnDeclaredExchange(e => e.AssumeInitialized())));
+				await client.PublishAsync(message, ctx => ctx.UsePublisherConfiguration(cfg => cfg.OnDeclaredExchange(e => e.AssumeInitialized())));
 
 				/* Test */
 				var ackable = await client.GetAsync<BasicMessage>();

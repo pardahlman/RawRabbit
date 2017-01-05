@@ -48,7 +48,7 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 					recievedTcs.TrySetResult(recieved);
 					return Task.FromResult(true);
 				}, ctx => ctx
-					.ConsumerConfiguration(cfg => cfg
+					.UseConsumerConfiguration(cfg => cfg
 						.OnDeclaredExchange(e=> e
 							.WithName("custom_exchange")
 						))
@@ -57,7 +57,7 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 				var message = new BasicMessage { Prop = "Hello, world!" };
 
 				/* Test */
-				await publisher.PublishAsync(message, ctx => ctx.PublisherConfiguration(cfg => cfg.OnExchange("custom_exchange")));
+				await publisher.PublishAsync(message, ctx => ctx.UsePublisherConfiguration(cfg => cfg.OnExchange("custom_exchange")));
 				await recievedTcs.Task;
 
 				/* Assert */
@@ -78,7 +78,7 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 					recievedTcs.TrySetResult(recieved);
 					return Task.FromResult(true);
 				}, ctx => ctx
-					.ConsumerConfiguration(cfg => cfg
+					.UseConsumerConfiguration(cfg => cfg
 						.Consume(c => c
 							.WithRoutingKey("custom_key")
 							.WithConsumerTag("custom_tag")
@@ -97,7 +97,7 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 
 				/* Test */
 				await publisher.PublishAsync(message, ctx => ctx
-					.PublisherConfiguration(cfg => cfg
+					.UsePublisherConfiguration(cfg => cfg
 						.OnExchange("custom_exchange")
 						.WithRoutingKey("custom_key")
 				));
@@ -124,18 +124,17 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 					firstTcs.TrySetResult(msg);
 					return Task.FromResult(0);
 				}, ctx => ctx
-					.ConsumerConfiguration(cfg => cfg
-						.FromDeclaredQueue(q => q.WithNameSuffix("first"))
-					)
+					.UseCustomQueueSuffix("second")
+					.UseApplicationQueueSuffix()
 				);
 				await secondSubscriber.SubscribeAsync<BasicMessage>(msg =>
 				{
 					secondTcs.TrySetResult(msg);
 					return Task.FromResult(0);
 				}, ctx => ctx
-					.ConsumerConfiguration(cfg => cfg
-						.FromDeclaredQueue(q => q.WithNameSuffix("second"))
-					)
+					.UseApplicationQueueSuffix()
+					.UseHostnameQueueSuffix()
+					.UseCustomQueueSuffix("second")
 				);
 
 				/* Test */
@@ -168,7 +167,7 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 					msgTcs.TrySetResult(msg);
 					return Task.FromResult(0);
 				}, ctx => ctx
-					.ConsumerConfiguration(cfg => cfg
+					.UseConsumerConfiguration(cfg => cfg
 						.FromDeclaredQueue(q => q.WithName(queueName))
 					)
 				);
@@ -201,15 +200,15 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 					msgTcs.TrySetResult(msg);
 					return Task.FromResult(0);
 				}, ctx => ctx
-					.ConsumerConfiguration(cfg => cfg
+					.UseConsumerConfiguration(cfg => cfg
 						.OnDeclaredExchange(e => e.WithName(exchangeName))
 					)
 				);
 
 				/* Test */
 				await publisher.PublishAsync(message, ctx => ctx
-					.PublishAcknowledgeDisabled()
-					.PublisherConfiguration(c => c.OnExchange(exchangeName))
+					.UsePublishAcknowledge()
+					.UsePublisherConfiguration(c => c.OnExchange(exchangeName))
 				);
 				await msgTcs.Task;
 

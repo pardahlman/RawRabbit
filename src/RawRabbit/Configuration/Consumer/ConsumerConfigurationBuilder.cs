@@ -27,8 +27,8 @@ namespace RawRabbit.Configuration.Consumer
 		{
 			var builder = new QueueDeclarationBuilder(Config.Queue);
 			queue(builder);
-			Config.Queue = builder.Configuration;
-			Config.Consume.QueueName = builder.Configuration.Name;
+			Config.Queue = builder.Declaration;
+			Config.Consume.QueueName = builder.Declaration.Name;
 			return this;
 		}
 

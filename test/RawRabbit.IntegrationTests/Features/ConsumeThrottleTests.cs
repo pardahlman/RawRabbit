@@ -32,7 +32,7 @@ namespace RawRabbit.IntegrationTests.Features
 					{
 						doneTsc.TrySetResult(true);
 					}
-				}, context: c => c.ConsumerConcurrency(concurrencyLevel));
+				}, context: c => c.UseConsumerConcurrency(concurrencyLevel));
 
 				/* Test */
 				for (var i = 0; i < messageCount; i++)

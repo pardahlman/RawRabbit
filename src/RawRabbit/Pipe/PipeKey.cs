@@ -28,9 +28,9 @@
 		public const string RoutingKey = "RoutingKey";
 		public const string ConsumeSemaphore = "ConsumeSemaphore";
 		public const string QueueDeclaration = "QueueDeclaration";
-		public const string QueueName = "QueueName";
-		public const string ExchangeName = "ExchangeName";
+		public const string QueueActions = "QueueActions";
 		public const string ExchangeDeclaration = "ExchangeDeclaration";
+		public const string ExchangeActions = "ExchangeActions";
 		public const string Subscription = "Subscription";
 		public const string SerializedMessage = "SerializedMessage";
 		public const string ReturnedMessageCallback = "ReturnedMessageCallback";

@@ -115,15 +115,17 @@ namespace RawRabbit.Pipe.Middleware
 
 	public static class PublishAcknowledgePipeExtensions
 	{
-		public static IPipeContext PublishAcknowledgeTimeout(this IPipeContext context, TimeSpan timeout)
+		public static IPipeContext UsePublishAcknowledgeTimeout(this IPipeContext context, TimeSpan timeout)
 		{
 			context.Properties.TryAdd(PipeKey.PublishAcknowledgeTimeout, timeout);
 			return context;
 		}
 
-		public static IPipeContext PublishAcknowledgeDisabled(this IPipeContext context)
+		public static IPipeContext UsePublishAcknowledge(this IPipeContext context, bool use = true)
 		{
-			return context.PublishAcknowledgeTimeout(TimeSpan.MaxValue);
+			return !use
+				? context.UsePublishAcknowledgeTimeout(TimeSpan.MaxValue)
+				: context;
 		}
 
 		public static TimeSpan GetPublishAcknowledgeTimeout(this IPipeContext context)

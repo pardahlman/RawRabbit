@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -51,11 +53,6 @@ namespace RawRabbit.Pipe
 			return context.Get<ExchangeDeclaration>(PipeKey.ExchangeDeclaration);
 		}
 
-		public static string GetExchangeName(this IPipeContext context)
-		{
-			return context.Get<string>(PipeKey.ExchangeName) ?? GetExchangeDeclaration(context)?.Name;
-		}
-
 		public static bool GetMandatoryPublishFlag(this IPipeContext context)
 		{
 			return GetReturnedMessageCallback(context) != null;
@@ -99,6 +96,28 @@ namespace RawRabbit.Pipe
 		public static IModel GetChannel(this IPipeContext context)
 		{
 			return context.Get<IModel>(PipeKey.Channel);
+		}
+
+		public static List<Action<IQueueDeclarationBuilder>> GetQueueActions(this IPipeContext context)
+		{
+			var actions = context.Get<List<Action<IQueueDeclarationBuilder>>>(PipeKey.QueueActions);
+			if (actions == null)
+			{
+				actions = new List<Action<IQueueDeclarationBuilder>>();
+				context.Properties.Add(PipeKey.QueueActions, actions);
+			}
+			return actions;
+		}
+
+		public static List<Action<IExchangeDeclarationBuilder>> GetExchangeActions(this IPipeContext context)
+		{
+			var actions = context.Get<List<Action<IExchangeDeclarationBuilder>>>(PipeKey.ExchangeActions);
+			if (actions == null)
+			{
+				actions = new List<Action<IExchangeDeclarationBuilder>>();
+				context.Properties.Add(PipeKey.ExchangeActions, actions);
+			}
+			return actions;
 		}
 
 		public static IModel GetTransientChannel(this IPipeContext context)

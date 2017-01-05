@@ -19,7 +19,7 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 
 				/* Test */
 				await publisher.PublishAsync(new BasicMessage {Prop = "Hello, world!"}, ctx => ctx
-					.PublisherConfiguration(cfg => cfg
+					.UsePublisherConfiguration(cfg => cfg
 						.WithReturnCallback(args =>
 						{
 							callbackTcs.TrySetResult(args);
@@ -49,7 +49,7 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 
 					/* Test */
 				await publisher.PublishAsync(new BasicMessage {Prop = "Hello, world!"}, ctx => ctx
-					.PublisherConfiguration(cfg => cfg
+					.UsePublisherConfiguration(cfg => cfg
 						.WithReturnCallback(args =>
 						{
 							callbackTcs.TrySetResult(args);

@@ -43,6 +43,19 @@ namespace RawRabbit.Pipe.Middleware
 				?? ExtractConfigFromStrings(context)
 				?? CreateDefaultConfig(context);
 
+			foreach (var queueAction in context.GetQueueActions())
+			{
+				var queue = new QueueDeclarationBuilder(config.Queue);
+				queueAction?.Invoke(queue);
+			}
+			foreach (var exchangeAction in context.GetExchangeActions())
+			{
+				var exchange = new ExchangeDeclarationBuilder(config.Exchange);
+				exchangeAction?.Invoke(exchange);
+			}
+			config.Consume.ExchangeName = config.Exchange.Name;
+			config.Consume.QueueName = config.Queue.Name;
+
 			var action = GetConfigurationAction(context);
 			if (action != null)
 			{
@@ -51,6 +64,7 @@ namespace RawRabbit.Pipe.Middleware
 				action(builder);
 				config = builder.Config;
 			}
+			
 
 			context.Properties.TryAdd(PipeKey.ConsumerConfiguration, config);
 			context.Properties.TryAdd(PipeKey.ConsumeConfiguration, config.Consume);

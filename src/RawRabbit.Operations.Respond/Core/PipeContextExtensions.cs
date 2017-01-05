@@ -38,7 +38,7 @@ namespace RawRabbit.Operations.Respond.Core
 			return context.Get<RespondConfiguration>(RespondKey.Configuration);
 		}
 
-		public static IPipeContext RespondConfiguration(this IPipeContext context, Action<IRespondConfigurationBuilder> configuration)
+		public static IPipeContext UseRespondConfiguration(this IPipeContext context, Action<IRespondConfigurationBuilder> configuration)
 		{
 			context.Properties.Add(PipeKey.ConfigurationAction, configuration);
 			return context;

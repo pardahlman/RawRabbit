@@ -97,7 +97,7 @@ namespace RawRabbit.IntegrationTests.Rpc
 					tsc.TrySetResult(msg);
 					return Task.FromResult(0);
 				}, ctx => ctx
-					.ConsumerConfiguration(cfg => cfg
+					.UseConsumerConfiguration(cfg => cfg
 						.FromDeclaredQueue(q => q.WithName("custom_error_queue"))
 						.OnDeclaredExchange(e => e.WithName("default_error_exchange"))
 				));
@@ -132,7 +132,7 @@ namespace RawRabbit.IntegrationTests.Rpc
 				{
 					tsc.TrySetResult(msg);
 					return Task.FromResult(0);
-				}, ctx => ctx.ConsumerConfiguration(cfg => cfg
+				}, ctx => ctx.UseConsumerConfiguration(cfg => cfg
 					.FromDeclaredQueue(q => q.WithName("custom_error_queue"))
 					.OnDeclaredExchange(e => e.WithName("default_error_exchange"))
 				));
