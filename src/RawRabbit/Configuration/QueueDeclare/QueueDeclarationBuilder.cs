@@ -1,4 +1,6 @@
-﻿namespace RawRabbit.Configuration.Queue
+﻿using RawRabbit.Common;
+
+namespace RawRabbit.Configuration.Queue
 {
 	public class QueueDeclarationBuilder : IQueueDeclarationBuilder
 	{
@@ -11,13 +13,14 @@
 
 		public IQueueDeclarationBuilder WithName(string queueName)
 		{
+			Truncator.Truncate(ref queueName);
 			Configuration.Name = queueName;
 			return this;
 		}
 
 		public IQueueDeclarationBuilder WithNameSuffix(string suffix)
 		{
-			Configuration.NameSuffix = suffix;
+			WithName($"{Configuration.Name}_{suffix}");
 			return this;
 		}
 

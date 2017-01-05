@@ -5,7 +5,7 @@ using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.Operations.Respond.Acknowledgement;
 using Xunit;
 
-namespace RawRabbit.IntegrationTests.PublishAndSubscribe
+namespace RawRabbit.IntegrationTests.Rpc
 {
 	public class AcknowledgementRespondTests
 	{

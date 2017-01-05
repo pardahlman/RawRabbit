@@ -4,22 +4,9 @@ namespace RawRabbit.Configuration.Queue
 {
 	public class QueueDeclaration
 	{
-		public string FullQueueName
-		{
-			get
-			{
-				var fullQueueName =  string.IsNullOrEmpty(NameSuffix)
-					? Name
-					: $"{Name}_{NameSuffix}";
 
-				return fullQueueName.Length > 254
-					? string.Concat("...", fullQueueName.Substring(fullQueueName.Length - 250))
-					: fullQueueName;
-			}
-		}
 
 		public string Name { get; set; }
-		public string NameSuffix { get; set; }
 		public bool Durable { get; set; }
 		public bool Exclusive { get; set; }
 		public bool AutoDelete { get; set; }

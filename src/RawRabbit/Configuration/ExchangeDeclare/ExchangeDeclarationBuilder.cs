@@ -1,4 +1,6 @@
-﻿namespace RawRabbit.Configuration.Exchange
+﻿using RawRabbit.Common;
+
+namespace RawRabbit.Configuration.Exchange
 {
 	public class ExchangeDeclarationBuilder : IExchangeDeclarationBuilder
 	{
@@ -11,6 +13,7 @@
 
 		public IExchangeDeclarationBuilder WithName(string exchangeName)
 		{
+			Truncator.Truncate(ref exchangeName);
 			Declaration.Name = exchangeName;
 			return this;
 		}

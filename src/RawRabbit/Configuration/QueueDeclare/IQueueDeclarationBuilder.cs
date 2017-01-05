@@ -7,6 +7,7 @@
 		IQueueDeclarationBuilder WithDurability(bool durable = true);
 		IQueueDeclarationBuilder WithExclusivity(bool exclusive = true);
 		IQueueDeclarationBuilder WithArgument(string key, object value);
-		
+
+		IQueueDeclarationBuilder WithNameSuffix(string suffix);
 	}
 }

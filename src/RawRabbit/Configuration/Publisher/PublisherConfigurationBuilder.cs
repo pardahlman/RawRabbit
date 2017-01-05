@@ -2,6 +2,7 @@
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Framing;
+using RawRabbit.Common;
 using RawRabbit.Configuration.BasicPublish;
 using RawRabbit.Configuration.Exchange;
 
@@ -36,6 +37,7 @@ namespace RawRabbit.Configuration.Publisher
 		public IBasicPublishConfigurationBuilder OnExchange(string exchange)
 		{
 			Config.Exchange = null;
+			Truncator.Truncate(ref exchange);
 			Config.ExchangeName = exchange;
 			return this;
 		}

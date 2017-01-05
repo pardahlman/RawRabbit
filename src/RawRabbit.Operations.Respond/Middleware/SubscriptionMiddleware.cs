@@ -29,7 +29,7 @@ namespace RawRabbit.Operations.Respond.Middleware
 		{
 			var consumer = _consumerFunc(context);
 			var queue = _queueFunc(context);
-			var subscription = new Subscription(consumer, queue.FullQueueName);
+			var subscription = new Subscription(consumer, queue.Name);
 			context.Properties.Add(PipeKey.Subscription, subscription);
 			return Task.FromResult(subscription);
 		}

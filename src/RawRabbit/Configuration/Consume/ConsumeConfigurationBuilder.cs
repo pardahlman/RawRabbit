@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using RawRabbit.Common;
 using RawRabbit.Pipe;
 
 namespace RawRabbit.Configuration.Consume
@@ -16,6 +17,7 @@ namespace RawRabbit.Configuration.Consume
 
 		public IConsumeConfigurationBuilder OnExchange(string exchange)
 		{
+			Truncator.Truncate(ref exchange);
 			Config.ExchangeName = exchange;
 			ExistingExchange = true;
 			return this;
@@ -23,6 +25,7 @@ namespace RawRabbit.Configuration.Consume
 
 		public IConsumeConfigurationBuilder FromQueue(string queue)
 		{
+			Truncator.Truncate(ref queue);
 			Config.QueueName = queue;
 			ExistingQueue = true;
 			return this;

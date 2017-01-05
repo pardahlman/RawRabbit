@@ -124,7 +124,7 @@ namespace RawRabbit.Common
 
 		public bool IsDeclared(QueueDeclaration queue)
 		{
-			return queue.IsDirectReplyTo() || queue.AssumeInitialized || _initQueues.Contains(queue.FullQueueName);
+			return queue.IsDirectReplyTo() || queue.AssumeInitialized || _initQueues.Contains(queue.Name);
 		}
 
 		private void BindQueueToExchange(ScheduledBindQueueTask bind)
@@ -171,11 +171,11 @@ namespace RawRabbit.Common
 				return;
 			}
 
-			_logger.LogInformation($"Declaring queue '{queue.FullQueueName}'.");
+			_logger.LogInformation($"Declaring queue '{queue.Name}'.");
 
 			var channel = GetOrCreateChannel();
 			channel.QueueDeclare(
-				queue.FullQueueName,
+				queue.Name,
 				queue.Durable,
 				queue.Exclusive,
 				queue.AutoDelete,
@@ -183,7 +183,7 @@ namespace RawRabbit.Common
 
 			if (queue.AutoDelete)
 			{
-				_initQueues.Add(queue.FullQueueName);
+				_initQueues.Add(queue.Name);
 			}
 		}
 

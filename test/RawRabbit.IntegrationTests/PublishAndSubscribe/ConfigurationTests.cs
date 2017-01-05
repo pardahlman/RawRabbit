@@ -1,8 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Exchange;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.Pipe;
+using RawRabbit.Pipe.Middleware;
 using Xunit;
 
 namespace RawRabbit.IntegrationTests.PublishAndSubscribe
@@ -103,6 +105,116 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 
 				/* Assert */
 				Assert.Equal(message.Prop, recievedTcs.Task.Result.Prop);
+			}
+		}
+
+		[Fact]
+		public async Task Should_Be_Able_To_Create_Unique_Queues_With_Naming_Suffix()
+		{
+			using (var firstSubscriber = RawRabbitFactory.CreateTestClient())
+			using (var secondSubscriber = RawRabbitFactory.CreateTestClient())
+			using (var publisher = RawRabbitFactory.CreateTestClient())
+			{
+				/* Setup */
+				var firstTcs = new TaskCompletionSource<BasicMessage>();
+				var secondTcs = new TaskCompletionSource<BasicMessage>();
+				var message = new BasicMessage {Prop = "I'm delivered twice."};
+				await firstSubscriber.SubscribeAsync<BasicMessage>(msg =>
+				{
+					firstTcs.TrySetResult(msg);
+					return Task.FromResult(0);
+				}, ctx => ctx
+					.ConsumerConfiguration(cfg => cfg
+						.FromDeclaredQueue(q => q.WithNameSuffix("first"))
+					)
+				);
+				await secondSubscriber.SubscribeAsync<BasicMessage>(msg =>
+				{
+					secondTcs.TrySetResult(msg);
+					return Task.FromResult(0);
+				}, ctx => ctx
+					.ConsumerConfiguration(cfg => cfg
+						.FromDeclaredQueue(q => q.WithNameSuffix("second"))
+					)
+				);
+
+				/* Test */
+				await publisher.PublishAsync(message);
+				await firstTcs.Task;
+				await secondTcs.Task;
+
+				/* Assert */
+				Assert.Equal(message.Prop, firstTcs.Task.Result.Prop);
+				Assert.Equal(message.Prop, secondTcs.Task.Result.Prop);
+			}
+		}
+
+		[Fact]
+		public async Task Should_Not_Throw_Exception_When_Queue_Name_Is_Long()
+		{
+			using (var subscriber = RawRabbitFactory.CreateTestClient())
+			using (var publisher = RawRabbitFactory.CreateTestClient())
+			{
+				/* Setup */
+				var msgTcs = new TaskCompletionSource<BasicMessage>();
+				var message = new BasicMessage { Prop = "I'm delivered to queue with truncated name" };
+				var queueName = string.Empty;
+				while (queueName.Length < 254)
+				{
+					queueName = queueName + "this_is_part_of_a_long_queue_name";
+				}
+				await subscriber.SubscribeAsync<BasicMessage>(msg =>
+				{
+					msgTcs.TrySetResult(msg);
+					return Task.FromResult(0);
+				}, ctx => ctx
+					.ConsumerConfiguration(cfg => cfg
+						.FromDeclaredQueue(q => q.WithName(queueName))
+					)
+				);
+
+				/* Test */
+				await publisher.PublishAsync(message);
+				await msgTcs.Task;
+
+				/* Assert */
+				Assert.Equal(message.Prop, msgTcs.Task.Result.Prop);
+			}
+		}
+
+		[Fact]
+		public async Task Should_Not_Throw_Exception_When_Exchange_Name_Is_Long()
+		{
+			using (var subscriber = RawRabbitFactory.CreateTestClient())
+			using (var publisher = RawRabbitFactory.CreateTestClient())
+			{
+				/* Setup */
+				var msgTcs = new TaskCompletionSource<BasicMessage>();
+				var message = new BasicMessage { Prop = "I'm delivered on an exchange with truncated name" };
+				var exchangeName = string.Empty;
+				while (exchangeName.Length < 254)
+				{
+					exchangeName = exchangeName + "this_is_part_of_a_long_exchange_name";
+				}
+				await subscriber.SubscribeAsync<BasicMessage>(msg =>
+				{
+					msgTcs.TrySetResult(msg);
+					return Task.FromResult(0);
+				}, ctx => ctx
+					.ConsumerConfiguration(cfg => cfg
+						.OnDeclaredExchange(e => e.WithName(exchangeName))
+					)
+				);
+
+				/* Test */
+				await publisher.PublishAsync(message, ctx => ctx
+					.PublishAcknowledgeDisabled()
+					.PublisherConfiguration(c => c.OnExchange(exchangeName))
+				);
+				await msgTcs.Task;
+
+				/* Assert */
+				Assert.Equal(message.Prop, msgTcs.Task.Result.Prop);
 			}
 		}
 	}

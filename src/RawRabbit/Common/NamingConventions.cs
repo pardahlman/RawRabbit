@@ -13,7 +13,6 @@ namespace RawRabbit.Common
 		Func<Type, string> QueueNamingConvention { get; set; }
 		Func<Type, string> RoutingKeyConvention { get; set; }
 		Func<string> ErrorExchangeNamingConvention { get; set; }
-		Func<string> ErrorQueueNamingConvention { get; set; }
 		Func<string> DeadLetterExchangeNamingConvention { get; set; }
 		Func<TimeSpan,string> RetryLaterExchangeConvention { get; set; }
 		Func<string> RetryQueueNamingConvention { get; set; }
@@ -33,9 +32,7 @@ namespace RawRabbit.Common
 		public virtual Func<Type, string> ExchangeNamingConvention { get; set; }
 		public virtual Func<Type, string> QueueNamingConvention { get; set; }
 		public virtual Func<Type, string> RoutingKeyConvention { get; set; }
-		public virtual Func<Type, Type, string> RpcExchangeNamingConvention { get; set; }
 		public virtual Func<string> ErrorExchangeNamingConvention { get; set; }
-		public virtual Func<string> ErrorQueueNamingConvention { get; set; }
 		public virtual Func<string> DeadLetterExchangeNamingConvention { get; set; }
 		public virtual Func<TimeSpan, string> RetryLaterExchangeConvention { get; set; }
 		public virtual Func<string> RetryQueueNamingConvention { get; set; }
@@ -49,12 +46,11 @@ namespace RawRabbit.Common
 			ExchangeNamingConvention = type => type?.Namespace?.ToLower() ?? string.Empty;
 			QueueNamingConvention = type => CreateShortAfqn(type);
 			RoutingKeyConvention = type => CreateShortAfqn(type);
-			ErrorQueueNamingConvention = () => "default_error_queue";
 			ErrorExchangeNamingConvention = () => "default_error_exchange";
 			DeadLetterExchangeNamingConvention = () => "default_dead_letter_exchange";
 			RetryQueueNamingConvention = () => $"retry_{Guid.NewGuid()}";
 			SubscriberQueueSuffix = GetSubscriberQueueSuffix;
-			RetryLaterExchangeConvention = span => $"rety_in_{span.TotalMilliseconds}_ms";
+			RetryLaterExchangeConvention = span => $"retry_in_{span.TotalMilliseconds}_ms";
 		}
 
 		private string GetSubscriberQueueSuffix(Type messageType)
