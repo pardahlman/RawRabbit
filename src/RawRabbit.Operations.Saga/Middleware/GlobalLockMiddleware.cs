@@ -17,7 +17,7 @@ namespace RawRabbit.Operations.Saga.Middleware
 
 		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
-			return _globalLock.ExecuteAsync(context.Get<Guid>(SagaKey.SagaId), () => Next.InvokeAsync(context, token));
+			return _globalLock.ExecuteAsync(context.Get<Guid>(SagaKey.SagaId), () => Next.InvokeAsync(context, token), token);
 		}
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Operations.Saga;
 using RawRabbit.Operations.Saga.Middleware;
@@ -12,7 +13,7 @@ namespace RawRabbit
 {
 	public static class StateMachineExtension
 	{
-		public static Task RegisterStateMachineAsync<TSaga, TTriggerConfiguration>(this IBusClient busClient) where TSaga : Saga where TTriggerConfiguration : TriggerConfiguration, new()
+		public static Task RegisterStateMachineAsync<TSaga, TTriggerConfiguration>(this IBusClient busClient, CancellationToken ct = default(CancellationToken)) where TSaga : Saga where TTriggerConfiguration : TriggerConfiguration, new()
 		{
 			return busClient.InvokeAsync(
 				builder => builder
@@ -33,10 +34,14 @@ namespace RawRabbit
 				{
 					context.Properties.Add(SagaKey.SagaType, typeof(TSaga));
 					context.Properties.Add(SagaKey.SagaSubscriberOptions, new TTriggerConfiguration().GetSagaSubscriberOptions());
-				});
+				}, ct);
 		}
 
-		public static Task TriggerStateMachineAsync<TSaga>(this IBusClient busClient, Func<TSaga, Task> triggerFunc, Guid sagaId = default(Guid)) where TSaga : Saga
+		public static Task TriggerStateMachineAsync<TSaga>(
+			this IBusClient busClient,
+			Func<TSaga, Task> triggerFunc,
+			Guid sagaId = default(Guid),
+			CancellationToken ct = default(CancellationToken)) where TSaga : Saga
 		{
 			Func<object[], Task> genericHandler = objects => triggerFunc((TSaga) objects[0]);
 
@@ -59,8 +64,7 @@ namespace RawRabbit
 						{
 							context.Properties.Add(SagaKey.SagaId, sagaId);
 						}
-					}
-				);
+					}, ct);
 		}
 	}
 }
