@@ -63,9 +63,9 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.Enrichers.Message
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.Operations.Get", "src\RawRabbit.Operations.Get\RawRabbit.Operations.Get.xproj", "{F6D034BE-A9D6-4204-BB70-FE9EEACFBEE5}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.Operations.Saga", "src\RawRabbit.Operations.Saga\RawRabbit.Operations.Saga.xproj", "{152B46DE-742E-4991-8B91-5EB47B7745EF}"
-EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.Operations.MessageSequence", "src\RawRabbit.Operations.MessageSequence\RawRabbit.Operations.MessageSequence.xproj", "{FABAA0E9-E44B-4017-92C1-1D7770ADD9AF}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.Operations.StateMachine", "src\RawRabbit.Operations.StateMachine\RawRabbit.Operations.StateMachine.xproj", "{152B46DE-742E-4991-8B91-5EB47B7745EF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -169,14 +169,14 @@ Global
 		{F6D034BE-A9D6-4204-BB70-FE9EEACFBEE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F6D034BE-A9D6-4204-BB70-FE9EEACFBEE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F6D034BE-A9D6-4204-BB70-FE9EEACFBEE5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{152B46DE-742E-4991-8B91-5EB47B7745EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{152B46DE-742E-4991-8B91-5EB47B7745EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{152B46DE-742E-4991-8B91-5EB47B7745EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{152B46DE-742E-4991-8B91-5EB47B7745EF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FABAA0E9-E44B-4017-92C1-1D7770ADD9AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FABAA0E9-E44B-4017-92C1-1D7770ADD9AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FABAA0E9-E44B-4017-92C1-1D7770ADD9AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FABAA0E9-E44B-4017-92C1-1D7770ADD9AF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{152B46DE-742E-4991-8B91-5EB47B7745EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{152B46DE-742E-4991-8B91-5EB47B7745EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{152B46DE-742E-4991-8B91-5EB47B7745EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{152B46DE-742E-4991-8B91-5EB47B7745EF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -206,7 +206,7 @@ Global
 		{B080F75F-2709-4BA7-8B85-89A24A609C46} = {7FCF8D3B-BA55-4C47-AC60-5CEF75418BEB}
 		{909E4663-768B-4CCD-B72F-2F8526C27442} = {7FCF8D3B-BA55-4C47-AC60-5CEF75418BEB}
 		{F6D034BE-A9D6-4204-BB70-FE9EEACFBEE5} = {7FCF8D3B-BA55-4C47-AC60-5CEF75418BEB}
-		{152B46DE-742E-4991-8B91-5EB47B7745EF} = {7FCF8D3B-BA55-4C47-AC60-5CEF75418BEB}
 		{FABAA0E9-E44B-4017-92C1-1D7770ADD9AF} = {7FCF8D3B-BA55-4C47-AC60-5CEF75418BEB}
+		{152B46DE-742E-4991-8B91-5EB47B7745EF} = {7FCF8D3B-BA55-4C47-AC60-5CEF75418BEB}
 	EndGlobalSection
 EndGlobal

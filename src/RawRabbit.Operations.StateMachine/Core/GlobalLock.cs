@@ -3,11 +3,11 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace RawRabbit.Operations.Saga.Repository
+namespace RawRabbit.Operations.StateMachine.Core
 {
 	public interface IGlobalLock
 	{
-		Task ExecuteAsync(Guid sagaId, Func<Task> handler, CancellationToken ct = default(CancellationToken));
+		Task ExecuteAsync(Guid modelId, Func<Task> handler, CancellationToken ct = default(CancellationToken));
 	}
 
 	public class GlobalLock : IGlobalLock
@@ -24,9 +24,9 @@ namespace RawRabbit.Operations.Saga.Repository
 			_exclusiveExecute = exclusiveExecute;
 		}
 
-		public Task ExecuteAsync(Guid sagaId, Func<Task> handler, CancellationToken ct = new CancellationToken())
+		public Task ExecuteAsync(Guid modelId, Func<Task> handler, CancellationToken ct = new CancellationToken())
 		{
-			return _exclusiveExecute(sagaId, handler, ct);
+			return _exclusiveExecute(modelId, handler, ct);
 		}
 	}
 
@@ -39,9 +39,9 @@ namespace RawRabbit.Operations.Saga.Repository
 			_semaphores = new ConcurrentDictionary<Guid, SemaphoreSlim>();
 		}
 		
-		public Task ExecuteAsync(Guid sagaId, Func<Task> handler, CancellationToken ct = default(CancellationToken))
+		public Task ExecuteAsync(Guid modelId, Func<Task> handler, CancellationToken ct = default(CancellationToken))
 		{
-			var semaphore = _semaphores.GetOrAdd(sagaId, guid => new SemaphoreSlim(1, 1));
+			var semaphore = _semaphores.GetOrAdd(modelId, guid => new SemaphoreSlim(1, 1));
 			return semaphore
 				.WaitAsync(ct)
 				.ContinueWith(t => handler().ContinueWith(done => semaphore.Release(), ct), ct)

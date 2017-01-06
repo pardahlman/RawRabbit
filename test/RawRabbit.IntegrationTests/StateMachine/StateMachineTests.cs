@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using RawRabbit.IntegrationTests.StateMachine.Generic;
-using RawRabbit.Operations.Saga;
+using RawRabbit.Operations.StateMachine;
 using RawRabbit.vNext.Pipe;
 using Xunit;
 

@@ -1,5 +1,5 @@
 {
-	"title": "RawRabbit.Operations.Saga",
+	"title": "RawRabbit.Operations.StateMachine",
 	"version": "2.0.0-*",
 	"authors": [ "pardahlman", "enrique-avalon" ],
 	"description": "A modern framework for communication over RabbitMq.",

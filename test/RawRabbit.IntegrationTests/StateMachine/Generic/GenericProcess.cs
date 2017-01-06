@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
-using RawRabbit.Operations.Saga.Model;
+using RawRabbit.Operations.StateMachine;
 using Stateless;
 
 namespace RawRabbit.IntegrationTests.StateMachine.Generic
 {
-	public class GenericProcess : Saga<State, Trigger, GenericProcessModel>
+	public class GenericProcess : StateMachineBase<State, Trigger, GenericProcessModel>
 	{
 		private readonly IBusClient _client;
 		private StateMachine<State, Trigger>.TriggerWithParameters<string> _cancel;
@@ -52,7 +52,7 @@ namespace RawRabbit.IntegrationTests.StateMachine.Generic
 		{
 			return _client.PublishAsync(new ProcessCompeted
 			{
-				TaskId = SagaDto.Id
+				TaskId = Model.Id
 			});
 		}
 
@@ -60,30 +60,30 @@ namespace RawRabbit.IntegrationTests.StateMachine.Generic
 		{
 			return _client.PublishAsync(new ProcessAborted
 			{
-				TaskId = SagaDto.Id,
+				TaskId = Model.Id,
 				Reason = reason
 			});
 		}
 
 		private bool IsAssigned()
 		{
-			return !string.IsNullOrWhiteSpace(SagaDto.Assignee);
+			return !string.IsNullOrWhiteSpace(Model.Assignee);
 		}
 
 		private Task SendUpdateMessage(string message = null)
 		{
 			return _client.PublishAsync(new ProcessUpdated
 			{
-				TaskId = SagaDto.Id,
-				State = SagaDto.State,
-				Assignee = SagaDto.Assignee,
+				TaskId = Model.Id,
+				State = Model.State,
+				Assignee = Model.Assignee,
 				Message = message
 			});
 		}
 
 		public Task StartAsync(string assignee)
 		{
-			SagaDto.Assignee = assignee;
+			Model.Assignee = assignee;
 			return StateMachine.FireAsync(Trigger.Start);
 		}
 
@@ -104,13 +104,13 @@ namespace RawRabbit.IntegrationTests.StateMachine.Generic
 
 		public Task CreateAsync(string process, DateTime deadline)
 		{
-			SagaDto.Name = process;
-			SagaDto.Deadline = deadline;
-			SagaDto.Id = Guid.NewGuid();
+			Model.Name = process;
+			Model.Deadline = deadline;
+			Model.Id = Guid.NewGuid();
 			return _client.PublishAsync(new TaskCreated
 			{
 				Name = process,
-				TaskId = SagaDto.Id
+				TaskId = Model.Id
 			});
 		}
 

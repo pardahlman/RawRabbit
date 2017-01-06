@@ -1,9 +1,9 @@
 ﻿using System;
-using RawRabbit.Operations.Saga.Model;
+using RawRabbit.Operations.StateMachine;
 
 namespace RawRabbit.IntegrationTests.StateMachine.Generic
 {
-	public class GenericProcessModel : SagaModel<State>
+	public class GenericProcessModel : Model<State>
 	{
 		public string Assignee { get; set; }
 		public string Name { get; set; }

@@ -2,10 +2,9 @@
 using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Instantiation;
-using RawRabbit.Operations.Saga.Model;
-using RawRabbit.Operations.Saga.Repository;
+using RawRabbit.Operations.StateMachine.Core;
 
-namespace RawRabbit.Operations.Saga
+namespace RawRabbit.Operations.StateMachine
 {
 	public static class StateMachinePlugin
 	{
@@ -25,8 +24,8 @@ namespace RawRabbit.Operations.Saga
 		/// <returns></returns>
 		public static IClientBuilder UseStateMachine(
 			this IClientBuilder builder,
-			Func<Guid, Task<SagaModel>> get = null,
-			Func<SagaModel, Task> addOrUpdate = null,
+			Func<Guid, Task<Model>> get = null,
+			Func<Model, Task> addOrUpdate = null,
 			Func<Guid, Func<Task>, CancellationToken, Task> execute = null)
 		{
 			builder.Register(
@@ -34,7 +33,7 @@ namespace RawRabbit.Operations.Saga
 				ioc => ioc
 					.AddSingleton<IGlobalLock>(new GlobalLock(execute))
 					.AddSingleton<IModelRepository>(new ModelRepository(get, addOrUpdate))
-					.AddSingleton<ISagaActivator, SagaActivator>()
+					.AddSingleton<IStateMachineActivator, StateMachineActivator>()
 				);
 			return builder;
 		}

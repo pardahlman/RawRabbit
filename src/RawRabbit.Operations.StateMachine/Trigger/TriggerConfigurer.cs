@@ -3,21 +3,21 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Consumer;
-using RawRabbit.Operations.Saga.Middleware;
+using RawRabbit.Operations.StateMachine.Middleware;
 using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
 
-namespace RawRabbit.Operations.Saga.Trigger
+namespace RawRabbit.Operations.StateMachine.Trigger
 {
-	public class TriggerConfigurer<TSaga> where TSaga : Model.Saga
+	public class TriggerConfigurer<TStateMachine> where TStateMachine : StateMachineBase
 	{
-		public List<SagaSubscriberOptions> SagaSubscribeOptions { get; set; }
+		public List<TriggerPipeOptions> TriggerPipeOptions { get; set; }
 
 		public static readonly Action<IPipeBuilder> ConsumePipe = pipe => pipe
 			.Use<BodyDeserializationMiddleware>()
-			.Use<SagaIdMiddleware>()
+			.Use<ModelIdMiddleware>()
 			.Use<GlobalLockMiddleware>()
-			.Use<RetrieveSagaMiddleware>()
+			.Use<RetrieveStateMachineMiddleware>()
 			.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
 			{
 				HeaderKeyFunc = context => PropertyHeaders.GlobalExecutionId,
@@ -27,7 +27,7 @@ namespace RawRabbit.Operations.Saga.Trigger
 			.Use<GlobalExecutionIdMiddleware>()
 			.Use<HandlerInvokationMiddleware>(new HandlerInvokationOptions
 			{
-				HandlerArgsFunc = context => new[] { context.GetSaga(), context.GetMessage() }
+				HandlerArgsFunc = context => new[] { context.GetStateMachine(), context.GetMessage() }
 			})
 			.Use<AutoAckMiddleware>();
 
@@ -39,36 +39,36 @@ namespace RawRabbit.Operations.Saga.Trigger
 
 		public TriggerConfigurer()
 		{
-			SagaSubscribeOptions = new List<SagaSubscriberOptions>();
+			TriggerPipeOptions = new List<TriggerPipeOptions>();
 		}
 
-		public TriggerConfigurer<TSaga> FromMessage<TMessage>(
+		public TriggerConfigurer<TStateMachine> FromMessage<TMessage>(
 			Func<TMessage, Guid> correlationFunc,
-			Action<TSaga, TMessage> sagaAction,
+			Action<TStateMachine, TMessage> stateMachineAction,
 			Action<IConsumerConfigurationBuilder> consumeConfig = null)
 		{
 			return FromMessage(
-				correlationFunc, (saga, message) =>
+				correlationFunc, (machine, message) =>
 				{
-					sagaAction(saga, message);
+					stateMachineAction(machine, message);
 					return Task.FromResult(0);
 				},
 				consumeConfig);
 		}
 
-		public TriggerConfigurer<TSaga> FromMessage<TMessage>(
+		public TriggerConfigurer<TStateMachine> FromMessage<TMessage>(
 			Func<TMessage, Guid> correlationFunc,
-			Func<TSaga, TMessage, Task> sagaFunc,
+			Func<TStateMachine, TMessage, Task> machineFunc,
 			Action<IConsumerConfigurationBuilder> consumeConfig = null)
 		{
-			Func<object[], Task> genericHandler = args => sagaFunc((TSaga)args[0], (TMessage)args[1]).ContinueWith<Acknowledgement>(t => new Ack());
+			Func<object[], Task> genericHandler = args => machineFunc((TStateMachine)args[0], (TMessage)args[1]).ContinueWith<Acknowledgement>(t => new Ack());
 			Func<object, Guid> genericCorrFunc = o => correlationFunc((TMessage) o);
 
-			SagaSubscribeOptions.Add(new SagaSubscriberOptions
+			TriggerPipeOptions.Add(new TriggerPipeOptions
 			{
 				ContextActionFunc = c=>  context =>
 				{
-					context.Properties.Add(SagaKey.CorrelationFunc, genericCorrFunc);
+					context.Properties.Add(StateMachineKey.CorrelationFunc, genericCorrFunc);
 					context.Properties.Add(PipeKey.MessageType, typeof(TMessage));
 					context.Properties.Add(PipeKey.ConfigurationAction, consumeConfig);
 					context.Properties.Add(PipeKey.MessageHandler, genericHandler);

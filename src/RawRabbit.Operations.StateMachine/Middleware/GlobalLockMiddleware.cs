@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using RawRabbit.Operations.Saga.Repository;
+using RawRabbit.Operations.StateMachine.Core;
 using RawRabbit.Pipe;
 
-namespace RawRabbit.Operations.Saga.Middleware
+namespace RawRabbit.Operations.StateMachine.Middleware
 {
 	public class GlobalLockMiddleware : Pipe.Middleware.Middleware
 	{
@@ -17,7 +17,7 @@ namespace RawRabbit.Operations.Saga.Middleware
 
 		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
-			return _globalLock.ExecuteAsync(context.Get<Guid>(SagaKey.SagaId), () => Next.InvokeAsync(context, token), token);
+			return _globalLock.ExecuteAsync(context.Get<Guid>(StateMachineKey.ModelId), () => Next.InvokeAsync(context, token), token);
 		}
 	}
 }

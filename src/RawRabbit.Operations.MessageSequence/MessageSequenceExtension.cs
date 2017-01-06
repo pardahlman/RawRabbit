@@ -12,8 +12,8 @@ namespace RawRabbit.Operations.MessageSequence
 			Func<IMessageChainPublisher<TMessageContext>, MessageSequence<TCompleteType>> cfg
 		) where TMessageContext : IMessageContext, new()
 		{
-			var sequenceSaga = new StateMachine.MessageSequence<TMessageContext>(client);
-			return cfg(sequenceSaga);
+			var sequenceMachine = new StateMachine.MessageSequence<TMessageContext>(client);
+			return cfg(sequenceMachine);
 		}
 	}
 }

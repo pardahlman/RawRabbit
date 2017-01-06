@@ -3,34 +3,34 @@ using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Pipe;
 
-namespace RawRabbit.Operations.Saga.Middleware
+namespace RawRabbit.Operations.StateMachine.Middleware
 {
-	public class SagaIdOptions
+	public class ModelIdOptions
 	{
 		public Func<IPipeContext, Func<object, Guid>> CorrelationFunc { get; set; }
 		public Func<IPipeContext, object> MessageFunc { get; set; }
-		public Func<IPipeContext, Guid> SagaIdFunc { get; set; }
+		public Func<IPipeContext, Guid> ModelIdFunc { get; set; }
 	}
 
-	public class SagaIdMiddleware : Pipe.Middleware.Middleware
+	public class ModelIdMiddleware : Pipe.Middleware.Middleware
 	{
 		protected Func<IPipeContext, Func<object, Guid>> CorrelationFunc;
 		protected Func<IPipeContext, object> MessageFunc;
-		protected Func<IPipeContext, Guid> SagaIdFunc;
+		protected Func<IPipeContext, Guid> ModelIdFunc;
 
-		public SagaIdMiddleware(SagaIdOptions options = null)
+		public ModelIdMiddleware(ModelIdOptions options = null)
 		{
 			CorrelationFunc = options?.CorrelationFunc ?? (context => context.GetIdCorrelationFunc());
 			MessageFunc = options?.MessageFunc ?? (context => context.GetMessage());
-			SagaIdFunc = options?.SagaIdFunc ?? (context => context.GetSagaId());
+			ModelIdFunc = options?.ModelIdFunc ?? (context => context.GetModelId());
 		}
 
 		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var corrFunc = GetCorrelationFunc(context);
 			var msg = GetMessage(context);
-			var id = GetSagaId(context, corrFunc, msg);
-			context.Properties.TryAdd(SagaKey.SagaId, id);
+			var id = GetModelId(context, corrFunc, msg);
+			context.Properties.TryAdd(StateMachineKey.ModelId, id);
 			return Next.InvokeAsync(context, token);
 		}
 
@@ -44,9 +44,9 @@ namespace RawRabbit.Operations.Saga.Middleware
 			return MessageFunc.Invoke(context);
 		}
 
-		protected virtual Guid GetSagaId(IPipeContext context, Func<object, Guid> corrFunc, object message)
+		protected virtual Guid GetModelId(IPipeContext context, Func<object, Guid> corrFunc, object message)
 		{
-			var fromComtext = SagaIdFunc?.Invoke(context);
+			var fromComtext = ModelIdFunc?.Invoke(context);
 			return fromComtext ?? corrFunc(message);
 		}
 	}

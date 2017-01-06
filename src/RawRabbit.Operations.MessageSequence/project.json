@@ -12,7 +12,7 @@
 
 	"dependencies": {
 		"RawRabbit.Enrichers.MessageContext.Publish": { "target": "project" },
-		"RawRabbit.Operations.Saga": { "target": "project" }
+		"RawRabbit.Operations.StateMachine": { "target": "project" }
 	},
 
 	"frameworks": {

@@ -7,16 +7,15 @@ using RawRabbit.Context;
 using RawRabbit.Operations.MessageSequence.Configuration;
 using RawRabbit.Operations.MessageSequence.Configuration.Abstraction;
 using RawRabbit.Operations.MessageSequence.Model;
-using RawRabbit.Operations.Saga;
-using RawRabbit.Operations.Saga.Model;
-using RawRabbit.Operations.Saga.Trigger;
+using RawRabbit.Operations.StateMachine;
+using RawRabbit.Operations.StateMachine.Trigger;
 using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
 using Stateless;
 
 namespace RawRabbit.Operations.MessageSequence.StateMachine
 {
-	public class MessageSequence<TMessageContext> : Saga<SequenceState, Type, SequenceModel>,
+	public class MessageSequence<TMessageContext> : StateMachineBase<SequenceState, Type, SequenceModel>,
 			IMessageChainPublisher<TMessageContext>, IMessageSequenceBuilder<TMessageContext>
 		where TMessageContext : IMessageContext, new()
 	{
@@ -60,7 +59,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 
 			StateMachine
 				.Configure(SequenceState.Active)
-				.OnEntryFromAsync(entryTrigger, msg => _client.PublishAsync(message, context: c => c.Properties.Add(PipeKey.GlobalExecutionId, SagaDto.Id.ToString())));
+				.OnEntryFromAsync(entryTrigger, msg => _client.PublishAsync(message, c => c.Properties.Add(PipeKey.GlobalExecutionId, Model.Id.ToString())));
 
 			_fireAction = () => StateMachine.FireAsync(entryTrigger, message);
 			return this;
@@ -94,7 +93,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 						{
 							if (step.Optional)
 							{
-								SagaDto.Skipped.Add(new ExecutionResult
+								Model.Skipped.Add(new ExecutionResult
 								{
 									Type = step.Type,
 									Time = DateTime.Now
@@ -115,14 +114,14 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 						.ContinueWith(t =>
 						{
 							
-							SagaDto.Completed.Add(new ExecutionResult
+							Model.Completed.Add(new ExecutionResult
 							{
 								Type = typeof(TMessage),
 								Time = DateTime.Now
 							});
 							if (optionBuilder.Configuration.AbortsExecution)
 							{
-								SagaDto.Aborted = true;
+								Model.Aborted = true;
 								StateMachine.Fire(typeof(CancelSequence));
 							}
 						});
@@ -130,11 +129,11 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 
 			_triggerConfigurer
 				.FromMessage<TMessage>(
-					message => SagaDto.Id,
+					message => Model.Id,
 					(sequence, message) => StateMachine.FireAsync(trigger, message),
 					cfg => cfg
-						.FromDeclaredQueue(q => q.WithName($"state_machine_{SagaDto.Id}"))
-						.Consume(c => c.WithRoutingKey($"{typeof(TMessage).Name.ToLower()}.{SagaDto.Id}")
+						.FromDeclaredQueue(q => q.WithName($"state_machine_{Model.Id}"))
+						.Consume(c => c.WithRoutingKey($"{typeof(TMessage).Name.ToLower()}.{Model.Id}")
 					)
 				);
 			return this;
@@ -157,8 +156,8 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 				.Configure(SequenceState.Completed)
 				.OnEntryFrom(trigger, message =>
 				{
-					sequence.Completed = SagaDto.Completed;
-					sequence.Skipped = SagaDto.Skipped;
+					sequence.Completed = Model.Completed;
+					sequence.Skipped = Model.Skipped;
 					tsc.TrySetResult(message);
 				});
 
@@ -166,23 +165,23 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 				.Configure(SequenceState.Canceled)
 				.OnEntry(() =>
 				{
-					sequence.Completed = SagaDto.Completed;
-					sequence.Skipped = SagaDto.Skipped;
+					sequence.Completed = Model.Completed;
+					sequence.Skipped = Model.Skipped;
 					sequence.Aborted = true;
 					tsc.TrySetResult(default(TMessage));
 				});
 
 			_triggerConfigurer
 				.FromMessage<TMessage>(
-					message => SagaDto.Id,
+					message => Model.Id,
 					(s, message) => StateMachine.FireAsync(trigger, message),
 					cfg => cfg
-						.FromDeclaredQueue(q => q.WithName($"state_machine_{SagaDto.Id}"))
-						.Consume(c => c.WithRoutingKey($"{typeof(TMessage).Name.ToLower()}.{SagaDto.Id}")
+						.FromDeclaredQueue(q => q.WithName($"state_machine_{Model.Id}"))
+						.Consume(c => c.WithRoutingKey($"{typeof(TMessage).Name.ToLower()}.{Model.Id}")
 						)
 				);
 
-			foreach (var invoker in _triggerConfigurer.SagaSubscribeOptions)
+			foreach (var invoker in _triggerConfigurer.TriggerPipeOptions)
 			{
 				_client.InvokeAsync(p => p
 							.Use<ConsumeConfigurationMiddleware>()
@@ -203,7 +202,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 					{
 						ConfigurationFunc = context => new ConsumeConfiguration
 						{
-							QueueName = $"state_machine_{SagaDto.Id}",
+							QueueName = $"state_machine_{Model.Id}",
 							ConsumerTag = Guid.NewGuid().ToString()
 						}
 					})
@@ -213,9 +212,9 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 					}),
 				context =>
 				{
-					context.Properties.Add(SagaKey.SagaType, GetType());
-					context.Properties.Add(SagaKey.SagaId, SagaDto.Id);
-					context.Properties.Add(SagaKey.Saga, this);
+					context.Properties.Add(StateMachineKey.Type, GetType());
+					context.Properties.Add(StateMachineKey.ModelId, Model.Id);
+					context.Properties.Add(StateMachineKey.Machine, this);
 					context.Properties.Add(PipeKey.MessageHandler, genericHandler);
 				});
 
@@ -230,7 +229,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 			{
 				requestTimer?.Dispose();
 				tsc.TrySetException(new TimeoutException(
-					$"Unable to complete sequence {SagaDto.Id} in {requestTimeout:g}. Operation Timed out."));
+					$"Unable to complete sequence {Model.Id} in {requestTimeout:g}. Operation Timed out."));
 			}, null, requestTimeout, new TimeSpan(-1));
 
 			_fireAction();

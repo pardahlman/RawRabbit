@@ -1,24 +1,24 @@
 ﻿using System.Threading.Tasks;
 using Stateless;
 
-namespace RawRabbit.Operations.Saga.Model
+namespace RawRabbit.Operations.StateMachine
 {
-	public abstract class Saga
+	public abstract class StateMachineBase
 	{
 		public abstract Task TriggerAsync(object trigger);
 		public abstract Task TriggerAsync<TPayload>(object trigger, TPayload payload);
-		public abstract SagaModel GetDto();
+		public abstract Model GetDto();
 	}
 
-	public abstract class Saga<TState, TTrigger, TModel> : Saga where TModel : SagaModel<TState>
+	public abstract class StateMachineBase<TState, TTrigger, TModel> : StateMachineBase where TModel : Model<TState>
 	{
-		protected readonly TModel SagaDto;
+		protected readonly TModel Model;
 		protected StateMachine<TState, TTrigger> StateMachine;
 
-		protected Saga(TModel model = null)
+		protected StateMachineBase(TModel model = null)
 		{
-			SagaDto = model ?? Initialize();
-			StateMachine = new StateMachine<TState, TTrigger>(() => SagaDto.State, s => SagaDto.State = s);
+			Model = model ?? Initialize();
+			StateMachine = new StateMachine<TState, TTrigger>(() => Model.State, s => Model.State = s);
 			ConfigureState(StateMachine);
 		}
 
@@ -37,9 +37,9 @@ namespace RawRabbit.Operations.Saga.Model
 			return StateMachine.FireAsync(paramTrigger, payload);
 		}
 		
-		public override SagaModel GetDto()
+		public override Model GetDto()
 		{
-			return SagaDto;
+			return Model;
 		}
 	}
 }

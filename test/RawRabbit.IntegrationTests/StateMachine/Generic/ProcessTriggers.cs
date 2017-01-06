@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using RawRabbit.Operations.Saga.Middleware;
-using RawRabbit.Operations.Saga.Trigger;
+using RawRabbit.Operations.StateMachine.Middleware;
+using RawRabbit.Operations.StateMachine.Trigger;
 
 namespace RawRabbit.IntegrationTests.StateMachine.Generic
 {
 	public class ProcessTriggers : TriggerConfiguration<GenericProcess>
 	{
-		public override List<SagaSubscriberOptions> ConfigureTriggers(TriggerConfigurer<GenericProcess> trigger)
+		public override List<TriggerPipeOptions> ConfigureTriggers(TriggerConfigurer<GenericProcess> trigger)
 		{
 			trigger
 				.FromMessage<CreateTask>(
@@ -30,7 +30,7 @@ namespace RawRabbit.IntegrationTests.StateMachine.Generic
 					(task, abort) => task.Abort(abort.Reason)
 				);
 
-			return trigger.SagaSubscribeOptions;
+			return trigger.TriggerPipeOptions;
 		}
 	}
 }

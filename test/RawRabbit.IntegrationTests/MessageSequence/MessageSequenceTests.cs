@@ -9,7 +9,7 @@ using RawRabbit.Context;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.Operations.MessageSequence;
 using RawRabbit.Operations.MessageSequence.Model;
-using RawRabbit.Operations.Saga;
+using RawRabbit.Operations.StateMachine;
 using RawRabbit.vNext.Pipe;
 using Xunit;
 

@@ -2,7 +2,7 @@
 using Autofac;
 using RawRabbit.DependencyInjection.Autofac;
 using RawRabbit.Instantiation;
-using RawRabbit.Operations.Saga;
+using RawRabbit.Operations.StateMachine;
 using Xunit;
 
 namespace RawRabbit.IntegrationTests.DependecyInjection
