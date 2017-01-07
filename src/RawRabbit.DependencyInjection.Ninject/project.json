@@ -1,6 +1,6 @@
 ﻿{
 	"title": "RawRabbit.DependencyInjection.Ninject",
-	"version": "1.10.3-*",
+	"version": "2.0.0-*",
 	"authors": [ "par.dahlman", "Joshua Barron" ],
 	"description": "Wire up RawRabbit with Ninject!",
 

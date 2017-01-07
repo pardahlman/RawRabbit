@@ -1,6 +1,6 @@
 {
 	"title": "RawRabbit",
-	"version": "1.10.3-*",
+	"version": "2.0.0-*",
 	"authors": [ "pardahlman", "enrique-avalon" ],
 	"description": "A modern framework for communication over RabbitMq.",
 	"packOptions": {
