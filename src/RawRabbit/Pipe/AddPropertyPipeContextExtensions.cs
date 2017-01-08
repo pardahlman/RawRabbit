@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using RawRabbit.Configuration.Consumer;
 using RawRabbit.Configuration.Publisher;
 
@@ -9,13 +10,24 @@ namespace RawRabbit.Pipe
 	{
 		public static IPipeContext UseConsumerConcurrency(this IPipeContext context, uint concurrency)
 		{
-			context.Properties.TryAdd(PipeKey.ConsumeSemaphore, new SemaphoreSlim((int)concurrency));
-			return context;
+			var semaphore = new SemaphoreSlim((int)concurrency, (int)concurrency);
+			return UseConsumeSemaphore(context, semaphore);
 		}
 
 		public static IPipeContext UseConsumeSemaphore(this IPipeContext context, SemaphoreSlim semaphore)
 		{
-			context.Properties.TryAdd(PipeKey.ConsumeSemaphore, semaphore);
+			return UseThrottledConsume(context, (asyncAction, ct) => semaphore
+				.WaitAsync(ct)
+				.ContinueWith(tEnter =>
+				{
+					Task.Run(asyncAction, ct)
+						.ContinueWith(tDone => semaphore.Release(), ct);
+				}, ct));
+		}
+
+		public static IPipeContext UseThrottledConsume(this IPipeContext context, Action<Func<Task>, CancellationToken> throttle)
+		{
+			context.Properties.TryAdd(PipeKey.ConsumeThrottleAction, throttle);
 			return context;
 		}
 

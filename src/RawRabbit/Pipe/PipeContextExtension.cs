@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -48,6 +49,11 @@ namespace RawRabbit.Pipe
 		public static GetConfiguration GetGetConfiguration(this IPipeContext context)
 		{
 			return context.Get<GetConfiguration>(PipeKey.GetConfiguration);
+		}
+
+		public static Action<Func<Task>, CancellationToken> GetConsumeThrottleAction(this IPipeContext context)
+		{
+			return context.Get<Action<Func<Task>, CancellationToken>>(PipeKey.ConsumeThrottleAction, (func, token) => func());
 		}
 
 		public static ExchangeDeclaration GetExchangeDeclaration(this IPipeContext context)

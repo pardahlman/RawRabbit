@@ -13,7 +13,7 @@ namespace RawRabbit.Pipe.Middleware
 	{
 		public Action<IPipeBuilder> Pipe { get; set; }
 		public Func<IPipeContext, IBasicConsumer> ConsumerFunc { get; set; }
-		public Func<IPipeContext, SemaphoreSlim> SemaphoreFunc { get; set; }
+		public Func<IPipeContext, Action<Func<Task>, CancellationToken>> ThrottleFuncFunc { get; set; }
 	}
 
 	public class MessageConsumeMiddleware : Middleware
@@ -22,6 +22,7 @@ namespace RawRabbit.Pipe.Middleware
 		protected Middleware ConsumePipe;
 		protected Func<IPipeContext, IBasicConsumer> ConsumeFunc;
 		protected Func<IPipeContext, SemaphoreSlim> SemaphoreFunc;
+		protected Func<IPipeContext, Action<Func<Task>, CancellationToken>> ThrottledExecutionFunc;
 		private readonly ILogger _logger = LogManager.GetLogger<MessageConsumeMiddleware>();
 
 		public MessageConsumeMiddleware(IPipeBuilderFactory pipeBuilderFactory, IPipeContextFactory contextFactory, ConsumeOptions options = null)
@@ -29,56 +30,32 @@ namespace RawRabbit.Pipe.Middleware
 			ContextFactory = contextFactory;
 			ConsumeFunc = options?.ConsumerFunc ?? (context =>context.GetConsumer());
 			ConsumePipe = pipeBuilderFactory.Create(options?.Pipe ?? (builder => {}));
-			SemaphoreFunc = options?.SemaphoreFunc ?? (context => context.Get<SemaphoreSlim>(PipeKey.ConsumeSemaphore));
+			ThrottledExecutionFunc = options?.ThrottleFuncFunc ?? (context => context.GetConsumeThrottleAction());
 		}
 
 		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var consumer = ConsumeFunc(context);
-			var semaphore = GetOrCreateSemaphore(context);
+			var throttlingFunc = GetThrottlingFunc(context);
 			consumer.OnMessage((sender, args) =>
 			{
-				ThrottledExecution(() => InvokeConsumePipeAsync(context, args), semaphore, token);
+				throttlingFunc(() => InvokeConsumePipeAsync(context, args, token), token);
 			});
 
 			return Next.InvokeAsync(context, token);
 		}
 
-		protected virtual SemaphoreSlim GetOrCreateSemaphore(IPipeContext context)
+		private Action<Func<Task>, CancellationToken> GetThrottlingFunc(IPipeContext context)
 		{
-			return SemaphoreFunc(context);
+			return ThrottledExecutionFunc(context);
 		}
 
-		protected virtual Task InvokeConsumePipeAsync(IPipeContext context, BasicDeliverEventArgs args)
+		protected virtual Task InvokeConsumePipeAsync(IPipeContext context, BasicDeliverEventArgs args, CancellationToken token)
 		{
+			_logger.LogDebug($"Invoking consumer pipe for message '{args?.BasicProperties?.MessageId}'.");
 			var consumeContext = ContextFactory.CreateContext(context.Properties.ToArray());
 			consumeContext.Properties.Add(PipeKey.DeliveryEventArgs, args);
-			return ConsumePipe.InvokeAsync(consumeContext);
-		}
-
-		protected virtual void ThrottledExecution(Func<Task> asyncAction, SemaphoreSlim semaphore, CancellationToken ct)
-		{
-			if (semaphore == null)
-			{
-				_logger.LogDebug("Consuming messages without throttle.");
-				Task.Run(asyncAction, ct).ConfigureAwait(false);
-				return;
-			}
-			semaphore
-				.WaitAsync(ct)
-				.ContinueWith(tEnter =>
-				{
-					try
-					{
-						Task.Run(asyncAction, ct)
-							.ContinueWith(tDone => semaphore.Release(), ct);
-					}
-					catch (Exception e)
-					{
-						_logger.LogError("An unhandled exception was thrown when consuming message", e);
-						semaphore.Release();
-					}
-				}, ct);
+			return ConsumePipe.InvokeAsync(consumeContext, token);
 		}
 	}
 }

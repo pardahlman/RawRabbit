@@ -26,7 +26,7 @@
 		public const string TransientChannel = "TransientChannel";
 		public const string PublishAcknowledger = "PublishAcknowledger";
 		public const string RoutingKey = "RoutingKey";
-		public const string ConsumeSemaphore = "ConsumeSemaphore";
+		public const string ConsumeThrottleAction = "ConsumeThrottleAction";
 		public const string QueueDeclaration = "QueueDeclaration";
 		public const string QueueActions = "QueueActions";
 		public const string ExchangeDeclaration = "ExchangeDeclaration";
