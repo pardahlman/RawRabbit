@@ -1,5 +1,4 @@
-﻿using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Exchange;
 using RawRabbit.IntegrationTests.TestMessages;

@@ -46,8 +46,7 @@ namespace RawRabbit.Pipe.Middleware
 			if (exchangeCfg != null)
 			{
 				_logger.LogDebug($"Exchange configuration found. Declaring '{exchangeCfg.Name}'.");
-				return _topologyProvider
-					.DeclareExchangeAsync(exchangeCfg)
+				return DeclareExchangeAsync(exchangeCfg)
 					.ContinueWith(t => Next.InvokeAsync(context, token), token)
 					.Unwrap();
 			}
@@ -58,6 +57,11 @@ namespace RawRabbit.Pipe.Middleware
 				throw new ArgumentNullException(nameof(exchangeCfg));
 			}
 			return Next.InvokeAsync(context, token);
+		}
+
+		protected virtual Task DeclareExchangeAsync(ExchangeDeclaration exchange)
+		{
+			return _topologyProvider.DeclareExchangeAsync(exchange);
 		}
 	}
 }
