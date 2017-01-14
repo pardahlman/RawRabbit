@@ -15,6 +15,11 @@ namespace RawRabbit
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.MessageRecieved))
 			.Use<BodyDeserializationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.MessageDeserialized))
+			.Use<AddContextPropertyMiddleware>(new AddContextPropertyOptions
+			{
+				KeyFunc = context => PipeKey.MessageContext,
+				ValueFunc = context => context.GetMessageContextResolver()
+			})
 			.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
 			{
 				HeaderKeyFunc = c => PropertyHeaders.Context,

@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
+using RabbitMQ.Client.Events;
 using RawRabbit.Enrichers.MessageContext;
 using RawRabbit.Enrichers.MessageContext.Context;
+using RawRabbit.Enrichers.MessageContext.Subscribe;
 using RawRabbit.IntegrationTests.TestMessages;
+using RawRabbit.Pipe;
 using RawRabbit.vNext.Pipe;
 using Xunit;
 
@@ -226,6 +229,28 @@ namespace RawRabbit.IntegrationTests.Enrichers
 
 				/* Assert */
 				Assert.Equal(firstContextTsc.Task.Result.GlobalRequestId, secondContextTsc.Task.Result.GlobalRequestId);
+			}
+		}
+
+		[Fact]
+		public async Task Should_Be_Able_To_Have_Any_Object_As_Message_Context()
+		{
+			using (var publisher = RawRabbitFactory.CreateTestClient())
+			using (var subscriber = RawRabbitFactory.CreateTestClient())
+			{
+				/* Setup */
+				var contextTsc = new TaskCompletionSource<BasicDeliverEventArgs>();
+				await subscriber.SubscribeAsync<BasicMessage, BasicDeliverEventArgs>((request, args) =>
+				{
+					contextTsc.TrySetResult(args);
+					return Task.FromResult(0);
+				}, ctx => ctx.UseMessageContext(c => c.GetDeliveryEventArgs()));
+
+				/* Test */
+				await publisher.PublishAsync(new BasicMessage());
+				await contextTsc.Task;
+				/* Assert */
+				Assert.NotNull(contextTsc.Task);
 			}
 		}
 	}
