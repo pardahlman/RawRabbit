@@ -11,7 +11,8 @@
 	},
 
 	"dependencies": {
-		"RawRabbit.Enrichers.MessageContext.Publish": { "target": "project" },
+		"RawRabbit.Enrichers.MessageContext": { "target": "project" },
+		"RawRabbit.Operations.Publish": { "target": "project" },
 		"RawRabbit.Operations.StateMachine": { "target": "project" }
 	},
 

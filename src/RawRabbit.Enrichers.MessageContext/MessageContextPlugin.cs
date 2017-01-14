@@ -1,26 +1,20 @@
 ﻿using System;
 using RawRabbit.Common;
-using RawRabbit.Context;
 using RawRabbit.Instantiation;
-using RawRabbit.Operations.Publish;
 using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
 
-namespace RawRabbit
+namespace RawRabbit.Enrichers.MessageContext
 {
 	public static class MessageContextPlugin
 	{
-		public static IClientBuilder PublishMessageContext<TMessageContext>(this IClientBuilder builder)
-			where TMessageContext : IMessageContext, new()
+		public static IClientBuilder UseMessageContext<TMessageContext>(this IClientBuilder builder)
+			where TMessageContext : new()
 		{
-			return PublishMessageContext(builder, context => new TMessageContext
-			{
-				GlobalRequestId = Guid.NewGuid()
-			});
+			return UseMessageContext(builder, context => new TMessageContext());
 		}
 
-		public static IClientBuilder PublishMessageContext<TMessageContext>(this IClientBuilder builder, Func<IPipeContext, TMessageContext> createFunc)
-			where TMessageContext : IMessageContext
+		public static IClientBuilder UseMessageContext<TMessageContext>(this IClientBuilder builder, Func<IPipeContext, TMessageContext> createFunc)
 		{
 			Func<IPipeContext, object> genericCreateFunc = context => createFunc(context);
 			builder.Register(pipe => pipe.Use<HeaderSerializationMiddleware>(new HeaderSerializationOptions

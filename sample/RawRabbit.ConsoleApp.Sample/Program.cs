@@ -2,7 +2,6 @@
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-using RawRabbit.Context;
 using RawRabbit.Messages.Sample;
 using RawRabbit.vNext;
 using RawRabbit.vNext.Pipe;

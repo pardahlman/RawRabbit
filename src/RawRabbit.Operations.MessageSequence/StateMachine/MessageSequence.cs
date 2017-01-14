@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Configuration.Consume;
-using RawRabbit.Context;
 using RawRabbit.Operations.MessageSequence.Configuration;
 using RawRabbit.Operations.MessageSequence.Configuration.Abstraction;
 using RawRabbit.Operations.MessageSequence.Model;
@@ -17,7 +16,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 {
 	public class MessageSequence<TMessageContext> : StateMachineBase<SequenceState, Type, SequenceModel>,
 			IMessageChainPublisher<TMessageContext>, IMessageSequenceBuilder<TMessageContext>
-		where TMessageContext : IMessageContext, new()
+		where TMessageContext : new()
 	{
 		private readonly IBusClient _client;
 		private Action _fireAction;

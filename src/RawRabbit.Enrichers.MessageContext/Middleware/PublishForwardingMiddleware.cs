@@ -1,16 +1,16 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using RawRabbit.Enrichers.MessageContext.Chaining.Dependencies;
+using RawRabbit.Enrichers.MessageContext.Dependencies;
 using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
 
-namespace RawRabbit.Enrichers.MessageContext.Chaining.Middleware
+namespace RawRabbit.Enrichers.MessageContext.Middleware
 {
-	public class PublishChainingMiddleware : StagedMiddleware
+	public class PublishForwardingMiddleware : StagedMiddleware
 	{
 		private readonly IMessageContextRepository _repo;
 
-		public PublishChainingMiddleware(IMessageContextRepository repo)
+		public PublishForwardingMiddleware(IMessageContextRepository repo)
 		{
 			_repo = repo;
 		}
@@ -30,6 +30,6 @@ namespace RawRabbit.Enrichers.MessageContext.Chaining.Middleware
 			return Next.InvokeAsync(context, token);
 		}
 
-		public override string StageMarker => "Initiated";
+		public override string StageMarker => Pipe.StageMarker.Initialized;
 	}
 }

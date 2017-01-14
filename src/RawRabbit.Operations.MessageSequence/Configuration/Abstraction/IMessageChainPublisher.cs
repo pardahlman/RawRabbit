@@ -1,9 +1,8 @@
 using System;
-using RawRabbit.Context;
 
 namespace RawRabbit.Operations.MessageSequence.Configuration.Abstraction
 {
-	public interface IMessageChainPublisher<TMessageContext> where TMessageContext : IMessageContext
+	public interface IMessageChainPublisher<TMessageContext>
 	{
 		IMessageSequenceBuilder<TMessageContext> PublishAsync<TMessage>(TMessage message = default(TMessage), Guid globalMessageId = new Guid()) where TMessage : new();
 	}

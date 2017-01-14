@@ -1,5 +1,5 @@
 ﻿using System;
-using RawRabbit.Context;
+using RawRabbit.Enrichers.MessageContext.Context;
 using RawRabbit.Operations.MessageSequence.Configuration.Abstraction;
 using RawRabbit.Operations.MessageSequence.Model;
 

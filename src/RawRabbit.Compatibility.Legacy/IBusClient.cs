@@ -6,7 +6,7 @@ using RawRabbit.Compatibility.Legacy.Configuration.Publish;
 using RawRabbit.Compatibility.Legacy.Configuration.Request;
 using RawRabbit.Compatibility.Legacy.Configuration.Respond;
 using RawRabbit.Compatibility.Legacy.Configuration.Subscribe;
-using RawRabbit.Context;
+using RawRabbit.Enrichers.MessageContext.Context;
 
 namespace RawRabbit.Compatibility.Legacy
 {

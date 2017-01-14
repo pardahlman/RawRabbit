@@ -11,13 +11,12 @@
 	},
 
 	"dependencies": {
+		"RawRabbit.Operations.Request": { "target": "project" },
+		"RawRabbit.Operations.Publish": { "target": "project" },
 		"RawRabbit.Enrichers.MessageContext.Respond": { "target": "project" },
-		"RawRabbit.Enrichers.MessageContext.Request": { "target": "project" },
-		"RawRabbit.Enrichers.MessageContext.Publish": { "target": "project" },
-		"RawRabbit.Enrichers.MessageContext.Subscribe": { "target": "project" },
-		"RawRabbit.Enrichers.MessageContext.Chaining": { "target": "project" }
-
-	},
+		"RawRabbit.Enrichers.MessageContext": { "target": "project" },
+		"RawRabbit.Enrichers.MessageContext.Subscribe": { "target": "project" }
+	},	
 
 	"frameworks": {
 		"netstandard1.5": {},

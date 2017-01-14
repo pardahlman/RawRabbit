@@ -1,5 +1,5 @@
 ﻿using RawRabbit.Compatibility.Legacy.Configuration;
-using RawRabbit.Context;
+using RawRabbit.Enrichers.MessageContext.Context;
 
 namespace RawRabbit.Compatibility.Legacy
 {

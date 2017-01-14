@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using RawRabbit.Context;
+using RawRabbit.Enrichers.MessageContext.Context;
 
 namespace RawRabbit.Operations.MessageSequence.Model
 {

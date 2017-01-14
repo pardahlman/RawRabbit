@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using RawRabbit.Common;
-using RawRabbit.Context;
+using RawRabbit.Enrichers.MessageContext.Context;
 using RawRabbit.IntegrationTests.TestMessages;
 using Xunit;
 

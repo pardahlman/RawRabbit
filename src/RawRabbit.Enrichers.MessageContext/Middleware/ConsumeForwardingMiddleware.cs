@@ -1,16 +1,16 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using RawRabbit.Enrichers.MessageContext.Chaining.Dependencies;
+using RawRabbit.Enrichers.MessageContext.Dependencies;
 using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
 
-namespace RawRabbit.Enrichers.MessageContext.Chaining.Middleware
+namespace RawRabbit.Enrichers.MessageContext.Middleware
 {
-	public class ConsumeChainingMiddleware : StagedMiddleware
+	public class ConsumeForwardingMiddleware : StagedMiddleware
 	{
 		private readonly IMessageContextRepository _repo;
 
-		public ConsumeChainingMiddleware(IMessageContextRepository repo)
+		public ConsumeForwardingMiddleware(IMessageContextRepository repo)
 		{
 			_repo = repo;
 		}

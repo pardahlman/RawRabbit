@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using RawRabbit.Context;
+using RawRabbit.Enrichers.MessageContext.Context;
 using RawRabbit.Messages.Sample;
 using RawRabbit.Operations.MessageSequence;
 using Serilog;

@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using RawRabbit.Compatibility.Legacy.Configuration.Exchange;
-using RawRabbit.Context;
+using RawRabbit.Enrichers.MessageContext;
+using RawRabbit.Enrichers.MessageContext.Context;
 using RawRabbit.Instantiation;
 using RawRabbit.IntegrationTests.TestMessages;
 using Xunit;
@@ -93,7 +94,7 @@ namespace RawRabbit.IntegrationTests.Compatibility
 			const string propValue = "This is test message prop";
 			var publisher = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient(new RawRabbitOptions
 			{
-				Plugins = p => p.PublishMessageContext(c =>
+				Plugins = p => p.UseMessageContext(c =>
 					new TestMessageContext
 					{
 						Prop = propValue
@@ -222,7 +223,7 @@ namespace RawRabbit.IntegrationTests.Compatibility
 			const string propValue = "This is test message prop";
 			var requester = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient(new RawRabbitOptions
 			{
-				Plugins = p => p.PublishMessageContext(c =>
+				Plugins = p => p.UseMessageContext(c =>
 					new TestMessageContext
 					{
 						Prop = propValue
@@ -232,7 +233,7 @@ namespace RawRabbit.IntegrationTests.Compatibility
 			var responder = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient<TestMessageContext>();
 			TestMessageContext recievedContext = null;
 			BasicRequest recievedRequest = null;
-			responder.RespondAsync<BasicRequest, BasicResponse>((req, context) =>
+			var sub = responder.RespondAsync<BasicRequest, BasicResponse>((req, context) =>
 			{
 				recievedContext = context;
 				recievedRequest = req;
@@ -247,6 +248,7 @@ namespace RawRabbit.IntegrationTests.Compatibility
 			Assert.NotNull(recievedRequest);
 			Assert.NotNull(response);
 
+			TestChannel.QueueDelete(sub.QueueName, false, false);
 			(requester as IDisposable)?.Dispose();
 			(responder as IDisposable)?.Dispose();
 		}

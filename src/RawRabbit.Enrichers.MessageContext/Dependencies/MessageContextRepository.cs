@@ -1,23 +1,22 @@
 ﻿using System.Threading;
-using RawRabbit.Context;
 
 #if NET451
 using System.Runtime.Remoting.Messaging;
 #endif
 
-namespace RawRabbit.Enrichers.MessageContext.Chaining.Dependencies
+namespace RawRabbit.Enrichers.MessageContext.Dependencies
 {
 	public interface IMessageContextRepository
 	{
-		IMessageContext Get();
-		void Set(IMessageContext context);
+		object Get();
+		void Set(object context);
 	}
 
 	public class MessageContextRepository : IMessageContextRepository
 	{
 
 #if NETSTANDARD1_5
-		private readonly AsyncLocal<IMessageContext> _msgContext;
+		private readonly AsyncLocal<object> _msgContext;
 #elif NET451
 		private const string MessageContext = "RawRabbit:MessageContext";
 #endif
@@ -25,19 +24,19 @@ namespace RawRabbit.Enrichers.MessageContext.Chaining.Dependencies
 		public MessageContextRepository()
 		{
 #if NETSTANDARD1_5
-			_msgContext = new AsyncLocal<IMessageContext>();
+			_msgContext = new AsyncLocal<object>();
 #endif
 		}
-		public IMessageContext Get()
+		public object Get()
 		{
 #if NETSTANDARD1_5
 			return _msgContext?.Value;
 #elif NET451
-			return CallContext.LogicalGetData(MessageContext) as IMessageContext;
+			return CallContext.LogicalGetData(MessageContext) as object;
 #endif
 		}
 
-		public void Set(IMessageContext context)
+		public void Set(object context)
 		{
 #if NETSTANDARD1_5
 			_msgContext.Value = context;

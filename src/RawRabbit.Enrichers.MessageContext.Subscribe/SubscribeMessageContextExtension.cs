@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Common;
-using RawRabbit.Context;
 using RawRabbit.Enrichers.MessageContext.Subscribe;
 using RawRabbit.Operations.Subscribe.Middleware;
 using RawRabbit.Pipe;
@@ -18,7 +17,6 @@ namespace RawRabbit
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.MessageDeserialized))
 			.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
 			{
-				HeaderTypeFunc = c => typeof(IMessageContext),
 				HeaderKeyFunc = c => PropertyHeaders.Context,
 				ContextSaveAction = (pipeCtx, msgCtx) => pipeCtx.Properties.TryAdd(PipeKey.MessageContext, msgCtx)
 			})

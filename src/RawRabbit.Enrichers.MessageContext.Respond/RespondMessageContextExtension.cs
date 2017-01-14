@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Common;
-using RawRabbit.Context;
 using RawRabbit.Operations.Respond.Acknowledgement;
 using RawRabbit.Operations.Respond.Core;
 using RawRabbit.Operations.Respond.Middleware;
@@ -27,7 +26,6 @@ namespace RawRabbit
 					})
 					.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
 					{
-						HeaderTypeFunc = c => typeof(IMessageContext),
 						HeaderKeyFunc = c => PropertyHeaders.Context,
 						ContextSaveAction = (pipeCtx, msgCtx) => pipeCtx.Properties.TryAdd(PipeKey.MessageContext, msgCtx)
 					}))
@@ -38,7 +36,7 @@ namespace RawRabbit
 			this IBusClient client,
 			Func<TRequest, TMessageContext, Task<TResponse>> handler,
 			Action<IPipeContext> context = null,
-			CancellationToken ct = default(CancellationToken)) where TMessageContext : IMessageContext
+			CancellationToken ct = default(CancellationToken))
 		{
 			return client
 				.RespondAsync<TRequest, TResponse, TMessageContext>((request, messageContext) => handler
@@ -55,7 +53,7 @@ namespace RawRabbit
 			this IBusClient client,
 			Func<TRequest, TMessageContext, Task<TypedAcknowlegement<TResponse>>> handler,
 			Action<IPipeContext> context = null,
-			CancellationToken ct = default(CancellationToken)) where TMessageContext : IMessageContext
+			CancellationToken ct = default(CancellationToken))
 		{
 			return client
 				.InvokeAsync(RespondPipe, ctx =>

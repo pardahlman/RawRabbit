@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using RawRabbit.Context;
 using RawRabbit.Operations.MessageSequence.Model;
 using RawRabbit.Operations.StateMachine;
 

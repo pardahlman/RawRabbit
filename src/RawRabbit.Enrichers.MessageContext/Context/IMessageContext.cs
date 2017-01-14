@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RawRabbit.Context
+namespace RawRabbit.Enrichers.MessageContext.Context
 {
 	public interface IMessageContext
 	{

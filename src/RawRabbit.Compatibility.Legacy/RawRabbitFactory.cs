@@ -1,6 +1,8 @@
-﻿using RawRabbit.Compatibility.Legacy.Configuration;
-using RawRabbit.Context;
+﻿using System;
+using RawRabbit.Compatibility.Legacy.Configuration;
 using RawRabbit.DependecyInjection;
+using RawRabbit.Enrichers.MessageContext;
+using RawRabbit.Enrichers.MessageContext.Context;
 using RawRabbit.Instantiation;
 using RawRabbitConfiguration = RawRabbit.Configuration.RawRabbitConfiguration;
 
@@ -16,7 +18,9 @@ namespace RawRabbit.Compatibility.Legacy
 			options.DependencyInjection += register => register.AddSingleton<IConfigurationEvaluator, ConfigurationEvaluator>();
 			options.ClientConfiguration = options?.ClientConfiguration ?? RawRabbitConfiguration.Local;
 			options.Plugins = options.Plugins ?? (builder => { });
-			options.Plugins += builder => builder.UseMessageChaining();
+			options.Plugins += builder => builder
+				.UseMessageContext(context => new MessageContext { GlobalRequestId = Guid.NewGuid() })
+				.UseContextForwaring();
 			var simpleIoc = new SimpleDependecyInjection();
 			var client = Instantiation.RawRabbitFactory.CreateSingleton(options, simpleIoc, ioc => simpleIoc);
 			return new BusClient<TMessageContext>(client, simpleIoc.GetService<IConfigurationEvaluator>());
@@ -30,9 +34,8 @@ namespace RawRabbit.Compatibility.Legacy
 			options.ClientConfiguration = options?.ClientConfiguration ?? RawRabbitConfiguration.Local;
 			options.Plugins = options.Plugins ?? (builder => { });
 			options.Plugins += builder => builder
-				.PublishMessageContext<MessageContext>()
-				.RequestMessageContext<MessageContext>()
-				.UseMessageChaining(); 
+				.UseMessageContext(context => new MessageContext {GlobalRequestId = Guid.NewGuid()})
+				.UseContextForwaring();
 			var simpleIoc = new SimpleDependecyInjection();
 			var client = Instantiation.RawRabbitFactory.CreateSingleton(options, simpleIoc, ioc => simpleIoc);
 			return new BusClient(client, simpleIoc.GetService<IConfigurationEvaluator>());

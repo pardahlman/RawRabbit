@@ -5,7 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Testing.Abstractions;
 using RawRabbit.Configuration;
-using RawRabbit.Context;
+using RawRabbit.Enrichers.MessageContext;
+using RawRabbit.Enrichers.MessageContext.Context;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.Operations.MessageSequence;
 using RawRabbit.Operations.MessageSequence.Model;
@@ -19,14 +20,14 @@ namespace RawRabbit.IntegrationTests.MessageSequence
 	{
 		[Fact]
 		public async Task Should_Create_Simple_Chain_Of_One_Send_And_Final_Recieve()
-		{
+		{	
 			/* Setup */
 			using (var client = RawRabbitFactory.CreateTestClient(new RawRabbitOptions
 			{
 				Plugins = p => p
-					.PublishMessageContext<MessageContext>()
+					.UseMessageContext<MessageContext>()
 					.UseStateMachine()
-					.UseMessageChaining()
+					.UseContextForwaring()
 			}))
 			{
 				await client.SubscribeAsync<BasicRequest, MessageContext>((request, context) =>
@@ -53,9 +54,9 @@ namespace RawRabbit.IntegrationTests.MessageSequence
 			using (var client = RawRabbitFactory.CreateTestClient(new RawRabbitOptions
 			{
 				Plugins = p => p
-					.PublishMessageContext<MessageContext>()
+					.UseMessageContext<MessageContext>()
 					.UseStateMachine()
-					.UseMessageChaining()
+					.UseContextForwaring()
 			}))
 			{
 				var secondTcs = new TaskCompletionSource<SecondMessage>();
@@ -93,9 +94,9 @@ namespace RawRabbit.IntegrationTests.MessageSequence
 			using (var client = RawRabbitFactory.CreateTestClient(new RawRabbitOptions
 			{
 				Plugins = p => p
-					.PublishMessageContext<MessageContext>()
+					.UseMessageContext<MessageContext>()
 					.UseStateMachine()
-					.UseMessageChaining()
+					.UseContextForwaring()
 			}))
 			{
 				var secondTcs = new TaskCompletionSource<SecondMessage>();
@@ -130,9 +131,9 @@ namespace RawRabbit.IntegrationTests.MessageSequence
 			using (var client = RawRabbitFactory.CreateTestClient(new RawRabbitOptions
 			{
 				Plugins = p => p
-					.PublishMessageContext<MessageContext>()
+					.UseMessageContext<MessageContext>()
 					.UseStateMachine()
-					.UseMessageChaining()
+					.UseContextForwaring()
 			}))
 			{
 				var secondTcs = new TaskCompletionSource<SecondMessage>();
@@ -190,9 +191,9 @@ namespace RawRabbit.IntegrationTests.MessageSequence
 			using (var client = RawRabbitFactory.CreateTestClient(new RawRabbitOptions
 			{
 				Plugins = p => p
-					.PublishMessageContext<MessageContext>()
+					.UseMessageContext<MessageContext>()
 					.UseStateMachine()
-					.UseMessageChaining()
+					.UseContextForwaring()
 			}))
 			{
 				var secondTcs = new TaskCompletionSource<SecondMessage>();
@@ -234,9 +235,9 @@ namespace RawRabbit.IntegrationTests.MessageSequence
 			using (var client = RawRabbitFactory.CreateTestClient(new RawRabbitOptions
 			{
 				Plugins = p => p
-					.PublishMessageContext<MessageContext>()
+					.UseMessageContext<MessageContext>()
 					.UseStateMachine()
-					.UseMessageChaining()
+					.UseContextForwaring()
 			}))
 			{
 				var firstTcs = new TaskCompletionSource<FirstMessage>();
@@ -283,9 +284,9 @@ namespace RawRabbit.IntegrationTests.MessageSequence
 			using (var client = RawRabbitFactory.CreateTestClient(new RawRabbitOptions
 			{
 				Plugins = p => p
-					.PublishMessageContext<MessageContext>()
+					.UseMessageContext<MessageContext>()
 					.UseStateMachine()
-					.UseMessageChaining(),
+					.UseContextForwaring(),
 				DependencyInjection = ioc => ioc.AddSingleton(cfg)
 			}))
 			{

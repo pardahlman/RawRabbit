@@ -10,6 +10,7 @@
 		"Microsoft.Extensions.Logging.Console": "1.0.0",
 		"RawRabbit": { "target": "project" },
 		"RawRabbit.Operations.MessageSequence": { "target": "project" },
+		"RawRabbit.Operations.Publish" : { "target": "project" },
 		"RawRabbit.Operations.Request" : { "target": "project" },
 		"RawRabbit.Messages.Sample": { "target": "project" },
 		"Serilog.Extensions.Logging": "1.0.0",

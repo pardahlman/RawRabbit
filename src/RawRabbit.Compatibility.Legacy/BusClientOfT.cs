@@ -12,7 +12,7 @@ using RawRabbit.Configuration.Consumer;
 using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Publisher;
 using RawRabbit.Configuration.Queue;
-using RawRabbit.Context;
+using RawRabbit.Enrichers.MessageContext.Context;
 using RawRabbit.Operations.Request.Core;
 using RawRabbit.Pipe;
 

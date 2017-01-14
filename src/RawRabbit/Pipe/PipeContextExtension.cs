@@ -16,7 +16,6 @@ using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Get;
 using RawRabbit.Configuration.Publisher;
 using RawRabbit.Configuration.Queue;
-using RawRabbit.Context;
 
 namespace RawRabbit.Pipe
 {
@@ -32,9 +31,9 @@ namespace RawRabbit.Pipe
 			return context.Get<Type>(PipeKey.MessageType);
 		}
 
-		public static IMessageContext GetMessageContext(this IPipeContext context)
+		public static object GetMessageContext(this IPipeContext context)
 		{
-			return context.Get<IMessageContext>(PipeKey.MessageContext);
+			return context.Get<object>(PipeKey.MessageContext);
 		}
 
 		public static IBasicConsumer GetConsumer(this IPipeContext context)
