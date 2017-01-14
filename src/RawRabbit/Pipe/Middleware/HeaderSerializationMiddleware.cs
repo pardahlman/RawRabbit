@@ -50,7 +50,7 @@ namespace RawRabbit.Pipe.Middleware
 			var item = _retrieveItemFunc(context) ?? _createItemFunc(context);
 
 			var serializedItem = _serializer.Serialize(item);
-			properties.Headers.Add(PropertyHeaders.Context, serializedItem);
+			properties.Headers.Add(_headerKey, serializedItem);
 			return Next.InvokeAsync(context, token);
 		}
 

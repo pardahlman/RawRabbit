@@ -17,7 +17,7 @@ namespace RawRabbit
 				RetrieveItemFunc = context =>
 				{
 					var msgCtx = context.GetMessageContext();
-					context.Properties.TryAdd(PipeKey.MessageContext, msgCtx);
+					//context.Properties.TryAdd(PipeKey.MessageContext, msgCtx);
 					return msgCtx;
 				},
 				CreateItemFunc = context => new TMessageContext

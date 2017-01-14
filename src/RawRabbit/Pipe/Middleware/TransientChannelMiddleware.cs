@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using RabbitMQ.Client;
 using RawRabbit.Channel.Abstraction;
 using RawRabbit.Logging;
 
@@ -17,8 +18,7 @@ namespace RawRabbit.Pipe.Middleware
 
 		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
-			return _channelFactory
-				.GetChannelAsync(token)
+			return CreateChannelAsync(context, token)
 				.ContinueWith(tChannel =>
 				{
 					_logger.LogDebug($"Adding channel {tChannel.Result.ChannelNumber} to Execution Context.");
@@ -26,6 +26,11 @@ namespace RawRabbit.Pipe.Middleware
 					return Next.InvokeAsync(context, token);
 				}, token)
 				.Unwrap();
+		}
+
+		protected virtual Task<IModel> CreateChannelAsync(IPipeContext context, CancellationToken ct)
+		{
+			return _channelFactory.GetChannelAsync(ct);
 		}
 	}
 }

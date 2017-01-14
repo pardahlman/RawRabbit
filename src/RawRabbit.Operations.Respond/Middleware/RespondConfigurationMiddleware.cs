@@ -52,10 +52,10 @@ namespace RawRabbit.Operations.Respond.Middleware
 			action?.Invoke(builder);
 
 			var respondCfg = builder.Config;
-			context.Properties.Add(PipeKey.ConsumerConfiguration, respondCfg);
-			context.Properties.Add(PipeKey.ConsumeConfiguration, respondCfg.Consume);
-			context.Properties.Add(PipeKey.QueueDeclaration, respondCfg.Queue);
-			context.Properties.Add(PipeKey.ExchangeDeclaration, respondCfg.Exchange);
+			context.Properties.TryAdd(PipeKey.ConsumerConfiguration, respondCfg);
+			context.Properties.TryAdd(PipeKey.ConsumeConfiguration, respondCfg.Consume);
+			context.Properties.TryAdd(PipeKey.QueueDeclaration, respondCfg.Queue);
+			context.Properties.TryAdd(PipeKey.ExchangeDeclaration, respondCfg.Exchange);
 
 			return Next.InvokeAsync(context, token);
 		}

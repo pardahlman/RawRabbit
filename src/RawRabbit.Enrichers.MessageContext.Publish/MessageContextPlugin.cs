@@ -10,34 +10,21 @@ namespace RawRabbit
 {
 	public static class MessageContextPlugin
 	{
-		public static IClientBuilder PublishMessageContext<TMessageContext>(this IClientBuilder builder, Func<IPipeContext, TMessageContext> createFunc = null)
+		public static IClientBuilder PublishMessageContext<TMessageContext>(this IClientBuilder builder)
 			where TMessageContext : IMessageContext, new()
 		{
-			Func<IPipeContext, object> genericCreateFunc;
-			if (createFunc == null)
+			return PublishMessageContext(builder, context => new TMessageContext
 			{
-				genericCreateFunc = context =>
-				{
-					Guid globalMsgId;
-					if (!Guid.TryParse(context.GetGlobalExecutionId(), out globalMsgId))
-					{
-						globalMsgId = Guid.NewGuid();
-					}
-					var msgContext = new TMessageContext
-					{
-						GlobalRequestId = globalMsgId
-					};
-					context.Properties.TryAdd(PipeKey.MessageContext, msgContext);
-					return msgContext;
-				};
-			}
-			else
-			{
-				genericCreateFunc = context => createFunc(context);
-			}
+				GlobalRequestId = Guid.NewGuid()
+			});
+		}
+
+		public static IClientBuilder PublishMessageContext<TMessageContext>(this IClientBuilder builder, Func<IPipeContext, TMessageContext> createFunc)
+			where TMessageContext : IMessageContext
+		{
+			Func<IPipeContext, object> genericCreateFunc = context => createFunc(context);
 			builder.Register(pipe => pipe.Use<HeaderSerializationMiddleware>(new HeaderSerializationOptions
 			{
-				ExecutePredicate = context => string.Equals(context.Get<string>(PipeKey.Operation), PublishKey.Publish),
 				HeaderKey = PropertyHeaders.Context,
 				RetrieveItemFunc = context => context.GetMessageContext(),
 				CreateItemFunc = genericCreateFunc

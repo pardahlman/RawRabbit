@@ -1,30 +1,32 @@
 ﻿using System.Collections.Generic;
+using RawRabbit.Configuration;
 
-namespace RawRabbit.Configuration.Exchange
+namespace RawRabbit.Compatibility.Legacy.Configuration.Exchange
 {
-	public class ExchangeDeclaration
+	public class ExchangeConfiguration
 	{
-		public string Name { get; set; }
+		public string ExchangeName { get; set; }
 		public string ExchangeType { get; set; }
 		public bool Durable { get; set; }
 		public bool AutoDelete { get; set; }
 		public IDictionary<string,object> Arguments { get; set; }
+		public bool AssumeInitialized { get; set; }
 
-		public ExchangeDeclaration()
+		public ExchangeConfiguration()
 		{
 			Arguments = new Dictionary<string, object>();
 		}
 
-		public ExchangeDeclaration(GeneralExchangeConfiguration exchange) : this()
+		public ExchangeConfiguration(GeneralExchangeConfiguration exchange) : this()
 		{
 			Durable = exchange.Durable;
 			AutoDelete = exchange.AutoDelete;
 			ExchangeType = exchange.Type.ToString().ToLower();
 		}
 
-		public static ExchangeDeclaration Default => new ExchangeDeclaration
+		public static ExchangeConfiguration Default => new ExchangeConfiguration
 		{
-			Name = "",
+			ExchangeName = "",
 			ExchangeType = RabbitMQ.Client.ExchangeType.Topic
 		};
 

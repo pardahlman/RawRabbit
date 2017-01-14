@@ -17,11 +17,12 @@ namespace RawRabbit.IntegrationTests.GetOperation
 				/* Setup */
 				var message = new BasicMessage {Prop = "Get me, get it?"};
 				var conventions = new NamingConventions();
+				var exchangeName = conventions.ExchangeNamingConvention(message.GetType());
 				TestChannel.QueueDeclare(conventions.QueueNamingConvention(message.GetType()), true, false, true, null);
-				TestChannel.ExchangeDeclare(conventions.ExchangeNamingConvention(message.GetType()), ExchangeType.Topic);
-				TestChannel.QueueBind(conventions.QueueNamingConvention(message.GetType()), conventions.ExchangeNamingConvention(message.GetType()), conventions.RoutingKeyConvention(message.GetType()) + ".#");
+				TestChannel.ExchangeDeclare(exchangeName, ExchangeType.Topic);
+				TestChannel.QueueBind(conventions.QueueNamingConvention(message.GetType()), exchangeName, conventions.RoutingKeyConvention(message.GetType()) + ".#");
 
-				await client.PublishAsync(message, ctx => ctx.UsePublisherConfiguration(cfg => cfg.OnDeclaredExchange(e => e.AssumeInitialized())));
+				await client.PublishAsync(message, ctx => ctx.UsePublisherConfiguration(cfg => cfg.OnExchange(exchangeName)));
 
 				/* Test */
 				var ackable = await client.GetAsync<BasicMessage>();

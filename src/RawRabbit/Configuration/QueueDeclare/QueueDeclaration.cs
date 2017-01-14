@@ -4,14 +4,11 @@ namespace RawRabbit.Configuration.Queue
 {
 	public class QueueDeclaration
 	{
-
-
 		public string Name { get; set; }
 		public bool Durable { get; set; }
 		public bool Exclusive { get; set; }
 		public bool AutoDelete { get; set; }
 		public Dictionary<string, object> Arguments { get; set; }
-		public bool AssumeInitialized { get; set; }
 
 		public QueueDeclaration()
 		{

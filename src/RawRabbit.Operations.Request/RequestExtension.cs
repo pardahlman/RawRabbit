@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
@@ -14,22 +15,22 @@ namespace RawRabbit
 	public static class RequestExtension
 	{
 		public static readonly Action<IPipeBuilder> RequestPipe = pipe => pipe
-			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.Initialized))
-			.Use<GlobalExecutionIdMiddleware>()
-			.Use<RequestConfigurationMiddleware>()
-			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.PublishConfigured))
-			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.ConsumeConfigured))
-			.Use<QueueDeclareMiddleware>(new QueueDeclareOptions { QueueDeclarationFunc = context => context.GetResponseQueue()})
-			.Use<ExchangeDeclareMiddleware>(new ExchangeDeclareOptions { ExchangeFunc = context => context.GetRequestExchange()})
-			.Use<ExchangeDeclareMiddleware>(new ExchangeDeclareOptions { ExchangeFunc = context => context.GetResponseExchange()})
-			.Use<QueueBindMiddleware>(new QueueBindOptions
+				.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.Initialized))
+				.Use<GlobalExecutionIdMiddleware>()
+				.Use<RequestConfigurationMiddleware>()
+				.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.PublishConfigured))
+				.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.ConsumeConfigured))
+				.Use<QueueDeclareMiddleware>(new QueueDeclareOptions {QueueDeclarationFunc = context => context.GetResponseQueue()})
+				.Use<ExchangeDeclareMiddleware>(new ExchangeDeclareOptions {ExchangeFunc = context => context.GetRequestExchange()})
+				.Use<ExchangeDeclareMiddleware>(new ExchangeDeclareOptions {ExchangeFunc = context => context.GetResponseExchange()})
+				.Use<QueueBindMiddleware>(new QueueBindOptions
 				{
 					ExchangeNameFunc = context => context.GetConsumeConfiguration()?.ExchangeName,
 					QueueNameFunc = context => context.GetConsumeConfiguration()?.QueueName,
 					RoutingKeyFunc = context => context.GetConsumeConfiguration()?.RoutingKey
 				})
-			.Use<BodySerializationMiddleware>(new MessageSerializationOptions { MessageFunc = context => context.GetMessage()})
-			.Use<Operations.Request.Middleware.BasicPropertiesMiddleware>(new BasicPropertiesOptions
+				.Use<BodySerializationMiddleware>()
+				.Use<Operations.Request.Middleware.BasicPropertiesMiddleware>(new BasicPropertiesOptions
 				{
 					PostCreateAction = (ctx, props) =>
 					{
@@ -38,9 +39,9 @@ namespace RawRabbit
 						props.Headers.TryAdd(PropertyHeaders.GlobalExecutionId, ctx.GetGlobalExecutionId());
 					}
 				})
-			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.BasicPropertiesCreated))
-			.Use<RequestTimeoutMiddleware>()
-			.Use<ResponseConsumeMiddleware>(new ResponseConsumerOptions
+				.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.BasicPropertiesCreated))
+				.Use<RequestTimeoutMiddleware>()
+				.Use<ResponseConsumeMiddleware>(new ResponseConsumerOptions
 				{
 					ResponseRecieved = p => p
 						.Use<BodyDeserializationMiddleware>(new MessageDeserializationOptions
@@ -50,13 +51,13 @@ namespace RawRabbit
 						})
 						.Use<ResponderExceptionMiddleware>()
 				})
-			.Use<BasicPublishMiddleware>(new BasicPublishOptions
-			{
-					ExchangeNameFunc = c => c.GetRequestConfiguration()?.Request.Exchange.Name,
+				.Use<BasicPublishMiddleware>(new BasicPublishOptions
+				{
+					ExchangeNameFunc = c => c.GetRequestConfiguration()?.Request.ExchangeName,
 					RoutingKeyFunc = c => c.GetRequestConfiguration()?.Request.RoutingKey,
-					ChannelFunc = c => c.Get<IBasicConsumer>(PipeKey.Consumer)?.Model
-				})
-			;
+					ChannelFunc = c => c.Get<IBasicConsumer>(PipeKey.Consumer)?.Model,
+					BodyFunc = c => Encoding.UTF8.GetBytes(c.Get<string>(PipeKey.SerializedMessage))
+				});
 
 		public static Task<TResponse> RequestAsync<TRequest, TResponse>(this IBusClient client, TRequest message = default(TRequest), Action<IPipeContext> context = null, CancellationToken ct = default(CancellationToken))
 		{

@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RabbitMQ.Client.MessagePatterns;
 using RawRabbit.Configuration;
 using RawRabbit.Configuration.BasicPublish;
 using RawRabbit.Configuration.Consume;
@@ -94,6 +95,11 @@ namespace RawRabbit.Pipe
 		public static string GetRoutingKey(this IPipeContext context)
 		{
 			return context.Get<string>(PipeKey.RoutingKey);
+		}
+
+		public static RawRabbit.Common.ISubscription GetSubscription(this IPipeContext context)
+		{
+			return context.Get<RawRabbit.Common.ISubscription>(PipeKey.Subscription);
 		}
 
 		public static string GetGlobalExecutionId(this IPipeContext context)

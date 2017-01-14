@@ -41,11 +41,5 @@ namespace RawRabbit.Configuration.Exchange
 			Declaration.Arguments.Add(name, value);
 			return this;
 		}
-
-		public IExchangeDeclarationBuilder AssumeInitialized(bool asumption = true)
-		{
-			Declaration.AssumeInitialized = asumption;
-			return this;
-		}
 	}
 }

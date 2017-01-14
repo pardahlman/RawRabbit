@@ -119,12 +119,12 @@ namespace RawRabbit.Common
 
 		public bool IsDeclared(ExchangeDeclaration exchange)
 		{
-			return exchange.IsDefaultExchange() || exchange.AssumeInitialized || _initExchanges.Contains(exchange.Name);
+			return exchange.IsDefaultExchange() || _initExchanges.Contains(exchange.Name);
 		}
 
 		public bool IsDeclared(QueueDeclaration queue)
 		{
-			return queue.IsDirectReplyTo() || queue.AssumeInitialized || _initQueues.Contains(queue.Name);
+			return queue.IsDirectReplyTo() || _initQueues.Contains(queue.Name);
 		}
 
 		private void BindQueueToExchange(ScheduledBindQueueTask bind)

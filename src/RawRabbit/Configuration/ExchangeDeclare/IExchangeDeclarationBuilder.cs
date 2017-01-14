@@ -7,6 +7,5 @@
 		IExchangeDeclarationBuilder WithDurability(bool durable = true);
 		IExchangeDeclarationBuilder WithAutoDelete(bool autoDelete= true);
 		IExchangeDeclarationBuilder WithArgument(string name, string value);
-		IExchangeDeclarationBuilder AssumeInitialized(bool asumption = true);
 	}
 }

@@ -45,7 +45,7 @@ namespace RawRabbit
 			pipe.Replace<MessageConsumeMiddleware, MessageConsumeMiddleware>(args: new ConsumeOptions { Pipe = ConsumePipe });
 		});
 
-		public static Task SubscribeAsync<TMessage, TMessageContext>(this IBusClient client, Func<TMessage, TMessageContext, Task> subscribeMethod, Action<IPipeContext> context = null, CancellationToken ct = default(CancellationToken))
+		public static Task<IPipeContext> SubscribeAsync<TMessage, TMessageContext>(this IBusClient client, Func<TMessage, TMessageContext, Task> subscribeMethod, Action<IPipeContext> context = null, CancellationToken ct = default(CancellationToken))
 		{
 			return client.SubscribeAsync<TMessage, TMessageContext>(
 					(msg, ctx) => subscribeMethod
@@ -54,7 +54,7 @@ namespace RawRabbit
 					context, ct);
 		}
 
-		public static Task SubscribeAsync<TMessage, TMessageContext>(
+		public static Task<IPipeContext> SubscribeAsync<TMessage, TMessageContext>(
 			this IBusClient client,
 			Func<TMessage, TMessageContext, Task<Acknowledgement>> subscribeMethod,
 			Action<IPipeContext> context = null,

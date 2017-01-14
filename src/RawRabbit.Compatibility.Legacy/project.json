@@ -1,6 +1,6 @@
 ﻿{
 	"title": "RawRabbit.Compatibility.Legacy",
-	"version": "2.0.0-*",
+	"version": "2.0.0-alpha",
 	"authors": [ "pardahlman" ],
 	"description": "A bus client that is compatible with older ones.",
 	"packOptions": {
@@ -11,6 +11,8 @@
 	},
 
 	"dependencies": {
+		"RawRabbit.Enrichers.MessageContext.Respond": { "target": "project" },
+		"RawRabbit.Enrichers.MessageContext.Request": { "target": "project" },
 		"RawRabbit.Enrichers.MessageContext.Publish": { "target": "project" },
 		"RawRabbit.Enrichers.MessageContext.Subscribe": { "target": "project" },
 		"RawRabbit.Enrichers.MessageContext.Chaining": { "target": "project" }

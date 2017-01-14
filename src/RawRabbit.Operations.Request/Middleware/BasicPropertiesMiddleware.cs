@@ -1,5 +1,6 @@
 ﻿using System;
 using RabbitMQ.Client;
+using RawRabbit.Configuration.Consume;
 using RawRabbit.Configuration.Queue;
 using RawRabbit.Operations.Request.Core;
 using RawRabbit.Pipe;
@@ -18,9 +19,9 @@ namespace RawRabbit.Operations.Request.Middleware
 			var consumeCfg = context.GetResponseConfiguration();
 			var clientCfg = context.GetClientConfiguration();
 
-			if (consumeCfg.Queue.IsDirectReplyTo())
+			if (consumeCfg.Consume.IsDirectReplyTo() || consumeCfg.Exchange == null)
 			{
-				props.ReplyTo = consumeCfg.Queue.Name;
+				props.ReplyTo = consumeCfg.Consume.QueueName;
 			}
 			else
 			{

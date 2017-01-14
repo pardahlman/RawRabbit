@@ -34,7 +34,7 @@ namespace RawRabbit
 			});
 		});
 
-		public static Task RespondAsync<TRequest, TResponse, TMessageContext>(
+		public static Task<IPipeContext> RespondAsync<TRequest, TResponse, TMessageContext>(
 			this IBusClient client,
 			Func<TRequest, TMessageContext, Task<TResponse>> handler,
 			Action<IPipeContext> context = null,
@@ -48,10 +48,10 @@ namespace RawRabbit
 						if (t.IsFaulted)
 							throw t.Exception;
 						return new Ack<TResponse>(t.Result);
-					}, ct), ct: ct);
+					}, ct), context, ct);
 		}
 
-		public static Task RespondAsync<TRequest, TResponse, TMessageContext>(
+		public static Task<IPipeContext> RespondAsync<TRequest, TResponse, TMessageContext>(
 			this IBusClient client,
 			Func<TRequest, TMessageContext, Task<TypedAcknowlegement<TResponse>>> handler,
 			Action<IPipeContext> context = null,

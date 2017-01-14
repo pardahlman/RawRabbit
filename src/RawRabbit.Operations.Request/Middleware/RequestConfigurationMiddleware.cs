@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Configuration.Consumer;
-using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Publisher;
-using RawRabbit.Configuration.Queue;
 using RawRabbit.Operations.Request.Configuration;
 using RawRabbit.Operations.Request.Configuration.Abstraction;
 using RawRabbit.Operations.Request.Core;
@@ -57,10 +52,10 @@ namespace RawRabbit.Operations.Request.Middleware
 			action?.Invoke(builder);
 			var requestConfig = builder.Config;
 
-			context.Properties.Add(RequestKey.Configuration, requestConfig);
-			context.Properties.Add(PipeKey.PublisherConfiguration, requestConfig.Request);
-			context.Properties.Add(PipeKey.ConsumerConfiguration, requestConfig.Response);
-			context.Properties.Add(PipeKey.ConsumeConfiguration, requestConfig.Response.Consume);
+			context.Properties.TryAdd(RequestKey.Configuration, requestConfig);
+			context.Properties.TryAdd(PipeKey.PublisherConfiguration, requestConfig.Request);
+			context.Properties.TryAdd(PipeKey.ConsumerConfiguration, requestConfig.Response);
+			context.Properties.TryAdd(PipeKey.ConsumeConfiguration, requestConfig.Response.Consume);
 			return Next.InvokeAsync(context, token);
 		}
 	}
