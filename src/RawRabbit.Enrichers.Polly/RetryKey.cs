@@ -15,6 +15,9 @@ namespace RawRabbit.Enrichers.Polly
 	public class RetryKey
 	{
 		public const string PipeContext = "PipeContext";
+		public const string PublishMandatory = "PublishMandatory";
+		public const string BasicProperties = "BasicProperties";
+		public const string PublishBody = "PublishBody";
 		public const string QueueDeclaration = "QueueDeclaration";
 		public const string QueueName = "QueueName";
 		public const string ExchangeDeclaration = "ExchangeDeclaration";

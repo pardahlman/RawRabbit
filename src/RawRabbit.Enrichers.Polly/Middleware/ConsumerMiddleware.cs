@@ -17,7 +17,7 @@ namespace RawRabbit.Enrichers.Polly.Middleware
 		{
 			var policy = context.GetPolicy(PolicyKeys.QueueDeclare);
 			return policy.ExecuteAsync(
-				action: ct => base.GetOrCreateConsumerAsync(context, token),
+				action: ct => base.GetOrCreateConsumerAsync(context, ct),
 				cancellationToken: token,
 				contextData: new Dictionary<string, object>
 				{

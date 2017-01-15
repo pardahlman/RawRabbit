@@ -15,7 +15,7 @@ namespace RawRabbit.Enrichers.Polly.Middleware
 		{
 			var policy = context.GetPolicy(PolicyKeys.HandlerInvokation);
 			return policy.ExecuteAsync(
-				action: ct => base.InvokeMessageHandler(context, token),
+				action: ct => base.InvokeMessageHandler(context, ct),
 				cancellationToken: token,
 				contextData: new Dictionary<string, object>
 				{

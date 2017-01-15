@@ -1,4 +1,5 @@
-﻿using RabbitMQ.Client;
+﻿using System.Collections.Generic;
+using RabbitMQ.Client;
 using RawRabbit.Common;
 using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
@@ -20,7 +21,17 @@ namespace RawRabbit.Enrichers.Polly.Middleware
 				IPipeContext context)
 		{
 			var policy = context.GetPolicy(PolicyKeys.BasicPublish);
-			policy.Execute(() => base.BasicPublish(channel, exchange, routingKey, mandatory, basicProps, body, context));
+			policy.Execute(
+				action: () => base.BasicPublish(channel, exchange, routingKey, mandatory, basicProps, body, context),
+				contextData: new Dictionary<string, object>
+				{
+					[RetryKey.PipeContext] = context,
+					[RetryKey.ExchangeName] = exchange,
+					[RetryKey.RoutingKey] = routingKey,
+					[RetryKey.PublishMandatory] = mandatory,
+					[RetryKey.BasicProperties] = basicProps,
+					[RetryKey.PublishBody] = body,
+				});
 		}
 	}
 }
