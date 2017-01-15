@@ -12,6 +12,7 @@ namespace RawRabbit.Pipe
 	{
 		IPipeBuilder Use(Func<IPipeContext, Func<Task>, Task> handler);
 		IPipeBuilder Use<TMiddleWare>(params object[] args) where TMiddleWare : Middleware.Middleware;
+		IPipeBuilder Replace<TCurrent, TNew>(Predicate<object[]> predicate = null, Func<object[], object[]> argsFunc = null) where TCurrent: Middleware.Middleware where TNew : Middleware.Middleware;
 		IPipeBuilder Replace<TCurrent, TNew>(Predicate<object[]> predicate = null, params object[] args) where TCurrent: Middleware.Middleware where TNew : Middleware.Middleware;
 		IPipeBuilder Remove<TMiddleware>(Predicate<object[]> predicate = null) where TMiddleware : Middleware.Middleware;
 	}
@@ -52,10 +53,16 @@ namespace RawRabbit.Pipe
 
 		public IPipeBuilder Replace<TCurrent, TNew>(Predicate<object[]> predicate = null, params object[] args) where TCurrent : Middleware.Middleware where TNew : Middleware.Middleware
 		{
+			return Replace<TCurrent, TNew>(predicate, oldArgs => args);
+;		}
+
+		public IPipeBuilder Replace<TCurrent, TNew>(Predicate<object[]> predicate = null, Func<object[], object[]> argsFunc = null) where TCurrent : Middleware.Middleware where TNew : Middleware.Middleware
+		{
 			predicate = predicate ?? (objects => true);
 			var matching = Pipe.Where(c => c.Type == typeof(TCurrent) && predicate(c.ConstructorArgs));
 			foreach (var middlewareInfo in matching)
 			{
+				var args = argsFunc?.Invoke(middlewareInfo.ConstructorArgs);
 				middlewareInfo.Type = typeof(TNew);
 				middlewareInfo.ConstructorArgs = args;
 			}
@@ -117,5 +124,7 @@ namespace RawRabbit.Pipe
 		{
 			return _resolver.GetService(middlewareInfo.Type, middlewareInfo.ConstructorArgs) as Middleware.Middleware;
 		}
+
+		
 	}
 }
