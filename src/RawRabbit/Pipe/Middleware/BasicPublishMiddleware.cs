@@ -50,15 +50,32 @@ namespace RawRabbit.Pipe.Middleware
 
 			_logger.LogInformation($"Performing basic publish with routing key {routingKey} on exchange {exchangeName}.");
 
-			ExclusiveExecute(channel, c => c.BasicPublish(
-				exchange: exchangeName,
+			ExclusiveExecute(channel, c =>
+					BasicPublish(
+						channel: c,
+						exchange: exchangeName,
+						routingKey: routingKey,
+						mandatory: mandatory,
+						basicProps: basicProps,
+						body: body,
+						context: context
+					), token
+			);
+
+			BasicPublish(channel, exchangeName, routingKey, mandatory, basicProps, body, context);
+
+			return Next.InvokeAsync(context, token);
+		}
+
+		protected virtual void BasicPublish(IModel channel, string exchange, string routingKey, bool mandatory, IBasicProperties basicProps, byte[] body, IPipeContext context)
+		{
+			channel.BasicPublish(
+				exchange: exchange,
 				routingKey: routingKey,
 				mandatory: mandatory,
 				basicProperties: basicProps,
 				body: body
-			), token);
-
-			return Next.InvokeAsync(context, token);
+			);
 		}
 
 		protected virtual void ExclusiveExecute(IModel channel, Action<IModel> action, CancellationToken token)
