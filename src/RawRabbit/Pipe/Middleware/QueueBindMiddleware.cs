@@ -24,8 +24,8 @@ namespace RawRabbit.Pipe.Middleware
 		public QueueBindMiddleware(ITopologyProvider topologyProvider, QueueBindOptions options = null)
 		{
 			TopologyProvider = topologyProvider;
-			QueueNameFunc = options?.QueueNameFunc ?? (context => context.GetQueueDeclaration()?.Name);
-			ExchangeNameFunc = options?.ExchangeNameFunc ?? (context => context.GetExchangeDeclaration()?.Name);
+			QueueNameFunc = options?.QueueNameFunc ?? (context => context.GetConsumeConfiguration()?.QueueName);
+			ExchangeNameFunc = options?.ExchangeNameFunc ?? (context => context.GetConsumeConfiguration()?.ExchangeName);
 			RoutingKeyFunc = options?.RoutingKeyFunc ?? (context => context.GetConsumeConfiguration()?.RoutingKey);
 		}
 
@@ -35,14 +35,14 @@ namespace RawRabbit.Pipe.Middleware
 			var exchangeName = GetExchangeName(context);
 			var routingKey = GetRoutingKey(context);
 
-			return BindQueueAsync(queueName, exchangeName, routingKey)
+			return BindQueueAsync(queueName, exchangeName, routingKey, context, token)
 				.ContinueWith(t => Next.InvokeAsync(context, token), token)
 				.Unwrap();
 		}
 
-		protected virtual Task BindQueueAsync(string queueName, string exchangeName, string routingKey)
+		protected virtual Task BindQueueAsync(string queue, string exchange, string routingKey, IPipeContext context, CancellationToken ct)
 		{
-			return TopologyProvider.BindQueueAsync(queueName, exchangeName, routingKey);
+			return TopologyProvider.BindQueueAsync(queue, exchange, routingKey);
 		}
 
 		protected virtual string GetRoutingKey(IPipeContext context)
