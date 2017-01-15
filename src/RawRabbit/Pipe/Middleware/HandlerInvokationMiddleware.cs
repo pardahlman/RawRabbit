@@ -24,9 +24,9 @@ namespace RawRabbit.Pipe.Middleware
 			PostInvokeAction = options?.PostInvokeAction;
 		}
 
-		public override Task InvokeAsync(IPipeContext context, CancellationToken token = default(CancellationToken))
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
-			return InvokeMessageHandler(context)
+			return InvokeMessageHandler(context, token)
 				.ContinueWith(t =>
 				{
 					if (t.IsFaulted)
@@ -36,7 +36,7 @@ namespace RawRabbit.Pipe.Middleware
 				.Unwrap();
 		}
 
-		protected virtual Task InvokeMessageHandler(IPipeContext context)
+		protected virtual Task InvokeMessageHandler(IPipeContext context, CancellationToken token)
 		{
 			var args = HandlerArgsFunc(context);
 			var handler = MessageHandlerFunc(context);
@@ -51,7 +51,7 @@ namespace RawRabbit.Pipe.Middleware
 					context.Properties.TryAdd(PipeKey.MessageHandlerResult, t);
 					PostInvokeAction?.Invoke(context, t);
 					return t;
-				})
+				}, token)
 				.Unwrap();
 		}
 	}
