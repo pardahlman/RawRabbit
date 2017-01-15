@@ -24,7 +24,7 @@ namespace RawRabbit.Pipe.Middleware
 		public ExchangeDeclareMiddleware(ITopologyProvider topologyProvider, ExchangeDeclareOptions options = null)
 		{
 			TopologyProvider = topologyProvider;
-			ExchangeFunc = options?.ExchangeFunc;
+			ExchangeFunc = options?.ExchangeFunc ?? (context => context.GetExchangeDeclaration());
 			ThrowOnFailFunc = options?.ThrowOnFailFunc ?? (context => false);
 		}
 
