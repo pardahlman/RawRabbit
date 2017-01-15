@@ -36,7 +36,7 @@ namespace RawRabbit.Pipe.Middleware
 			}
 
 			_logger.LogDebug($"Declaring queue '{queue.Name}'.");
-			return DeclareQueueAsync(queue)
+			return DeclareQueueAsync(queue, context, token)
 				.ContinueWith(t => Next.InvokeAsync(context, token), token)
 				.Unwrap();
 		}
@@ -46,7 +46,7 @@ namespace RawRabbit.Pipe.Middleware
 			return QueueDeclareFunc(context);
 		}
 
-		protected virtual Task DeclareQueueAsync(QueueDeclaration queue)
+		protected virtual Task DeclareQueueAsync(QueueDeclaration queue, IPipeContext context, CancellationToken token)
 		{
 			return Topology.DeclareQueueAsync(queue);
 		}
