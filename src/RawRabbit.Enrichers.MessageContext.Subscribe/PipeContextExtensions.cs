@@ -8,7 +8,7 @@ namespace RawRabbit.Enrichers.MessageContext.Subscribe
 	{
 		private const string PipebasedContextFunc = "PipebasedContextFunc";
 
-		public static IPipeContext UseMessageContextResolver(this IPipeContext context, Func<IPipeContext, object> contextFunc)
+		public static IPipeContext UseMessageContext(this IPipeContext context, Func<IPipeContext, object> contextFunc)
 		{
 			context.Properties.TryAdd(PipebasedContextFunc, contextFunc);
 			return context;
