@@ -25,7 +25,7 @@ namespace RawRabbit.Enrichers.Polly.Middleware
 					[RetryKey.ExchangeName] = exchange,
 					[RetryKey.RoutingKey] = routingKey,
 					[RetryKey.PipeContext] = context,
-					[RetryKey.CancellationToken] = token,
+					[RetryKey.CancellationToken] = token
 				}
 			);
 		}
