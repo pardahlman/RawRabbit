@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RawRabbit.Common;
-using RawRabbit.Operations.Request.Configuration.Abstraction;
 using RawRabbit.Operations.Request.Core;
 using RawRabbit.Operations.Request.Middleware;
 using RawRabbit.Pipe;
