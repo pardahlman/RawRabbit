@@ -62,8 +62,6 @@ namespace RawRabbit.Pipe.Middleware
 					), token
 			);
 
-			BasicPublish(channel, exchangeName, routingKey, mandatory, basicProps, body, context);
-
 			return Next.InvokeAsync(context, token);
 		}
 
