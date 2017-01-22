@@ -1,45 +1,79 @@
 ﻿using System;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using RabbitMQ.Client.Events;
 using RawRabbit.Common;
 using RawRabbit.Exceptions;
 using RawRabbit.Logging;
 using RawRabbit.Operations.Request.Core;
 using RawRabbit.Pipe;
+using RawRabbit.Serialization;
 
 namespace RawRabbit.Operations.Request.Middleware
 {
 	public class ResponderExceptionOptions
 	{
-		public Func<IPipeContext, ExceptionInformation> ExceptionInfoFunc { get; set; }
+		public Func<IPipeContext, object> MessageFunc { get; set; }
 		public Func<ExceptionInformation, IPipeContext, Task> HandlerFunc { get; set; }
+		public Func<IPipeContext, Type> ResponseTypeFunc { get; set; }
+		public Func<IPipeContext, BasicDeliverEventArgs> DeliveryArgsFunc { get; set; }
 	}
 
 	public class ResponderExceptionMiddleware : Pipe.Middleware.Middleware
 	{
-		protected Func<IPipeContext, ExceptionInformation> ExceptionInfoFunc;
+		private readonly ISerializer _serializer;
+		protected Func<IPipeContext, object> ExceptionInfoFunc;
 		protected Func<ExceptionInformation, IPipeContext, Task> HandlerFunc;
 		private readonly ILogger _logger = LogManager.GetLogger<ResponderExceptionMiddleware>();
+		protected Func<IPipeContext, Type> ResponseTypeFunc;
+		private Func<IPipeContext, BasicDeliverEventArgs> _deliveryArgFunc;
 
-		public ResponderExceptionMiddleware(ResponderExceptionOptions options = null)
+		public ResponderExceptionMiddleware(ISerializer serializer, ResponderExceptionOptions options = null)
 		{
-			ExceptionInfoFunc = options?.ExceptionInfoFunc ?? (context => context.GetExceptionInfo());
+			_serializer = serializer;
+			ExceptionInfoFunc = options?.MessageFunc ?? (context => context.GetResponseMessage());
 			HandlerFunc = options?.HandlerFunc;
+			_deliveryArgFunc = options?.DeliveryArgsFunc ?? (context => context.GetDeliveryEventArgs());
+			ResponseTypeFunc = options?.ResponseTypeFunc ?? (context =>
+			{
+				var type = GetDeliverEventArgs(context)?.BasicProperties.Type;
+				return !string.IsNullOrWhiteSpace(type) ? Type.GetType(type, false) : typeof(object);
+			});
 		}
 
 		public override Task InvokeAsync(IPipeContext context, CancellationToken token = new CancellationToken())
 		{
-			var exceptionInfo = GetExceptionInfo(context);
-			if (exceptionInfo != null)
+			var responseType = GetResponseType(context);
+			if (responseType == typeof(ExceptionInformation))
 			{
+				var exceptionInfo = GetExceptionInfo(context);
 				return HandleRespondException(exceptionInfo, context);
 			}
 			return Next.InvokeAsync(context, token);
 		}
 
+		protected virtual BasicDeliverEventArgs GetDeliverEventArgs(IPipeContext context)
+		{
+			return _deliveryArgFunc?.Invoke(context);
+		}
+
+		protected virtual Type GetResponseType(IPipeContext context)
+		{
+			return ResponseTypeFunc?.Invoke(context);
+		}
+
+		protected virtual string GetSerializedBody(IPipeContext context)
+		{
+			var deliveryArgs = GetDeliverEventArgs(context);
+			var serialized = Encoding.UTF8.GetString(deliveryArgs?.Body ?? new byte[0]);
+			return serialized;
+		}
+
 		protected virtual ExceptionInformation GetExceptionInfo(IPipeContext context)
 		{
-			return ExceptionInfoFunc(context);
+			var serialized = GetSerializedBody(context);
+			return _serializer.Deserialize<ExceptionInformation>(serialized);
 		}
 
 		protected virtual Task HandleRespondException(ExceptionInformation exceptionInfo, IPipeContext context)

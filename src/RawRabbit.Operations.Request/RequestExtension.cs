@@ -43,12 +43,12 @@ namespace RawRabbit
 				.Use<ResponseConsumeMiddleware>(new ResponseConsumerOptions
 				{
 					ResponseRecieved = p => p
+						.Use<ResponderExceptionMiddleware>()
 						.Use<BodyDeserializationMiddleware>(new MessageDeserializationOptions
 						{
-							BodyTypeFunc = c => Type.GetType(c.GetDeliveryEventArgs()?.BasicProperties?.Type ?? string.Empty, false),
+							BodyTypeFunc = c => c.GetResponseMessageType(),
 							PersistAction = (ctx, msg) => ctx.Properties.TryAdd(RequestKey.ResponseMessage, msg)
 						})
-						.Use<ResponderExceptionMiddleware>()
 				})
 				.Use<BasicPublishMiddleware>(new BasicPublishOptions
 				{
