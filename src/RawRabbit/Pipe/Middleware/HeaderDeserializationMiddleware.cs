@@ -37,7 +37,10 @@ namespace RawRabbit.Pipe.Middleware
 		public override Task InvokeAsync(IPipeContext context, CancellationToken token = default(CancellationToken))
 		{
 			var headerObject = GetHeaderObject(context);
-			SaveInContext(context, headerObject);
+			if (headerObject != null)
+			{
+				SaveInContext(context, headerObject);
+			}
 			return Next.InvokeAsync(context, token);
 		}
 
@@ -49,6 +52,10 @@ namespace RawRabbit.Pipe.Middleware
 		protected virtual object GetHeaderObject(IPipeContext context)
 		{
 			var serialized = GetSerializedHeader(context);
+			if (serialized == null)
+			{
+				return null;
+			}
 			var type = GetHeaderType(context);
 			return Serializer.Deserialize(type, serialized);
 		}

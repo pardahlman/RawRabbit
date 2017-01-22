@@ -19,7 +19,7 @@ namespace RawRabbit.Enrichers.MessageContext
 			Func<IPipeContext, object> genericCreateFunc = context => createFunc(context);
 			builder.Register(pipe => pipe.Use<HeaderSerializationMiddleware>(new HeaderSerializationOptions
 			{
-				HeaderKey = PropertyHeaders.Context,
+				HeaderKeyFunc = context => PropertyHeaders.Context,
 				RetrieveItemFunc = context => context.GetMessageContext(),
 				CreateItemFunc = genericCreateFunc
 			}));

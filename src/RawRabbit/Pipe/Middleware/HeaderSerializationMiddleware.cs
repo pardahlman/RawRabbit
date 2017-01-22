@@ -13,45 +13,77 @@ namespace RawRabbit.Pipe.Middleware
 		public Func<IPipeContext, IBasicProperties> BasicPropsFunc { get; set; }
 		public Func<IPipeContext, object> RetrieveItemFunc { get; set; }
 		public Func<IPipeContext, object> CreateItemFunc { get; set; }
-		public string HeaderKey { get; set; }
+		public Func<IPipeContext, string> HeaderKeyFunc { get; set; }
 	}
 
 	public class HeaderSerializationMiddleware : StagedMiddleware
 	{
-		private readonly ISerializer _serializer;
-		private readonly Func<IPipeContext, IBasicProperties> _basicPropsFunc;
-		private readonly string _headerKey;
-		private readonly Func<IPipeContext, object> _retrieveItemFunc;
-		private readonly Func<IPipeContext, object> _createItemFunc;
-		private readonly Predicate<IPipeContext> _executePredicate;
+		protected readonly ISerializer Serializer;
+		protected Func<IPipeContext, IBasicProperties> BasicPropsFunc;
+		protected Func<IPipeContext, object> RetrieveItemFunc;
+		protected Func<IPipeContext, object> CreateItemFunc;
+		protected Predicate<IPipeContext> ExecutePredicate;
+		protected Func<IPipeContext, string> HeaderKeyFunc;
 
 		public HeaderSerializationMiddleware(ISerializer serializer, HeaderSerializationOptions options = null)
 		{
-			_serializer = serializer;
-			_executePredicate = options?.ExecutePredicate ?? (context => true);
-			_basicPropsFunc = options?.BasicPropsFunc ?? (context => context.GetBasicProperties());
-			_headerKey = options?.HeaderKey;
-			_retrieveItemFunc = options?.RetrieveItemFunc;
-			_createItemFunc = options?.CreateItemFunc;
+			Serializer = serializer;
+			ExecutePredicate = options?.ExecutePredicate ?? (context => true);
+			BasicPropsFunc = options?.BasicPropsFunc ?? (context => context.GetBasicProperties());
+			RetrieveItemFunc = options?.RetrieveItemFunc ?? (context => null);
+			CreateItemFunc = options?.CreateItemFunc ?? (context => null);
+			CreateItemFunc = options?.CreateItemFunc ?? (context => null);
+			HeaderKeyFunc = options?.HeaderKeyFunc ?? (context => null);
 		}
 
 		public override Task InvokeAsync(IPipeContext context, CancellationToken token = default(CancellationToken))
 		{
-			if (!_executePredicate(context))
+			if (!ShouldExecute(context))
 			{
 				return Next.InvokeAsync(context, token);
 			}
-			var properties = _basicPropsFunc(context);
-			if (properties.Headers.ContainsKey(_headerKey))
+			var properties = GetBasicProperties(context);
+			var headerKey = GetHeaderKey(context);
+			if (properties.Headers.ContainsKey(headerKey))
 			{
 				return Next.InvokeAsync(context, token);
 			}
 
-			var item = _retrieveItemFunc(context) ?? _createItemFunc(context);
+			var item = GetHeaderItem(context) ?? CreateHeaderItem(context);
+			var serializedItem = SerializeItem(item, context);
+			properties.Headers.TryAdd(headerKey, serializedItem);
 
-			var serializedItem = _serializer.Serialize(item);
-			properties.Headers.Add(_headerKey, serializedItem);
 			return Next.InvokeAsync(context, token);
+		}
+
+		protected virtual bool ShouldExecute(IPipeContext context)
+		{
+			return ExecutePredicate.Invoke(context);
+		}
+
+		protected virtual IBasicProperties GetBasicProperties(IPipeContext context)
+		{
+			return BasicPropsFunc?.Invoke(context);
+		}
+
+		protected virtual object GetHeaderItem(IPipeContext context)
+		{
+			return RetrieveItemFunc?.Invoke(context);
+		}
+
+		protected virtual object CreateHeaderItem(IPipeContext context)
+		{
+			return CreateItemFunc?.Invoke(context);
+		}
+
+		protected virtual string SerializeItem(object item, IPipeContext context)
+		{
+			return Serializer.Serialize(item);
+		}
+
+		protected virtual string GetHeaderKey(IPipeContext context)
+		{
+			return HeaderKeyFunc?.Invoke(context);
 		}
 
 		public override string StageMarker => Pipe.StageMarker.BasicPropertiesCreated;

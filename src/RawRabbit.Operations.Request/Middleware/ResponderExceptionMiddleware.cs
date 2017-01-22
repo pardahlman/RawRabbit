@@ -11,35 +11,35 @@ namespace RawRabbit.Operations.Request.Middleware
 {
 	public class ResponderExceptionOptions
 	{
-		public Func<IPipeContext, object> MessageFunc { get; set; }
+		public Func<IPipeContext, ExceptionInformation> ExceptionInfoFunc { get; set; }
 		public Func<ExceptionInformation, IPipeContext, Task> HandlerFunc { get; set; }
 	}
 
 	public class ResponderExceptionMiddleware : Pipe.Middleware.Middleware
 	{
-		protected Func<IPipeContext, object> MessageFunc;
+		protected Func<IPipeContext, ExceptionInformation> ExceptionInfoFunc;
 		protected Func<ExceptionInformation, IPipeContext, Task> HandlerFunc;
 		private readonly ILogger _logger = LogManager.GetLogger<ResponderExceptionMiddleware>();
 
 		public ResponderExceptionMiddleware(ResponderExceptionOptions options = null)
 		{
-			MessageFunc = options?.MessageFunc ?? (context => context.GetResponseMessage());
+			ExceptionInfoFunc = options?.ExceptionInfoFunc ?? (context => context.GetExceptionInfo());
 			HandlerFunc = options?.HandlerFunc;
 		}
 
 		public override Task InvokeAsync(IPipeContext context, CancellationToken token = new CancellationToken())
 		{
-			var message = GetResponseMessage(context);
-			if (message is ExceptionInformation)
+			var exceptionInfo = GetExceptionInfo(context);
+			if (exceptionInfo != null)
 			{
-				return HandleRespondException(message as ExceptionInformation, context);
+				return HandleRespondException(exceptionInfo, context);
 			}
 			return Next.InvokeAsync(context, token);
 		}
 
-		protected virtual object GetResponseMessage(IPipeContext context)
+		protected virtual ExceptionInformation GetExceptionInfo(IPipeContext context)
 		{
-			return MessageFunc(context);
+			return ExceptionInfoFunc(context);
 		}
 
 		protected virtual Task HandleRespondException(ExceptionInformation exceptionInfo, IPipeContext context)
