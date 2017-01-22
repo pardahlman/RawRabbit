@@ -4,13 +4,14 @@ using RawRabbit.Enrichers.MessageContext;
 using RawRabbit.Enrichers.MessageContext.Context;
 using RawRabbit.Exceptions;
 using RawRabbit.IntegrationTests.TestMessages;
+using RawRabbit.Operations.Request.Middleware;
 using RawRabbit.Pipe;
 using RawRabbit.vNext.Pipe;
 using Xunit;
 
 namespace RawRabbit.IntegrationTests.Rpc
 {
-	public class ExceptionScenarioTests
+	public class RpcExceptionPropagationTests
 	{
 		[Fact]
 		public async Task Should_Propegate_Responder_Exception_To_Requester()
@@ -28,7 +29,7 @@ namespace RawRabbit.IntegrationTests.Rpc
 				/* Test */
 				/* Assert */
 				await Assert.ThrowsAsync<MessageHandlerException>(
-					async () => await requester.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest())
+					async () => await requester.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest(), cfg => cfg.UseRequestTimeout(TimeSpan.FromHours(1)))
 				);
 			}
 		}
