@@ -18,7 +18,7 @@ namespace RawRabbit
 			.Use<AddContextPropertyMiddleware>(new AddContextPropertyOptions
 			{
 				KeyFunc = context => PipeKey.MessageContext,
-				ValueFunc = context => context.GetMessageContextResolver()
+				ValueFunc = context => context.GetMessageContextResolver()?.Invoke(context)
 			})
 			.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
 			{
