@@ -24,7 +24,6 @@
 		public const string Consumer = "Consumer";
 		public const string Channel = "Channel";
 		public const string TransientChannel = "TransientChannel";
-		public const string PublishAcknowledger = "PublishAcknowledger";
 		public const string RoutingKey = "RoutingKey";
 		public const string ConsumeThrottleAction = "ConsumeThrottleAction";
 		public const string QueueDeclaration = "QueueDeclaration";
