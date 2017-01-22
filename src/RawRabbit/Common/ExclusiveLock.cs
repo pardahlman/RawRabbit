@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
+using RawRabbit.Logging;
 
 namespace RawRabbit.Common
 {
@@ -17,6 +18,7 @@ namespace RawRabbit.Common
 	{
 		private readonly ConcurrentDictionary<object, SemaphoreSlim> _semaphoreDictionary;
 		private readonly ConcurrentDictionary<object, object> _lockDictionary;
+		private readonly ILogger _logger = LogManager.GetLogger<ExclusiveLock>();
 
 		public ExclusiveLock()
 		{
@@ -49,7 +51,10 @@ namespace RawRabbit.Common
 			{
 				action(obj);
 			}
-			catch (Exception){ }
+			catch (Exception e)
+			{
+				_logger.LogError("Exception when performing exclusive execute", e);
+			}
 			finally
 			{
 				semaphore.Release();
