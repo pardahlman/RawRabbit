@@ -102,6 +102,10 @@ namespace RawRabbit.Pipe.Middleware
 			{
 				_logger.LogWarning("Unable to extract header key from Pipe context.");
 			}
+			else
+			{
+				_logger.LogDebug($"Trying to abstract {key} from header");
+			}
 			return key;
 		}
 
