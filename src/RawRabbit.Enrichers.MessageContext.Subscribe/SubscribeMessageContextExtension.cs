@@ -26,19 +26,17 @@ namespace RawRabbit
 			})
 			.Use<BodyDeserializationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.MessageDeserialized))
-			.Use<AddContextPropertyMiddleware>(new AddContextPropertyOptions
-			{
-				KeyFunc = context => PipeKey.MessageContext,
-				ValueFunc = context => context.GetMessageContextResolver()?.Invoke(context),
-				OverrideExistingFunc = context => true
-			})
 			.Use<GlobalExecutionIdMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.MessageContextDeserialized))
 			.Use<SubscriptionExceptionMiddleware>(new SubscriptionExceptionOptions
 			{
 				InnerPipe = p => p.Use<HandlerInvokationMiddleware>(new HandlerInvokationOptions
 				{
-					HandlerArgsFunc = context => new[] { context.GetMessage(), context.GetMessageContext() }
+					HandlerArgsFunc = context => new[]
+					{
+						context.GetMessage(),
+						context.GetMessageContextResolver()?.Invoke(context) ?? context.GetMessageContext()
+					}
 				})
 			})
 			.Use<ExplicitAckMiddleware>()

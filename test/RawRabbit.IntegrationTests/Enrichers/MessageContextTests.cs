@@ -259,34 +259,40 @@ namespace RawRabbit.IntegrationTests.Enrichers
 		{
 			using (var publisher = RawRabbitFactory.CreateTestClient(new RawRabbitOptions
 			{
-				Plugins = p => p.UseMessageContext<TestMessageContext>()
+				Plugins = p => p.UseMessageContext<TestMessageContext>().UseContextForwaring() 
 			}))
 			using (var subscriber = RawRabbitFactory.CreateTestClient(new RawRabbitOptions
 			{
-				Plugins = p => p.UseMessageContext<TestMessageContext>()
+				Plugins = p => p.UseMessageContext<TestMessageContext>().UseContextForwaring()
 			}))
 			{
 				/* Setup */
-				var contextTsc = new TaskCompletionSource<TestMessageContext>();
-				var argsTsc = new TaskCompletionSource<BasicDeliverEventArgs>();
+				var firstTcs = new TaskCompletionSource<TestMessageContext>();
+				var secondTcs = new TaskCompletionSource<BasicDeliverEventArgs>();
+				var thirdTcs = new TaskCompletionSource<TestMessageContext>();
 				await subscriber.SubscribeAsync<FirstMessage, TestMessageContext>(async (request, ctx) =>
 				{
-					contextTsc.TrySetResult(ctx);
+					firstTcs.TrySetResult(ctx);
 					await subscriber.PublishAsync(new SecondMessage());
 				});
-				await subscriber.SubscribeAsync<SecondMessage, BasicDeliverEventArgs>((request, args) =>
+				await subscriber.SubscribeAsync<SecondMessage, BasicDeliverEventArgs>(async (request, args) =>
 				{
-					argsTsc.TrySetResult(args);
-					return Task.FromResult(0);
+					secondTcs.TrySetResult(args);
+					await subscriber.PublishAsync(new ThirdMessage());
 				}, ctx => ctx.UseMessageContext(c => c.GetDeliveryEventArgs()));
+				await subscriber.SubscribeAsync<ThirdMessage, TestMessageContext>(async (request, ctx) =>
+				{
+					thirdTcs.TrySetResult(ctx);
+				});
 
 				/* Test */
 				await publisher.PublishAsync(new FirstMessage());
-				await contextTsc.Task;
-				await argsTsc.Task;
+				await firstTcs.Task;
+				await secondTcs.Task;
+				await thirdTcs.Task;
 
 				/* Assert */
-				Assert.NotNull(contextTsc.Task);
+				Assert.NotNull(firstTcs.Task);
 			}
 		}
 	}
