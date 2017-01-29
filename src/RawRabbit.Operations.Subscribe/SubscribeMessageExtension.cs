@@ -42,6 +42,7 @@ namespace RawRabbit
 			.Use<QueueBindMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(SubscribeStage.QueueBound))
 			.Use<ConsumerMiddleware>()
+			.Use<ConsumerRecoveryMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(SubscribeStage.ConsumerChannelCreated))
 			.Use<MessageConsumeMiddleware>(new ConsumeOptions { Pipe = ConsumePipe })
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(SubscribeStage.ConsumerCreated))
