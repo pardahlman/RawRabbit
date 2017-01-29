@@ -73,7 +73,9 @@ namespace RawRabbit.Pipe.Middleware
 				(c, seq) =>
 				{
 					seq++;
-					return seq;
+					return seq > c.NextPublishSeqNo
+						? seq
+						: c.NextPublishSeqNo;
 				});
 		}
 
