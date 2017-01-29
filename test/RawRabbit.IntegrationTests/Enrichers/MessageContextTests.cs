@@ -253,5 +253,41 @@ namespace RawRabbit.IntegrationTests.Enrichers
 				Assert.NotNull(contextTsc.Task);
 			}
 		}
+
+		[Fact]
+		public async Task Should_Use_Subscriber_Declared_Context()
+		{
+			using (var publisher = RawRabbitFactory.CreateTestClient(new RawRabbitOptions
+			{
+				Plugins = p => p.UseMessageContext<TestMessageContext>()
+			}))
+			using (var subscriber = RawRabbitFactory.CreateTestClient(new RawRabbitOptions
+			{
+				Plugins = p => p.UseMessageContext<TestMessageContext>()
+			}))
+			{
+				/* Setup */
+				var contextTsc = new TaskCompletionSource<TestMessageContext>();
+				var argsTsc = new TaskCompletionSource<BasicDeliverEventArgs>();
+				await subscriber.SubscribeAsync<FirstMessage, TestMessageContext>(async (request, ctx) =>
+				{
+					contextTsc.TrySetResult(ctx);
+					await subscriber.PublishAsync(new SecondMessage());
+				});
+				await subscriber.SubscribeAsync<SecondMessage, BasicDeliverEventArgs>((request, args) =>
+				{
+					argsTsc.TrySetResult(args);
+					return Task.FromResult(0);
+				}, ctx => ctx.UseMessageContext(c => c.GetDeliveryEventArgs()));
+
+				/* Test */
+				await publisher.PublishAsync(new FirstMessage());
+				await contextTsc.Task;
+				await argsTsc.Task;
+
+				/* Assert */
+				Assert.NotNull(contextTsc.Task);
+			}
+		}
 	}
 }
