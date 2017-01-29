@@ -31,7 +31,7 @@ namespace RawRabbit.IntegrationTests.Enrichers
 					customCalled = true;
 					var defaultQueueCfg = ctx.GetPipeContext().GetClientConfiguration().Queue;
 					var topology = ctx.GetTopologyProvider();
-					var queue = new QueueDeclaration(defaultQueueCfg) { Name = ctx.GetQueueName() };
+					var queue = new QueueDeclaration(defaultQueueCfg) { Name = ctx.GetQueueName(), Durable = false};
 					await topology.DeclareQueueAsync(queue);
 				});
 
@@ -53,8 +53,8 @@ namespace RawRabbit.IntegrationTests.Enrichers
 					));
 			}
 
-			Assert.False(defaultCalled, "The custom retry policy should be called");
 			Assert.True(customCalled);
+			Assert.False(defaultCalled, "The custom retry policy should be called");
 		}
 	}
 }
