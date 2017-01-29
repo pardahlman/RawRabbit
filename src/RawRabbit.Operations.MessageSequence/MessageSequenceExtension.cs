@@ -10,7 +10,7 @@ namespace RawRabbit.Operations.MessageSequence
 		public static MessageSequence<TCompleteType> ExecuteSequence<TMessageContext, TCompleteType>(
 			this IBusClient client,
 			Func<IMessageChainPublisher<TMessageContext>, MessageSequence<TCompleteType>> cfg
-		) where TMessageContext : IMessageContext, new()
+		) where TMessageContext : new()
 		{
 			var sequenceMachine = new StateMachine.MessageSequence<TMessageContext>(client);
 			return cfg(sequenceMachine);
