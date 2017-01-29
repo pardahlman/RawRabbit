@@ -13,13 +13,6 @@ namespace RawRabbit
 	{
 		public static readonly Action<IPipeBuilder> ConsumePipe = consume => consume
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.MessageRecieved))
-			.Use<BodyDeserializationMiddleware>()
-			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.MessageDeserialized))
-			.Use<AddContextPropertyMiddleware>(new AddContextPropertyOptions
-			{
-				KeyFunc = context => PipeKey.MessageContext,
-				ValueFunc = context => context.GetMessageContextResolver()?.Invoke(context)
-			})
 			.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
 			{
 				HeaderKeyFunc = c => PropertyHeaders.Context,
@@ -30,6 +23,14 @@ namespace RawRabbit
 				HeaderKeyFunc = c => PropertyHeaders.GlobalExecutionId,
 				HeaderTypeFunc = c => typeof(string),
 				ContextSaveAction = (ctx, id) => ctx.Properties.TryAdd(PipeKey.GlobalExecutionId, id)
+			})
+			.Use<BodyDeserializationMiddleware>()
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.MessageDeserialized))
+			.Use<AddContextPropertyMiddleware>(new AddContextPropertyOptions
+			{
+				KeyFunc = context => PipeKey.MessageContext,
+				ValueFunc = context => context.GetMessageContextResolver()?.Invoke(context),
+				OverrideExistingFunc = context => true
 			})
 			.Use<GlobalExecutionIdMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.MessageContextDeserialized))
