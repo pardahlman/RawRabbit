@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using RabbitMQ.Client.Events;
 using RawRabbit.Common;
 using RawRabbit.IntegrationTests.TestMessages;
+using RawRabbit.Pipe;
 using RawRabbit.Pipe.Extensions;
 using Xunit;
 
@@ -32,17 +33,19 @@ namespace RawRabbit.IntegrationTests.Features
 				await secondSubscriber.SubscribeAsync<SecondMessage>(message => secondSubscriber.PublishAsync(new ThirdMessage()));
 				await thridSubscriber.SubscribeAsync<SecondMessage>(message => Task.FromResult(0));
 				await consumer.BasicConsumeAsync(args =>
-				{
-					var tsc = taskCompletionSources.First(t => !t.Task.IsCompleted);
-					tsc.TrySetResult(args);
-					return Task.FromResult<Acknowledgement>(new Ack());
-				}, cfg => cfg
-				.Consume(c => c
-					.OnExchange("rawrabbit.integrationtests.testmessages")
-					.WithRoutingKey("#"))
-				.FromDeclaredQueue(q => q
-					.WithName("take_all")
-					.WithAutoDelete())
+					{
+						var tsc = taskCompletionSources.First(t => !t.Task.IsCompleted);
+						tsc.TrySetResult(args);
+						return Task.FromResult<Acknowledgement>(new Ack());
+					}, ctx => ctx
+						.UseConsumerConfiguration(cfg => cfg
+							.Consume(c => c
+								.OnExchange("rawrabbit.integrationtests.testmessages")
+								.WithRoutingKey("#"))
+							.FromDeclaredQueue(q => q
+								.WithName("take_all")
+								.WithAutoDelete())
+						)
 				);
 
 				/* Test */
@@ -91,14 +94,15 @@ namespace RawRabbit.IntegrationTests.Features
 					var tsc = taskCompletionSources.First(t => !t.Task.IsCompleted);
 					tsc.TrySetResult(args);
 					return Task.FromResult<Acknowledgement>(new Ack());
-				}, cfg => cfg
-				.Consume(c => c
-					.OnExchange("rawrabbit.integrationtests.testmessages")
-					.WithRoutingKey("#"))
-				.FromDeclaredQueue(q => q
-					.WithName("take_all")
-					.WithAutoDelete())
-				);
+				}, ctx => ctx
+					.UseConsumerConfiguration(cfg => cfg
+						.Consume(c => c
+							.OnExchange("rawrabbit.integrationtests.testmessages")
+							.WithRoutingKey("#"))
+						.FromDeclaredQueue(q => q
+							.WithName("take_all")
+							.WithAutoDelete())
+				));
 
 				/* Test */
 				await requester.RequestAsync<FirstRequest, FirstResponse>();

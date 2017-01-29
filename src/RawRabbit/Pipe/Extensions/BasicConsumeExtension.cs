@@ -11,7 +11,7 @@ namespace RawRabbit.Pipe.Extensions
 	public static class BasicConsumeExtension
 	{
 		public static Task BasicConsumeAsync(this IBusClient busClient, Func<BasicDeliverEventArgs, Task<Acknowledgement>> consumeFunc,
-			Action<IConsumerConfigurationBuilder> cfg)
+			Action<IPipeContext> context)
 		{
 			Func<object[], Task> genericFunc = args => consumeFunc(args[0] as BasicDeliverEventArgs);
 
@@ -23,7 +23,7 @@ namespace RawRabbit.Pipe.Extensions
 						.Use<QueueDeclareMiddleware>()
 						.Use<QueueBindMiddleware>(new QueueBindOptions
 						{
-							ExchangeNameFunc = context => context.GetConsumeConfiguration()?.ExchangeName
+							ExchangeNameFunc = ctx => ctx.GetConsumeConfiguration()?.ExchangeName
 						})
 						.Use<ConsumerMiddleware>()
 						.Use<MessageConsumeMiddleware>(new ConsumeOptions
@@ -31,14 +31,14 @@ namespace RawRabbit.Pipe.Extensions
 							Pipe = p => p
 								.Use<HandlerInvokationMiddleware>(new HandlerInvokationOptions
 								{
-									HandlerArgsFunc = context => new object[] {context.GetDeliveryEventArgs()},
+									HandlerArgsFunc = ctx => new object[] { ctx.GetDeliveryEventArgs()},
 								})
 								.Use<ExplicitAckMiddleware>()
 						}),
-					context =>
+					ctx =>
 					{
-						context.Properties.Add(PipeKey.MessageHandler, genericFunc);
-						context.Properties.Add(PipeKey.ConfigurationAction, cfg);
+						ctx.Properties.Add(PipeKey.MessageHandler, genericFunc);
+						context?.Invoke(ctx);
 					}
 				);
 		}
