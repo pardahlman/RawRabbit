@@ -2,7 +2,7 @@
 	"title": "RawRabbit.Operations.Respond",
 	"version": "2.0.0-*",
 	"authors": [ "pardahlman", "enrique-avalon" ],
-	"description": "A modern framework for communication over RabbitMq.",
+	"description": "Enrich the BusClient with a RespondAsync, the server part of RPC.",
 	"packOptions": {
 		"iconUrl": "http://pardahlman.se/raw/icon.png",
 		"projectUrl": "https://github.com/pardahlman/RawRabbit",

@@ -2,7 +2,7 @@
 	"title": "RawRabbit.Compatibility.Legacy",
 	"version": "2.0.0-alpha",
 	"authors": [ "pardahlman" ],
-	"description": "A bus client that is compatible with older ones.",
+	"description": "Bus Client that is API compatible with 1.x.",
 	"packOptions": {
 		"iconUrl": "http://pardahlman.se/raw/icon.png",
 		"projectUrl": "https://github.com/pardahlman/RawRabbit",

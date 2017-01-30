@@ -2,7 +2,7 @@
 	"title": "RawRabbit.Operations.MessageSequence",
 	"version": "2.0.0-*",
 	"authors": [ "pardahlman", "enrique-avalon" ],
-	"description": "A modern framework for communication over RabbitMq.",
+	"description": "Enrich the BusClient with ExecuteSequence.",
 	"packOptions": {
 		"iconUrl": "http://pardahlman.se/raw/icon.png",
 		"projectUrl": "https://github.com/pardahlman/RawRabbit",
