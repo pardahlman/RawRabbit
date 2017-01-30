@@ -2,7 +2,7 @@
 	"title": "RawRabbit.DependencyInjection.Autofac",
 	"version": "1.10.3-*",
 	"authors": [ "par.dahlman" ],
-	"description": "Wire up RawRabbit with Autfac!",
+	"description": "Wire up RawRabbit with Autofac!",
 
 	"packOptions": {
 		"iconUrl": "http://pardahlman.se/raw/icon.png",
