@@ -14,19 +14,18 @@ using Stateless;
 
 namespace RawRabbit.Operations.MessageSequence.StateMachine
 {
-	public class MessageSequence<TMessageContext> : StateMachineBase<SequenceState, Type, SequenceModel>,
-			IMessageChainPublisher<TMessageContext>, IMessageSequenceBuilder<TMessageContext>
-		where TMessageContext : new()
+	public class MessageSequence : StateMachineBase<SequenceState, Type, SequenceModel>,
+			IMessageChainPublisher, IMessageSequenceBuilder
 	{
 		private readonly IBusClient _client;
 		private Action _fireAction;
-		private readonly TriggerConfigurer<MessageSequence<TMessageContext>> _triggerConfigurer;
+		private readonly TriggerConfigurer<MessageSequence> _triggerConfigurer;
 		private readonly Queue<StepDefinition> _stepDefinitions;
 
 		public MessageSequence(IBusClient client, SequenceModel model = null) : base(model)
 		{
 			_client = client;
-			_triggerConfigurer = new TriggerConfigurer<MessageSequence<TMessageContext>>();
+			_triggerConfigurer = new TriggerConfigurer<MessageSequence>();
 			_stepDefinitions = new Queue<StepDefinition>();
 		}
 
@@ -48,7 +47,17 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 			};
 		}
 
-		public IMessageSequenceBuilder<TMessageContext> PublishAsync<TMessage>(TMessage message = default(TMessage), Guid globalMessageId = new Guid()) where TMessage : new()
+		public IMessageSequenceBuilder PublishAsync<TMessage>(TMessage message = default(TMessage), Guid globalMessageId = new Guid()) where TMessage : new()
+		{
+			if (globalMessageId != Guid.Empty)
+			{
+				Model.Id = globalMessageId;
+			}
+			return PublishAsync(message, context => { });
+		}
+
+		public IMessageSequenceBuilder PublishAsync<TMessage>(TMessage message, Action<IPipeContext> context, CancellationToken ct = new CancellationToken())
+			where TMessage : new()
 		{
 			var entryTrigger = StateMachine.SetTriggerParameters<TMessage>(typeof(TMessage));
 
@@ -58,13 +67,17 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 
 			StateMachine
 				.Configure(SequenceState.Active)
-				.OnEntryFromAsync(entryTrigger, msg => _client.PublishAsync(message, c => c.Properties.Add(PipeKey.GlobalExecutionId, Model.Id.ToString())));
+				.OnEntryFromAsync(entryTrigger, msg => _client.PublishAsync(message, c =>
+				{
+					c.Properties.Add(PipeKey.GlobalExecutionId, Model.Id.ToString());
+					context?.Invoke(c);
+				}, ct));
 
 			_fireAction = () => StateMachine.FireAsync(entryTrigger, message);
 			return this;
 		}
 
-		public IMessageSequenceBuilder<TMessageContext> When<TMessage>(Func<TMessage, TMessageContext, Task> func, Action<IStepOptionBuilder> options = null)
+		public IMessageSequenceBuilder When<TMessage, TMessageContext>(Func<TMessage, TMessageContext, Task> func, Action<IStepOptionBuilder> options = null)
 		{
 			var optionBuilder = new StepOptionBuilder();
 			options?.Invoke(optionBuilder);
@@ -138,7 +151,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 			return this;
 		}
 
-		Model.MessageSequence<TMessage> IMessageSequenceBuilder<TMessageContext>.Complete<TMessage>()
+		MessageSequence<TMessage> IMessageSequenceBuilder.Complete<TMessage>()
 		{
 			var tsc = new TaskCompletionSource<TMessage>();
 			var sequence = new Model.MessageSequence<TMessage>
@@ -157,7 +170,14 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 				{
 					sequence.Completed = Model.Completed;
 					sequence.Skipped = Model.Skipped;
-					tsc.TrySetResult(message);
+					_client
+						.InvokeAsync(p => p
+							.Use<TransientChannelMiddleware>()
+							.Use<DeleteQueueMiddleware>(new DeleteQueueOptions
+							{
+								QueueNameFunc = context => $"state_machine_{Model.Id}"
+							}))
+						.ContinueWith(t =>tsc.TrySetResult(message));
 				});
 
 			StateMachine
@@ -175,7 +195,10 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 					message => Model.Id,
 					(s, message) => StateMachine.FireAsync(trigger, message),
 					cfg => cfg
-						.FromDeclaredQueue(q => q.WithName($"state_machine_{Model.Id}"))
+						.FromDeclaredQueue(q => q
+							.WithName($"state_machine_{Model.Id}")
+							.WithExclusivity()
+							.WithAutoDelete())
 						.Consume(c => c.WithRoutingKey($"{typeof(TMessage).Name.ToLower()}.{Model.Id}")
 						)
 				);
@@ -207,7 +230,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 					})
 					.Use<MessageConsumeMiddleware>(new ConsumeOptions
 					{
-						Pipe = TriggerConfigurer<MessageSequence<TMessageContext>>.ConsumePipe
+						Pipe = TriggerConfigurer<MessageSequence>.ConsumePipe
 					}),
 				context =>
 				{
@@ -235,6 +258,8 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 
 			return sequence;
 		}
+
+		
 
 		private class CancelSequence { }
 	}

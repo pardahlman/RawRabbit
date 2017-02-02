@@ -29,12 +29,12 @@ namespace RawRabbit.AspNet.Sample.Controllers
 		public Task<List<string>> GetAsync()
 		{
 			_logger.LogDebug("Recieved Value Request.");
-			var valueSequence = _busClient.ExecuteSequence<MessageContext, ValuesCalculated>(s => s
+			var valueSequence = _busClient.ExecuteSequence(s => s
 				.PublishAsync(new ValuesRequested
 					{
 						NumberOfValues = _random.Next(1,10)
 					})
-				.When<ValueCreationFailed>(
+				.When<ValueCreationFailed, MessageContext>(
 					(failed, context) =>
 					{
 						_logger.LogWarning("Unable to create Values. Exception: {0}", failed.Exception);

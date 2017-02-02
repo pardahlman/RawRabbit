@@ -35,7 +35,7 @@ namespace RawRabbit.IntegrationTests.MessageSequence
 				);
 
 				/* Test */
-				var chain = client.ExecuteSequence<MessageContext, BasicResponse>(c => c
+				var chain = client.ExecuteSequence(c => c
 						.PublishAsync<BasicRequest>()
 						.Complete<BasicResponse>()
 				);
@@ -68,9 +68,9 @@ namespace RawRabbit.IntegrationTests.MessageSequence
 				);
 
 				/* Test */
-				var chain = client.ExecuteSequence<MessageContext, ThirdMessage>(c => c
+				var chain = client.ExecuteSequence(c => c
 						.PublishAsync<FirstMessage>()
-						.When<SecondMessage>((message, context) =>
+						.When<SecondMessage, MessageContext>((message, context) =>
 						{
 							secondTcs.TrySetResult(message);
 							return Task.FromResult(0);
@@ -105,9 +105,9 @@ namespace RawRabbit.IntegrationTests.MessageSequence
 				);
 
 				/* Test */
-				var chain = client.ExecuteSequence<MessageContext, ThirdMessage>(c => c
+				var chain = client.ExecuteSequence(c => c
 						.PublishAsync<FirstMessage>()
-						.When<SecondMessage>((message, context) =>
+						.When<SecondMessage, MessageContext>((message, context) =>
 						{
 							secondTcs.TrySetResult(message);
 							return Task.FromResult(0);
@@ -153,19 +153,19 @@ namespace RawRabbit.IntegrationTests.MessageSequence
 				);
 
 				/* Test */
-				var chain = client.ExecuteSequence<MessageContext, FifthMessage>(c => c
+				var chain = client.ExecuteSequence(c => c
 						.PublishAsync<FirstMessage>()
-						.When<SecondMessage>((message, context) =>
+						.When<SecondMessage, MessageContext>((message, context) =>
 						{
 							secondTcs.TrySetResult(message);
 							return Task.FromResult(0);
 						})
-						.When<ThirdMessage>((message, context) =>
+						.When<ThirdMessage, MessageContext>((message, context) =>
 						{
 							thirdTsc.TrySetResult(message);
 							return Task.FromResult(0);
 						})
-						.When<ForthMessage>((message, context) =>
+						.When<ForthMessage, MessageContext>((message, context) =>
 						{
 							forthTcs.TrySetResult(message);
 							return Task.FromResult(0);
@@ -208,9 +208,9 @@ namespace RawRabbit.IntegrationTests.MessageSequence
 				var sequences = new List<MessageSequence<ThirdMessage>>();
 				for (var i = 0; i < numberOfSequences; i++)
 				{
-					var seq = client.ExecuteSequence<MessageContext, ThirdMessage>(c => c
+					var seq = client.ExecuteSequence(c => c
 							.PublishAsync<FirstMessage>()
-							.When<SecondMessage>((message, context) =>
+							.When<SecondMessage, MessageContext>((message, context) =>
 							{
 								secondTcs.TrySetResult(message);
 								return Task.FromResult(0);
@@ -250,14 +250,14 @@ namespace RawRabbit.IntegrationTests.MessageSequence
 				});
 
 				/* Test */
-				client.ExecuteSequence<MessageContext, ForthMessage>(c => c
+				client.ExecuteSequence(c => c
 					.PublishAsync<FirstMessage>()
-					.When<SecondMessage>((message, context) =>
+					.When<SecondMessage, MessageContext>((message, context) =>
 						{
 							secondTcs.TrySetResult(message);
 							return Task.FromResult(0);
 						})
-					.When<ThirdMessage>((message, context) =>
+					.When<ThirdMessage, MessageContext>((message, context) =>
 						{
 							thirdTcs.TrySetResult(message);
 							return Task.FromResult(0);
@@ -291,7 +291,7 @@ namespace RawRabbit.IntegrationTests.MessageSequence
 			}))
 			{
 				/* Test */
-				var chain = client.ExecuteSequence<MessageContext, SecondMessage>(c => c
+				var chain = client.ExecuteSequence(c => c
 					.PublishAsync<FirstMessage>()
 					.Complete<SecondMessage>()
 				);
