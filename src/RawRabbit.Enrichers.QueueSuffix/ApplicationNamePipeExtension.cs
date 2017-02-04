@@ -1,8 +1,8 @@
 ﻿using RawRabbit.Pipe;
 
-namespace RawRabbit.Enrichers.ApplicationQueueSuffix
+namespace RawRabbit.Enrichers.QueueSuffix
 {
-	public static class ApplicationSuffixExtension
+	public static class ApplicationNamePipeExtension
 	{
 		private const string ApplicationQueueSuffix = "ApplicationQueueSuffix";
 

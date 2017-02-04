@@ -1,7 +1,5 @@
 ﻿using System.Threading.Tasks;
-using RawRabbit.Enrichers.ApplicationQueueSuffix;
-using RawRabbit.Enrichers.CustomQueueSuffix;
-using RawRabbit.Enrichers.HostQueueSuffix;
+using RawRabbit.Enrichers.QueueSuffix;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.Pipe;
 using RawRabbit.vNext.Pipe;
@@ -200,7 +198,7 @@ namespace RawRabbit.IntegrationTests.Enrichers
 			using (var firstClient = RawRabbitFactory.CreateTestClient())
 			using (var secondClient = RawRabbitFactory.CreateTestClient(new RawRabbitOptions
 			{
-				Plugins = p => p.UseCustomQueueSuffix(q => q.WithNameSuffix("custom"))
+				Plugins = p => p.UseCustomQueueSuffix("custom")
 			}))
 			{
 				/* Setup */
@@ -237,7 +235,7 @@ namespace RawRabbit.IntegrationTests.Enrichers
 				Plugins = p => p
 					.UseApplicationQueueSuffix()
 					.UseHostQueueSuffix()
-					.UseCustomQueueSuffix(q => q.WithNameSuffix("custom"))
+					.UseCustomQueueSuffix("custom")
 			}))
 			{
 				/* Setup */

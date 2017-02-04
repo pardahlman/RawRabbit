@@ -1,15 +1,15 @@
 ﻿using RawRabbit.Pipe;
 
-namespace RawRabbit.Enrichers.CustomQueueSuffix
+namespace RawRabbit.Enrichers.QueueSuffix
 {
-	public static class CustomSuffixExtension
+	public static class QueueSuffixExtension
 	{
 		private const string CustomQueueSuffix = "CustomQueueSuffix";
 		private const string CustomQueueSuffixActivated = "CustomQueueSuffixActivated";
 
 		public static IPipeContext UseCustomQueueSuffix(this IPipeContext context, string prefix)
 		{
-			context.Properties.TryAdd(CustomQueueSuffix, prefix);
+			context.Properties.AddOrReplace(CustomQueueSuffix, prefix);
 			return context;
 		}
 

@@ -29,6 +29,7 @@ namespace RawRabbit.IntegrationTests.GetOperation
 				/* Test */
 				var ackable = await client.GetManyAsync<BasicMessage>(3);
 				TestChannel.QueueDelete(conventions.QueueNamingConvention(message.GetType()));
+				TestChannel.ExchangeDelete(exchangeName);
 
 				/* Assert */
 				Assert.NotNull(ackable);
@@ -56,6 +57,7 @@ namespace RawRabbit.IntegrationTests.GetOperation
 				/* Test */
 				var ackable = await client.GetManyAsync<BasicMessage>(10);
 				TestChannel.QueueDelete(conventions.QueueNamingConvention(message.GetType()));
+				TestChannel.ExchangeDelete(exchangeName);
 
 				/* Assert */
 				Assert.NotNull(ackable);
@@ -83,6 +85,7 @@ namespace RawRabbit.IntegrationTests.GetOperation
 				/* Test */
 				var ackable = await client.GetManyAsync<BasicMessage>(2);
 				TestChannel.QueueDelete(conventions.QueueNamingConvention(message.GetType()));
+				TestChannel.ExchangeDelete(exchangeName);
 
 				/* Assert */
 				Assert.NotNull(ackable);
@@ -123,6 +126,7 @@ namespace RawRabbit.IntegrationTests.GetOperation
 				}
 				var getAgain = await client.GetAsync<BasicMessage>();
 				TestChannel.QueueDelete(conventions.QueueNamingConvention(message.GetType()));
+				TestChannel.ExchangeDelete(exchangeName);
 
 				/* Assert */
 				Assert.NotNull(getAgain);
@@ -151,6 +155,8 @@ namespace RawRabbit.IntegrationTests.GetOperation
 				var ackable = await client.GetManyAsync<BasicMessage>(3);
 				ackable.Content[1].Ack();
 				ackable.Ack();
+				TestChannel.QueueDelete(conventions.QueueNamingConvention(message.GetType()));
+				TestChannel.ExchangeDelete(exchangeName);
 
 				/* Assert */
 				Assert.True(true);

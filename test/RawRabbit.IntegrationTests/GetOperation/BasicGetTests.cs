@@ -18,7 +18,7 @@ namespace RawRabbit.IntegrationTests.GetOperation
 				var message = new BasicMessage {Prop = "Get me, get it?"};
 				var conventions = new NamingConventions();
 				var exchangeName = conventions.ExchangeNamingConvention(message.GetType());
-				TestChannel.QueueDeclare(conventions.QueueNamingConvention(message.GetType()), true, false, true, null);
+				TestChannel.QueueDeclare(conventions.QueueNamingConvention(message.GetType()), true, false, false, null);
 				TestChannel.ExchangeDeclare(exchangeName, ExchangeType.Topic);
 				TestChannel.QueueBind(conventions.QueueNamingConvention(message.GetType()), exchangeName, conventions.RoutingKeyConvention(message.GetType()) + ".#");
 
@@ -31,6 +31,7 @@ namespace RawRabbit.IntegrationTests.GetOperation
 				Assert.NotNull(ackable);
 				Assert.Equal(ackable.Content.Prop, message.Prop);
 				TestChannel.QueueDelete(conventions.QueueNamingConvention(message.GetType()));
+				TestChannel.ExchangeDelete(exchangeName);
 			}
 		}
 	}

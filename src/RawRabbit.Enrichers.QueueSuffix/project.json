@@ -1,8 +1,8 @@
 ﻿{
-	"title": "RawRabbit.Enrichers.ApplicationQueueSuffix",
+	"title": "RawRabbit.Enrichers.QueueSuffix",
 	"version": "2.0.0-*",
 	"authors": [ "pardahlman" ],
-	"description": "Suffix the Queue Name with hosting application name.",
+	"description": "Suffix the Queue Name with application name, host name or a string of your choice.",
 	"packOptions": {
 		"iconUrl": "http://pardahlman.se/raw/icon.png",
 		"projectUrl": "https://github.com/pardahlman/RawRabbit",

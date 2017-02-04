@@ -7,8 +7,8 @@
 
   <Import Project="$(VSToolsPath)\DotNet\Microsoft.DotNet.Props" Condition="'$(VSToolsPath)' != ''" />
   <PropertyGroup Label="Globals">
-    <ProjectGuid>58e12de9-d8b9-4be9-9fe5-d4b6404efb04</ProjectGuid>
-    <RootNamespace>RawRabbit.Enrichers.HostQueueSuffix</RootNamespace>
+    <ProjectGuid>e290407e-2e61-4958-9c89-3f0d422ed00a</ProjectGuid>
+    <RootNamespace>RawRabbit.Enrichers.QueueSuffix</RootNamespace>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">.\obj</BaseIntermediateOutputPath>
     <OutputPath Condition="'$(OutputPath)'=='' ">.\bin\</OutputPath>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
