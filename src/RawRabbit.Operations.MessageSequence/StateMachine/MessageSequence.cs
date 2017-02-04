@@ -154,7 +154,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 		MessageSequence<TMessage> IMessageSequenceBuilder.Complete<TMessage>()
 		{
 			var tsc = new TaskCompletionSource<TMessage>();
-			var sequence = new Model.MessageSequence<TMessage>
+			var sequence = new MessageSequence<TMessage>
 			{
 				Task = tsc.Task
 			};
@@ -258,8 +258,6 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 
 			return sequence;
 		}
-
-		
 
 		private class CancelSequence { }
 	}
