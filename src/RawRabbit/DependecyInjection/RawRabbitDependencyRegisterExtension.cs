@@ -62,7 +62,6 @@ namespace RawRabbit.DependecyInjection
 
 				})
 				.AddTransient<IConsumerFactory, ConsumerFactory>()
-				.AddSingleton<IBasicPropertiesProvider, BasicPropertiesProvider>()
 				.AddSingleton<IChannelFactory, ChannelFactory>()
 				.AddSingleton<ChannelFactoryConfiguration, ChannelFactoryConfiguration>(c => ChannelFactoryConfiguration.Default)
 				.AddSingleton<ITopologyProvider, TopologyProvider>()

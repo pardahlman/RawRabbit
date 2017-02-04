@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Framing;
 using RawRabbit.Common;
 using RawRabbit.Serialization;
 
@@ -9,13 +10,11 @@ namespace RawRabbit.Configuration.BasicPublish
 	public class BasicPublishConfigurationFactory : IBasicPublishConfigurationFactory
 	{
 		private readonly INamingConventions _conventions;
-		private readonly IBasicPropertiesProvider _provider;
 		private readonly ISerializer _serializer;
 
-		public BasicPublishConfigurationFactory(INamingConventions conventions, IBasicPropertiesProvider provider, ISerializer serializer)
+		public BasicPublishConfigurationFactory(INamingConventions conventions, ISerializer serializer)
 		{
 			_conventions = conventions;
-			_provider = provider;
 			_serializer = serializer;
 		}
 
@@ -45,7 +44,7 @@ namespace RawRabbit.Configuration.BasicPublish
 		{
 			return new BasicPublishConfiguration
 			{
-				BasicProperties = _provider.GetProperties()
+				BasicProperties = new BasicProperties()
 			};
 		}
 
@@ -66,7 +65,10 @@ namespace RawRabbit.Configuration.BasicPublish
 
 		protected virtual IBasicProperties GetBasicProperties(Type type)
 		{
-			return _provider.GetProperties(type);
+			return new BasicProperties
+			{
+				Type = type.GetUserFriendlyName()
+			};
 		}
 
 		protected virtual byte[] GetBody(object message)
