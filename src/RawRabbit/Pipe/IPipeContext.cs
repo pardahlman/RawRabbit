@@ -23,5 +23,14 @@ namespace RawRabbit.Pipe
 			dictionary.Add(key, value);
 			return true;
 		}
+
+		public static bool AddOrReplace<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue value)
+		{
+			if (dictionary.ContainsKey(key))
+			{
+				dictionary.Remove(key);
+			}
+			return dictionary.TryAdd(key, value);
+		}
 	}
 }
