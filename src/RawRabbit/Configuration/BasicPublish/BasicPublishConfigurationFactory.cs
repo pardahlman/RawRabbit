@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
@@ -67,7 +68,8 @@ namespace RawRabbit.Configuration.BasicPublish
 		{
 			return new BasicProperties
 			{
-				Type = type.GetUserFriendlyName()
+				Type = type.GetUserFriendlyName(),
+				Headers = new Dictionary<string, object>()
 			};
 		}
 
