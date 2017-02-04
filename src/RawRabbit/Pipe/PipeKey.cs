@@ -17,7 +17,6 @@
 		public const string MessageHandlerResult = "MessageHandlerResult";
 		public const string BasicProperties = "BasicProperties";
 		public const string BasicGetResult = "BasicGetResult";
-		public const string GlobalExecutionId = "GlobalExecutionId";
 		public const string GetConfiguration = "GetConfiguration";
 		public const string ConfigurationAction = "ConfigurationAction";
 		public const string DeliveryEventArgs = "DeliveryEventArgs";

@@ -18,13 +18,6 @@ namespace RawRabbit.Operations.StateMachine.Trigger
 			.Use<ModelIdMiddleware>()
 			.Use<GlobalLockMiddleware>()
 			.Use<RetrieveStateMachineMiddleware>()
-			.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
-			{
-				HeaderKeyFunc = context => PropertyHeaders.GlobalExecutionId,
-				HeaderTypeFunc = context => typeof(string),
-				ContextSaveAction = (ctx, id) => ctx.Properties.TryAdd(PipeKey.GlobalExecutionId, id)
-			})
-			.Use<GlobalExecutionIdMiddleware>()
 			.Use<HandlerInvokationMiddleware>(new HandlerInvokationOptions
 			{
 				HandlerArgsFunc = context => new[] { context.GetStateMachine(), context.GetMessage() }

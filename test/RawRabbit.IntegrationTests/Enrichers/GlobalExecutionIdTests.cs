@@ -4,22 +4,29 @@ using System.Text;
 using System.Threading.Tasks;
 using RabbitMQ.Client.Events;
 using RawRabbit.Common;
+using RawRabbit.Enrichers.GlobalExecutionId;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.Pipe;
 using RawRabbit.Pipe.Extensions;
+using RawRabbit.Pipe.Middleware;
+using RawRabbit.vNext.Pipe;
 using Xunit;
 
-namespace RawRabbit.IntegrationTests.Features
+namespace RawRabbit.IntegrationTests.Enrichers
 {
 	public class GlobalExecutionIdTests
 	{
 		[Fact]
 		public async Task Should_Forward_On_Pub_Sub()
 		{
-			using (var publisher = RawRabbitFactory.CreateTestClient())
-			using (var firstSubscriber = RawRabbitFactory.CreateTestClient())
-			using (var secondSubscriber = RawRabbitFactory.CreateTestClient())
-			using (var thridSubscriber = RawRabbitFactory.CreateTestClient())
+			var withGloblalExecutionId = new RawRabbitOptions
+			{
+				Plugins = p => p.UseGlobalExecutionId()
+			};
+			using (var publisher = RawRabbitFactory.CreateTestClient(withGloblalExecutionId))
+			using (var firstSubscriber = RawRabbitFactory.CreateTestClient(withGloblalExecutionId))
+			using (var secondSubscriber = RawRabbitFactory.CreateTestClient(withGloblalExecutionId))
+			using (var thridSubscriber = RawRabbitFactory.CreateTestClient(withGloblalExecutionId))
 			using (var consumer = RawRabbitFactory.CreateTestClient())
 			{
 				/* Setup */
@@ -29,16 +36,15 @@ namespace RawRabbit.IntegrationTests.Features
 					new TaskCompletionSource<BasicDeliverEventArgs>(),
 					new TaskCompletionSource<BasicDeliverEventArgs>()
 				};
-				await firstSubscriber.SubscribeAsync<FirstMessage>(message => firstSubscriber.PublishAsync(new SecondMessage()));
+				await firstSubscriber.SubscribeAsync<FirstMessage>(message => firstSubscriber.PublishAsync(new SecondMessage(), ctx => ctx.UsePublishAcknowledge(false)));
 				await secondSubscriber.SubscribeAsync<SecondMessage>(message => secondSubscriber.PublishAsync(new ThirdMessage()));
-				await thridSubscriber.SubscribeAsync<SecondMessage>(message => Task.FromResult(0));
+				await thridSubscriber.SubscribeAsync<ThirdMessage>(message => Task.FromResult(0));
 				await consumer.BasicConsumeAsync(args =>
 					{
 						var tsc = taskCompletionSources.First(t => !t.Task.IsCompleted);
 						tsc.TrySetResult(args);
 						return Task.FromResult<Acknowledgement>(new Ack());
-					}, ctx => ctx
-						.UseConsumerConfiguration(cfg => cfg
+					}, ctx => ctx.UseConsumerConfiguration(cfg => cfg
 							.Consume(c => c
 								.OnExchange("rawrabbit.integrationtests.testmessages")
 								.WithRoutingKey("#"))
@@ -55,7 +61,7 @@ namespace RawRabbit.IntegrationTests.Features
 				var results = new List<string>();
 				foreach (var tcs in taskCompletionSources)
 				{
-					var id = Encoding.UTF8.GetString(tcs.Task.Result.BasicProperties.Headers[PropertyHeaders.GlobalExecutionId] as byte[]);
+					var id = Encoding.UTF8.GetString(tcs.Task.Result.BasicProperties.Headers[RawRabbit.Enrichers.GlobalExecutionId.PropertyHeaders.GlobalExecutionId] as byte[]);
 					results.Add(id);
 				}
 
@@ -69,10 +75,14 @@ namespace RawRabbit.IntegrationTests.Features
 		[Fact]
 		public async Task Should_Forward_For_Rpc()
 		{
-			using (var requester = RawRabbitFactory.CreateTestClient())
-			using (var firstResponder = RawRabbitFactory.CreateTestClient())
-			using (var secondResponder = RawRabbitFactory.CreateTestClient())
-			using (var thridResponder = RawRabbitFactory.CreateTestClient())
+			var withGloblalExecutionId = new RawRabbitOptions
+			{
+				Plugins = p => p.UseGlobalExecutionId()
+			};
+			using (var requester = RawRabbitFactory.CreateTestClient(withGloblalExecutionId))
+			using (var firstResponder = RawRabbitFactory.CreateTestClient(withGloblalExecutionId))
+			using (var secondResponder = RawRabbitFactory.CreateTestClient(withGloblalExecutionId))
+			using (var thridResponder = RawRabbitFactory.CreateTestClient(withGloblalExecutionId))
 			using (var consumer = RawRabbitFactory.CreateTestClient())
 			{
 				/* Setup */
@@ -88,7 +98,7 @@ namespace RawRabbit.IntegrationTests.Features
 					return new FirstResponse();
 				});
 				await secondResponder.SubscribeAsync<SecondMessage>(message => secondResponder.PublishAsync(new ThirdMessage()));
-				await thridResponder.SubscribeAsync<SecondMessage>(message => Task.FromResult(0));
+				await thridResponder.SubscribeAsync<ThirdMessage>(message => Task.FromResult(0));
 				await consumer.BasicConsumeAsync(args =>
 				{
 					var tsc = taskCompletionSources.First(t => !t.Task.IsCompleted);
@@ -111,7 +121,7 @@ namespace RawRabbit.IntegrationTests.Features
 				var results = new List<string>();
 				foreach (var tcs in taskCompletionSources)
 				{
-					var id = Encoding.UTF8.GetString(tcs.Task.Result.BasicProperties.Headers[PropertyHeaders.GlobalExecutionId] as byte[]);
+					var id = Encoding.UTF8.GetString(tcs.Task.Result.BasicProperties.Headers[RawRabbit.Enrichers.GlobalExecutionId.PropertyHeaders.GlobalExecutionId] as byte[]);
 					results.Add(id);
 				}
 

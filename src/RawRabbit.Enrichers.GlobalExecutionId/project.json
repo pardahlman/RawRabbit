@@ -1,8 +1,8 @@
 ﻿{
-	"title": "RawRabbit.Operations.MessageSequence",
+	"title": "RawRabbit.Enrichers.GlobalExecutionId",
 	"version": "2.0.0-*",
-	"authors": [ "pardahlman", "enrique-avalon" ],
-	"description": "Enrich the BusClient with ExecuteSequence.",
+	"authors": [ "pardahlman" ],
+	"description": "Message headers and routing with Global Execution Id",
 	"packOptions": {
 		"iconUrl": "http://pardahlman.se/raw/icon.png",
 		"projectUrl": "https://github.com/pardahlman/RawRabbit",
@@ -11,9 +11,7 @@
 	},
 
 	"dependencies": {
-		"RawRabbit.Enrichers.GlobalExecutionId": { "target": "project" },
-		"RawRabbit.Operations.Publish": { "target": "project" },
-		"RawRabbit.Operations.StateMachine": { "target": "project" }
+		"RawRabbit": { "target": "project" }
 	},
 
 	"frameworks": {

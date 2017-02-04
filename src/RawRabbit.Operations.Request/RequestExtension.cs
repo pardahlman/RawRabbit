@@ -15,7 +15,7 @@ namespace RawRabbit
 	{
 		public static readonly Action<IPipeBuilder> RequestPipe = pipe => pipe
 				.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.Initialized))
-				.Use<GlobalExecutionIdMiddleware>()
+				.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.ProducerInitialized))
 				.Use<RequestConfigurationMiddleware>()
 				.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.PublishConfigured))
 				.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.ConsumeConfigured))
@@ -35,7 +35,6 @@ namespace RawRabbit
 					{
 						props.Type = ctx.GetRequestMessageType().GetUserFriendlyName();
 						props.Headers.TryAdd(PropertyHeaders.Sent, DateTime.UtcNow.ToString("u"));
-						props.Headers.TryAdd(PropertyHeaders.GlobalExecutionId, ctx.GetGlobalExecutionId());
 					}
 				})
 				.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.BasicPropertiesCreated))

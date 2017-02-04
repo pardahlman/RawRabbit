@@ -16,13 +16,6 @@ namespace RawRabbit
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.MessageRecieved))
 			.Use<BodyDeserializationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.MessageDeserialized))
-			.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
-			{
-				HeaderKeyFunc = c =>  PropertyHeaders.GlobalExecutionId,
-				HeaderTypeFunc = c => typeof(string),
-				ContextSaveAction = (ctx, id) => ctx.Properties.TryAdd(PipeKey.GlobalExecutionId, id)
-			})
-			.Use<GlobalExecutionIdMiddleware>()
 			.Use<SubscriptionExceptionMiddleware>(new SubscriptionExceptionOptions { InnerPipe = p => p.Use<SubscribeInvokationMiddleware>()})
 			.Use<ExplicitAckMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.HandlerInvoked));
@@ -30,7 +23,6 @@ namespace RawRabbit
 		public static readonly Action<IPipeBuilder> SubscribePipe = pipe => pipe
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.Initialized))
 			.Use<ConsumeConfigurationMiddleware>()
-			.Use<ExecutionIdRoutingMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.ConsumeConfigured))
 			.Use<QueueDeclareMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(SubscribeStage.QueueDeclared))

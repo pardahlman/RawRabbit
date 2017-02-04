@@ -2,8 +2,10 @@
 using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Logging;
+using RawRabbit.Pipe;
+using RawRabbit.Pipe.Middleware;
 
-namespace RawRabbit.Pipe.Middleware
+namespace RawRabbit.Enrichers.GlobalExecutionId.Middleware
 {
 	public class ExecutionIdRoutingOptions
 	{
@@ -12,8 +14,9 @@ namespace RawRabbit.Pipe.Middleware
 		public Func<IPipeContext, string, string> UpdateAction { get; set; }
 	}
 
-	public class ExecutionIdRoutingMiddleware : Middleware
+	public class ExecutionIdRoutingMiddleware : StagedMiddleware
 	{
+		public override string StageMarker => Pipe.StageMarker.PublishConfigured;
 		protected Func<IPipeContext, bool> EnableRoutingFunc;
 		protected Func<IPipeContext, string> ExecutionIdFunc;
 		protected Func<IPipeContext, string, string> UpdateAction;
@@ -30,12 +33,6 @@ namespace RawRabbit.Pipe.Middleware
 				{
 					pubConfig.RoutingKey = $"{pubConfig.RoutingKey}.{executionId}";
 					return pubConfig.RoutingKey;
-				}
-				var consumeConfig = context.GetConsumeConfiguration();
-				if (consumeConfig != null)
-				{
-					consumeConfig.RoutingKey = $"{consumeConfig.RoutingKey}.#";
-					return consumeConfig.RoutingKey;
 				}
 				return string.Empty;
 			});

@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using RawRabbit.Common;
 using RawRabbit.Logging;
+using RawRabbit.Pipe;
+using RawRabbit.Pipe.Middleware;
+
 #if NET451
 using System.Runtime.Remoting.Messaging;
 #endif
 
-namespace RawRabbit.Pipe.Middleware
+namespace RawRabbit.Enrichers.GlobalExecutionId.Middleware
 {
 	public class GlobalExecutionOptions
 	{
@@ -15,10 +17,12 @@ namespace RawRabbit.Pipe.Middleware
 		public Action<IPipeContext, string> PersistAction { get; set; }
 	}
 
-	public class GlobalExecutionIdMiddleware : Middleware
+	public class GlobalExecutionIdMiddleware : StagedMiddleware
 	{
+		public override string StageMarker => Pipe.StageMarker.Initialized;
 		protected Func<IPipeContext, string> IdFunc;
 		protected Action<IPipeContext, string> PersistAction;
+
 #if NETSTANDARD1_5
 		protected static readonly AsyncLocal<string> ExecutionId = new AsyncLocal<string>();
 #elif NET451

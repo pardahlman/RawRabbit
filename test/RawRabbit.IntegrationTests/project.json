@@ -16,6 +16,7 @@
 		"RawRabbit.Enrichers.CustomQueueSuffix": { "target": "project" },
 		"RawRabbit.Enrichers.ApplicationQueueSuffix": { "target": "project" },
 		"RawRabbit.Enrichers.HostQueueSuffix": { "target": "project" },
+		"RawRabbit.Enrichers.GlobalExecutionId": { "target": "project" },
 		"RawRabbit.Enrichers.Polly": { "target": "project" },
 		"RawRabbit.Enrichers.Attributes": { "target": "project" },
 		"RawRabbit.Enrichers.MessageContext": { "target": "project" },

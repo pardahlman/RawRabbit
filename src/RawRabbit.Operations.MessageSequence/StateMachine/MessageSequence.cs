@@ -69,7 +69,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 				.Configure(SequenceState.Active)
 				.OnEntryFromAsync(entryTrigger, msg => _client.PublishAsync(message, c =>
 				{
-					c.Properties.Add(PipeKey.GlobalExecutionId, Model.Id.ToString());
+					c.Properties.Add(Enrichers.GlobalExecutionId.PipeKey.GlobalExecutionId, Model.Id.ToString());
 					context?.Invoke(c);
 				}, ct));
 

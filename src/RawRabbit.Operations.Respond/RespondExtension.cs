@@ -21,13 +21,6 @@ namespace RawRabbit
 				BodyTypeFunc = context => context.GetRequestMessageType()
 			})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.MessageDeserialized))
-			.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
-			{
-				HeaderKeyFunc = c => PropertyHeaders.GlobalExecutionId,
-				HeaderTypeFunc = c => typeof(string),
-				ContextSaveAction = (ctx, id) => ctx.Properties.TryAdd(PipeKey.GlobalExecutionId, id)
-			})
-			.Use<GlobalExecutionIdMiddleware>()
 			.Use<RespondExceptionMiddleware>(new RespondExceptionOptions { InnerPipe = p => p.Use<RespondInvokationMiddleware>() })
 			.Use<ExplicitAckMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.HandlerInvoked))

@@ -101,10 +101,6 @@ namespace RawRabbit.Pipe
 			return context.Get<RawRabbit.Common.ISubscription>(PipeKey.Subscription);
 		}
 
-		public static string GetGlobalExecutionId(this IPipeContext context)
-		{
-			return context.Get<string>(PipeKey.GlobalExecutionId);
-		}
 
 		public static IModel GetChannel(this IPipeContext context)
 		{

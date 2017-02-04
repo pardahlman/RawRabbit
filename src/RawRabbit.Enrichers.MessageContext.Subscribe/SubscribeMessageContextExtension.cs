@@ -18,15 +18,8 @@ namespace RawRabbit
 				HeaderKeyFunc = c => PropertyHeaders.Context,
 				ContextSaveAction = (pipeCtx, msgCtx) => pipeCtx.Properties.TryAdd(PipeKey.MessageContext, msgCtx)
 			})
-			.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
-			{
-				HeaderKeyFunc = c => PropertyHeaders.GlobalExecutionId,
-				HeaderTypeFunc = c => typeof(string),
-				ContextSaveAction = (ctx, id) => ctx.Properties.TryAdd(PipeKey.GlobalExecutionId, id)
-			})
 			.Use<BodyDeserializationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.MessageDeserialized))
-			.Use<GlobalExecutionIdMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.MessageContextDeserialized))
 			.Use<SubscriptionExceptionMiddleware>(new SubscriptionExceptionOptions
 			{
