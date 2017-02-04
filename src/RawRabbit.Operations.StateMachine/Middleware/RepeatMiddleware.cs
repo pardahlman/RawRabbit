@@ -3,8 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using RawRabbit.Pipe;
 
-namespace RawRabbit.Pipe.Middleware
+namespace RawRabbit.Operations.StateMachine.Middleware
 {
 	public class RepeatOptions
 	{
@@ -12,10 +13,10 @@ namespace RawRabbit.Pipe.Middleware
 		public Func<IPipeContext, IEnumerable> EnumerableFunc { get; set; }
 		public Func<IPipeContext, IPipeContextFactory, object, IPipeContext> RepeatContextFactory { get; set; }
 	}
-	public class RepeatMiddleware : Middleware
+	public class RepeatMiddleware : Pipe.Middleware.Middleware
 	{
 		private readonly IPipeContextFactory _contextFactory;
-		protected Middleware RepeatPipe;
+		protected Pipe.Middleware.Middleware RepeatPipe;
 		protected Func<IPipeContext, IEnumerable> EnumerableFunc;
 		protected Func<IPipeContext, IPipeContextFactory, object, IPipeContext> RepeateContextFactory;
 
