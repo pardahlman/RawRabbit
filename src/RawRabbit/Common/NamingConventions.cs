@@ -13,9 +13,7 @@ namespace RawRabbit.Common
 		Func<Type, string> QueueNamingConvention { get; set; }
 		Func<Type, string> RoutingKeyConvention { get; set; }
 		Func<string> ErrorExchangeNamingConvention { get; set; }
-		Func<string> DeadLetterExchangeNamingConvention { get; set; }
 		Func<TimeSpan,string> RetryLaterExchangeConvention { get; set; }
-		Func<string> RetryQueueNamingConvention { get; set; }
 		Func<Type, string> SubscriberQueueSuffix { get; set; }
 	}
 
@@ -33,9 +31,7 @@ namespace RawRabbit.Common
 		public virtual Func<Type, string> QueueNamingConvention { get; set; }
 		public virtual Func<Type, string> RoutingKeyConvention { get; set; }
 		public virtual Func<string> ErrorExchangeNamingConvention { get; set; }
-		public virtual Func<string> DeadLetterExchangeNamingConvention { get; set; }
 		public virtual Func<TimeSpan, string> RetryLaterExchangeConvention { get; set; }
-		public virtual Func<string> RetryQueueNamingConvention { get; set; }
 		public virtual Func<Type, string> SubscriberQueueSuffix { get; set; }
 
 		public NamingConventions()
@@ -47,8 +43,6 @@ namespace RawRabbit.Common
 			QueueNamingConvention = type => CreateShortAfqn(type);
 			RoutingKeyConvention = type => CreateShortAfqn(type);
 			ErrorExchangeNamingConvention = () => "default_error_exchange";
-			DeadLetterExchangeNamingConvention = () => "default_dead_letter_exchange";
-			RetryQueueNamingConvention = () => $"retry_{Guid.NewGuid()}";
 			SubscriberQueueSuffix = GetSubscriberQueueSuffix;
 			RetryLaterExchangeConvention = span => $"retry_in_{span.TotalMilliseconds}_ms";
 		}
