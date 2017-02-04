@@ -10,13 +10,13 @@ namespace RawRabbit.Pipe.Middleware
 	public class BasicPropertiesOptions
 	{
 		public Action<IPipeContext, IBasicProperties> PropertyModier { get; set; }
-		public Func<IPipeContext, IBasicProperties> CreatePropsFunc { get; set; }
+		public Func<IPipeContext, IBasicProperties> GetOrCreatePropsFunc { get; set; }
 		public Action<IPipeContext, IBasicProperties> PostCreateAction { get; set; }
 	}
 
 	public class BasicPropertiesMiddleware : Middleware
 	{
-		protected Func<IPipeContext, IBasicProperties> CreatePropsFunc;
+		protected Func<IPipeContext, IBasicProperties> GetOrCreatePropsFunc;
 		protected Action<IPipeContext, IBasicProperties> PropertyModifier;
 		protected Action<IPipeContext, IBasicProperties> PostCreateAction;
 
@@ -24,7 +24,7 @@ namespace RawRabbit.Pipe.Middleware
 		{
 			PropertyModifier = options?.PropertyModier ?? ((ctx, props) => ctx.Get<Action<IBasicProperties>>(PipeKey.BasicPropertyModifier)?.Invoke(props));
 			PostCreateAction = options?.PostCreateAction;
-			CreatePropsFunc = options?.CreatePropsFunc ?? (ctx => new BasicProperties
+			GetOrCreatePropsFunc = options?.GetOrCreatePropsFunc ?? (ctx => ctx.GetBasicProperties() ?? new BasicProperties
 			{
 				MessageId = Guid.NewGuid().ToString(),
 				Headers = new Dictionary<string, object>(),
@@ -34,7 +34,7 @@ namespace RawRabbit.Pipe.Middleware
 
 		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
-			var props = CreateBasicProperties(context);
+			var props = GetOrCreateBasicProperties(context);
 			ModifyBasicProperties(context, props);
 			InvokePostCreateAction(context, props);
 			context.Properties.TryAdd(PipeKey.BasicProperties, props);
@@ -51,9 +51,9 @@ namespace RawRabbit.Pipe.Middleware
 			PostCreateAction?.Invoke(context, props);
 		}
 
-		protected virtual IBasicProperties CreateBasicProperties(IPipeContext context)
+		protected virtual IBasicProperties GetOrCreateBasicProperties(IPipeContext context)
 		{
-			return CreatePropsFunc(context);
+			return GetOrCreatePropsFunc(context);
 		}
 	}
 }

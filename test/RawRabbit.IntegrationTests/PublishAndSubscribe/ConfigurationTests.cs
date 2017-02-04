@@ -1,9 +1,12 @@
 ﻿using System.Threading.Tasks;
+using RabbitMQ.Client.Events;
+using RabbitMQ.Client.Framing;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Exchange;
 using RawRabbit.Enrichers.ApplicationQueueSuffix;
 using RawRabbit.Enrichers.CustomQueueSuffix;
 using RawRabbit.Enrichers.HostQueueSuffix;
+using RawRabbit.Enrichers.MessageContext.Subscribe;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
@@ -35,6 +38,32 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 
 				/* Assert */
 				Assert.Equal(message.Prop, recievedTcs.Task.Result.Prop);
+			}
+		}
+
+		[Fact]
+		public async Task Should_Be_Able_To_Publish_With_Custom_Header()
+		{
+			using (var publisher = RawRabbitFactory.CreateTestClient())
+			using (var subscriber = RawRabbitFactory.CreateTestClient())
+			{
+				/* Setup */
+				var recievedTcs = new TaskCompletionSource<BasicDeliverEventArgs>();
+				await subscriber.SubscribeAsync<BasicMessage, BasicDeliverEventArgs>((recieved, args) =>
+				{
+					recievedTcs.TrySetResult(args);
+					return Task.FromResult(true);
+				}, ctx => ctx.UseMessageContext(c => c.GetDeliveryEventArgs()));
+				var message = new BasicMessage { Prop = "Hello, world!" };
+
+				/* Test */
+				await publisher.PublishAsync(message, ctx => ctx
+					.UsePublisherConfiguration(cfg => cfg
+						.WithProperties(props => props.Headers.Add("foo", "bar"))));
+				await recievedTcs.Task;
+
+				/* Assert */
+				Assert.True(recievedTcs.Task.Result.BasicProperties.Headers.ContainsKey("foo"));
 			}
 		}
 
