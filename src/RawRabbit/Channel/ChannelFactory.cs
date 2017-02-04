@@ -269,6 +269,10 @@ namespace RawRabbit.Channel
 				.ContinueWith(tConnection =>
 				{
 					var channel = tConnection.Result.CreateModel();
+					if (_config.AutoCloseConnection && !tConnection.Result.AutoClose)
+					{
+						tConnection.Result.AutoClose = true;
+					}
 					_logger.LogInformation($"Channel '{channel.ChannelNumber}' has been created.");
 					var recoverable = channel as IRecoverable;
 					if (recoverable != null)

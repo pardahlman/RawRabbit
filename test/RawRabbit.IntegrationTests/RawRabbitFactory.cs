@@ -10,8 +10,18 @@ namespace RawRabbit.IntegrationTests
 	{
 		public static Instantiation.Disposable.BusClient CreateTestClient(RawRabbitOptions options = null)
 		{
+			return vNext.Pipe.RawRabbitFactory.CreateSingleton(GetTestOptions(options));
+		}
+
+		public static Instantiation.InstanceFactory CreateTestInstanceFactory(RawRabbitOptions options = null)
+		{
+			return vNext.Pipe.RawRabbitFactory.CreateInstanceFactory(GetTestOptions(options));
+		}
+
+		private static RawRabbitOptions GetTestOptions(RawRabbitOptions options)
+		{
 			options = options ?? new RawRabbitOptions();
-			var action = options.DependencyInjection ?? (collection => {});
+			var action = options.DependencyInjection ?? (collection => { });
 			action += collection =>
 			{
 				var registration = collection.LastOrDefault(c => c.ServiceType == typeof(RawRabbitConfiguration));
@@ -25,7 +35,7 @@ namespace RawRabbit.IntegrationTests
 				LogManager.CurrentFactory = new VoidLoggerFactory();
 			};
 			options.DependencyInjection = action;
-			return vNext.Pipe.RawRabbitFactory.CreateSingleton(options);
+			return options;
 		}
 	}
 }

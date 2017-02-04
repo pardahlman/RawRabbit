@@ -15,6 +15,7 @@ using RawRabbit.Configuration.Queue;
 using RawRabbit.Enrichers.MessageContext.Context;
 using RawRabbit.Operations.Request.Core;
 using RawRabbit.Pipe;
+using RawRabbit.Subscription;
 
 namespace RawRabbit.Compatibility.Legacy
 {

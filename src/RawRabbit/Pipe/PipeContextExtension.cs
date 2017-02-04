@@ -16,6 +16,7 @@ using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Get;
 using RawRabbit.Configuration.Publisher;
 using RawRabbit.Configuration.Queue;
+using ISubscription = RawRabbit.Subscription.ISubscription;
 
 namespace RawRabbit.Pipe
 {
@@ -96,9 +97,9 @@ namespace RawRabbit.Pipe
 			return context.Get<string>(PipeKey.RoutingKey);
 		}
 
-		public static RawRabbit.Common.ISubscription GetSubscription(this IPipeContext context)
+		public static ISubscription GetSubscription(this IPipeContext context)
 		{
-			return context.Get<RawRabbit.Common.ISubscription>(PipeKey.Subscription);
+			return context.Get<ISubscription>(PipeKey.Subscription);
 		}
 
 

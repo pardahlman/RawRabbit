@@ -2,7 +2,7 @@
 using RabbitMQ.Client;
 using RawRabbit.Consumer;
 
-namespace RawRabbit.Common
+namespace RawRabbit.Subscription
 {
 	public interface ISubscription : IDisposable
 	{

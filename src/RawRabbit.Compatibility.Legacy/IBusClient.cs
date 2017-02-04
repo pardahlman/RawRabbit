@@ -7,6 +7,7 @@ using RawRabbit.Compatibility.Legacy.Configuration.Request;
 using RawRabbit.Compatibility.Legacy.Configuration.Respond;
 using RawRabbit.Compatibility.Legacy.Configuration.Subscribe;
 using RawRabbit.Enrichers.MessageContext.Context;
+using RawRabbit.Subscription;
 
 namespace RawRabbit.Compatibility.Legacy
 {

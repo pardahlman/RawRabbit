@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Operations.Respond.Acknowledgement;
-using RawRabbit.Operations.Respond.Configuration;
 using RawRabbit.Operations.Respond.Core;
 using RawRabbit.Operations.Respond.Middleware;
 using RawRabbit.Pipe;

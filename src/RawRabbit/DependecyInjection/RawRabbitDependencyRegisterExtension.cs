@@ -17,6 +17,7 @@ using RawRabbit.Consumer;
 using RawRabbit.Logging;
 using RawRabbit.Pipe;
 using RawRabbit.Serialization;
+using RawRabbit.Subscription;
 
 namespace RawRabbit.DependecyInjection
 {
@@ -63,6 +64,7 @@ namespace RawRabbit.DependecyInjection
 				})
 				.AddTransient<IConsumerFactory, ConsumerFactory>()
 				.AddSingleton<IChannelFactory, ChannelFactory>()
+				.AddSingleton<ISubscriptionRepository, SubscriptionRepository>()
 				.AddSingleton<ChannelFactoryConfiguration, ChannelFactoryConfiguration>(c => ChannelFactoryConfiguration.Default)
 				.AddSingleton<ITopologyProvider, TopologyProvider>()
 				.AddTransient<IPublisherConfigurationFactory, PublisherConfigurationFactory>()

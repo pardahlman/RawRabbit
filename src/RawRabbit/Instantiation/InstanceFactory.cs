@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Threading.Tasks;
 using RawRabbit.Common;
+using RawRabbit.Configuration;
 using RawRabbit.DependecyInjection;
 using RawRabbit.Pipe;
+using RawRabbit.Subscription;
 
 namespace RawRabbit.Instantiation
 {
@@ -28,6 +31,18 @@ namespace RawRabbit.Instantiation
 		{
 			var diposer = _resolver.GetService<IResourceDisposer>();
 			diposer?.Dispose();
+		}
+
+		public async Task ShutdownAsync(TimeSpan? graceful = null)
+		{
+			var subscriptions = _resolver.GetService<ISubscriptionRepository>().GetAll();
+			foreach (var subscription in subscriptions)
+			{
+				subscription?.Dispose();
+			}
+			graceful = graceful ?? _resolver.GetService<RawRabbitConfiguration>().GracefulShutdown;
+			await Task.Delay(graceful.Value);
+			Dispose();
 		}
 	}
 }
