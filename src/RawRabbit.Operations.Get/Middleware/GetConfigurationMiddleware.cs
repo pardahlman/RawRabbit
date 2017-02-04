@@ -2,8 +2,9 @@
 using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Configuration.Get;
+using RawRabbit.Pipe;
 
-namespace RawRabbit.Pipe.Middleware
+namespace RawRabbit.Operations.Get.Middleware
 {
 	public class GetConfigurationOptions
 	{
@@ -12,7 +13,7 @@ namespace RawRabbit.Pipe.Middleware
 		public Action<IPipeContext, GetConfiguration> PostExecuteAction { get; set; }
 	}
 
-	public class GetConfigurationMiddleware : Middleware
+	public class GetConfigurationMiddleware : Pipe.Middleware.Middleware
 	{
 		protected Func<IPipeContext, GetConfiguration> CreateFunc;
 		protected Action<IPipeContext, GetConfiguration> PostExecutionAction;

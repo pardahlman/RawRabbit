@@ -2,8 +2,9 @@
 using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
+using RawRabbit.Pipe;
 
-namespace RawRabbit.Pipe.Middleware
+namespace RawRabbit.Operations.Get.Middleware
 {
 	public class BasicGetOptions
 	{
@@ -13,7 +14,7 @@ namespace RawRabbit.Pipe.Middleware
 		public Func<IPipeContext, string> QueueNameFunc { get; internal set; }
 	}
 
-	public class BasicGetMiddleware : Middleware
+	public class BasicGetMiddleware : Pipe.Middleware.Middleware
 	{
 		protected Func<IPipeContext, IModel> ChannelFunc;
 		protected  Func<IPipeContext, string> QueueNameFunc;
