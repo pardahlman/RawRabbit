@@ -1,9 +1,13 @@
 ﻿using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Exchange;
+using RawRabbit.Enrichers.ApplicationQueueSuffix;
+using RawRabbit.Enrichers.CustomQueueSuffix;
+using RawRabbit.Enrichers.HostQueueSuffix;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
+using RawRabbit.vNext.Pipe;
 using Xunit;
 
 namespace RawRabbit.IntegrationTests.PublishAndSubscribe
@@ -110,8 +114,14 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 		[Fact]
 		public async Task Should_Be_Able_To_Create_Unique_Queues_With_Naming_Suffix()
 		{
-			using (var firstSubscriber = RawRabbitFactory.CreateTestClient())
-			using (var secondSubscriber = RawRabbitFactory.CreateTestClient())
+			var options = new RawRabbitOptions
+			{
+				Plugins = ioc => ioc
+					.UseApplicationQueueSuffix()
+					.UseCustomQueueSuffix()
+			};
+			using (var firstSubscriber = RawRabbitFactory.CreateTestClient(options))
+			using (var secondSubscriber = RawRabbitFactory.CreateTestClient(options))
 			using (var publisher = RawRabbitFactory.CreateTestClient())
 			{
 				/* Setup */
@@ -122,18 +132,14 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 				{
 					firstTcs.TrySetResult(msg);
 					return Task.FromResult(0);
-				}, ctx => ctx
-					.UseCustomQueueSuffix("second")
-					.UseApplicationQueueSuffix()
+				}, ctx => ctx.UseCustomQueueSuffix("first")
 				);
+
 				await secondSubscriber.SubscribeAsync<BasicMessage>(msg =>
 				{
 					secondTcs.TrySetResult(msg);
 					return Task.FromResult(0);
-				}, ctx => ctx
-					.UseApplicationQueueSuffix()
-					.UseHostnameQueueSuffix()
-					.UseCustomQueueSuffix("second")
+				}, ctx => ctx.UseCustomQueueSuffix("second")
 				);
 
 				/* Test */

@@ -3,26 +3,22 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Configuration.Queue;
+using RawRabbit.Pipe;
+using RawRabbit.Pipe.Middleware;
 
-namespace RawRabbit.Pipe.Middleware
+namespace RawRabbit.Enrichers.HostQueueSuffix
 {
-	public class HostnameQueueSuffixOptions
-	{
-		public Func<IPipeContext, List<Action<IQueueDeclarationBuilder>>> QueueActionListFunc { get; set; }
-		public Func<IPipeContext, Action<IQueueDeclarationBuilder>> QueueSuffixFunc { get; set; }
-		public Func<IPipeContext, bool> ActivatedFlagFunc { get; set; }
-	}
-
-	public class HostnameQueueSuffixMiddleware : Middleware
+	public class HostQueueSuffixMiddleware : StagedMiddleware
 	{
 		protected Func<IPipeContext, List<Action<IQueueDeclarationBuilder>>> QueueActionListFunc;
 		protected Func<IPipeContext, Action<IQueueDeclarationBuilder>> QueueSuffixFunc;
 		protected Func<IPipeContext, bool> ActivatedFlagFunc;
+		public override string StageMarker => Pipe.StageMarker.Initialized;
 
-		public HostnameQueueSuffixMiddleware(HostnameQueueSuffixOptions options = null)
+		public HostQueueSuffixMiddleware(HostQueueSuffixOptions options = null)
 		{
 			QueueActionListFunc = options?.QueueActionListFunc ?? (context => context.GetQueueActions());
-			QueueSuffixFunc = options?.QueueSuffixFunc;
+			QueueSuffixFunc = options?.QueueSuffixFunc ?? (context => context.GetQueueSuffixFunc());
 			ActivatedFlagFunc = options?.ActivatedFlagFunc ?? (context => context.GetHostnameQueueSuffixFlag());
 		}
 
@@ -51,35 +47,15 @@ namespace RawRabbit.Pipe.Middleware
 
 			protected virtual Action<IQueueDeclarationBuilder> GetQueueSuffixAction(IPipeContext context)
 			{
-				if (QueueSuffixFunc != null)
-				{
-					return QueueSuffixFunc.Invoke(context);
-				}
-				return builder =>
+			return QueueSuffixFunc.Invoke(context) ?? (builder =>
 				{
 					builder.WithNameSuffix(Environment.MachineName.ToLower());
-				};
+				});
 			}
 
 			protected virtual void AddSuffixAction(List<Action<IQueueDeclarationBuilder>> queueActions, Action<IQueueDeclarationBuilder> suffixAction)
 			{
 				queueActions.Add(suffixAction);
 			}
-	}
-
-	public static class HostnameSuffixExtension
-	{
-		private const string HostnameQueueSuffix = "HostnameQueueSuffix";
-
-		public static IPipeContext UseHostnameQueueSuffix(this IPipeContext context, bool use = true)
-		{
-			context.Properties.TryAdd("HostnameQueueSuffix", use);
-			return context;
-		}
-
-		public static bool GetHostnameQueueSuffixFlag(this IPipeContext context)
-		{
-			return context.Get(HostnameQueueSuffix, false);
-		}
 	}
 }

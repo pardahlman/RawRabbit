@@ -1,33 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using RawRabbit.Common;
 using RawRabbit.Configuration.Queue;
+using RawRabbit.Pipe;
+using RawRabbit.Pipe.Middleware;
 
-namespace RawRabbit.Pipe.Middleware
+namespace RawRabbit.Enrichers.ApplicationQueueSuffix
 {
-	public class CustomQueueSuffixOptions
+	public class ApplicationQueueSuffixMiddleware : StagedMiddleware
 	{
-		public Func<IPipeContext, List<Action<IQueueDeclarationBuilder>>> QueueActionListFunc { get; set; }
-		public Func<IPipeContext, Action<IQueueDeclarationBuilder>> QueueSuffixFunc { get; set; }
-		public Func<IPipeContext, bool> ActivatedFlagFunc { get; set; }
-	}
-
-	public class CustomQueueSuffixMiddleware : Middleware
-	{
+		protected INamingConventions Conventsions;
 		protected Func<IPipeContext, List<Action<IQueueDeclarationBuilder>>> QueueActionListFunc;
 		protected Func<IPipeContext, Action<IQueueDeclarationBuilder>> QueueSuffixFunc;
 		protected Func<IPipeContext, bool> ActivatedFlagFunc;
+		public override string StageMarker => Pipe.StageMarker.Initialized;
 
-		public CustomQueueSuffixMiddleware(CustomQueueSuffixOptions options = null)
+		public ApplicationQueueSuffixMiddleware(INamingConventions conventsions, ApplicationQueueSuffixOptions options = null)
 		{
+			Conventsions = conventsions;
 			QueueActionListFunc = options?.QueueActionListFunc ?? (context => context.GetQueueActions());
 			QueueSuffixFunc = options?.QueueSuffixFunc;
-			ActivatedFlagFunc = options?.ActivatedFlagFunc ?? (context => context.GetCustomQueueSuffix() != null);
+			ActivatedFlagFunc = options?.ActivatedFlagFunc ?? (context => context.GetApplicationSuffixFlag());
 		}
 
-		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token = new CancellationToken())
 		{
 			var activated = GetActivatedFlag(context);
 			if (!activated)
@@ -58,7 +56,8 @@ namespace RawRabbit.Pipe.Middleware
 			}
 			return builder =>
 			{
-				builder.WithNameSuffix(context.GetCustomQueueSuffix());
+				var msgType = context.GetMessageType();
+				builder.WithNameSuffix(Conventsions.SubscriberQueueSuffix(msgType));
 			};
 		}
 
@@ -66,21 +65,6 @@ namespace RawRabbit.Pipe.Middleware
 		{
 			queueActions.Add(suffixAction);
 		}
-	}
 
-	public static class CustomSuffixExtension
-	{
-		private const string CustomQueueSuffix = "CustomQueueSuffix";
-
-		public static IPipeContext UseCustomQueueSuffix(this IPipeContext context, string prefix)
-		{
-			context.Properties.TryAdd(CustomQueueSuffix, prefix);
-			return context;
-		}
-
-		public static string GetCustomQueueSuffix(this IPipeContext context)
-		{
-			return context.Get<string>(CustomQueueSuffix);
-		}
 	}
 }
