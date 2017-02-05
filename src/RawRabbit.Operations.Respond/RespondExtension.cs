@@ -107,8 +107,8 @@ namespace RawRabbit
 								return tResponse.Result.AsUntyped();
 							}, ct);
 
-						ctx.Properties.Add(RespondKey.RequestMessageType, typeof(TRequest));
-						ctx.Properties.Add(RespondKey.ResponseMessageType, typeof(TResponse));
+						ctx.Properties.Add(RespondKey.IncommingMessageType, typeof(TRequest));
+						ctx.Properties.Add(RespondKey.OutgoingMessageType, typeof(TResponse));
 						ctx.Properties.Add(PipeKey.MessageHandler, genericHandler);
 						context?.Invoke(ctx);
 					}, ct

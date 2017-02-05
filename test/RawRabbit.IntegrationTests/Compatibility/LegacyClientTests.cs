@@ -3,23 +3,38 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using RawRabbit.Compatibility.Legacy.Configuration.Exchange;
+using RawRabbit.Configuration;
 using RawRabbit.Enrichers.MessageContext;
 using RawRabbit.Enrichers.MessageContext.Context;
 using RawRabbit.Instantiation;
 using RawRabbit.IntegrationTests.TestMessages;
+using RawRabbit.Logging;
 using Xunit;
 
 namespace RawRabbit.IntegrationTests.Compatibility
 {
 	public class LegacyClientTests : IntegrationTestBase
 	{
+		private RawRabbitOptions _legacyConfig;
+
+		public LegacyClientTests()
+		{
+			var clientCfg = RawRabbitConfiguration.Local;
+			clientCfg.Exchange.AutoDelete = true;
+			clientCfg.Queue.AutoDelete = true;
+			_legacyConfig = new RawRabbitOptions
+			{
+				ClientConfiguration = clientCfg,
+				DependencyInjection = ioc => ioc.AddSingleton<ILoggerFactory, VoidLoggerFactory>()
+			};
+		}
 
 		[Fact]
 		public async Task Should_Pub_Sub_Without_Config()
 		{
 			/* Setup */
-			var publisher = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient();
-			var subscriber = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient();
+			var publisher = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient(_legacyConfig);
+			var subscriber = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient(_legacyConfig);
 			var message = new BasicMessage { Prop = "Hello, world!" };
 			var tsc = new TaskCompletionSource<BasicMessage>();
 			MessageContext recievedContext = null;
@@ -47,8 +62,8 @@ namespace RawRabbit.IntegrationTests.Compatibility
 		public async Task Should_Pub_Sub_With_Custom_Config()
 		{
 			/* Setup */
-			var publisher = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient();
-			var subscriber = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient();
+			var publisher = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient(_legacyConfig);
+			var subscriber = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient(_legacyConfig);
 			var message = new BasicMessage { Prop = "Hello, world!" };
 			var tsc = new TaskCompletionSource<BasicMessage>();
 			MessageContext recievedContext = null;
@@ -61,7 +76,7 @@ namespace RawRabbit.IntegrationTests.Compatibility
 				.WithExchange(e => e
 					.WithName("custom_exchange")
 					.WithType(ExchangeType.Topic)
-					.WithAutoDelete(false)
+					.WithAutoDelete()
 				)
 				.WithRoutingKey("custom_key")
 				.WithQueue(q => q
@@ -92,16 +107,13 @@ namespace RawRabbit.IntegrationTests.Compatibility
 		{
 			/* Setup */
 			const string propValue = "This is test message prop";
-			var publisher = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient(new RawRabbitOptions
-			{
-				Plugins = p => p.UseMessageContext(c =>
-					new TestMessageContext
-					{
-						Prop = propValue
-					}
-				)
-			});
-			var subscriber = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient<TestMessageContext>();
+			_legacyConfig.Plugins = p => p.UseMessageContext(c =>
+				new TestMessageContext
+				{
+					Prop = propValue
+				});
+			var publisher = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient(_legacyConfig);
+			var subscriber = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient<TestMessageContext>(_legacyConfig);
 			var message = new BasicMessage { Prop = "Hello, world!" };
 			var tsc = new TaskCompletionSource<BasicMessage>();
 			TestMessageContext recievedContext = null;
@@ -114,7 +126,7 @@ namespace RawRabbit.IntegrationTests.Compatibility
 				.WithExchange(e => e
 					.WithName("custom_exchange")
 					.WithType(ExchangeType.Topic)
-					.WithAutoDelete(false)
+					.WithAutoDelete(true)
 				)
 				.WithRoutingKey("custom_key")
 				.WithQueue(q => q
@@ -144,8 +156,8 @@ namespace RawRabbit.IntegrationTests.Compatibility
 		public async Task Should_Rpc_Without_Config()
 		{
 			/* Setup */
-			var requester = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient();
-			var responder = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient();
+			var requester = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient(_legacyConfig);
+			var responder = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient(_legacyConfig);
 			MessageContext recievedContext = null;
 			BasicRequest recievedRequest = null;
 			var request = new BasicRequest {Number = 3};
@@ -172,8 +184,8 @@ namespace RawRabbit.IntegrationTests.Compatibility
 		public async Task Should_Rpc_With_Config()
 		{
 			/* Setup */
-			var requester = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient();
-			var responder = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient();
+			var requester = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient(_legacyConfig);
+			var responder = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient(_legacyConfig);
 			MessageContext recievedContext = null;
 			BasicRequest recievedRequest = null;
 			var request = new BasicRequest { Number = 3 };
@@ -221,16 +233,14 @@ namespace RawRabbit.IntegrationTests.Compatibility
 		{
 			/* Setup */
 			const string propValue = "This is test message prop";
-			var requester = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient(new RawRabbitOptions
-			{
-				Plugins = p => p.UseMessageContext(c =>
-					new TestMessageContext
-					{
-						Prop = propValue
-					}
-				)
-			});
-			var responder = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient<TestMessageContext>();
+			_legacyConfig.Plugins = p => p.UseMessageContext(c =>
+				new TestMessageContext
+				{
+					Prop = propValue
+				}
+			);
+			var requester = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient(_legacyConfig);
+			var responder = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient<TestMessageContext>(_legacyConfig);
 			TestMessageContext recievedContext = null;
 			BasicRequest recievedRequest = null;
 			var sub = responder.RespondAsync<BasicRequest, BasicResponse>((req, context) =>

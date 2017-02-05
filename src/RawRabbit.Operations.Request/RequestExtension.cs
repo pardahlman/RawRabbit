@@ -62,8 +62,8 @@ namespace RawRabbit
 			return client
 				.InvokeAsync(RequestPipe, ctx =>
 				{
-					ctx.Properties.Add(RequestKey.RequestMessageType, typeof(TRequest));
-					ctx.Properties.Add(RequestKey.ResponseMessageType, typeof(TResponse));
+					ctx.Properties.Add(RequestKey.OutgoingMessageType, typeof(TRequest));
+					ctx.Properties.Add(RequestKey.IncommingMessageType, typeof(TResponse));
 					ctx.Properties.Add(PipeKey.Message, message);
 					context?.Invoke(ctx);
 				}, ct)

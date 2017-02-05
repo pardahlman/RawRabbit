@@ -135,6 +135,52 @@ namespace RawRabbit.IntegrationTests.Enrichers
 			}
 		}
 
+		[Fact]
+		public async Task Should_Work_For_Full_Rpc()
+		{
+			using (var responder = RawRabbitFactory.CreateTestClient(new RawRabbitOptions { Plugins = plugin => plugin.UseAttributeRouting() }))
+			using (var requester = RawRabbitFactory.CreateTestClient(new RawRabbitOptions { Plugins = plugin => plugin.UseAttributeRouting() }))
+			{
+				/* Setup */
+				var recievedTcs = new TaskCompletionSource<AttributedRequest>();
+				await responder.RespondAsync<AttributedRequest, AttributedResponse>(recieved =>
+				{
+					recievedTcs.TrySetResult(recieved);
+					return Task.FromResult(new AttributedResponse());
+				});
+
+				/* Test */
+				await requester.RequestAsync<AttributedRequest, AttributedResponse>(new AttributedRequest());
+				await recievedTcs.Task;
+
+				/* Assert */
+				Assert.True(true, "Routing successful");
+			}
+		}
+
+		[Fact]
+		public async Task Should_Work_For_Pub_Sub()
+		{
+			using (var publisher = RawRabbitFactory.CreateTestClient(new RawRabbitOptions { Plugins = plugin => plugin.UseAttributeRouting() }))
+			using (var subscriber = RawRabbitFactory.CreateTestClient(new RawRabbitOptions { Plugins = plugin => plugin.UseAttributeRouting() }))
+			{
+				/* Setup */
+				var recievedTcs = new TaskCompletionSource<AttributedMessage>();
+				await subscriber.SubscribeAsync<AttributedMessage>(recieved =>
+				{
+					recievedTcs.TrySetResult(recieved);
+					return Task.FromResult(new AttributedResponse());
+				});
+
+				/* Test */
+				await publisher.PublishAsync(new AttributedMessage());
+				await recievedTcs.Task;
+
+				/* Assert */
+				Assert.True(true, "Routing successful");
+			}
+		}
+
 		[Queue(Name = "my_queue", MessageTtl = 300, DeadLeterExchange = "dlx", Durable = false)]
 		[Exchange(Name = "my_topic", Type = ExchangeType.Topic)]
 		[Routing(RoutingKey = "my_key", NoAck = true, PrefetchCount = 50)]

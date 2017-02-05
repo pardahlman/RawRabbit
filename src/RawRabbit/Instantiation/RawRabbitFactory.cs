@@ -2,6 +2,7 @@
 using RawRabbit.Common;
 using RawRabbit.Configuration;
 using RawRabbit.DependecyInjection;
+using RawRabbit.Logging;
 using RawRabbit.Pipe;
 
 namespace RawRabbit.Instantiation
@@ -49,6 +50,7 @@ namespace RawRabbit.Instantiation
 				register.AddSingleton(new Action<IPipeBuilder>(b => { }));
 			}
 			var resolver = resolverFunc(register);
+			LogManager.CurrentFactory = resolver.GetService<ILoggerFactory>();
 			return new InstanceFactory(resolver);
 		}
 	}

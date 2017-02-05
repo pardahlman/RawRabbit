@@ -19,7 +19,7 @@ namespace RawRabbit.Operations.Publish.Middleware
 		public Func<IPipeContext, Type> MessageTypeFunc { get; set; }
 	}
 
-	public class PublisherConfigurationMiddleware : ConfigurationMiddlewareBase
+	public class PublisherConfigurationMiddleware : Pipe.Middleware.Middleware
 	{
 		protected readonly IPublisherConfigurationFactory PublisherFactory;
 		protected readonly Func<IPipeContext, string> ExchangeFunc;
@@ -44,10 +44,6 @@ namespace RawRabbit.Operations.Publish.Middleware
 				throw new ArgumentNullException(nameof(config));
 			}
 
-			var msgType = GetMessageType(context);
-			InvokeExchangeActions(context, msgType, config.Exchange);
-			InvokePublishActions(context, msgType, config);
-			config.ExchangeName = config.Exchange.Name;
 			var action = context.Get<Action<IPublisherConfigurationBuilder>>(PipeKey.ConfigurationAction);
 			if (action != null)
 			{

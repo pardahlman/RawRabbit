@@ -102,58 +102,9 @@ namespace RawRabbit.Pipe
 			return context.Get<ISubscription>(PipeKey.Subscription);
 		}
 
-
 		public static IModel GetChannel(this IPipeContext context)
 		{
 			return context.Get<IModel>(PipeKey.Channel);
-		}
-
-		public static List<Action<IQueueDeclarationBuilder>> GetQueueActions(this IPipeContext context, Type type = null)
-		{
-			var typedActions = context.Get<ConcurrentDictionary<string, List<Action<IQueueDeclarationBuilder>>>>(PipeKey.QueueActions);
-			if (typedActions == null)
-			{
-				typedActions = new ConcurrentDictionary<string, List<Action<IQueueDeclarationBuilder>>>();
-				context.Properties.Add(PipeKey.QueueActions, typedActions);
-			}
-			var actions = typedActions.GetOrAdd(type?.FullName ?? string.Empty, t => new List<Action<IQueueDeclarationBuilder>>());
-			return actions;
-		}
-
-		public static List<Action<IExchangeDeclarationBuilder>> GetExchangeActions(this IPipeContext context, Type type = null)
-		{
-			var typedActions = context.Get<ConcurrentDictionary<string, List<Action<IExchangeDeclarationBuilder>>>>(PipeKey.ExchangeActions);
-			if (typedActions == null)
-			{
-				typedActions = new ConcurrentDictionary<string, List<Action<IExchangeDeclarationBuilder>>>();
-				context.Properties.Add(PipeKey.ExchangeActions, typedActions);
-			}
-			var actions = typedActions.GetOrAdd(type?.FullName ?? string.Empty, t => new List<Action<IExchangeDeclarationBuilder>>());
-			return actions;
-		}
-
-		public static List<Action<IConsumeConfigurationBuilder>> GetConsumeActions(this IPipeContext context, Type type = null)
-		{
-			var typedActions = context.Get<ConcurrentDictionary<string, List<Action<IConsumeConfigurationBuilder>>>>(PipeKey.ConsumeActions);
-			if (typedActions == null)
-			{
-				typedActions = new ConcurrentDictionary<string, List<Action<IConsumeConfigurationBuilder>>>();
-				context.Properties.Add(PipeKey.ConsumeActions, typedActions);
-			}
-			var actions = typedActions.GetOrAdd(type?.FullName ?? string.Empty, t => new List<Action<IConsumeConfigurationBuilder>>());
-			return actions;
-		}
-
-		public static List<Action<IBasicPublishConfigurationBuilder>> GetBasicPublishActions(this IPipeContext context, Type type = null)
-		{
-			var typedActions = context.Get<ConcurrentDictionary<string, List<Action<IBasicPublishConfigurationBuilder>>>>(PipeKey.BasicPublishActions);
-			if (typedActions == null)
-			{
-				typedActions = new ConcurrentDictionary<string, List<Action<IBasicPublishConfigurationBuilder>>>();
-				context.Properties.Add(PipeKey.BasicPublishActions, typedActions);
-			}
-			var actions = typedActions.GetOrAdd(type?.FullName ?? string.Empty, t => new List<Action<IBasicPublishConfigurationBuilder>>());
-			return actions;
 		}
 
 		public static IModel GetTransientChannel(this IPipeContext context)

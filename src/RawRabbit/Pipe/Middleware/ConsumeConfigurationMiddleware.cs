@@ -17,7 +17,7 @@ namespace RawRabbit.Pipe.Middleware
 		public Func<IPipeContext, Action<IConsumerConfigurationBuilder>> ConfigActionFunc { get; set; }
 	}
 
-	public class ConsumeConfigurationMiddleware : ConfigurationMiddlewareBase
+	public class ConsumeConfigurationMiddleware : Middleware
 	{
 		protected IConsumerConfigurationFactory ConfigFactory;
 		protected Func<IPipeContext, string> QueueFunc;
@@ -42,13 +42,6 @@ namespace RawRabbit.Pipe.Middleware
 			var config = ExtractConfigFromMessageType(context)
 				?? ExtractConfigFromStrings(context)
 				?? CreateDefaultConfig(context);
-
-			var msgType = GetMessageType(context);
-			InvokeQueueActions(context, msgType, config.Queue);
-			InvokeExchangeActions(context, msgType, config.Exchange);
-			InvokeConsumeActions(context, msgType, config.Consume);
-			config.Consume.ExchangeName = config.Exchange.Name;
-			config.Consume.QueueName = config.Queue.Name;
 
 			var action = GetConfigurationAction(context);
 			if (action != null)

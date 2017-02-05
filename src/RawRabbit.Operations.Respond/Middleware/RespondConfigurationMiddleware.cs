@@ -15,7 +15,7 @@ namespace RawRabbit.Operations.Respond.Middleware
 		public Func<IPipeContext, Type> ResponseTypeFunc { get; set; }
 	}
 
-	public class RespondConfigurationMiddleware : ConfigurationMiddlewareBase
+	public class RespondConfigurationMiddleware : Pipe.Middleware.Middleware
 	{
 		private readonly IRespondConfigurationFactory _factory;
 		private readonly Func<IPipeContext, Type> _requestTypeFunc;
@@ -42,12 +42,7 @@ namespace RawRabbit.Operations.Respond.Middleware
 			if (responseType == null)
 				throw new ArgumentNullException(nameof(responseType));
 			var defaultCfg = _factory.Create(requestType, responseType);
-			InvokeExchangeActions(context, requestType, defaultCfg.Exchange);
-			InvokeQueueActions(context, requestType, defaultCfg.Queue);
-			InvokeConsumeActions(context, requestType, defaultCfg.Consume);
-			defaultCfg.Consume.ExchangeName = defaultCfg.Exchange.Name;
-			defaultCfg.Consume.QueueName = defaultCfg.Queue.Name;
-			
+
 			var builder = new RespondConfigurationBuilder(defaultCfg);
 			action?.Invoke(builder);
 

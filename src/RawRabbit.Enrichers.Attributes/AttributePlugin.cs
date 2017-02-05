@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using RawRabbit.Enrichers.Attributes.Middleware;
 using RawRabbit.Instantiation;
 using RawRabbit.Pipe;
@@ -8,25 +7,28 @@ namespace RawRabbit
 {
 	public static class AttributePlugin
 	{
-		private const string RequestMsgType = "RequestMessageType";
-		private const string ResponseMsgType = "ResponseMessageType";
+		private const string IncommingMessageType = "IncommingMessageType";
+		private const string OutgoingMessageType = "OutgoingMessageType";
 
-		public static IClientBuilder UseAttributeRouting(this IClientBuilder builder, AttributeOptions consume = null)
+		public static IClientBuilder UseAttributeRouting(this IClientBuilder builder, ConsumeAttributeOptions consume = null, ProduceAttributeOptions produce = null)
 		{
 			if (consume == null)
 			{
-				consume = new AttributeOptions
+				consume = new ConsumeAttributeOptions
 				{
-					MessageTypeFunc = context => new List<Type>
-					{
-						context.Get<Type>(PipeKey.MessageType),
-						context.Get<Type>(RequestMsgType),
-						context.Get<Type>(ResponseMsgType),
-					}
+					MessageTypeFunc = context => context.Get<Type>(IncommingMessageType) ?? context.Get<Type>(PipeKey.MessageType)
+				};
+			}
+			if (produce == null)
+			{
+				produce = new ProduceAttributeOptions
+				{
+					MessageTypeFunc = context => context.Get<Type>(OutgoingMessageType) ?? context.Get<Type>(PipeKey.MessageType)
 				};
 			}
 			builder.Register(pipe => pipe
-				.Use<AttributeMiddleware>(consume));
+				.Use<ConsumeAttributeMiddleware>(consume)
+				.Use<ProduceAttributeMiddleware>(produce));
 			return builder;
 		}
 	}
