@@ -12,11 +12,13 @@ namespace RawRabbit.Configuration.BasicPublish
 	{
 		private readonly INamingConventions _conventions;
 		private readonly ISerializer _serializer;
+		private readonly RawRabbitConfiguration _config;
 
-		public BasicPublishConfigurationFactory(INamingConventions conventions, ISerializer serializer)
+		public BasicPublishConfigurationFactory(INamingConventions conventions, ISerializer serializer, RawRabbitConfiguration config)
 		{
 			_conventions = conventions;
 			_serializer = serializer;
+			_config = config;
 		}
 
 		public virtual BasicPublishConfiguration Create(object message)
@@ -69,6 +71,11 @@ namespace RawRabbit.Configuration.BasicPublish
 			return new BasicProperties
 			{
 				Type = type.GetUserFriendlyName(),
+				MessageId = Guid.NewGuid().ToString(),
+				DeliveryMode = _config.PersistentDeliveryMode ? Convert.ToByte(2) : Convert.ToByte(1),
+				ContentType = _serializer.ContentType,
+				ContentEncoding = "UTF-8",
+				UserId =  _config.Username,
 				Headers = new Dictionary<string, object>()
 			};
 		}

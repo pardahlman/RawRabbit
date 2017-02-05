@@ -7,6 +7,7 @@ namespace RawRabbit.Serialization
 	public class JsonSerializer : ISerializer
 	{
 		private readonly Newtonsoft.Json.JsonSerializer _json;
+		public string ContentType => "application/json";
 
 		public JsonSerializer(Newtonsoft.Json.JsonSerializer json)
 		{
@@ -46,5 +47,7 @@ namespace RawRabbit.Serialization
 		{
 			return (TType)Deserialize(typeof(TType), str);
 		}
+
+		
 	}
 }

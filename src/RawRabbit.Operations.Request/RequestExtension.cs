@@ -34,7 +34,7 @@ namespace RawRabbit
 					PostCreateAction = (ctx, props) =>
 					{
 						props.Type = ctx.GetRequestMessageType().GetUserFriendlyName();
-						props.Headers.TryAdd(PropertyHeaders.Sent, DateTime.UtcNow.ToString("u"));
+						props.Headers.TryAdd(PropertyHeaders.Sent, DateTime.UtcNow.ToString("O"));
 					}
 				})
 				.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.BasicPropertiesCreated))
