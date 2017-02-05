@@ -5,7 +5,7 @@ using RabbitMQ.Client;
 
 namespace RawRabbit.Pipe.Middleware
 {
-	public class DeleteQueueOptions
+	public class QueueDeleteOptions
 	{
 		public Func<IPipeContext, string> QueueNameFunc { get; set; }
 		public Func<IPipeContext, IModel> ChannelFunc { get; set; }
@@ -13,14 +13,14 @@ namespace RawRabbit.Pipe.Middleware
 		public Func<IPipeContext, bool> IfEmptyFunc { get; set; }
 	}
 
-	public class DeleteQueueMiddleware : Middleware
+	public class QueueDeleteMiddleware : Middleware
 	{
 		protected Func<IPipeContext, IModel> ChannelFunc;
 		protected Func<IPipeContext, string> QueueNameFunc;
 		protected Func<IPipeContext, bool> IfUnusedFunc;
 		protected Func<IPipeContext, bool> IfEmptyFunc;
 
-		public DeleteQueueMiddleware(DeleteQueueOptions options = null)
+		public QueueDeleteMiddleware(QueueDeleteOptions options = null)
 		{
 			ChannelFunc = options?.ChannelFunc ?? (context => context.GetTransientChannel());
 			QueueNameFunc = options?.QueueNameFunc ?? (context => string.Empty);

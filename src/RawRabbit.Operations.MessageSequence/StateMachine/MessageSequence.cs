@@ -173,7 +173,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 					_client
 						.InvokeAsync(p => p
 							.Use<TransientChannelMiddleware>()
-							.Use<DeleteQueueMiddleware>(new DeleteQueueOptions
+							.Use<QueueDeleteMiddleware>(new QueueDeleteOptions
 							{
 								QueueNameFunc = context => $"state_machine_{Model.Id}"
 							}))
