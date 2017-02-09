@@ -45,7 +45,6 @@ namespace RawRabbit
 				{
 					ctx.Properties.Add(PipeKey.MessageType, typeof(TMessage));
 					ctx.Properties.Add(PipeKey.Message, message);
-					ctx.Properties.Add(PipeKey.Operation, PublishKey.Publish);
 					context?.Invoke(ctx);
 				}, token);
 		}

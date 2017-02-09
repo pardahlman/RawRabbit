@@ -47,11 +47,6 @@ namespace RawRabbit.Pipe
 			return context.Get<QueueDeclaration>(PipeKey.QueueDeclaration);
 		}
 
-		public static GetConfiguration GetGetConfiguration(this IPipeContext context)
-		{
-			return context.Get<GetConfiguration>(PipeKey.GetConfiguration);
-		}
-
 		public static Action<Func<Task>, CancellationToken> GetConsumeThrottleAction(this IPipeContext context)
 		{
 			return context.Get<Action<Func<Task>, CancellationToken>>(PipeKey.ConsumeThrottleAction, (func, token) => func());
@@ -122,10 +117,6 @@ namespace RawRabbit.Pipe
 			return context.Get<BasicDeliverEventArgs>(PipeKey.DeliveryEventArgs);
 		}
 
-		public static BasicGetResult GetBasicGetResult(this IPipeContext context)
-		{
-			return context.Get<BasicGetResult>(PipeKey.BasicGetResult);
-		}
 
 		public static Func<object[], Task> GetMessageHandler(this IPipeContext context)
 		{

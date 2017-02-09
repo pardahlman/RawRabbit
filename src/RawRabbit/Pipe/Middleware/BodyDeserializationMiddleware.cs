@@ -26,7 +26,7 @@ namespace RawRabbit.Pipe.Middleware
 		{
 			Serializer = serializer;
 			MessageTypeFunc = options?.BodyTypeFunc ?? (context => context.GetMessageType());
-			BodyBytesFunc = options?.BodyFunc ?? (context =>context.GetDeliveryEventArgs()?.Body ?? context.GetBasicGetResult()?.Body);
+			BodyBytesFunc = options?.BodyFunc ?? (context =>context.GetDeliveryEventArgs()?.Body);
 			PersistAction = options?.PersistAction ?? ((context, msg) => context.Properties.TryAdd(PipeKey.Message, msg));
 		}
 

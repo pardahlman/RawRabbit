@@ -31,7 +31,7 @@ namespace RawRabbit.Operations.Get.Middleware
 			var configAction = GetConfigurationAction(context);
 			var config = GetConfiguredConfiguration(defaultCfg, configAction);
 			PostExecutionAction?.Invoke(context, config);
-			context.Properties.TryAdd(PipeKey.GetConfiguration, config);
+			context.Properties.TryAdd(GetPipeExtensions.GetConfiguration, config);
 			return Next.InvokeAsync(context, token);
 		}
 

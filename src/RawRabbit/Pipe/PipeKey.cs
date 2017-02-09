@@ -3,7 +3,6 @@
 	public static class PipeKey
 	{
 		public const string Message = "Message";
-		public const string CancellationToken = "CancellationToken";
 		public const string ConsumerConfiguration = "ConsumerConfiguration";
 		public const string ConsumeConfiguration = "ConsumeConfiguration";
 		public const string PublisherConfiguration = "PublisherConfiguration";
@@ -16,8 +15,6 @@
 		public const string MessageHandlerArgs = "MessageHandlerArgs";
 		public const string MessageHandlerResult = "MessageHandlerResult";
 		public const string BasicProperties = "BasicProperties";
-		public const string BasicGetResult = "BasicGetResult";
-		public const string GetConfiguration = "GetConfiguration";
 		public const string ConfigurationAction = "ConfigurationAction";
 		public const string DeliveryEventArgs = "DeliveryEventArgs";
 		public const string Consumer = "Consumer";
@@ -26,16 +23,11 @@
 		public const string RoutingKey = "RoutingKey";
 		public const string ConsumeThrottleAction = "ConsumeThrottleAction";
 		public const string QueueDeclaration = "QueueDeclaration";
-		public const string QueueActions = "QueueActions";
 		public const string ExchangeDeclaration = "ExchangeDeclaration";
-		public const string ExchangeActions = "ExchangeActions";
-		public const string ConsumeActions = "ConsumeActions";
-		public const string BasicPublishActions = "BasicPublishActions";
 		public const string Subscription = "Subscription";
 		public const string SerializedMessage = "SerializedMessage";
 		public const string ReturnedMessageCallback = "ReturnedMessageCallback";
 		public const string BasicPropertyModifier = "BasicPropertyModifier";
-		public const string Operation = "Operation";
 		public const string ClientConfiguration = "ClientConfiguration";
 	}
 }

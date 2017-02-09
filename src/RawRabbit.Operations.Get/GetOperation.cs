@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RawRabbit.Configuration.Get;
+using RawRabbit.Operations.Get;
 using RawRabbit.Operations.Get.Middleware;
 using RawRabbit.Operations.Get.Model;
 using RawRabbit.Pipe;

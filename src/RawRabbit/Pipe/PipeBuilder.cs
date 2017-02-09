@@ -124,7 +124,5 @@ namespace RawRabbit.Pipe
 		{
 			return _resolver.GetService(middlewareInfo.Type, middlewareInfo.ConstructorArgs) as Middleware.Middleware;
 		}
-
-		
 	}
 }

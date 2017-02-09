@@ -35,7 +35,7 @@ namespace RawRabbit.Operations.Get.Middleware
 			var queueNamme = GetQueueName(context);
 			var noAck = GetNoAck(context);
 			var getResult = PerformBasicGet(channel, queueNamme, noAck);
-			context.Properties.TryAdd(PipeKey.BasicGetResult, getResult);
+			context.Properties.TryAdd(GetPipeExtensions.BasicGetResult, getResult);
 			PostExecutionAction?.Invoke(context, getResult);
 			return Next.InvokeAsync(context, token);
 		}
