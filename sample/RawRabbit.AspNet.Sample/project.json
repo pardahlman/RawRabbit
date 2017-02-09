@@ -9,6 +9,7 @@
 		"Microsoft.Extensions.Logging": "1.0.0",
 		"Microsoft.Extensions.Logging.Console": "1.0.0",
 		"RawRabbit": { "target": "project" },
+		"RawRabbit.Enrichers.MessageContext": { "target": "project" },
 		"RawRabbit.Operations.MessageSequence": { "target": "project" },
 		"RawRabbit.Operations.Publish" : { "target": "project" },
 		"RawRabbit.Operations.Request" : { "target": "project" },
