@@ -6,7 +6,7 @@ namespace RawRabbit.Enrichers.MessageContext
 {
 	public static class ContextForwardPlugin
 	{
-		public static IClientBuilder UseContextForwaring(this IClientBuilder builder)
+		public static IClientBuilder UseContextForwarding(this IClientBuilder builder)
 		{
 			builder.Register(
 				pipe => pipe

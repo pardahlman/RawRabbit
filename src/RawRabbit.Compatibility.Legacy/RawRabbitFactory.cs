@@ -20,7 +20,7 @@ namespace RawRabbit.Compatibility.Legacy
 			options.Plugins = options.Plugins ?? (builder => { });
 			options.Plugins += builder => builder
 				.UseMessageContext(context => new MessageContext { GlobalRequestId = Guid.NewGuid() })
-				.UseContextForwaring();
+				.UseContextForwarding();
 			var simpleIoc = new SimpleDependecyInjection();
 			var client = Instantiation.RawRabbitFactory.CreateSingleton(options, simpleIoc, ioc => simpleIoc);
 			return new BusClient<TMessageContext>(client, simpleIoc.GetService<IConfigurationEvaluator>());
@@ -35,7 +35,7 @@ namespace RawRabbit.Compatibility.Legacy
 			options.Plugins = options.Plugins ?? (builder => { });
 			options.Plugins += builder => builder
 				.UseMessageContext(context => new MessageContext {GlobalRequestId = Guid.NewGuid()})
-				.UseContextForwaring();
+				.UseContextForwarding();
 			var simpleIoc = new SimpleDependecyInjection();
 			var client = Instantiation.RawRabbitFactory.CreateSingleton(options, simpleIoc, ioc => simpleIoc);
 			return new BusClient(client, simpleIoc.GetService<IConfigurationEvaluator>());

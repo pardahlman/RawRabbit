@@ -158,7 +158,7 @@ namespace RawRabbit.IntegrationTests.Enrichers
 			var withMsgContext = new RawRabbitOptions
 			{
 				Plugins = p => p
-					.UseContextForwaring()
+					.UseContextForwarding()
 					.UseMessageContext(context =>
 						new MessageContext
 						{
@@ -198,7 +198,7 @@ namespace RawRabbit.IntegrationTests.Enrichers
 			var withMsgContext = new RawRabbitOptions
 			{
 				Plugins = p => p
-					.UseContextForwaring()
+					.UseContextForwarding()
 					.UseMessageContext(context =>
 						new MessageContext
 						{
@@ -259,11 +259,11 @@ namespace RawRabbit.IntegrationTests.Enrichers
 		{
 			using (var publisher = RawRabbitFactory.CreateTestClient(new RawRabbitOptions
 			{
-				Plugins = p => p.UseMessageContext<TestMessageContext>().UseContextForwaring() 
+				Plugins = p => p.UseMessageContext<TestMessageContext>().UseContextForwarding() 
 			}))
 			using (var subscriber = RawRabbitFactory.CreateTestClient(new RawRabbitOptions
 			{
-				Plugins = p => p.UseMessageContext<TestMessageContext>().UseContextForwaring()
+				Plugins = p => p.UseMessageContext<TestMessageContext>().UseContextForwarding()
 			}))
 			{
 				/* Setup */
