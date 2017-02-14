@@ -4,19 +4,17 @@ namespace RawRabbit.Enrichers.QueueSuffix
 {
 	public static class HostNamePipeExtensions
 	{
-		private const string HostnameQueueSuffix = "HostnameQueueSuffix";
+		private const string HostnameQueueSuffixActive = "HostnameQueueSuffixActive";
 
 		public static bool GetHostnameQueueSuffixFlag(this IPipeContext context)
 		{
-			return context.Get(HostnameQueueSuffix, true);
+			return context.Get(HostnameQueueSuffixActive, true);
 		}
 
 		public static IPipeContext UseHostnameQueueSuffix(this IPipeContext context, bool activated)
 		{
-			context.Properties.TryAdd(HostnameQueueSuffix, activated);
+			context.Properties.TryAdd(HostnameQueueSuffixActive, activated);
 			return context;
 		}
-
-
 	}
 }

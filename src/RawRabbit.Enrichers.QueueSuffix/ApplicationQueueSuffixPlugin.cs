@@ -55,7 +55,7 @@ namespace RawRabbit.Enrichers.QueueSuffix
 			}
 
 			var name =  applicationName.Replace(".", "_").ToLower();
-			builder.UseCustomQueueSuffix(new QueueSuffixOptions
+			builder.UseQueueSuffix(new QueueSuffixOptions
 			{
 				CustomSuffixFunc = context => name,
 				ActiveFunc = context => context.GetApplicationSuffixFlag()

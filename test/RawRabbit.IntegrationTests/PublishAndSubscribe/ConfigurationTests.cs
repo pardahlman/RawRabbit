@@ -145,7 +145,7 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 			{
 				Plugins = ioc => ioc
 					.UseApplicationQueueSuffix()
-					.UseCustomQueueSuffix()
+					.UseQueueSuffix()
 			};
 			using (var firstSubscriber = RawRabbitFactory.CreateTestClient(options))
 			using (var secondSubscriber = RawRabbitFactory.CreateTestClient(options))

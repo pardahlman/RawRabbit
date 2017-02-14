@@ -15,6 +15,9 @@ namespace RawRabbit.Enrichers.QueueSuffix
 		protected Func<IPipeContext, string> CustomSuffixFunc;
 		protected Func<IPipeContext, ConsumeConfiguration> ConsumeCfgFunc;
 		protected Action<QueueDeclaration, string> AppendSuffixAction;
+		protected Func<string, bool> SkipSuffixFunc;
+		protected Func<IPipeContext, string> ContextSuffixOverride;
+
 		public override string StageMarker => Pipe.StageMarker.ConsumeConfigured;
 
 		public QueueSuffixMiddleware(QueueSuffixOptions options = null)
@@ -24,6 +27,8 @@ namespace RawRabbit.Enrichers.QueueSuffix
 			QueueDeclareFunc = options?.QueueDeclareFunc ?? (context => context.GetQueueDeclaration());
 			AppendSuffixAction = options?.AppendSuffixAction ?? ((queue, suffix) => queue.Name = $"{queue.Name}_{suffix}");
 			ConsumeCfgFunc = options?.ConsumeConfigFunc ?? (context => context.GetConsumeConfiguration());
+			SkipSuffixFunc = options?.SkipSuffixFunc ?? (string.IsNullOrWhiteSpace);
+			ContextSuffixOverride = options?.ContextSuffixOverrideFunc ?? (context => null);
 		}
 
 		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
@@ -35,10 +40,19 @@ namespace RawRabbit.Enrichers.QueueSuffix
 			}
 			var declaration = GetQueueDeclaration(context);
 			var suffix = GetCustomQueueSuffix(context);
+			if (SkipSuffix(suffix))
+			{
+				return Next.InvokeAsync(context, token);
+			}
 			AppendSuffix(declaration, suffix);
 			var consumeConfig = GetConsumeConfig(context);
 			AlignConsumerConfig(consumeConfig, declaration);
 			return Next.InvokeAsync(context, token);
+		}
+
+		protected virtual bool SkipSuffix(string suffix)
+		{
+			return SkipSuffixFunc.Invoke(suffix);
 		}
 
 		protected virtual void AlignConsumerConfig(ConsumeConfiguration consumeConfig, QueueDeclaration declaration)
@@ -62,7 +76,17 @@ namespace RawRabbit.Enrichers.QueueSuffix
 
 		protected virtual string GetCustomQueueSuffix(IPipeContext context)
 		{
+			var suffixOverride = GetContextSuffixOverride(context);
+			if (!string.IsNullOrWhiteSpace(suffixOverride))
+			{
+				return suffixOverride;
+			}
 			return CustomSuffixFunc?.Invoke(context);
+		}
+
+		protected virtual string GetContextSuffixOverride(IPipeContext context)
+		{
+			return ContextSuffixOverride?.Invoke(context);
 		}
 
 		protected virtual void AppendSuffix(QueueDeclaration queue, string suffix)

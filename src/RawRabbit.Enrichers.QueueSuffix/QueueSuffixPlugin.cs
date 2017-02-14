@@ -5,15 +5,7 @@ namespace RawRabbit.Enrichers.QueueSuffix
 {
 	public static class QueueSuffixPlugin
 	{
-		public static IClientBuilder UseCustomQueueSuffix(this IClientBuilder builder, string suffix)
-		{
-			return builder.UseCustomQueueSuffix(new QueueSuffixOptions
-			{
-				CustomSuffixFunc = context => suffix
-			});
-		}
-
-		public static IClientBuilder UseCustomQueueSuffix(this IClientBuilder builder, QueueSuffixOptions options = null)
+		public static IClientBuilder UseQueueSuffix(this IClientBuilder builder, QueueSuffixOptions options = null)
 		{
 			if (options == null)
 			{
