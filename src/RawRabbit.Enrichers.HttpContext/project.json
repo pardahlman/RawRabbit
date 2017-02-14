@@ -1,0 +1,27 @@
+﻿{
+	"title": "RawRabbit.Enrichers.HttpContext",
+	"version": "2.0.0-*",
+	"authors": [ "pardahlman" ],
+	"description": "Enrich the IPipeContext with current HttpContext",
+	"packOptions": {
+		"iconUrl": "http://pardahlman.se/raw/icon.png",
+		"projectUrl": "https://github.com/pardahlman/RawRabbit",
+		"tags": [ "rabbitmq", "rawrabbit", "httpcontext" ],
+		"publishExclude": [ "**.xproj", "**.user", "**.vspscc" ]
+	},
+
+	"dependencies": {
+		"RawRabbit": { "target": "project" }
+	},
+
+	"frameworks": {
+		"netstandard1.6": {
+					"dependencies": {
+						"Microsoft.AspNetCore.Mvc.Core" : "1.0.0"
+					}
+		},
+		"net451": {
+					"define": [ "NET451" ]
+		}
+	}
+}
