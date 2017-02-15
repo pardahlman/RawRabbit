@@ -21,13 +21,13 @@ namespace RawRabbit.vNext.DependecyInjection
 
 		public IDependecyRegister AddTransient<TService>(Func<IDependecyResolver, TService> instanceCreator) where TService : class
 		{
-			Collection.AddTransient(c => instanceCreator(c.GetService<IDependecyResolver>()));
+			Collection.AddTransient(c => instanceCreator(new ServiceProviderAdapter(c)));
 			return this;
 		}
 
 		public IDependecyRegister AddTransient<TService, TImplementation>(Func<IDependecyResolver, TImplementation> instanceCreator) where TService : class where TImplementation : class, TService
 		{
-			Collection.AddTransient<TService, TImplementation>(c => instanceCreator(c.GetService<IDependecyResolver>()));
+			Collection.AddTransient<TService, TImplementation>(c => instanceCreator(new ServiceProviderAdapter(c)));
 			return this;
 		}
 
@@ -39,13 +39,13 @@ namespace RawRabbit.vNext.DependecyInjection
 
 		public IDependecyRegister AddSingleton<TService, TImplementation>(Func<IDependecyResolver, TService> instanceCreator) where TImplementation : class, TService where TService : class
 		{
-			Collection.AddSingleton(c => instanceCreator(c.GetService<IDependecyResolver>()));
+			Collection.AddSingleton(c => instanceCreator(new ServiceProviderAdapter(c)));
 			return this;
 		}
 
 		public IDependecyRegister AddSingleton<TService>(Func<IDependecyResolver, TService> instanceCreator) where TService : class
 		{
-			Collection.AddSingleton<TService>(c => instanceCreator(c.GetService<IDependecyResolver>()));
+			Collection.AddSingleton<TService>(c => instanceCreator(new ServiceProviderAdapter(c)));
 			return this;
 		}
 
