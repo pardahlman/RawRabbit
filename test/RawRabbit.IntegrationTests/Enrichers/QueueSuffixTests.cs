@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using RawRabbit.Compatibility.Legacy.Configuration.Respond;
 using RawRabbit.Enrichers.QueueSuffix;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.Pipe;
@@ -334,6 +335,22 @@ namespace RawRabbit.IntegrationTests.Enrichers
 				var onlyOneCompleted = !(firstTsc.Task.IsCompleted && secondTsc.Task.IsCompleted);
 				Assert.True(oneCompleted, "Should be delivered at least once");
 				Assert.True(onlyOneCompleted, "Should not be delivered to both");
+			}
+		}
+
+		[Fact]
+		public async Task Should_Not_Interfere_With_Direct_RPC()
+		{
+			using (var responer = RawRabbitFactory.CreateTestClient())
+			using (var requester = RawRabbitFactory.CreateTestClient(new RawRabbitOptions
+			{
+				Plugins = p => p.UseApplicationQueueSuffix()
+			}))
+			{
+				await responer.RespondAsync<BasicRequest, BasicResponse>(request => Task.FromResult(new BasicResponse()));
+				var response = await requester.RequestAsync<BasicRequest, BasicResponse>();
+
+				Assert.NotNull(response);
 			}
 		}
 	}

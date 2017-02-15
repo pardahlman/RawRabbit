@@ -39,6 +39,10 @@ namespace RawRabbit.Enrichers.QueueSuffix
 				return Next.InvokeAsync(context, token);
 			}
 			var declaration = GetQueueDeclaration(context);
+			if (declaration == null)
+			{
+				return Next.InvokeAsync(context, token);
+			}
 			var suffix = GetCustomQueueSuffix(context);
 			if (SkipSuffix(suffix))
 			{
