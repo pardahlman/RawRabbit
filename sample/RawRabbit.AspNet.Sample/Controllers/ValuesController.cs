@@ -6,8 +6,6 @@ using Microsoft.Extensions.Logging;
 using RawRabbit.Enrichers.MessageContext.Context;
 using RawRabbit.Messages.Sample;
 using RawRabbit.Operations.MessageSequence;
-using Serilog;
-using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace RawRabbit.AspNet.Sample.Controllers
 {
@@ -26,7 +24,7 @@ namespace RawRabbit.AspNet.Sample.Controllers
 
 		[HttpGet]
 		[Route("api/values")]
-		public Task<List<string>> GetAsync()
+		public async Task<List<string>> GetAsync()
 		{
 			_logger.LogDebug("Recieved Value Request.");
 			var valueSequence = _busClient.ExecuteSequence(s => s
@@ -43,25 +41,28 @@ namespace RawRabbit.AspNet.Sample.Controllers
 				.Complete<ValuesCalculated>()
 			);
 
-			return valueSequence.Task.ContinueWith(tResponse =>
+			try
 			{
-				if (tResponse.IsFaulted)
-					throw new Exception("No response recieved. Is the Console App started?");
-				
-				_logger.LogInformation("Successfully created {valueCount} values", tResponse.Result.Values.Count);
-				return valueSequence.Aborted
-					? new List<string>()
-					: tResponse.Result.Values;
-			});
+				await valueSequence.Task;
+			}
+			catch (Exception e)
+			{
+				throw new Exception("No response recieved. Is the Console App started?", e);
+			}
+
+			_logger.LogInformation("Successfully created {valueCount} values", valueSequence.Task.Result.Values.Count);
+			return valueSequence.Aborted
+				? new List<string>()
+				: valueSequence.Task.Result.Values;
+
 		}
 
 		[HttpGet("api/values/{id}")]
-		public Task<string> GetAsync(int id)
+		public async Task<string> GetAsync(int id)
 		{
 			_logger.LogInformation("Requesting Value with id {valueId}", id);
-			return _busClient
-				.RequestAsync<ValueRequest, ValueResponse>(new ValueRequest {Value = id})
-				.ContinueWith(tResponse => tResponse.Result.Value);
+			var response = await _busClient.RequestAsync<ValueRequest, ValueResponse>(new ValueRequest {Value = id});
+			return response.Value;
 		}
 	}
 }
