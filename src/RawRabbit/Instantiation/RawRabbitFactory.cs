@@ -41,7 +41,7 @@ namespace RawRabbit.Instantiation
 			{
 				var clientBuilder = new ClientBuilder();
 				options.Plugins(clientBuilder);
-				clientBuilder.ServiceAction(register);
+				clientBuilder.DependencyInjection(register);
 				register.AddSingleton<IPipeBuilder, PipeBuilder>();
 				register.AddSingleton(clientBuilder.PipeBuilderAction);
 			}

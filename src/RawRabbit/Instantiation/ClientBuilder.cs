@@ -12,18 +12,18 @@ namespace RawRabbit.Instantiation
 	public class ClientBuilder : IClientBuilder
 	{
 		public Action<IPipeBuilder> PipeBuilderAction { get; set; }
-		public Action<IDependecyRegister> ServiceAction { get; set; }
+		public Action<IDependecyRegister> DependencyInjection { get; set; }
 
 		public ClientBuilder()
 		{
 			PipeBuilderAction = builder => { };
-			ServiceAction = collection => { };
+			DependencyInjection = collection => { };
 		}
 
 		public void Register(Action<IPipeBuilder> pipe, Action<IDependecyRegister> ioc)
 		{
 			PipeBuilderAction += pipe;
-			ServiceAction += ioc;
+			DependencyInjection += ioc;
 		}
 	}
 }
