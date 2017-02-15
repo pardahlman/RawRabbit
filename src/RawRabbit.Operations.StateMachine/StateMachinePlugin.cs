@@ -33,7 +33,7 @@ namespace RawRabbit.Operations.StateMachine
 				ioc => ioc
 					.AddSingleton<IGlobalLock>(new GlobalLock(execute))
 					.AddSingleton<IModelRepository>(new ModelRepository(get, addOrUpdate))
-					.AddSingleton<IStateMachineActivator, StateMachineActivator>()
+					.AddTransient<IStateMachineActivator, StateMachineActivator>(resolver => new StateMachineActivator(resolver.GetService<IModelRepository>(), resolver))
 				);
 			return builder;
 		}

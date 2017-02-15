@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using RawRabbit.DependecyInjection;
 
 namespace RawRabbit.Pipe
 {
@@ -11,21 +12,21 @@ namespace RawRabbit.Pipe
 
 	public class PipeBuilderFactory : IPipeBuilderFactory
 	{
-		private readonly Func<IExtendedPipeBuilder> _pipeBuilder;
+		private readonly IDependecyResolver _resolver;
 
-		public PipeBuilderFactory(Func<IExtendedPipeBuilder> pipeBuilder)
+		public PipeBuilderFactory(IDependecyResolver resolver)
 		{
-			_pipeBuilder = pipeBuilder;
+			_resolver = resolver;
 		}
 
 		public IExtendedPipeBuilder Create()
 		{
-			return _pipeBuilder();
+			return new PipeBuilder(_resolver);
 		}
 
 		public Middleware.Middleware Create(Action<IPipeBuilder> pipe)
 		{
-			var builder = _pipeBuilder();
+			var builder = Create();
 			pipe(builder);
 			return builder.Build();
 		}
@@ -36,9 +37,9 @@ namespace RawRabbit.Pipe
 		private readonly PipeBuilderFactory _fallback;
 		private readonly ConcurrentDictionary<Action<IPipeBuilder>, Middleware.Middleware> _pipeCache;
 
-		public CachedPipeBuilderFactory(Func<IExtendedPipeBuilder> pipeBuilder)
+		public CachedPipeBuilderFactory(IDependecyResolver resolver)
 		{
-			_fallback = new PipeBuilderFactory(pipeBuilder);
+			_fallback = new PipeBuilderFactory(resolver);
 			_pipeCache = new ConcurrentDictionary<Action<IPipeBuilder>, Middleware.Middleware>();
 		}
 

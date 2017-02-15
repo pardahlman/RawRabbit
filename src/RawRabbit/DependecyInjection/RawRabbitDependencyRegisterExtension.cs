@@ -79,9 +79,9 @@ namespace RawRabbit.DependecyInjection
 				.AddSingleton<IBusClient, BusClient>()
 				.AddSingleton<IResourceDisposer, ResourceDisposer>()
 				.AddSingleton<IPipeContextFactory, PipeContextFactory>()
-				.AddSingleton<IExtendedPipeBuilder, PipeBuilder>()
-				.AddSingleton<IDependecyResolver, IDependecyResolver>(resolver => resolver)
 				.AddSingleton<IPipeBuilderFactory>(provider => new CachedPipeBuilderFactory(() => new PipeBuilder(provider)));
+				.AddSingleton<IPipeBuilderFactory>(provider => new CachedPipeBuilderFactory(provider))
+				;
 			return register;
 		}
 	}
