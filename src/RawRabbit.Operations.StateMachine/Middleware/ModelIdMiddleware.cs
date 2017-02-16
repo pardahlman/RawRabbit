@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Pipe;
+using RawRabbit.Pipe.Middleware;
 
 namespace RawRabbit.Operations.StateMachine.Middleware
 {
@@ -12,11 +13,13 @@ namespace RawRabbit.Operations.StateMachine.Middleware
 		public Func<IPipeContext, Guid> ModelIdFunc { get; set; }
 	}
 
-	public class ModelIdMiddleware : Pipe.Middleware.Middleware
+	public class ModelIdMiddleware : StagedMiddleware
 	{
 		protected Func<IPipeContext, Func<object, Guid>> CorrelationFunc;
 		protected Func<IPipeContext, object> MessageFunc;
 		protected Func<IPipeContext, Guid> ModelIdFunc;
+
+		public override string StageMarker => Pipe.StageMarker.MessageRecieved;
 
 		public ModelIdMiddleware(ModelIdOptions options = null)
 		{

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Operations.StateMachine.Middleware;
@@ -11,32 +10,21 @@ namespace RawRabbit.Operations.StateMachine
 {
 	public static class StateMachineExtension
 	{
-		public static Task RegisterStateMachineAsync<TStateMachine, TTriggerConfiguration>(
+		public static async Task RegisterStateMachineAsync<TStateMachine, TTriggerConfiguration>(
 			this IBusClient busClient,
 			CancellationToken ct = default(CancellationToken))
 				where TStateMachine : StateMachineBase
 				where TTriggerConfiguration : TriggerConfiguration, new()
 		{
-			return busClient.InvokeAsync(
-				builder => builder
-					.Use<RepeatMiddleware>(new RepeatOptions
-					{
-						EnumerableFunc = context => context.GetTriggerPipeOptions(),
-						RepeatContextFactory = (context, factory, enumerated) =>
-						{
-							var options = enumerated as TriggerPipeOptions;
-							var childContext = factory.CreateContext(context.Properties.ToArray());
-							childContext.Properties.TryAdd(StateMachineKey.PipeBuilderAction, options?.PipeActionFunc(childContext));
-							childContext.Properties.TryAdd(StateMachineKey.ContextAction, options?.ContextActionFunc(childContext));
-							return childContext;
-						},
-						RepeatePipe = pipe => pipe.Use<TriggerPipeMiddleware>()
-					}),
-				context =>
+			var contextActions = new TTriggerConfiguration().GetTriggerContextActions();
+			foreach (var contextAction in contextActions)
+			{
+				await busClient.RegisterTrigger(context =>
 				{
 					context.Properties.Add(StateMachineKey.Type, typeof(TStateMachine));
-					context.Properties.Add(StateMachineKey.TriggerPipeOptions, new TTriggerConfiguration().GetTriggerPipeOptions());
+					contextAction?.Invoke(context);
 				}, ct);
+			}
 		}
 
 		public static Task TriggerStateMachineAsync<TStateMachine>(

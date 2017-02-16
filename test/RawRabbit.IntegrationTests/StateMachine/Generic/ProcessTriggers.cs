@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using RawRabbit.Operations.StateMachine.Middleware;
 using RawRabbit.Operations.StateMachine.Trigger;
 
 namespace RawRabbit.IntegrationTests.StateMachine.Generic
 {
 	public class ProcessTriggers : TriggerConfiguration<GenericProcess>
 	{
-		public override List<TriggerPipeOptions> ConfigureTriggers(TriggerConfigurer<GenericProcess> trigger)
+		public override void ConfigureTriggers(TriggerConfigurer<GenericProcess> trigger)
 		{
 			trigger
 				.FromMessage<CreateTask>(
@@ -29,8 +27,6 @@ namespace RawRabbit.IntegrationTests.StateMachine.Generic
 					abort => abort.TaskId,
 					(task, abort) => task.Abort(abort.Reason)
 				);
-
-			return trigger.TriggerPipeOptions;
 		}
 	}
 }

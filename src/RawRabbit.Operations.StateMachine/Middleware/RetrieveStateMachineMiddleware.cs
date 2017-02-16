@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Operations.StateMachine.Core;
 using RawRabbit.Pipe;
+using RawRabbit.Pipe.Middleware;
 
 namespace RawRabbit.Operations.StateMachine.Middleware
 {
@@ -14,13 +15,14 @@ namespace RawRabbit.Operations.StateMachine.Middleware
 		public Action<StateMachineBase, IPipeContext> PostExecuteAction { get; set; }
 	}
 
-	public class RetrieveStateMachineMiddleware : Pipe.Middleware.Middleware
+	public class RetrieveStateMachineMiddleware : StagedMiddleware
 	{
 		private readonly IStateMachineActivator _stateMachineRepo;
 		protected Func<IPipeContext, Guid> ModelIdFunc;
 		protected Func<IPipeContext, Type> StateMachineTypeFunc;
 		protected Action<StateMachineBase, IPipeContext> PostExecuteAction;
 		protected Func<IPipeContext, StateMachineBase> StateMachineFunc;
+		public override string StageMarker => Pipe.StageMarker.MessageRecieved;
 
 		public RetrieveStateMachineMiddleware(IStateMachineActivator stateMachineRepo, RetrieveStateMachineOptions options = null)
 		{

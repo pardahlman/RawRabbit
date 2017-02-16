@@ -203,7 +203,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 						)
 				);
 
-			foreach (var invoker in _triggerConfigurer.TriggerPipeOptions)
+			foreach (var contextAction in _triggerConfigurer.TriggerContextActions)
 			{
 				_client.InvokeAsync(p => p
 							.Use<ConsumeConfigurationMiddleware>()
@@ -212,7 +212,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 							.Use<QueueBindMiddleware>(),
 						context =>
 						{
-							invoker.ContextActionFunc?.Invoke(context)?.Invoke(context);
+							contextAction?.Invoke(context);
 						}
 					)
 					.GetAwaiter()
@@ -230,7 +230,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 					})
 					.Use<MessageConsumeMiddleware>(new ConsumeOptions
 					{
-						Pipe = TriggerConfigurer<MessageSequence>.ConsumePipe
+						Pipe = RegisterTriggerExtension.ConsumePipe
 					}),
 				context =>
 				{
@@ -238,6 +238,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 					context.Properties.Add(StateMachineKey.ModelId, Model.Id);
 					context.Properties.Add(StateMachineKey.Machine, this);
 					context.Properties.Add(PipeKey.MessageHandler, genericHandler);
+					context.UseLazyHandlerArgs(ctx => new[] {ctx.GetStateMachine(), ctx.GetMessage()});
 				});
 
 			var requestTimeout = _client
