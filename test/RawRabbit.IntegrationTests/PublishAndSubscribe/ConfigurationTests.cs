@@ -200,7 +200,7 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 					return Task.FromResult(0);
 				}, ctx => ctx
 					.UseConsumerConfiguration(cfg => cfg
-						.FromDeclaredQueue(q => q.WithName(queueName))
+						.FromDeclaredQueue(q => q.WithName(queueName).WithAutoDelete(true))
 					)
 				);
 
