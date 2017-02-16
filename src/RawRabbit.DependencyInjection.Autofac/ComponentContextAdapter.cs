@@ -6,16 +6,16 @@ using RawRabbit.DependecyInjection;
 
 namespace RawRabbit.DependencyInjection.Autofac
 {
-	public class AutofacAdapter : IDependecyResolver
+	public class ComponentContextAdapter : IDependecyResolver
 	{
-		public static AutofacAdapter Create(IComponentContext context)
+		public static ComponentContextAdapter Create(IComponentContext context)
 		{
-			return new AutofacAdapter(context);
+			return new ComponentContextAdapter(context);
 		}
 
 		private readonly IComponentContext _context;
 
-		public AutofacAdapter(IComponentContext context)
+		public ComponentContextAdapter(IComponentContext context)
 		{
 			_context = context;
 		}

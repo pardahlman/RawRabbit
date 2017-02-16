@@ -1,4 +1,5 @@
 ﻿using Autofac;
+using RawRabbit.DependecyInjection;
 using RawRabbit.Instantiation;
 
 namespace RawRabbit.DependencyInjection.Autofac
@@ -7,12 +8,8 @@ namespace RawRabbit.DependencyInjection.Autofac
 	{
 		public static ContainerBuilder RegisterRawRabbit(this ContainerBuilder builder, RawRabbitOptions options = null)
 		{
-			if (options != null)
-			{
-				builder.Register(context => options);
-			}
-
-			builder.RegisterModule<RawRabbitModule>();
+			var adapter = new ContainerBuilderAdapter(builder);
+			adapter.AddRawRabbit(options);
 			return builder;
 		}
 	}

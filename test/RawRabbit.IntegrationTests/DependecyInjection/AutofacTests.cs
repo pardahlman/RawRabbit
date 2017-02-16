@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Autofac;
+using RawRabbit.Common;
 using RawRabbit.DependencyInjection.Autofac;
 using RawRabbit.Instantiation;
 using RawRabbit.Operations.StateMachine;
@@ -19,10 +20,10 @@ namespace RawRabbit.IntegrationTests.DependecyInjection
 
 			/* Test */
 			var client = container.Resolve<IBusClient>();
-			var instanceFactory = container.Resolve<IInstanceFactory>();
+			var disposer = container.Resolve<IResourceDisposer>();
 
 			/* Assert */
-			(instanceFactory as InstanceFactory)?.Dispose();
+			disposer.Dispose();
 			Assert.True(true);
 		}
 
@@ -39,10 +40,10 @@ namespace RawRabbit.IntegrationTests.DependecyInjection
 
 			/* Test */
 			var client = container.Resolve<IBusClient>();
-			var instanceFactory = container.Resolve<IInstanceFactory>();
+			var disposer = container.Resolve<IResourceDisposer>();
 
 			/* Assert */
-			(instanceFactory as InstanceFactory)?.Dispose();
+			disposer.Dispose();
 			Assert.True(true);
 		}
 	}
