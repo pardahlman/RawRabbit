@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using RawRabbit.DependecyInjection;
 using RawRabbit.Instantiation;
-using RawRabbitFactory = RawRabbit.vNext.Pipe.RawRabbitFactory;
+using RawRabbit.vNext.DependecyInjection;
 using RawRabbitOptions = RawRabbit.vNext.Pipe.RawRabbitOptions;
 
 namespace RawRabbit.vNext
@@ -9,9 +10,10 @@ namespace RawRabbit.vNext
 	{
 		public static IServiceCollection AddRawRabbit(this IServiceCollection collection, RawRabbitOptions options = null)
 		{
-			collection
-				.AddSingleton(c => RawRabbitFactory.CreateInstanceFactory(options, collection))
-				.AddTransient(p => p.GetService<InstanceFactory>().Create());
+			options?.DependencyInjection?.Invoke(collection);
+			var adapter = new ServiceCollectionAdapter(collection);
+			adapter.AddRawRabbit(options);
+			
 			return collection;
 		}
 	}
