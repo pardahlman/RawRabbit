@@ -26,7 +26,7 @@ namespace RawRabbit.Instantiation
 
 		public static InstanceFactory CreateInstanceFactory(RawRabbitOptions options, IDependecyRegister register, Func<IDependecyRegister, IDependecyResolver> resolverFunc)
 		{
-			register.AddRawRabbit();
+			register.AddRawRabbit(options);
 			var resolver = resolverFunc(register);
 			LogManager.CurrentFactory = resolver.GetService<ILoggerFactory>();
 			return new InstanceFactory(resolver);

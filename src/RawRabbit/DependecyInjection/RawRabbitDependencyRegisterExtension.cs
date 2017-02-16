@@ -29,6 +29,7 @@ namespace RawRabbit.DependecyInjection
 		{
 			var clientBuilder = new ClientBuilder();
 			options?.Plugins?.Invoke(clientBuilder);
+			clientBuilder.DependencyInjection?.Invoke(register);
 			register.AddSingleton(clientBuilder.PipeBuilderAction);
 
 			register
@@ -87,8 +88,7 @@ namespace RawRabbit.DependecyInjection
 				.AddTransient<IExtendedPipeBuilder, PipeBuilder>(resolver => new PipeBuilder(resolver))
 				.AddSingleton<IPipeBuilderFactory>(provider => new CachedPipeBuilderFactory(provider));
 
-			clientBuilder.DependencyInjection?.Invoke(register);
-
+			options?.DependencyInjection?.Invoke(register);
 			return register;
 		}
 	}
