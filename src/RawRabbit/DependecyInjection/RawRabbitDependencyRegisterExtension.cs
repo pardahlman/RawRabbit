@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Runtime.Serialization.Formatters;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -14,6 +15,7 @@ using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Publisher;
 using RawRabbit.Configuration.Queue;
 using RawRabbit.Consumer;
+using RawRabbit.Instantiation;
 using RawRabbit.Logging;
 using RawRabbit.Pipe;
 using RawRabbit.Serialization;
@@ -23,8 +25,12 @@ namespace RawRabbit.DependecyInjection
 {
 	public static class RawRabbitDependencyRegisterExtension
 	{
-		public static IDependecyRegister AddRawRabbit(this IDependecyRegister register)
+		public static IDependecyRegister AddRawRabbit(this IDependecyRegister register, RawRabbitOptions options = null)
 		{
+			var clientBuilder = new ClientBuilder();
+			options?.Plugins?.Invoke(clientBuilder);
+			register.AddSingleton(clientBuilder.PipeBuilderAction);
+
 			register
 				.AddSingleton(RawRabbitConfiguration.Local)
 				.AddSingleton<IConnectionFactory, ConnectionFactory>(provider =>
@@ -60,7 +66,6 @@ namespace RawRabbit.DependecyInjection
 					MissingMemberHandling = MissingMemberHandling.Ignore,
 					PreserveReferencesHandling = PreserveReferencesHandling.Objects,
 					NullValueHandling = NullValueHandling.Ignore
-
 				})
 				.AddTransient<IConsumerFactory, ConsumerFactory>()
 				.AddSingleton<IChannelFactory, ChannelFactory>()
@@ -75,13 +80,15 @@ namespace RawRabbit.DependecyInjection
 				.AddTransient<IQueueConfigurationFactory, QueueDeclarationFactory>()
 				.AddSingleton<INamingConventions, NamingConventions>()
 				.AddSingleton<IExclusiveLock, ExclusiveLock>()
-			
 				.AddSingleton<IBusClient, BusClient>()
 				.AddSingleton<IResourceDisposer, ResourceDisposer>()
+				.AddTransient<IInstanceFactory>(resolver => new InstanceFactory(resolver))
 				.AddSingleton<IPipeContextFactory, PipeContextFactory>()
-				.AddSingleton<IPipeBuilderFactory>(provider => new CachedPipeBuilderFactory(() => new PipeBuilder(provider)));
-				.AddSingleton<IPipeBuilderFactory>(provider => new CachedPipeBuilderFactory(provider))
-				;
+				.AddTransient<IExtendedPipeBuilder, PipeBuilder>(resolver => new PipeBuilder(resolver))
+				.AddSingleton<IPipeBuilderFactory>(provider => new CachedPipeBuilderFactory(provider));
+
+			clientBuilder.DependencyInjection?.Invoke(register);
+
 			return register;
 		}
 	}
