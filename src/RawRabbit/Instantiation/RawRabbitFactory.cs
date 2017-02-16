@@ -1,9 +1,6 @@
 ﻿using System;
-using RawRabbit.Common;
-using RawRabbit.Configuration;
 using RawRabbit.DependecyInjection;
 using RawRabbit.Logging;
-using RawRabbit.Pipe;
 
 namespace RawRabbit.Instantiation
 {
@@ -30,25 +27,6 @@ namespace RawRabbit.Instantiation
 		public static InstanceFactory CreateInstanceFactory(RawRabbitOptions options, IDependecyRegister register, Func<IDependecyRegister, IDependecyResolver> resolverFunc)
 		{
 			register.AddRawRabbit();
-			options?.DependencyInjection?.Invoke(register);
-
-			if (options?.ClientConfiguration != null)
-			{
-				register.AddSingleton(options.ClientConfiguration);
-			}
-
-			if (options?.Plugins != null)
-			{
-				var clientBuilder = new ClientBuilder();
-				options.Plugins(clientBuilder);
-				clientBuilder.DependencyInjection(register);
-				register.AddSingleton<IPipeBuilder, PipeBuilder>();
-				register.AddSingleton(clientBuilder.PipeBuilderAction);
-			}
-			else
-			{
-				register.AddSingleton(new Action<IPipeBuilder>(b => { }));
-			}
 			var resolver = resolverFunc(register);
 			LogManager.CurrentFactory = resolver.GetService<ILoggerFactory>();
 			return new InstanceFactory(resolver);
