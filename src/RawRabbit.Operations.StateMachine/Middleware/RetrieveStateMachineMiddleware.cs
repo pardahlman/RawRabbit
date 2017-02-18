@@ -22,7 +22,7 @@ namespace RawRabbit.Operations.StateMachine.Middleware
 		protected Func<IPipeContext, Type> StateMachineTypeFunc;
 		protected Action<StateMachineBase, IPipeContext> PostExecuteAction;
 		protected Func<IPipeContext, StateMachineBase> StateMachineFunc;
-		public override string StageMarker => Pipe.StageMarker.MessageRecieved;
+		public override string StageMarker => Pipe.StageMarker.MessageDeserialized;
 
 		public RetrieveStateMachineMiddleware(IStateMachineActivator stateMachineRepo, RetrieveStateMachineOptions options = null)
 		{

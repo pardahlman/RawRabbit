@@ -10,7 +10,7 @@ namespace RawRabbit.Operations.StateMachine.Middleware
 	public class GlobalLockMiddleware : StagedMiddleware
 	{
 		private readonly IGlobalLock _globalLock;
-		public override string StageMarker => Pipe.StageMarker.MessageRecieved;
+		public override string StageMarker => Pipe.StageMarker.MessageDeserialized;
 
 		public GlobalLockMiddleware(IGlobalLock globalLock)
 		{

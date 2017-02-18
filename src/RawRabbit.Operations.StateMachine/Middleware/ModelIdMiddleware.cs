@@ -19,7 +19,7 @@ namespace RawRabbit.Operations.StateMachine.Middleware
 		protected Func<IPipeContext, object> MessageFunc;
 		protected Func<IPipeContext, Guid> ModelIdFunc;
 
-		public override string StageMarker => Pipe.StageMarker.MessageRecieved;
+		public override string StageMarker => Pipe.StageMarker.MessageDeserialized;
 
 		public ModelIdMiddleware(ModelIdOptions options = null)
 		{
