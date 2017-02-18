@@ -10,18 +10,15 @@ namespace RawRabbit.Operations.StateMachine
 {
 	public static class StateMachineExtension
 	{
-		public static async Task RegisterStateMachineAsync<TStateMachine, TTriggerConfiguration>(
+		public static async Task RegisterStateMachineAsync<TTriggerConfiguration>(
 			this IBusClient busClient,
-			CancellationToken ct = default(CancellationToken))
-				where TStateMachine : StateMachineBase
-				where TTriggerConfiguration : TriggerConfiguration, new()
+			CancellationToken ct = default(CancellationToken)) where TTriggerConfiguration : TriggerConfiguration, new()
 		{
 			var contextActions = new TTriggerConfiguration().GetTriggerContextActions();
 			foreach (var contextAction in contextActions)
 			{
 				await busClient.RegisterTrigger(context =>
 				{
-					context.Properties.Add(StateMachineKey.Type, typeof(TStateMachine));
 					contextAction?.Invoke(context);
 				}, ct);
 			}

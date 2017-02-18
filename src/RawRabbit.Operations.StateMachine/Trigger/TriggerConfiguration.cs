@@ -6,18 +6,13 @@ namespace RawRabbit.Operations.StateMachine.Trigger
 {
 	public abstract class TriggerConfiguration
 	{
-		public abstract List<Action<IPipeContext>> GetTriggerContextActions();
-	}
-
-	public abstract class TriggerConfiguration<TStateMacahine> : TriggerConfiguration where TStateMacahine : StateMachineBase
-	{
-		public override List<Action<IPipeContext>> GetTriggerContextActions()
+		public List<Action<IPipeContext>> GetTriggerContextActions()
 		{
-			var configurer = new TriggerConfigurer<TStateMacahine>();
+			var configurer = new TriggerConfigurer();
 			ConfigureTriggers(configurer);
 			return configurer.TriggerContextActions;
 		}
 
-		public abstract void ConfigureTriggers(TriggerConfigurer<TStateMacahine> trigger);
+		public abstract void ConfigureTriggers(TriggerConfigurer trigger);
 	}
 }

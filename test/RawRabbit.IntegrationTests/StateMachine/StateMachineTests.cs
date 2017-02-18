@@ -20,7 +20,7 @@ namespace RawRabbit.IntegrationTests.StateMachine
 			{
 				var tsc = new TaskCompletionSource<ProcessCompeted>();
 				var updates = new List<ProcessUpdated>();
-				await processOwner.RegisterStateMachineAsync<GenericProcess, ProcessTriggers>();
+				await processOwner.RegisterStateMachineAsync<ProcessTriggers>();
 				await observer.SubscribeAsync<ProcessCompeted>(competed =>
 				{
 					tsc.TrySetResult(competed);

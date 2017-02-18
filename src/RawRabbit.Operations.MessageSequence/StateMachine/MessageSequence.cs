@@ -19,13 +19,13 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 	{
 		private readonly IBusClient _client;
 		private Action _fireAction;
-		private readonly TriggerConfigurer<MessageSequence> _triggerConfigurer;
+		private readonly TriggerConfigurer _triggerConfigurer;
 		private readonly Queue<StepDefinition> _stepDefinitions;
 
 		public MessageSequence(IBusClient client, SequenceModel model = null) : base(model)
 		{
 			_client = client;
-			_triggerConfigurer = new TriggerConfigurer<MessageSequence>();
+			_triggerConfigurer = new TriggerConfigurer();
 			_stepDefinitions = new Queue<StepDefinition>();
 		}
 
@@ -140,7 +140,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 				});
 
 			_triggerConfigurer
-				.FromMessage<TMessage>(
+				.FromMessage<MessageSequence,TMessage>(
 					message => Model.Id,
 					(sequence, message) => StateMachine.FireAsync(trigger, message),
 					cfg => cfg
@@ -191,7 +191,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 				});
 
 			_triggerConfigurer
-				.FromMessage<TMessage>(
+				.FromMessage<MessageSequence, TMessage>(
 					message => Model.Id,
 					(s, message) => StateMachine.FireAsync(trigger, message),
 					cfg => cfg
