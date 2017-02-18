@@ -13,6 +13,7 @@ Contents:
    message-context
    attribute-routing
    queue-name-suffix
+   httpcontext
    polly
 
 
