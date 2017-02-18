@@ -1,11 +1,9 @@
 ﻿using System;
-using RawRabbit.Operations.StateMachine;
 using RawRabbit.Operations.StateMachine.Trigger;
-using RawRabbit.Pipe;
 
 namespace RawRabbit.IntegrationTests.StateMachine.Generic
 {
-	public class ProcessTriggers : TriggerConfiguration
+	public class ProcessTriggers : TriggerConfigurationCollection
 	{
 		public override void ConfigureTriggers(TriggerConfigurer trigger)
 		{
@@ -29,14 +27,6 @@ namespace RawRabbit.IntegrationTests.StateMachine.Generic
 					abort => abort.TaskId,
 					(task, abort) => task.Abort(abort.Reason)
 				);
-		}
-	}
-
-	public static class TriggerExtensions
-	{
-		public static Action<IPipeContext> FromMsg<TStateMachine, TMessage, TContext>(this TriggerConfigurer configurer, Func<TMessage, TContext, Guid> correlationFunc, Func<TStateMachine, TMessage, TContext> invokeFunc) where TStateMachine : StateMachineBase
-		{
-			return null;
 		}
 	}
 }

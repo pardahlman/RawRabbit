@@ -6,18 +6,27 @@ namespace RawRabbit.Operations.StateMachine.Trigger
 {
 	public class TriggerConfigurer
 	{
-		public List<Action<IPipeContext>> TriggerContextActions { get; set; }
+		public List<TriggerConfiguration> TriggerConfiguration { get; set; }
 		
 		public TriggerConfigurer()
 		{
-			TriggerContextActions = new List<Action<IPipeContext>>();
+			TriggerConfiguration = new List<TriggerConfiguration>();
 		}
 
-		public TriggerConfigurer From(Action<IPipeContext> context)
+		public TriggerConfigurer From(Action<IPipeBuilder> pipe, Action<IPipeContext> context)
 		{
-			TriggerContextActions.Add(context);
+			TriggerConfiguration.Add(new TriggerConfiguration
+			{
+				Pipe = pipe,
+				Context = context
+			});
 			return this;
 		}
+	}
 
+	public class TriggerConfiguration
+	{
+		public Action<IPipeBuilder> Pipe { get; set; }
+		public Action<IPipeContext> Context { get; set; }
 	}
 }

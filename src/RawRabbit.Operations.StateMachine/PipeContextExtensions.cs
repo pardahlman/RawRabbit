@@ -27,15 +27,28 @@ namespace RawRabbit.Operations.StateMachine
 			return context.Get<Action<IPipeBuilder>>(StateMachineKey.PipeBuilderAction);
 		}
 
-		public static Func<object, Guid> GetIdCorrelationFunc(this IPipeContext context)
+		public static Func<object[], Guid> GetIdCorrelationFunc(this IPipeContext context)
 		{
-			return context.Get<Func<object, Guid>>(StateMachineKey.CorrelationFunc);
+			return context.Get<Func<object[], Guid>>(StateMachineKey.CorrelationFunc);
+		}
+
+		public static object[] GetLazyIdCorrelationArgs(this IPipeContext context)
+		{
+			var func = context.Get<Func<IPipeContext, Func<IPipeContext, object[]>>>(StateMachineKey.LazyCorrelationFuncArgs);
+			return func?.Invoke(context)?.Invoke(context);
 		}
 
 		public static object[] GetLazyHandlerArgs(this IPipeContext context)
 		{
 			var func =  context.Get<Func<IPipeContext, Func<IPipeContext, object[]>>>(StateMachineKey.LazyHandlerArgsFunc);
 			return func?.Invoke(context)?.Invoke(context);
+		}
+
+		public static IPipeContext UseLazyCorrelationArgs(this IPipeContext context, Func<IPipeContext, object[]> argsFunc)
+		{
+			Func<IPipeContext, Func<IPipeContext, object[]>> lazyFunc = pipeContext => argsFunc;
+			context.Properties.TryAdd(StateMachineKey.LazyCorrelationFuncArgs, lazyFunc);
+			return context;
 		}
 
 		public static IPipeContext UseLazyHandlerArgs(this IPipeContext context, Func<IPipeContext, object[]> argsFunc)

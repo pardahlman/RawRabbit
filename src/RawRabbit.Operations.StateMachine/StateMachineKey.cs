@@ -10,6 +10,7 @@
 		public const string TriggerConfiguration = "TriggerConfiguration";
 		public const string TriggerPipeOptions = "ChildPipeOptions";
 		public const string CorrelationFunc = "CorrelationFunc";
+		public const string LazyCorrelationFuncArgs = "LazyCorrelationFuncArgs";
 		public const string LazyHandlerArgsFunc = "LazyHandlerArgsFunc";
 	}
 }

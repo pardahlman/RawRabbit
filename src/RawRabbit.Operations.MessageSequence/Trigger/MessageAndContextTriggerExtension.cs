@@ -2,17 +2,19 @@
 using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Consumer;
+using RawRabbit.Operations.StateMachine;
 using RawRabbit.Operations.StateMachine.Middleware;
-using RawRabbit.Pipe;
+using RawRabbit.Operations.StateMachine.Trigger;
 using RawRabbit.Operations.Subscribe.Middleware;
+using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
 
-namespace RawRabbit.Operations.StateMachine.Trigger
+namespace RawRabbit.Operations.MessageSequence.Trigger
 {
-	public static class TriggerFromMessageExtension
+	public static class MessageAndContextTriggerExtension
 	{
 		public static readonly Action<IPipeBuilder> ConsumePipe =
-			SubscribeMessageExtension.ConsumePipe + (p => p
+			SubscribeMessageContextExtension.ConsumePipe + (p => p
 				.Use<ModelIdMiddleware>()
 				.Use<GlobalLockMiddleware>()
 				.Use<RetrieveStateMachineMiddleware>()
@@ -27,38 +29,40 @@ namespace RawRabbit.Operations.StateMachine.Trigger
 				.Replace<MessageConsumeMiddleware, MessageConsumeMiddleware>(args: new ConsumeOptions {Pipe = ConsumePipe})
 			);
 
-		public static TriggerConfigurer FromMessage<TStateMachine, TMessage>(
+		public static TriggerConfigurer FromMessage<TStateMachine, TMessage, TMessageContext>(
 			this TriggerConfigurer configurer,
-			Func<TMessage, Guid> correlationFunc,
-			Func<TStateMachine, TMessage, Task> machineFunc,
+			Func<TMessage, TMessageContext, Guid> correlationFunc,
+			Func<TStateMachine, TMessage, TMessageContext, Task> machineFunc,
 			Action<IConsumerConfigurationBuilder> consumeConfig = null
 		)
 		{
-			Func<object[], Task> genericHandler = args => machineFunc((TStateMachine)args[0], (TMessage)args[1]).ContinueWith<Acknowledgement>(t => new Ack());
-			Func<object[], Guid> genericCorrFunc = args => correlationFunc((TMessage)args[0]);
+			Func<object[], Task> genericHandler = args => 
+				machineFunc((TStateMachine) args[0], (TMessage) args[1], (TMessageContext)args[2])
+					.ContinueWith<Acknowledgement>(t => new Ack());
+			Func<object, object, Guid> genericCorrFunc = (msg, ctx) => correlationFunc((TMessage) msg, (TMessageContext)ctx);
 
-			return configurer.From(SubscribePipe, context =>
+			return configurer.From(SubscribePipe,context =>
 			{
 				context.Properties.Add(StateMachineKey.Type, typeof(TStateMachine));
 				context.Properties.Add(StateMachineKey.CorrelationFunc, genericCorrFunc);
-				context.UseLazyCorrelationArgs(ctx => new[] { ctx.GetMessage()});
+				context.UseLazyCorrelationArgs(ctx => new[] { ctx.GetMessage(), ctx.GetMessageContext() });
 				context.Properties.Add(PipeKey.MessageType, typeof(TMessage));
 				context.Properties.Add(PipeKey.ConfigurationAction, consumeConfig);
 				context.Properties.Add(PipeKey.MessageHandler, genericHandler);
-				context.UseLazyHandlerArgs(ctx => new[] { ctx.GetStateMachine(), ctx.GetMessage() });
+				context.UseLazyHandlerArgs(ctx => new[] { ctx.GetStateMachine(), ctx.GetMessage(), ctx.GetMessageContext() });
 			});
 		}
 
-		public static TriggerConfigurer FromMessage<TStateMachine, TMessage>(
+		public static TriggerConfigurer FromMessage<TStateMachine, TMessage, TMessageContext>(
 			this TriggerConfigurer configurer,
-			Func<TMessage, Guid> correlationFunc,
-			Action<TStateMachine, TMessage> stateMachineAction,
+			Func<TMessage, TMessageContext, Guid> correlationFunc,
+			Action<TStateMachine, TMessage, TMessageContext> stateMachineAction,
 			Action<IConsumerConfigurationBuilder> consumeConfig = null)
 		{
-			return configurer.FromMessage<TStateMachine, TMessage>(
-				correlationFunc, (machine, message) =>
+			return configurer.FromMessage<TStateMachine, TMessage, TMessageContext>(
+				correlationFunc, (machine, message, context) =>
 				{
-					stateMachineAction(machine, message);
+					stateMachineAction(machine, message, context);
 					return Task.FromResult(0);
 				},
 				consumeConfig);

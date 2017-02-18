@@ -13,6 +13,7 @@
 	"dependencies": {
 		"RawRabbit.Enrichers.GlobalExecutionId": { "target": "project" },
 		"RawRabbit.Operations.Publish": { "target": "project" },
+		"RawRabbit.Enrichers.MessageContext.Subscribe": { "target": "project" },
 		"RawRabbit.Operations.StateMachine": { "target": "project" }
 	},
 

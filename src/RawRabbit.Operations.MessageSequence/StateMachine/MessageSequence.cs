@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using RawRabbit.Configuration.Consume;
 using RawRabbit.Operations.MessageSequence.Configuration;
 using RawRabbit.Operations.MessageSequence.Configuration.Abstraction;
 using RawRabbit.Operations.MessageSequence.Model;
+using RawRabbit.Operations.MessageSequence.Trigger;
 using RawRabbit.Operations.StateMachine;
 using RawRabbit.Operations.StateMachine.Trigger;
 using RawRabbit.Pipe;
@@ -67,7 +67,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 
 			StateMachine
 				.Configure(SequenceState.Active)
-				.OnEntryFromAsync(entryTrigger, msg => _client.PublishAsync(message, c =>
+				.OnEntryFromAsync(entryTrigger, msg => _client.PublishAsync(msg, c =>
 				{
 					c.Properties.Add(Enrichers.GlobalExecutionId.PipeKey.GlobalExecutionId, Model.Id.ToString());
 					context?.Invoke(c);
@@ -89,6 +89,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 			});
 
 			var trigger = StateMachine.SetTriggerParameters<TMessage>(typeof(TMessage));
+
 			StateMachine
 				.Configure(SequenceState.Active)
 				.InternalTransitionAsync(trigger, (message, transition) =>
@@ -125,7 +126,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 					return func(message, default(TMessageContext))
 						.ContinueWith(t =>
 						{
-							
+
 							Model.Completed.Add(new ExecutionResult
 							{
 								Type = typeof(TMessage),
@@ -140,11 +141,14 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 				});
 
 			_triggerConfigurer
-				.FromMessage<MessageSequence,TMessage>(
-					message => Model.Id,
-					(sequence, message) => StateMachine.FireAsync(trigger, message),
+				.FromMessage<MessageSequence,TMessage, TMessageContext>(
+					(msg, ctx) => Model.Id,
+					(sequence, message, ctx) => StateMachine.FireAsync(trigger, message),
 					cfg => cfg
-						.FromDeclaredQueue(q => q.WithName($"state_machine_{Model.Id}"))
+						.FromDeclaredQueue(q => q
+							.WithName($"state_machine_{Model.Id}")
+							.WithExclusivity()
+							.WithAutoDelete())
 						.Consume(c => c.WithRoutingKey($"{typeof(TMessage).Name.ToLower()}.{Model.Id}")
 					)
 				);
@@ -184,6 +188,13 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 				.Configure(SequenceState.Canceled)
 				.OnEntry(() =>
 				{
+					_client
+						.InvokeAsync(p => p
+							.Use<TransientChannelMiddleware>()
+							.Use<QueueDeleteMiddleware>(new QueueDeleteOptions
+							{
+								QueueNameFunc = context => $"state_machine_{Model.Id}"
+							}));
 					sequence.Completed = Model.Completed;
 					sequence.Skipped = Model.Skipped;
 					sequence.Aborted = true;
@@ -203,43 +214,15 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 						)
 				);
 
-			foreach (var contextAction in _triggerConfigurer.TriggerContextActions)
+			foreach (var triggerCfg in _triggerConfigurer.TriggerConfiguration)
 			{
-				_client.InvokeAsync(p => p
-							.Use<ConsumeConfigurationMiddleware>()
-							.Use<QueueDeclareMiddleware>()
-							.Use<ExchangeDeclareMiddleware>()
-							.Use<QueueBindMiddleware>(),
-						context =>
-						{
-							contextAction?.Invoke(context);
-						}
-					)
-					.GetAwaiter()
-					.GetResult();
-			}
-			Func<object[], Task> genericHandler = args => TriggerAsync(args[1].GetType(), args[1]);
-			_client.InvokeAsync(p => p
-					.Use<ConsumerMiddleware>(new ConsumerOptions
-					{
-						ConfigurationFunc = context => new ConsumeConfiguration
-						{
-							QueueName = $"state_machine_{Model.Id}",
-							ConsumerTag = Guid.NewGuid().ToString()
-						}
-					})
-					.Use<MessageConsumeMiddleware>(new ConsumeOptions
-					{
-						Pipe = RegisterTriggerExtension.ConsumePipe
-					}),
-				context =>
+				triggerCfg.Context += context =>
 				{
-					context.Properties.Add(StateMachineKey.Type, GetType());
 					context.Properties.Add(StateMachineKey.ModelId, Model.Id);
 					context.Properties.Add(StateMachineKey.Machine, this);
-					context.Properties.Add(PipeKey.MessageHandler, genericHandler);
-					context.UseLazyHandlerArgs(ctx => new[] {ctx.GetStateMachine(), ctx.GetMessage()});
-				});
+				};
+				_client.InvokeAsync(triggerCfg.Pipe, triggerCfg.Context).GetAwaiter().GetResult();
+			}
 
 			var requestTimeout = _client
 				.InvokeAsync(builder => { })
