@@ -72,10 +72,17 @@ namespace RawRabbit.Pipe.Middleware
 			var args = GetDeliveryArgs(context);
 			if (string.IsNullOrEmpty(headerKey))
 			{
+				_logger.LogDebug($"Key '{headerKey}' not found.");
 				return null;
 			}
 			if (args == null)
 			{
+				_logger.LogDebug("DeliveryEventArgs not found.");
+				return null;
+			}
+			if (!args.BasicProperties.Headers.ContainsKey(headerKey))
+			{
+				_logger.LogInformation($"BasicProperties Header does not contain '{headerKey}'");
 				return null;
 			}
 
@@ -115,6 +122,10 @@ namespace RawRabbit.Pipe.Middleware
 			if (type == null)
 			{
 				_logger.LogWarning("Unable to extract header type from Pipe context.");
+			}
+			else
+			{
+				_logger.LogDebug($"Header type extracted: '{type.Name}'");
 			}
 			return type;
 		}
