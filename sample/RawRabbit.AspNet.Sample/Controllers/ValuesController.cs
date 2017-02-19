@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -24,7 +25,7 @@ namespace RawRabbit.AspNet.Sample.Controllers
 
 		[HttpGet]
 		[Route("api/values")]
-		public async Task<List<string>> GetAsync()
+		public async Task<IActionResult> GetAsync()
 		{
 			_logger.LogDebug("Recieved Value Request.");
 			var valueSequence = _busClient.ExecuteSequence(s => s
@@ -47,14 +48,12 @@ namespace RawRabbit.AspNet.Sample.Controllers
 			}
 			catch (Exception e)
 			{
-				throw new Exception("No response recieved. Is the Console App started?", e);
+				return StatusCode((int)HttpStatusCode.InternalServerError, $"No response recieved. Is the Console App started? \n\nException: {e}");
 			}
 
 			_logger.LogInformation("Successfully created {valueCount} values", valueSequence.Task.Result.Values.Count);
-			return valueSequence.Aborted
-				? new List<string>()
-				: valueSequence.Task.Result.Values;
 
+			return Ok(valueSequence.Task.Result.Values);
 		}
 
 		[HttpGet("api/values/{id}")]

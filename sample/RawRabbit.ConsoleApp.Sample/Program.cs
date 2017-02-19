@@ -2,6 +2,9 @@
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using RawRabbit.Enrichers.GlobalExecutionId;
+using RawRabbit.Enrichers.MessageContext;
+using RawRabbit.Enrichers.MessageContext.Context;
 using RawRabbit.Messages.Sample;
 using RawRabbit.vNext;
 using RawRabbit.vNext.Pipe;
@@ -23,10 +26,13 @@ namespace RawRabbit.ConsoleApp.Sample
 			{
 				Configuration = cfg => cfg
 					.SetBasePath(Directory.GetCurrentDirectory())
-					.AddJsonFile("rawrabbit.json")
+					.AddJsonFile("rawrabbit.json"),
+				Plugins = p => p
+					.UseGlobalExecutionId()
+					.UseMessageContext<MessageContext>()
 			});
 
-			await _client.SubscribeAsync<ValuesRequested>(requested => ServeValuesAsync(requested));
+			await _client.SubscribeAsync<ValuesRequested, MessageContext>((requested, ctx) => ServeValuesAsync(requested, ctx));
 			await _client.RespondAsync<ValueRequest, ValueResponse>(request => SendValuesThoughRpcAsync(request));
 		}
 
@@ -38,7 +44,7 @@ namespace RawRabbit.ConsoleApp.Sample
 			});
 		}
 
-		private static Task ServeValuesAsync(ValuesRequested message)
+		private static Task ServeValuesAsync(ValuesRequested message, MessageContext ctx)
 		{
 			var values = new List<string>();
 			for (var i = 0; i < message.NumberOfValues; i++)

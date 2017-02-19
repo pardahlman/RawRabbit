@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using RawRabbit.Enrichers.GlobalExecutionId;
 using RawRabbit.vNext;
 using RawRabbit.vNext.Logging;
 using RawRabbit.vNext.Pipe;
@@ -35,7 +36,9 @@ namespace RawRabbit.AspNet.Sample
 					{
 						Configuration = builder => Configuration.GetSection("RawRabbit"),
 						DependencyInjection = ioc => ioc.AddSingleton(LoggingFactory.ApplicationLogger),
-						Plugins = p => p.UseStateMachine()
+						Plugins = p => p
+							.UseStateMachine()
+							.UseGlobalExecutionId()
 					})
 				.AddMvc();
 		}

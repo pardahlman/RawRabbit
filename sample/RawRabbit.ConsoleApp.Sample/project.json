@@ -9,6 +9,9 @@
 		"RawRabbit.Operations.Subscribe": { "target": "project" },
 		"RawRabbit.Operations.Publish": { "target": "project" },
 		"RawRabbit.Operations.Respond": { "target": "project" },
+		"RawRabbit.Enrichers.GlobalExecutionId": { "target": "project" },
+		"RawRabbit.Enrichers.MessageContext": { "target": "project" },
+		"RawRabbit.Enrichers.MessageContext.Subscribe": { "target": "project" },
 		"RawRabbit.Messages.Sample": { "target": "project" },
 		"Microsoft.Extensions.Configuration.Json": "1.0.0"
 	},
