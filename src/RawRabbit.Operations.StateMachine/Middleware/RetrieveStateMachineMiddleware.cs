@@ -15,14 +15,13 @@ namespace RawRabbit.Operations.StateMachine.Middleware
 		public Action<StateMachineBase, IPipeContext> PostExecuteAction { get; set; }
 	}
 
-	public class RetrieveStateMachineMiddleware : StagedMiddleware
+	public class RetrieveStateMachineMiddleware : Pipe.Middleware.Middleware
 	{
 		private readonly IStateMachineActivator _stateMachineRepo;
 		protected Func<IPipeContext, Guid> ModelIdFunc;
 		protected Func<IPipeContext, Type> StateMachineTypeFunc;
 		protected Action<StateMachineBase, IPipeContext> PostExecuteAction;
 		protected Func<IPipeContext, StateMachineBase> StateMachineFunc;
-		public override string StageMarker => Pipe.StageMarker.MessageDeserialized;
 
 		public RetrieveStateMachineMiddleware(IStateMachineActivator stateMachineRepo, RetrieveStateMachineOptions options = null)
 		{

@@ -3,14 +3,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Operations.StateMachine.Core;
 using RawRabbit.Pipe;
-using RawRabbit.Pipe.Middleware;
 
 namespace RawRabbit.Operations.StateMachine.Middleware
 {
-	public class GlobalLockMiddleware : StagedMiddleware
+	public class GlobalLockMiddleware : Pipe.Middleware.Middleware
 	{
 		private readonly IGlobalLock _globalLock;
-		public override string StageMarker => Pipe.StageMarker.MessageDeserialized;
 
 		public GlobalLockMiddleware(IGlobalLock globalLock)
 		{

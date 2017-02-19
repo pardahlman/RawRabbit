@@ -88,18 +88,18 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 				Optional =  optionBuilder.Configuration.Optional
 			});
 
-			var trigger = StateMachine.SetTriggerParameters<TMessage>(typeof(TMessage));
+			var trigger = StateMachine.SetTriggerParameters<MessageAndContext<TMessage, TMessageContext>>(typeof(TMessage));
 
 			StateMachine
 				.Configure(SequenceState.Active)
-				.InternalTransitionAsync(trigger, (message, transition) =>
+				.InternalTransitionAsync(trigger, async (message, transition) =>
 				{
 					var matchFound = false;
 					do
 					{
 						if (_stepDefinitions.Peek() == null)
 						{
-							return Task.FromResult(0);
+							return;
 						}
 						var step = _stepDefinitions.Dequeue();
 						if (step.Type != typeof(TMessage))
@@ -114,7 +114,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 							}
 							else
 							{
-								return Task.FromResult(0);
+								return;
 							}
 						}
 						else
@@ -123,27 +123,23 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 						}
 					} while (!matchFound);
 
-					return func(message, default(TMessageContext))
-						.ContinueWith(t =>
-						{
-
-							Model.Completed.Add(new ExecutionResult
-							{
-								Type = typeof(TMessage),
-								Time = DateTime.Now
-							});
-							if (optionBuilder.Configuration.AbortsExecution)
-							{
-								Model.Aborted = true;
-								StateMachine.Fire(typeof(CancelSequence));
-							}
-						});
+					await func(message.Message, message.Context);
+					Model.Completed.Add(new ExecutionResult
+					{
+						Type = typeof(TMessage),
+						Time = DateTime.Now
+					});
+					if (optionBuilder.Configuration.AbortsExecution)
+					{
+						Model.Aborted = true;
+						StateMachine.Fire(typeof(CancelSequence));
+					}
 				});
 
 			_triggerConfigurer
 				.FromMessage<MessageSequence,TMessage, TMessageContext>(
 					(msg, ctx) => Model.Id,
-					(sequence, message, ctx) => StateMachine.FireAsync(trigger, message),
+					(sequence, message, ctx) => StateMachine.FireAsync(trigger, new MessageAndContext<TMessage, TMessageContext> {Context = ctx, Message = message}),
 					cfg => cfg
 						.FromDeclaredQueue(q => q
 							.WithName($"state_machine_{Model.Id}")
@@ -244,6 +240,13 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 		}
 
 		private class CancelSequence { }
+
+		// Temp class until Stateless supports multiple trigger args
+		private class MessageAndContext<TMessage, TContext>
+		{
+			public TMessage Message { get; set; }
+			public TContext Context { get; set; }
+		}
 	}
 
 	public enum SequenceState

@@ -15,12 +15,16 @@ namespace RawRabbit.Operations.MessageSequence.Trigger
 	{
 		public static readonly Action<IPipeBuilder> ConsumePipe =
 			SubscribeMessageContextExtension.ConsumePipe + (p => p
-				.Use<ModelIdMiddleware>()
-				.Use<GlobalLockMiddleware>()
-				.Use<RetrieveStateMachineMiddleware>()
-				.Replace<SubscriptionExceptionMiddleware, HandlerInvokationMiddleware>(args: new HandlerInvokationOptions
+				.Replace<SubscriptionExceptionMiddleware, SubscriptionExceptionMiddleware>(args: new SubscriptionExceptionOptions
 				{
-					HandlerArgsFunc = context => context.GetLazyHandlerArgs()
+					InnerPipe = inner => inner
+						.Use<ModelIdMiddleware>()
+						.Use<GlobalLockMiddleware>()
+						.Use<RetrieveStateMachineMiddleware>()
+						.Use<HandlerInvokationMiddleware>(new HandlerInvokationOptions
+						{
+							HandlerArgsFunc = context => context.GetLazyHandlerArgs()
+						})
 				})
 			);
 

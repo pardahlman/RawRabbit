@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using RawRabbit.Configuration;
 using RawRabbit.Enrichers.GlobalExecutionId;
+using RawRabbit.Enrichers.MessageContext;
 using RawRabbit.Enrichers.MessageContext.Context;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.Operations.MessageSequence;
 using RawRabbit.Operations.MessageSequence.Model;
-using RawRabbit.Operations.StateMachine;
 using RawRabbit.vNext.Pipe;
 using Xunit;
 
@@ -52,6 +52,7 @@ namespace RawRabbit.IntegrationTests.MessageSequence
 			using (var client = RawRabbitFactory.CreateTestClient(new RawRabbitOptions
 			{
 				Plugins = p => p
+					.UseMessageContext<MessageContext>()
 					.UseStateMachine()
 					.UseGlobalExecutionId()
 			}))

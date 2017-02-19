@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
+using RawRabbit.Logging;
 
 namespace RawRabbit.Operations.StateMachine.Core
 {
@@ -33,19 +34,29 @@ namespace RawRabbit.Operations.StateMachine.Core
 	public class ProcessGlobalLock : IGlobalLock
 	{
 		private readonly ConcurrentDictionary<Guid, SemaphoreSlim> _semaphores;
+		private readonly ILogger _logger = LogManager.GetLogger<ProcessGlobalLock>();
 
 		public ProcessGlobalLock()
 		{
 			_semaphores = new ConcurrentDictionary<Guid, SemaphoreSlim>();
 		}
 		
-		public Task ExecuteAsync(Guid modelId, Func<Task> handler, CancellationToken ct = default(CancellationToken))
+		public async Task ExecuteAsync(Guid modelId, Func<Task> handler, CancellationToken ct = default(CancellationToken))
 		{
 			var semaphore = _semaphores.GetOrAdd(modelId, guid => new SemaphoreSlim(1, 1));
-			return semaphore
-				.WaitAsync(ct)
-				.ContinueWith(t => handler().ContinueWith(done => semaphore.Release(), ct), ct)
-				.Unwrap();
+			await semaphore.WaitAsync(ct);
+			try
+			{
+				await handler();
+			}
+			catch (Exception e)
+			{
+				_logger.LogError("Unhandled exception during execution under Global Lock", e);
+			}
+			finally
+			{
+				semaphore.Release();
+			}
 		}
 	}
 }
