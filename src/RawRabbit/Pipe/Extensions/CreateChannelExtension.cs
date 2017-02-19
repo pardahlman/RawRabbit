@@ -2,9 +2,10 @@
 using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
+using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
 
-namespace RawRabbit.Pipe.Extensions
+namespace RawRabbit.Advanced
 {
 	public static class CreateChannelExtension
 	{
