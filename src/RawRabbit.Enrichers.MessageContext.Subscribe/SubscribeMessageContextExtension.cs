@@ -16,6 +16,7 @@ namespace RawRabbit
 			.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
 			{
 				HeaderKeyFunc = c => PropertyHeaders.Context,
+				HeaderTypeFunc = c => c.GetMessageContextType(),
 				ContextSaveAction = (pipeCtx, msgCtx) => pipeCtx.Properties.TryAdd(PipeKey.MessageContext, msgCtx)
 			})
 			.Use<BodyDeserializationMiddleware>()
@@ -63,6 +64,7 @@ namespace RawRabbit
 						Func<object[], Task> genericHandler = args => subscribeMethod((TMessage)args[0], (TMessageContext)args[1]);
 
 						ctx.Properties.Add(PipeKey.MessageType, typeof(TMessage));
+						ctx.AddMessageContextType<TMessageContext>();
 						ctx.Properties.Add(PipeKey.MessageHandler, genericHandler);
 						context?.Invoke(ctx);
 					}, token);
