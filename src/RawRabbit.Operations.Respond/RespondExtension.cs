@@ -65,7 +65,7 @@ namespace RawRabbit
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ConsumerCreated))
 			.Use<ConsumerRecoveryMiddleware>(new ConsumerRecoveryOptions
 			{
-				ConsumeConfigFunc = context => context.GetRespondConfiguration().Consume,
+				ConsumeConfigFunc = context => context.GetConsumeConfiguration(),
 			})
 			.Use<MessageConsumeMiddleware>(new ConsumeOptions { Pipe = ConsumePipe })
 			.Use<SubscriptionMiddleware>();
