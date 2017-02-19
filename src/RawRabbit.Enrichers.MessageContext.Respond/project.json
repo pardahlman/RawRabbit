@@ -6,12 +6,12 @@
 	"packOptions": {
 		"iconUrl": "http://pardahlman.se/raw/icon.png",
 		"projectUrl": "https://github.com/pardahlman/RawRabbit",
-		"tags": [ "rabbitmq", "raw", "rawrabbit", "attributes" ],
+		"tags": [ "rabbitmq", "rawrabbit", "respond", "operation", "messagecontext" ],
 		"publishExclude": [ "**.xproj", "**.user", "**.vspscc" ]
 	},
 
 	"dependencies": {
-		"RawRabbit.Operations.Respond": { "target": "project" },
+		"RawRabbit.Operations.Respond": { "target": "project" }
 	},
 
 	"frameworks": {

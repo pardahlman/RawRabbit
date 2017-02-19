@@ -6,7 +6,7 @@
 	"packOptions": {
 		"iconUrl": "http://pardahlman.se/raw/icon.png",
 		"projectUrl": "https://github.com/pardahlman/RawRabbit",
-		"tags": [ "rabbitmq", "raw", "rawrabbit", "attributes" ],
+		"tags": [ "rabbitmq", "rawrabbit", "global", "executionid" ],
 		"publishExclude": [ "**.xproj", "**.user", "**.vspscc" ]
 	},
 
