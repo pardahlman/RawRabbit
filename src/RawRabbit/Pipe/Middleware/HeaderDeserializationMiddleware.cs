@@ -104,7 +104,7 @@ namespace RawRabbit.Pipe.Middleware
 			}
 			else
 			{
-				_logger.LogDebug($"Trying to abstract {key} from header");
+				_logger.LogDebug($"Trying to extract {key} from header");
 			}
 			return key;
 		}
