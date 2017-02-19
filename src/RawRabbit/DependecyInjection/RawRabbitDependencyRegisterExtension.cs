@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Runtime.Serialization.Formatters;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -53,8 +52,7 @@ namespace RawRabbit.DependecyInjection
 				})
 				.AddSingleton<IClientPropertyProvider, ClientPropertyProvider>()
 				.AddSingleton<ILoggerFactory, LoggerFactory>()
-				.AddTransient<ISerializer, Serialization.JsonSerializer>()
-				.AddTransient(c => new Newtonsoft.Json.JsonSerializer
+				.AddSingleton<ISerializer>(resolver => new Serialization.JsonSerializer(new Newtonsoft.Json.JsonSerializer
 				{
 					TypeNameAssemblyFormat = FormatterAssemblyStyle.Simple,
 					Formatting = Formatting.None,
@@ -67,7 +65,7 @@ namespace RawRabbit.DependecyInjection
 					MissingMemberHandling = MissingMemberHandling.Ignore,
 					PreserveReferencesHandling = PreserveReferencesHandling.Objects,
 					NullValueHandling = NullValueHandling.Ignore
-				})
+				}))
 				.AddTransient<IConsumerFactory, ConsumerFactory>()
 				.AddSingleton<IChannelFactory, ChannelFactory>()
 				.AddSingleton<ISubscriptionRepository, SubscriptionRepository>()
