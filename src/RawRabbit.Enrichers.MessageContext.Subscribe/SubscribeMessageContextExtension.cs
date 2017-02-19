@@ -63,10 +63,13 @@ namespace RawRabbit
 					{
 						Func<object[], Task> genericHandler = args => subscribeMethod((TMessage)args[0], (TMessageContext)args[1]);
 
-						ctx.Properties.Add(PipeKey.MessageType, typeof(TMessage));
-						ctx.AddMessageContextType<TMessageContext>();
-						ctx.Properties.Add(PipeKey.MessageHandler, genericHandler);
 						context?.Invoke(ctx);
+						ctx.Properties.Add(PipeKey.MessageType, typeof(TMessage));
+						if (!ctx.Properties.ContainsKey(PipeContextExtensions.PipebasedContextFunc))
+						{
+							ctx.AddMessageContextType<TMessageContext>();
+						}
+						ctx.Properties.Add(PipeKey.MessageHandler, genericHandler);
 					}, token);
 		}
 	}

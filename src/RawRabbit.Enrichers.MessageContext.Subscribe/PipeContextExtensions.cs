@@ -6,7 +6,7 @@ namespace RawRabbit.Enrichers.MessageContext.Subscribe
 {
 	public static class PipeContextExtensions
 	{
-		private const string PipebasedContextFunc = "PipebasedContextFunc";
+		public const string PipebasedContextFunc = "Subscribe:MessageContext:PipebasedContext";
 		private const string MessageContextType = "Subscribe:MessageContext:Type";
 
 		public static IPipeContext UseMessageContext(this IPipeContext context, Func<IPipeContext, object> contextFunc)
