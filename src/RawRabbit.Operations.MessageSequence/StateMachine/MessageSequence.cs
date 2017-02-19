@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Operations.MessageSequence.Configuration;
@@ -9,7 +10,6 @@ using RawRabbit.Operations.MessageSequence.Trigger;
 using RawRabbit.Operations.StateMachine;
 using RawRabbit.Operations.StateMachine.Trigger;
 using RawRabbit.Pipe;
-using RawRabbit.Pipe.Middleware;
 using Stateless;
 
 namespace RawRabbit.Operations.MessageSequence.StateMachine
@@ -21,12 +21,14 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 		private Action _fireAction;
 		private readonly TriggerConfigurer _triggerConfigurer;
 		private readonly Queue<StepDefinition> _stepDefinitions;
+		private readonly List<Subscription.ISubscription> _subscriptions;
 
 		public MessageSequence(IBusClient client, SequenceModel model = null) : base(model)
 		{
 			_client = client;
 			_triggerConfigurer = new TriggerConfigurer();
 			_stepDefinitions = new Queue<StepDefinition>();
+			_subscriptions = new List<Subscription.ISubscription>();
 		}
 
 		protected override void ConfigureState(StateMachine<SequenceState, Type> machine)
@@ -142,7 +144,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 					(sequence, message, ctx) => StateMachine.FireAsync(trigger, new MessageAndContext<TMessage, TMessageContext> {Context = ctx, Message = message}),
 					cfg => cfg
 						.FromDeclaredQueue(q => q
-							.WithName($"state_machine_{Model.Id}")
+							.WithNameSuffix(Model.Id.ToString())
 							.WithExclusivity()
 							.WithAutoDelete())
 						.Consume(c => c.WithRoutingKey($"{typeof(TMessage).Name.ToLower()}.{Model.Id}")
@@ -170,27 +172,21 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 				{
 					sequence.Completed = Model.Completed;
 					sequence.Skipped = Model.Skipped;
-					_client
-						.InvokeAsync(p => p
-							.Use<TransientChannelMiddleware>()
-							.Use<QueueDeleteMiddleware>(new QueueDeleteOptions
-							{
-								QueueNameFunc = context => $"state_machine_{Model.Id}"
-							}))
-						.ContinueWith(t =>tsc.TrySetResult(message));
+					foreach (var subscription in _subscriptions)
+					{
+						subscription.Dispose();
+					}
+					tsc.TrySetResult(message);
 				});
 
 			StateMachine
 				.Configure(SequenceState.Canceled)
 				.OnEntry(() =>
 				{
-					_client
-						.InvokeAsync(p => p
-							.Use<TransientChannelMiddleware>()
-							.Use<QueueDeleteMiddleware>(new QueueDeleteOptions
-							{
-								QueueNameFunc = context => $"state_machine_{Model.Id}"
-							}));
+					foreach (var subscription in _subscriptions)
+					{
+						subscription.Dispose();
+					}
 					sequence.Completed = Model.Completed;
 					sequence.Skipped = Model.Skipped;
 					sequence.Aborted = true;
@@ -200,14 +196,14 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 			_triggerConfigurer
 				.FromMessage<MessageSequence, TMessage>(
 					message => Model.Id,
-					(s, message) => StateMachine.FireAsync(trigger, message),
+					(s, message) => StateMachine.Fire(trigger, message),
 					cfg => cfg
 						.FromDeclaredQueue(q => q
-							.WithName($"state_machine_{Model.Id}")
+							.WithNameSuffix(Model.Id.ToString())
 							.WithExclusivity()
 							.WithAutoDelete())
 						.Consume(c => c.WithRoutingKey($"{typeof(TMessage).Name.ToLower()}.{Model.Id}")
-						)
+					)
 				);
 
 			foreach (var triggerCfg in _triggerConfigurer.TriggerConfiguration)
@@ -217,7 +213,8 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 					context.Properties.Add(StateMachineKey.ModelId, Model.Id);
 					context.Properties.Add(StateMachineKey.Machine, this);
 				};
-				_client.InvokeAsync(triggerCfg.Pipe, triggerCfg.Context).GetAwaiter().GetResult();
+				var ctx = _client.InvokeAsync(triggerCfg.Pipe, triggerCfg.Context).GetAwaiter().GetResult();
+				_subscriptions.Add(ctx.GetSubscription());
 			}
 
 			var requestTimeout = _client
@@ -232,6 +229,10 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 				requestTimer?.Dispose();
 				tsc.TrySetException(new TimeoutException(
 					$"Unable to complete sequence {Model.Id} in {requestTimeout:g}. Operation Timed out."));
+				if (StateMachine.PermittedTriggers.Contains(typeof(CancelSequence)))
+				{
+					StateMachine.Fire(typeof(CancelSequence));
+				}
 			}, null, requestTimeout, new TimeSpan(-1));
 
 			_fireAction();
