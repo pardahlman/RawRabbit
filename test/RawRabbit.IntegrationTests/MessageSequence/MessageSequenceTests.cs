@@ -293,5 +293,55 @@ namespace RawRabbit.IntegrationTests.MessageSequence
 				await Assert.ThrowsAsync<TimeoutException>(async () => await chain.Task);
 			}
 		}
+
+		[Fact]
+		public async Task Should_Forward_Message_Context_In_When_Message_Handler()
+		{
+			/* Setup */
+			using(var client = RawRabbitFactory.CreateTestClient(new RawRabbitOptions
+			{
+				Plugins = p => p
+					.UseMessageContext<MessageContext>()
+					.UseContextForwarding()
+					.UseGlobalExecutionId()
+			}))
+			using (var sequenceClient = RawRabbitFactory.CreateTestClient(new RawRabbitOptions
+			{
+				Plugins = p => p
+					.UseStateMachine()
+					.UseMessageContext(context => new MessageContext { GlobalRequestId = Guid.NewGuid()})
+					.UseContextForwarding()
+					.UseGlobalExecutionId()
+			}))
+			{
+				var firstTcs = new TaskCompletionSource<MessageContext>();
+				var secondTcs = new TaskCompletionSource<MessageContext>();
+				await client.SubscribeAsync<FirstMessage, MessageContext>((request, context) =>
+					sequenceClient.PublishAsync(new SecondMessage())
+				);
+				await client.SubscribeAsync<ThirdMessage, MessageContext>(async (request, context) =>
+				{
+					secondTcs.TrySetResult(context);
+					await sequenceClient.PublishAsync(new ForthMessage());
+				});
+
+				/* Test */
+				sequenceClient.ExecuteSequence(c => c
+					.PublishAsync<FirstMessage>()
+					.When<SecondMessage, MessageContext>(async (message, context) =>
+					{
+						firstTcs.TrySetResult(context);
+						await sequenceClient.PublishAsync(new ThirdMessage());
+					})
+					.Complete<ForthMessage>()
+				);
+
+				await firstTcs.Task;
+				await secondTcs.Task;
+
+				/* Assert */
+				Assert.Equal(firstTcs.Task.Result.GlobalRequestId, secondTcs.Task.Result.GlobalRequestId);
+			}
+		}
 	}
 }
