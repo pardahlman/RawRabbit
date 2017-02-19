@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using RawRabbit.Operations.StateMachine;
 using RawRabbit.vNext;
 using RawRabbit.vNext.Logging;
 using RawRabbit.vNext.Pipe;

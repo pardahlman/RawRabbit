@@ -2,9 +2,10 @@
 using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Instantiation;
+using RawRabbit.Operations.StateMachine;
 using RawRabbit.Operations.StateMachine.Core;
 
-namespace RawRabbit.Operations.StateMachine
+namespace RawRabbit
 {
 	public static class StateMachinePlugin
 	{
