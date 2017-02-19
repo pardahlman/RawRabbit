@@ -67,7 +67,14 @@ namespace RawRabbit.Logging
 				{
 					continue;
 				}
-				args[i] = JsonConvert.SerializeObject(args[i]);
+				try
+				{
+					args[i] = JsonConvert.SerializeObject(args[i]);
+				}
+				catch (Exception)
+				{
+					args[i] = "N/A";
+				}
 			}
 			return string.Format(format, args);
 		}
