@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Runtime.Serialization.Formatters;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -32,7 +33,6 @@ namespace RawRabbit.DependecyInjection
 			register.AddSingleton(clientBuilder.PipeBuilderAction);
 
 			register
-				.AddSingleton(RawRabbitConfiguration.Local)
 				.AddSingleton<IConnectionFactory, ConnectionFactory>(provider =>
 				{
 					var cfg = provider.GetService<RawRabbitConfiguration>();
@@ -86,6 +86,7 @@ namespace RawRabbit.DependecyInjection
 				.AddTransient<IExtendedPipeBuilder, PipeBuilder>(resolver => new PipeBuilder(resolver))
 				.AddSingleton<IPipeBuilderFactory>(provider => new CachedPipeBuilderFactory(provider));
 
+			register.AddSingleton(options?.ClientConfiguration ?? RawRabbitConfiguration.Local);
 			options?.DependencyInjection?.Invoke(register);
 			return register;
 		}
