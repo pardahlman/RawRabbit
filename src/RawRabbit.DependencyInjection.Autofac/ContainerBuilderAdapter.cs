@@ -16,7 +16,7 @@ namespace RawRabbit.DependencyInjection.Autofac
 		public IDependecyRegister AddTransient<TService, TImplementation>(Func<IDependecyResolver, TImplementation> instanceCreator) where TService : class where TImplementation : class, TService
 		{
 			_builder
-				.Register<TImplementation>(context => instanceCreator(new ComponentContextAdapter(context)))
+				.Register<TImplementation>(context => instanceCreator(new ComponentContextAdapter(context.Resolve<IComponentContext>())))
 				.As<TService>()
 				.InstancePerDependency();
 			return this;
@@ -43,7 +43,7 @@ namespace RawRabbit.DependencyInjection.Autofac
 		public IDependecyRegister AddSingleton<TService, TImplementation>(Func<IDependecyResolver, TService> instanceCreator) where TService : class where TImplementation : class, TService
 		{
 			_builder
-				.Register<TService>(context => instanceCreator(new ComponentContextAdapter(context)))
+				.Register<TService>(context => instanceCreator(new ComponentContextAdapter(context.Resolve<IComponentContext>())))
 				.As<TService>()
 				.SingleInstance();
 			return this;

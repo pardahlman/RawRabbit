@@ -2,6 +2,7 @@
 using System.Linq;
 using Autofac;
 using Autofac.Core;
+using Autofac.Core.Registration;
 using RawRabbit.DependecyInjection;
 
 namespace RawRabbit.DependencyInjection.Autofac
