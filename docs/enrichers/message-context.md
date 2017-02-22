@@ -34,7 +34,7 @@ await publisher.PublishAsync(new BasicMessage(), ctx => ctx
 
 ## Incomming messages
 
-The Subscribe and Respond operation each have dedicated enrichers that adds new methods to the bus client for consuming a message with message context
+The Subscribe and Response operations each have dedicated enrichers that adds new methods to the bus client for consuming a message with message context
 
 ```csharp
 await c.SubscribeAsync<BasicMessage, MessageContext>(async (message, context) =>
@@ -75,7 +75,7 @@ await secondClient.SubscribeAsync<SecondMessage, CustomContext>((async msg, cont
 });
 ```
 
-The feature is enabled by register it as a plugin. As of the current version, both `UseMessageContext<TMessageContext>` and `UseContextForwarding` needs to be registed for this to work.
+The feature can be enabled by registering it as a plugin. As of the current version, both `UseMessageContext<TMessageContext>` and `UseContextForwarding` needs to be registered for this to work.
 
 ```csharp
 new RawRabbitOptions

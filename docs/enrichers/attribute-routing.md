@@ -1,7 +1,7 @@
 # Attribute Routing
 
 Attribute Routing is a convenient way to specify routing key and other topology features based on attributes on the message object
-The enricher is be registered as a plugin
+The enricher is can be registered as a plugin
 
 ```csharp
 new RawRabbitOptions
@@ -10,7 +10,7 @@ new RawRabbitOptions
 }
 ```
 
-There are three attributes that configure Exchange, Queue and Routing reprectivly. There is no requirement to use all three attributes for a message.
+The Exchange, Queue and Routing options can configured with the provided attributes. There is no requirement to use all of them for a message.
 
 ```csharp
 [Exchange(Name = "todo", Type = ExchangeType.Topic)]
