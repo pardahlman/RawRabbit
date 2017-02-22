@@ -1,5 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Autofac;
+using Autofac.Core;
 using RawRabbit.Common;
 using RawRabbit.Configuration;
 using RawRabbit.DependencyInjection.Autofac;
@@ -44,6 +46,28 @@ namespace RawRabbit.IntegrationTests.DependecyInjection
 
 			/* Assert */
 			disposer.Dispose();
+			Assert.True(true);
+		}
+
+		[Fact]
+		public async Task Should_Honor_Client_Configuration()
+		{
+			/* Setup */
+			var builder = new ContainerBuilder();
+			var config = RawRabbitConfiguration.Local;
+			config.VirtualHost = "/foo";
+
+			/* Test */
+			await Assert.ThrowsAsync<DependencyResolutionException>(async () =>
+			{
+				builder.RegisterRawRabbit(new RawRabbitOptions {ClientConfiguration = config});
+				var container = builder.Build();
+				var client = container.Resolve<IBusClient>();
+				await client.PublishAsync(new BasicMessage());
+			});
+			
+
+			/* Assert */
 			Assert.True(true);
 		}
 
