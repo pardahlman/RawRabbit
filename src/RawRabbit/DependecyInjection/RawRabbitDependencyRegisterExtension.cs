@@ -85,7 +85,7 @@ namespace RawRabbit.DependecyInjection
 				.AddTransient<IInstanceFactory>(resolver => new InstanceFactory(resolver))
 				.AddSingleton<IPipeContextFactory, PipeContextFactory>()
 				.AddTransient<IExtendedPipeBuilder, PipeBuilder>(resolver => new PipeBuilder(resolver))
-				.AddSingleton<IPipeBuilderFactory>(provider => new CachedPipeBuilderFactory(provider));
+				.AddSingleton<IPipeBuilderFactory>(provider => new PipeBuilderFactory(provider));
 
 			options?.DependencyInjection?.Invoke(register);
 			return register;
