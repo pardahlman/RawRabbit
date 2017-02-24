@@ -15,7 +15,7 @@ namespace RawRabbit.IntegrationTests.Compatibility
 {
 	public class LegacyClientTests : IntegrationTestBase
 	{
-		private RawRabbitOptions _legacyConfig;
+		private readonly RawRabbitOptions _legacyConfig;
 
 		public LegacyClientTests()
 		{
@@ -54,6 +54,7 @@ namespace RawRabbit.IntegrationTests.Compatibility
 			Assert.NotNull(recievedContext);
 
 			TestChannel.QueueDelete(subscription.QueueName, false, false);
+			TestChannel.ExchangeDelete("rawrabbit.integrationtests.testmessages", false);
 			(publisher as IDisposable)?.Dispose();
 			(subscriber as IDisposable)?.Dispose();
 		}
@@ -126,7 +127,7 @@ namespace RawRabbit.IntegrationTests.Compatibility
 				.WithExchange(e => e
 					.WithName("custom_exchange")
 					.WithType(ExchangeType.Topic)
-					.WithAutoDelete(true)
+					.WithAutoDelete()
 				)
 				.WithRoutingKey("custom_key")
 				.WithQueue(q => q
@@ -176,6 +177,8 @@ namespace RawRabbit.IntegrationTests.Compatibility
 			Assert.NotNull(recievedContext);
 
 			TestChannel.QueueDelete(subscription.QueueName, false, false);
+			TestChannel.ExchangeDelete("rawrabbit.integrationtests.testmessages", false);
+
 			(requester as IDisposable)?.Dispose();
 			(responder as IDisposable)?.Dispose();
 		}
