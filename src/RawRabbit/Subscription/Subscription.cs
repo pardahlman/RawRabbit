@@ -34,6 +34,14 @@ namespace RawRabbit.Subscription
 		public void Dispose()
 		{
 			Active = false;
+			if (!_consumer.Model.IsOpen)
+			{
+				return;
+			}
+			if (!Active)
+			{
+				return;
+			}
 			_consumer.CancelAsync();
 		}
 	}
