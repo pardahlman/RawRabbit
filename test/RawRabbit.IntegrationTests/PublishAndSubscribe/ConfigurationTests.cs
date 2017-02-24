@@ -1,8 +1,10 @@
 ﻿using System.Threading.Tasks;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Framing;
+using RawRabbit.Advanced;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Exchange;
+using RawRabbit.Configuration.Queue;
 using RawRabbit.Enrichers.MessageContext.Subscribe;
 using RawRabbit.Enrichers.QueueSuffix;
 using RawRabbit.IntegrationTests.TestMessages;
@@ -200,7 +202,7 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 					return Task.FromResult(0);
 				}, ctx => ctx
 					.UseConsumerConfiguration(cfg => cfg
-						.FromDeclaredQueue(q => q.WithName(queueName).WithAutoDelete(true))
+						.FromDeclaredQueue(q => q.WithName(queueName).WithAutoDelete())
 					)
 				);
 
@@ -227,13 +229,14 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 				{
 					exchangeName = exchangeName + "this_is_part_of_a_long_exchange_name";
 				}
+
 				await subscriber.SubscribeAsync<BasicMessage>(msg =>
 				{
 					msgTcs.TrySetResult(msg);
 					return Task.FromResult(0);
 				}, ctx => ctx
 					.UseConsumerConfiguration(cfg => cfg
-						.OnDeclaredExchange(e => e.WithName(exchangeName))
+						.OnDeclaredExchange(e => e.WithName(exchangeName).WithAutoDelete())
 					)
 				);
 
