@@ -2,12 +2,14 @@
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Core;
+using RawRabbit.Advanced;
 using RawRabbit.Common;
 using RawRabbit.Configuration;
 using RawRabbit.DependencyInjection.Autofac;
 using RawRabbit.Instantiation;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.Operations.StateMachine;
+using RawRabbit.Pipe.Extensions;
 using Xunit;
 
 namespace RawRabbit.IntegrationTests.DependecyInjection
@@ -42,6 +44,7 @@ namespace RawRabbit.IntegrationTests.DependecyInjection
 			/* Test */
 			var client = container.Resolve<IBusClient>();
 			await client.PublishAsync(new BasicMessage());
+			await client.DeleteExchangeAsync<BasicMessage>();
 			var disposer = container.Resolve<IResourceDisposer>();
 
 			/* Assert */
@@ -63,7 +66,7 @@ namespace RawRabbit.IntegrationTests.DependecyInjection
 				builder.RegisterRawRabbit(new RawRabbitOptions {ClientConfiguration = config});
 				var container = builder.Build();
 				var client = container.Resolve<IBusClient>();
-				await client.PublishAsync(new BasicMessage());
+				await client.CreateChannelAsync();
 			});
 			
 
