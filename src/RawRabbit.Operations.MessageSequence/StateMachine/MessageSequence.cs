@@ -133,7 +133,6 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 					});
 					if (optionBuilder.Configuration.AbortsExecution)
 					{
-						Model.Aborted = true;
 						StateMachine.Fire(typeof(CancelSequence));
 					}
 				});
@@ -165,6 +164,16 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 				.Configure(SequenceState.Active)
 				.Permit(typeof(TMessage), SequenceState.Completed);
 
+			StateMachine
+				.Configure(SequenceState.Active)
+				.OnExit(() =>
+				{
+					foreach (var subscription in _subscriptions)
+					{
+						subscription.Dispose();
+					}
+				});
+
 			var trigger = StateMachine.SetTriggerParameters<TMessage>(typeof(TMessage));
 			StateMachine
 				.Configure(SequenceState.Completed)
@@ -172,10 +181,6 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 				{
 					sequence.Completed = Model.Completed;
 					sequence.Skipped = Model.Skipped;
-					foreach (var subscription in _subscriptions)
-					{
-						subscription.Dispose();
-					}
 					tsc.TrySetResult(message);
 				});
 
@@ -183,10 +188,6 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 				.Configure(SequenceState.Canceled)
 				.OnEntry(() =>
 				{
-					foreach (var subscription in _subscriptions)
-					{
-						subscription.Dispose();
-					}
 					sequence.Completed = Model.Completed;
 					sequence.Skipped = Model.Skipped;
 					sequence.Aborted = true;
