@@ -24,8 +24,8 @@ namespace RawRabbit.Pipe.Middleware
 		protected Func<IPipeContext, TimeSpan> TimeOutFunc;
 		protected Func<IPipeContext, IModel> ChannelFunc;
 		protected Func<IPipeContext, bool> EnabledFunc;
-		protected ConcurrentDictionary<IModel, ConcurrentDictionary<ulong, TaskCompletionSource<ulong>>> ConfirmsDictionary;
-		protected ConcurrentDictionary<IModel, ulong> ChannelSequences;
+		protected static ConcurrentDictionary<IModel, ConcurrentDictionary<ulong, TaskCompletionSource<ulong>>> ConfirmsDictionary = new ConcurrentDictionary<IModel, ConcurrentDictionary<ulong, TaskCompletionSource<ulong>>>();
+		protected static ConcurrentDictionary<IModel, ulong> ChannelSequences = new ConcurrentDictionary<IModel, ulong>();
 
 		public PublishAcknowledgeMiddleware(IExclusiveLock exclusive, PublishAcknowledgeOptions options = null)
 		{
@@ -33,8 +33,6 @@ namespace RawRabbit.Pipe.Middleware
 			TimeOutFunc = options?.TimeOutFunc ?? (context => context.GetPublishAcknowledgeTimeout());
 			ChannelFunc = options?.ChannelFunc ?? (context => context.GetTransientChannel());
 			EnabledFunc = options?.EnabledFunc ?? (context => context.GetPublishAcknowledgeTimeout() != TimeSpan.MaxValue);
-			ConfirmsDictionary = new ConcurrentDictionary<IModel, ConcurrentDictionary<ulong, TaskCompletionSource<ulong>>>();
-			ChannelSequences = new ConcurrentDictionary<IModel, ulong>();
 		}
 
 		public override async Task InvokeAsync(IPipeContext context, CancellationToken token)
