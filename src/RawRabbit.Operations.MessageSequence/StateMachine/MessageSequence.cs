@@ -133,7 +133,10 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 					});
 					if (optionBuilder.Configuration.AbortsExecution)
 					{
-						StateMachine.Fire(typeof(CancelSequence));
+						if (StateMachine.PermittedTriggers.Contains(typeof(CancelSequence)))
+						{
+							StateMachine.Fire(typeof(CancelSequence));
+						}
 					}
 				});
 
