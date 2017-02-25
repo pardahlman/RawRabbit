@@ -8,7 +8,7 @@ using RawRabbit.Configuration;
 using RawRabbit.DependencyInjection.Autofac;
 using RawRabbit.Instantiation;
 using RawRabbit.IntegrationTests.TestMessages;
-using RawRabbit.Operations.StateMachine;
+using RawRabbit.Logging;
 using RawRabbit.Pipe.Extensions;
 using Xunit;
 
@@ -21,7 +21,10 @@ namespace RawRabbit.IntegrationTests.DependecyInjection
 		{
 			/* Setup */
 			var builder = new ContainerBuilder();
-			builder.RegisterRawRabbit(new RawRabbitOptions());
+			builder.RegisterRawRabbit(new RawRabbitOptions
+			{
+				DependencyInjection = ioc => ioc.AddSingleton<ILoggerFactory, VoidLoggerFactory>()
+			});
 			var container = builder.Build();
 
 			/* Test */
@@ -38,7 +41,10 @@ namespace RawRabbit.IntegrationTests.DependecyInjection
 		{
 			/* Setup */
 			var builder = new ContainerBuilder();
-			builder.RegisterRawRabbit();
+			builder.RegisterRawRabbit(new RawRabbitOptions
+			{
+				DependencyInjection = ioc => ioc.AddSingleton<ILoggerFactory, VoidLoggerFactory>()
+			});
 			var container = builder.Build();
 
 			/* Test */
@@ -63,7 +69,11 @@ namespace RawRabbit.IntegrationTests.DependecyInjection
 			/* Test */
 			await Assert.ThrowsAsync<DependencyResolutionException>(async () =>
 			{
-				builder.RegisterRawRabbit(new RawRabbitOptions {ClientConfiguration = config});
+				builder.RegisterRawRabbit(new RawRabbitOptions
+				{
+					ClientConfiguration = config,
+					DependencyInjection = ioc => ioc.AddSingleton<ILoggerFactory, VoidLoggerFactory>()
+				});
 				var container = builder.Build();
 				var client = container.Resolve<IBusClient>();
 				await client.CreateChannelAsync();
