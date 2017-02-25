@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RawRabbit.IntegrationTests.TestMessages;
+using RawRabbit.Pipe;
 using RawRabbit.Pipe.Extensions;
 using RawRabbit.Pipe.Middleware;
 using Xunit;
@@ -13,10 +14,10 @@ namespace RawRabbit.IntegrationTests.Features
 		[Fact]
 		public async Task Should_Cancel_Subscription_When_Shutdown_Is_Called()
 		{
-			var singleton = vNext.Pipe.RawRabbitFactory.CreateSingleton();
-			var instanceFactory = vNext.Pipe.RawRabbitFactory.CreateInstanceFactory();
+			var singleton = RawRabbitFactory.CreateTestClient();
+			var instanceFactory = RawRabbitFactory.CreateTestInstanceFactory();
 			var client = instanceFactory.Create();
-			var processTime = TimeSpan.FromMilliseconds(50);
+			var processMs =50;
 			var firstMsg = (new BasicMessage { Prop = "I'll get processed" });
 			var secondMsg = (new BasicMessage { Prop = "I'll get stuck in the queue" });
 
@@ -24,12 +25,18 @@ namespace RawRabbit.IntegrationTests.Features
 			await client.SubscribeAsync<BasicMessage>(async message =>
 			{
 				firstTsc.TrySetResult(message);
-				await Task.Delay(processTime);
-			});
+				await Task.Delay(processMs);
+			}, ctx => ctx
+				.UseConsumerConfiguration(cfg => cfg
+					.FromDeclaredQueue(q => q
+						.WithAutoDelete(false)
+				)
+			));
 
 			await client.PublishAsync(firstMsg);
 			await firstTsc.Task;
-			var shutdownTask = instanceFactory.ShutdownAsync(processTime);
+			var shutdownTask = instanceFactory.ShutdownAsync(TimeSpan.FromMilliseconds(processMs));
+			await Task.Delay(TimeSpan.FromMilliseconds(10));
 			await singleton.PublishAsync(secondMsg);
 			await shutdownTask;
 
