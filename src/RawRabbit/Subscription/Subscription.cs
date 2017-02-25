@@ -21,6 +21,7 @@ namespace RawRabbit.Subscription
 
 		public Subscription(IBasicConsumer consumer, string queueName)
 		{
+			Active = true;
 			_consumer = consumer;
 			var basicConsumer = consumer as DefaultBasicConsumer;
 			if (basicConsumer == null)
