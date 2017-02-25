@@ -33,7 +33,6 @@ namespace RawRabbit.Subscription
 
 		public void Dispose()
 		{
-			Active = false;
 			if (!_consumer.Model.IsOpen)
 			{
 				return;
@@ -42,6 +41,7 @@ namespace RawRabbit.Subscription
 			{
 				return;
 			}
+			Active = false;
 			_consumer.CancelAsync();
 		}
 	}
