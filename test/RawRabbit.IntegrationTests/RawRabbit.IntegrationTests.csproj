@@ -1,0 +1,48 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Authors>par.dahlman</Authors>
+    <TargetFramework>net451</TargetFramework>
+    <AssemblyName>RawRabbit.IntegrationTests</AssemblyName>
+    <PackageId>RawRabbit.IntegrationTests</PackageId>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\RawRabbit\RawRabbit.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.Compatibility.Legacy\RawRabbit.Compatibility.Legacy.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.Operations.Get\RawRabbit.Operations.Get.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.Operations.Publish\RawRabbit.Operations.Publish.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.Operations.Subscribe\RawRabbit.Operations.Subscribe.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.Operations.Request\RawRabbit.Operations.Request.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.Operations.Respond\RawRabbit.Operations.Respond.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.Operations.StateMachine\RawRabbit.Operations.StateMachine.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.Operations.MessageSequence\RawRabbit.Operations.MessageSequence.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.Enrichers.QueueSuffix\RawRabbit.Enrichers.QueueSuffix.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.Enrichers.GlobalExecutionId\RawRabbit.Enrichers.GlobalExecutionId.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.Enrichers.Polly\RawRabbit.Enrichers.Polly.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.Enrichers.Attributes\RawRabbit.Enrichers.Attributes.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.Enrichers.MessageContext\RawRabbit.Enrichers.MessageContext.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.Enrichers.MessageContext.Subscribe\RawRabbit.Enrichers.MessageContext.Subscribe.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.Enrichers.MessageContext.Respond\RawRabbit.Enrichers.MessageContext.Respond.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.DependencyInjection.Autofac\RawRabbit.DependencyInjection.Autofac.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.DependencyInjection.Ninject\RawRabbit.DependencyInjection.Ninject.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.vNext\RawRabbit.vNext.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20170106-08" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0-beta5-build1225" />
+    <PackageReference Include="Moq" Version="4.6.38-alpha" />
+    <PackageReference Include="xunit" Version="2.2.0-beta5-build3474" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
+</Project>

@@ -1,75 +1,74 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26228.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{7FCF8D3B-BA55-4C47-AC60-5CEF75418BEB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DAAF8928-DAFA-47A7-8E43-FD20590CCF6E}"
 	ProjectSection(SolutionItems) = preProject
-		global.json = global.json
 		NuGet.Config = NuGet.Config
 	EndProjectSection
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit", "src\RawRabbit\RawRabbit.xproj", "{14195F79-B374-4FEB-BA3C-E24138542421}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{2F91E22A-AEBA-4BEF-9A03-C8232830F697}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.DependencyInjection.Autofac", "src\RawRabbit.DependencyInjection.Autofac\RawRabbit.DependencyInjection.Autofac.xproj", "{23381B29-382A-4CF7-B10F-9661C2EA4F75}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.DependencyInjection.Ninject", "src\RawRabbit.DependencyInjection.Ninject\RawRabbit.DependencyInjection.Ninject.xproj", "{B763B208-1986-4995-921B-0CE1D417EE83}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.vNext", "src\RawRabbit.vNext\RawRabbit.vNext.xproj", "{62F08E39-36C4-4BE0-ADAF-4AA7FD91117B}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.Logging.Log4Net", "src\RawRabbit.Logging.Log4Net\RawRabbit.Logging.Log4Net.xproj", "{FA7F9725-DC41-425D-B6EA-BEAF6BA1BA4A}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.Logging.NLog", "src\RawRabbit.Logging.NLog\RawRabbit.Logging.NLog.xproj", "{38383E3A-84D6-45A2-BE38-E848BE436587}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.Logging.Serilog", "src\RawRabbit.Logging.Serilog\RawRabbit.Logging.Serilog.xproj", "{78C75F6F-E8CF-45FD-9F84-590A05A168D3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sample", "sample", "{CD0B1BD5-CEE9-4E4E-9266-19A18D5E5AF1}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.Messages.Sample", "sample\RawRabbit.Messages.Sample\RawRabbit.Messages.Sample.xproj", "{368BE2B7-456D-474F-A460-7C19E633C7DB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RawRabbit", "src\RawRabbit\RawRabbit.csproj", "{14195F79-B374-4FEB-BA3C-E24138542421}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.AspNet.Sample", "sample\RawRabbit.AspNet.Sample\RawRabbit.AspNet.Sample.xproj", "{313A89F7-B0DD-4559-BE59-C1684C41689F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RawRabbit.DependencyInjection.Autofac", "src\RawRabbit.DependencyInjection.Autofac\RawRabbit.DependencyInjection.Autofac.csproj", "{23381B29-382A-4CF7-B10F-9661C2EA4F75}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.ConsoleApp.Sample", "sample\RawRabbit.ConsoleApp.Sample\RawRabbit.ConsoleApp.Sample.xproj", "{70157E2B-961A-4029-A21A-BBBA15066755}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RawRabbit.DependencyInjection.Ninject", "src\RawRabbit.DependencyInjection.Ninject\RawRabbit.DependencyInjection.Ninject.csproj", "{B763B208-1986-4995-921B-0CE1D417EE83}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.Tests", "test\RawRabbit.Tests\RawRabbit.Tests.xproj", "{BCCCEBD4-7456-43F7-93C5-380C563705DA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RawRabbit.vNext", "src\RawRabbit.vNext\RawRabbit.vNext.csproj", "{62F08E39-36C4-4BE0-ADAF-4AA7FD91117B}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.IntegrationTests", "test\RawRabbit.IntegrationTests\RawRabbit.IntegrationTests.xproj", "{98C9E1D2-CBD2-4058-BE9F-BB5F0F3795B4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RawRabbit.Logging.Log4Net", "src\RawRabbit.Logging.Log4Net\RawRabbit.Logging.Log4Net.csproj", "{FA7F9725-DC41-425D-B6EA-BEAF6BA1BA4A}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.Operations.Publish", "src\RawRabbit.Operations.Publish\RawRabbit.Operations.Publish.xproj", "{569B0E27-FA00-41EC-82AD-B60C121D5799}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RawRabbit.Logging.NLog", "src\RawRabbit.Logging.NLog\RawRabbit.Logging.NLog.csproj", "{38383E3A-84D6-45A2-BE38-E848BE436587}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.Operations.Subscribe", "src\RawRabbit.Operations.Subscribe\RawRabbit.Operations.Subscribe.xproj", "{09428754-16D9-457E-A9C4-8C62D745D5CB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RawRabbit.Logging.Serilog", "src\RawRabbit.Logging.Serilog\RawRabbit.Logging.Serilog.csproj", "{78C75F6F-E8CF-45FD-9F84-590A05A168D3}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.Compatibility.Legacy", "src\RawRabbit.Compatibility.Legacy\RawRabbit.Compatibility.Legacy.xproj", "{D15DC347-BD32-4B1F-9ED3-958851E81CDF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RawRabbit.Messages.Sample", "sample\RawRabbit.Messages.Sample\RawRabbit.Messages.Sample.csproj", "{368BE2B7-456D-474F-A460-7C19E633C7DB}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.Enrichers.MessageContext.Subscribe", "src\RawRabbit.Enrichers.MessageContext.Subscribe\RawRabbit.Enrichers.MessageContext.Subscribe.xproj", "{608C761A-CC99-40A6-B474-C6783C7E47E8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RawRabbit.AspNet.Sample", "sample\RawRabbit.AspNet.Sample\RawRabbit.AspNet.Sample.csproj", "{313A89F7-B0DD-4559-BE59-C1684C41689F}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.Operations.Request", "src\RawRabbit.Operations.Request\RawRabbit.Operations.Request.xproj", "{E970BC44-5D50-480B-8477-0B82315AB99A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RawRabbit.ConsoleApp.Sample", "sample\RawRabbit.ConsoleApp.Sample\RawRabbit.ConsoleApp.Sample.csproj", "{70157E2B-961A-4029-A21A-BBBA15066755}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.Operations.Respond", "src\RawRabbit.Operations.Respond\RawRabbit.Operations.Respond.xproj", "{9B40CE36-B5B1-4D33-B027-5A3D80554791}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RawRabbit.Tests", "test\RawRabbit.Tests\RawRabbit.Tests.csproj", "{BCCCEBD4-7456-43F7-93C5-380C563705DA}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.Enrichers.Attributes", "src\RawRabbit.Enrichers.Attributes\RawRabbit.Enrichers.Attributes.xproj", "{6E8BCE71-124E-4876-B28E-58C349922826}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RawRabbit.IntegrationTests", "test\RawRabbit.IntegrationTests\RawRabbit.IntegrationTests.csproj", "{98C9E1D2-CBD2-4058-BE9F-BB5F0F3795B4}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.Enrichers.MessageContext.Respond", "src\RawRabbit.Enrichers.MessageContext.Respond\RawRabbit.Enrichers.MessageContext.Respond.xproj", "{909E4663-768B-4CCD-B72F-2F8526C27442}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RawRabbit.Operations.Publish", "src\RawRabbit.Operations.Publish\RawRabbit.Operations.Publish.csproj", "{569B0E27-FA00-41EC-82AD-B60C121D5799}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.Operations.Get", "src\RawRabbit.Operations.Get\RawRabbit.Operations.Get.xproj", "{F6D034BE-A9D6-4204-BB70-FE9EEACFBEE5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RawRabbit.Operations.Subscribe", "src\RawRabbit.Operations.Subscribe\RawRabbit.Operations.Subscribe.csproj", "{09428754-16D9-457E-A9C4-8C62D745D5CB}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.Operations.MessageSequence", "src\RawRabbit.Operations.MessageSequence\RawRabbit.Operations.MessageSequence.xproj", "{FABAA0E9-E44B-4017-92C1-1D7770ADD9AF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RawRabbit.Compatibility.Legacy", "src\RawRabbit.Compatibility.Legacy\RawRabbit.Compatibility.Legacy.csproj", "{D15DC347-BD32-4B1F-9ED3-958851E81CDF}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.Operations.StateMachine", "src\RawRabbit.Operations.StateMachine\RawRabbit.Operations.StateMachine.xproj", "{152B46DE-742E-4991-8B91-5EB47B7745EF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RawRabbit.Enrichers.MessageContext.Subscribe", "src\RawRabbit.Enrichers.MessageContext.Subscribe\RawRabbit.Enrichers.MessageContext.Subscribe.csproj", "{608C761A-CC99-40A6-B474-C6783C7E47E8}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.Enrichers.MessageContext", "src\RawRabbit.Enrichers.MessageContext\RawRabbit.Enrichers.MessageContext.xproj", "{B4622844-74F4-4C5D-A75D-45855B03E81F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RawRabbit.Operations.Request", "src\RawRabbit.Operations.Request\RawRabbit.Operations.Request.csproj", "{E970BC44-5D50-480B-8477-0B82315AB99A}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.Enrichers.Polly", "src\RawRabbit.Enrichers.Polly\RawRabbit.Enrichers.Polly.xproj", "{C95030FF-2D90-4C68-B382-061CE8542C3B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RawRabbit.Operations.Respond", "src\RawRabbit.Operations.Respond\RawRabbit.Operations.Respond.csproj", "{9B40CE36-B5B1-4D33-B027-5A3D80554791}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.Enrichers.GlobalExecutionId", "src\RawRabbit.Enrichers.GlobalExecutionId\RawRabbit.Enrichers.GlobalExecutionId.xproj", "{66E98C93-4917-4349-8396-DE0AE9746BE4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RawRabbit.Enrichers.Attributes", "src\RawRabbit.Enrichers.Attributes\RawRabbit.Enrichers.Attributes.csproj", "{6E8BCE71-124E-4876-B28E-58C349922826}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.Enrichers.QueueSuffix", "src\RawRabbit.Enrichers.QueueSuffix\RawRabbit.Enrichers.QueueSuffix.xproj", "{E290407E-2E61-4958-9C89-3F0D422ED00A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RawRabbit.Enrichers.MessageContext.Respond", "src\RawRabbit.Enrichers.MessageContext.Respond\RawRabbit.Enrichers.MessageContext.Respond.csproj", "{909E4663-768B-4CCD-B72F-2F8526C27442}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RawRabbit.Enrichers.HttpContext", "src\RawRabbit.Enrichers.HttpContext\RawRabbit.Enrichers.HttpContext.xproj", "{21629DD1-B62B-4503-BFE5-399ECCB5AF37}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RawRabbit.Operations.Get", "src\RawRabbit.Operations.Get\RawRabbit.Operations.Get.csproj", "{F6D034BE-A9D6-4204-BB70-FE9EEACFBEE5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RawRabbit.Operations.MessageSequence", "src\RawRabbit.Operations.MessageSequence\RawRabbit.Operations.MessageSequence.csproj", "{FABAA0E9-E44B-4017-92C1-1D7770ADD9AF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RawRabbit.Operations.StateMachine", "src\RawRabbit.Operations.StateMachine\RawRabbit.Operations.StateMachine.csproj", "{152B46DE-742E-4991-8B91-5EB47B7745EF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RawRabbit.Enrichers.MessageContext", "src\RawRabbit.Enrichers.MessageContext\RawRabbit.Enrichers.MessageContext.csproj", "{B4622844-74F4-4C5D-A75D-45855B03E81F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RawRabbit.Enrichers.Polly", "src\RawRabbit.Enrichers.Polly\RawRabbit.Enrichers.Polly.csproj", "{C95030FF-2D90-4C68-B382-061CE8542C3B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RawRabbit.Enrichers.GlobalExecutionId", "src\RawRabbit.Enrichers.GlobalExecutionId\RawRabbit.Enrichers.GlobalExecutionId.csproj", "{66E98C93-4917-4349-8396-DE0AE9746BE4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RawRabbit.Enrichers.QueueSuffix", "src\RawRabbit.Enrichers.QueueSuffix\RawRabbit.Enrichers.QueueSuffix.csproj", "{E290407E-2E61-4958-9C89-3F0D422ED00A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RawRabbit.Enrichers.HttpContext", "src\RawRabbit.Enrichers.HttpContext\RawRabbit.Enrichers.HttpContext.csproj", "{21629DD1-B62B-4503-BFE5-399ECCB5AF37}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

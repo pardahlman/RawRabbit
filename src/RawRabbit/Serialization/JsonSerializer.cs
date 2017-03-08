@@ -51,7 +51,5 @@ namespace RawRabbit.Serialization
 		{
 			return (TType)Deserialize(typeof(TType), str);
 		}
-
-		
 	}
 }

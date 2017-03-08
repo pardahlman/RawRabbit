@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp1.0</TargetFramework>
+    <AssemblyName>RawRabbit.ConsoleApp.Sample</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <PackageId>RawRabbit.ConsoleApp.Sample</PackageId>
+    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
+    <RuntimeFrameworkVersion>1.0.4</RuntimeFrameworkVersion>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Update="rawrabbit.json">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\RawRabbit\RawRabbit.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.Operations.Subscribe\RawRabbit.Operations.Subscribe.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.Operations.Publish\RawRabbit.Operations.Publish.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.Operations.Respond\RawRabbit.Operations.Respond.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.Enrichers.GlobalExecutionId\RawRabbit.Enrichers.GlobalExecutionId.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.Enrichers.MessageContext\RawRabbit.Enrichers.MessageContext.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.Enrichers.MessageContext.Subscribe\RawRabbit.Enrichers.MessageContext.Subscribe.csproj" />
+    <ProjectReference Include="..\RawRabbit.Messages.Sample\RawRabbit.Messages.Sample.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.0.2" />
+  </ItemGroup>
+
+</Project>
