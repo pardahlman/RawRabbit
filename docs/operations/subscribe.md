@@ -4,7 +4,7 @@ The extension methods again come to the rescue! Subscriptions again very much re
 
 ## BasicConsume
 
-First get the `Subscribe` operation package to enrich the BusClient with BasicConsumeAsync, used to perform a BasicConsumeAsync
+First get the `Subscribe` operation package to enrich the BusClient with subscription/consuming capabilities
 
 ```nuget
 
