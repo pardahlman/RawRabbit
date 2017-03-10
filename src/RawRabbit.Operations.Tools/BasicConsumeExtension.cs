@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using RabbitMQ.Client.Events;
 using RawRabbit.Common;
-using RawRabbit.Configuration.Consumer;
+using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
 
-namespace RawRabbit.Pipe.Extensions
+namespace RawRabbit
 {
 	public static class BasicConsumeExtension
 	{

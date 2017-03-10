@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using RawRabbit.Advanced;
 using RawRabbit.Configuration.Get;
 using RawRabbit.Operations.Get.Model;
 using RawRabbit.Pipe;
-using RawRabbit.Pipe.Extensions;
 
 namespace RawRabbit
 {

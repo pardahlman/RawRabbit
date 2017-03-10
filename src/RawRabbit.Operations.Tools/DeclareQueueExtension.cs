@@ -5,7 +5,7 @@ using RawRabbit.Configuration.Queue;
 using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
 
-namespace RawRabbit.Advanced
+namespace RawRabbit
 {
 	public static class DeclareQueueExtension
 	{

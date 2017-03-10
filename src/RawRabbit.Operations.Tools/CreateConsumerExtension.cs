@@ -6,7 +6,7 @@ using RawRabbit.Configuration.Consume;
 using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
 
-namespace RawRabbit.Advanced
+namespace RawRabbit
 {
 	public static class CreateConsumerExtension
 	{

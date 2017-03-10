@@ -12,6 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\RawRabbit.Operations.Tools\RawRabbit.Operations.Tools.csproj" />
     <ProjectReference Include="..\..\src\RawRabbit\RawRabbit.csproj" />
     <ProjectReference Include="..\..\src\RawRabbit.Compatibility.Legacy\RawRabbit.Compatibility.Legacy.csproj" />
     <ProjectReference Include="..\..\src\RawRabbit.Operations.Get\RawRabbit.Operations.Get.csproj" />

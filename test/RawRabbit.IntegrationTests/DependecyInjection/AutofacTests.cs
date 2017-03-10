@@ -2,14 +2,12 @@
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Core;
-using RawRabbit.Advanced;
 using RawRabbit.Common;
 using RawRabbit.Configuration;
 using RawRabbit.DependencyInjection.Autofac;
 using RawRabbit.Instantiation;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.Logging;
-using RawRabbit.Pipe.Extensions;
 using Xunit;
 
 namespace RawRabbit.IntegrationTests.DependecyInjection

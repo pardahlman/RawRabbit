@@ -7,7 +7,6 @@ using RawRabbit.Common;
 using RawRabbit.Enrichers.GlobalExecutionId;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.Pipe;
-using RawRabbit.Pipe.Extensions;
 using RawRabbit.Pipe.Middleware;
 using RawRabbit.vNext.Pipe;
 using Xunit;

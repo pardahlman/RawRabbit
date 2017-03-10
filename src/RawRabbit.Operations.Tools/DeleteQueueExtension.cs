@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using RawRabbit.Configuration.Consumer;
+using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
 
-namespace RawRabbit.Pipe.Extensions
+namespace RawRabbit
 {
 	public static class DeleteQueueExtension
 	{

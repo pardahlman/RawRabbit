@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.Pipe;
-using RawRabbit.Pipe.Extensions;
 using RawRabbit.Pipe.Middleware;
 using Xunit;
 

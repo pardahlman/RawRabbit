@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Framing;
-using RawRabbit.Advanced;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Queue;

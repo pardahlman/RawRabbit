@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using RawRabbit.Advanced;
 using RawRabbit.Configuration;
 using RawRabbit.vNext.Pipe;
 using Xunit;
