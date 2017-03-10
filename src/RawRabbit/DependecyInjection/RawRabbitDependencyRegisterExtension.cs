@@ -61,7 +61,7 @@ namespace RawRabbit.DependecyInjection
 					ContractResolver = new CamelCasePropertyNamesContractResolver(),
 					ObjectCreationHandling = ObjectCreationHandling.Auto,
 					DefaultValueHandling = DefaultValueHandling.Ignore,
-					TypeNameHandling = TypeNameHandling.All,
+					TypeNameHandling = TypeNameHandling.Auto,
 					ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
 					MissingMemberHandling = MissingMemberHandling.Ignore,
 					PreserveReferencesHandling = PreserveReferencesHandling.Objects,
