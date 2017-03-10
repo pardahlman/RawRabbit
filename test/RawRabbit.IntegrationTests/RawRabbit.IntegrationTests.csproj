@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Authors>par.dahlman</Authors>
-    <TargetFramework>net451</TargetFramework>
+    <TargetFramework>net46</TargetFramework>
     <AssemblyName>RawRabbit.IntegrationTests</AssemblyName>
     <PackageId>RawRabbit.IntegrationTests</PackageId>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
@@ -36,12 +36,13 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20170106-08" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0-beta5-build1225" />
-    <PackageReference Include="Moq" Version="4.6.38-alpha" />
-    <PackageReference Include="xunit" Version="2.2.0-beta5-build3474" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
+    <PackageReference Include="Moq" Version="4.7.1" />
+    <PackageReference Include="xunit" Version="2.2.0" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
+    <PackageReference Include="Microsoft.NETCore.Platforms" Version="1.0.2" />
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
