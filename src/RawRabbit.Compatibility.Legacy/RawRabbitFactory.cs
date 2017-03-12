@@ -4,6 +4,8 @@ using RawRabbit.DependecyInjection;
 using RawRabbit.Enrichers.MessageContext;
 using RawRabbit.Enrichers.MessageContext.Context;
 using RawRabbit.Instantiation;
+using RawRabbit.Pipe;
+using RawRabbit.Pipe.Middleware;
 using RawRabbitConfiguration = RawRabbit.Configuration.RawRabbitConfiguration;
 
 namespace RawRabbit.Compatibility.Legacy
@@ -20,7 +22,14 @@ namespace RawRabbit.Compatibility.Legacy
 			options.Plugins = options.Plugins ?? (builder => { });
 			options.Plugins += builder => builder
 				.UseMessageContext(context => new MessageContext { GlobalRequestId = Guid.NewGuid() })
-				.UseContextForwarding();
+				.UseContextForwarding()
+				.Register(p => p
+					.Use<HeaderSerializationMiddleware>(new HeaderSerializationOptions
+					{
+						CreateItemFunc =
+							context => context.GetMessageType().Name,
+						HeaderKeyFunc = context => "message_type"
+					}));
 			var simpleIoc = new SimpleDependecyInjection();
 			var client = Instantiation.RawRabbitFactory.CreateSingleton(options, simpleIoc, ioc => simpleIoc);
 			return new BusClient<TMessageContext>(client, simpleIoc.GetService<IConfigurationEvaluator>());
@@ -35,7 +44,14 @@ namespace RawRabbit.Compatibility.Legacy
 			options.Plugins = options.Plugins ?? (builder => { });
 			options.Plugins += builder => builder
 				.UseMessageContext(context => new MessageContext {GlobalRequestId = Guid.NewGuid()})
-				.UseContextForwarding();
+				.UseContextForwarding()
+				.Register(p => p
+					.Use<HeaderSerializationMiddleware>(new HeaderSerializationOptions
+					{
+						CreateItemFunc =
+							context => context.GetMessageType().Name,
+						HeaderKeyFunc = context => "message_type"
+					}));
 			var simpleIoc = new SimpleDependecyInjection();
 			var client = Instantiation.RawRabbitFactory.CreateSingleton(options, simpleIoc, ioc => simpleIoc);
 			return new BusClient(client, simpleIoc.GetService<IConfigurationEvaluator>());
