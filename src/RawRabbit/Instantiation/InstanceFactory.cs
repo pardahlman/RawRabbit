@@ -8,12 +8,12 @@ using RawRabbit.Subscription;
 
 namespace RawRabbit.Instantiation
 {
-	public interface IInstanceFactory
+	public interface IInstanceFactory : IDisposable
 	{
 		IBusClient Create();
 	}
 
-	public class InstanceFactory : IDisposable, IInstanceFactory
+	public class InstanceFactory : IInstanceFactory
 	{
 		private readonly IDependecyResolver _resolver;
 
