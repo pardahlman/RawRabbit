@@ -53,7 +53,9 @@ namespace RawRabbit.Consumer
 
 		public IBasicConsumer ConfigureConsume(IBasicConsumer consumer, ConsumeConfiguration cfg)
 		{
+			CheckPropertyValues(cfg);
 			_logger.LogInformation($"Preparing to consume message from queue '{cfg.QueueName}'.");
+
 			consumer.Model.BasicConsume(
 				queue: cfg.QueueName,
 				noAck: cfg.NoAck,
@@ -73,6 +75,22 @@ namespace RawRabbit.Consumer
 				);
 			}
 			return consumer;
+		}
+
+		protected virtual void CheckPropertyValues(ConsumeConfiguration cfg)
+		{
+			if (cfg == null)
+			{
+				throw new ArgumentException("Unable to create consumer. The provided configuration is null");
+			}
+			if (string.IsNullOrEmpty(cfg.QueueName))
+			{
+				throw new ArgumentException("Unable to create consume. No queue name provided.");
+			}
+			if (string.IsNullOrEmpty(cfg.ConsumerTag))
+			{
+				throw new ArgumentException("Unable to create consume. Consumer tag cannot be undefined.");
+			}
 		}
 
 		protected virtual Task<IModel> GetOrCreateChannelAsync(CancellationToken token = default(CancellationToken))
