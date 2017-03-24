@@ -19,7 +19,7 @@ namespace RawRabbit.Enrichers.HttpContext
 		}
 #endif
 
-#if net451
+#if NET451
 		public static IPipeContext UseHttpContext(this IPipeContext pipeContext, System.Web.HttpContext httpContext)
 		{
 			pipeContext.Properties.AddOrReplace(HttpContext, httpContext);

@@ -7,7 +7,7 @@ namespace RawRabbit
 	{
 		public static IClientBuilder UseHttpContext(this IClientBuilder builder)
 		{
-#if net451
+#if NET451
 			builder.Register(p => p
 				.Use<NetFxHttpContextMiddleware>()
 			);

@@ -14,7 +14,7 @@ namespace RawRabbit.Enrichers.HttpContext
 
 		public override Task InvokeAsync(IPipeContext context, CancellationToken token = new CancellationToken())
 		{
-#if net451
+#if NET451
 			context.UseHttpContext(System.Web.HttpContext.Current);
 #endif
 			return Next.InvokeAsync(context, token);
