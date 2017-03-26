@@ -18,7 +18,7 @@ namespace RawRabbit.Logging
 		private readonly Func<string, ILogger> _createFn;
 		private readonly ConcurrentDictionary<string, ILogger> _categoryToLogger;
 
-		public LoggerFactory() : this(s => new ConsoleLogger(LogLevel.Debug, s))
+		public LoggerFactory() : this(s => new VoidLogger())
 		{
 			
 		}
