@@ -32,13 +32,13 @@ namespace RawRabbit.Pipe.Middleware
 			});
 		}
 
-		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
+		public override async Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var props = GetOrCreateBasicProperties(context);
 			ModifyBasicProperties(context, props);
 			InvokePostCreateAction(context, props);
 			context.Properties.TryAdd(PipeKey.BasicProperties, props);
-			return Next.InvokeAsync(context, token);
+			await Next.InvokeAsync(context, token);
 		}
 
 		protected virtual void ModifyBasicProperties(IPipeContext context, IBasicProperties props)

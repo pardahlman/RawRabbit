@@ -32,12 +32,12 @@ namespace RawRabbit.IntegrationTests.Rpc
 				/* Setup */
 				var timeout = TimeSpan.FromMilliseconds(300);
 				var timeoutCs = new CancellationTokenSource();
+
 				/* Test */
 				/* Assert */
-
 				var requestTask = requester.RequestAsync<BasicRequest, BasicResponse>(
 					message: new BasicRequest(),
-					context: ctx => ctx .UseRequestTimeout(timeout),
+					context: ctx => ctx.UseRequestTimeout(timeout),
 					ct: timeoutCs.Token
 				);
 
@@ -48,7 +48,7 @@ namespace RawRabbit.IntegrationTests.Rpc
 				Assert.False(requestTask.IsCompleted);
 
 				timeoutCs.Cancel();
-
+				await Task.Delay(timeout.Add(TimeSpan.FromMilliseconds(50)));
 				Assert.True(requestTask.IsCanceled);
 			}
 		}

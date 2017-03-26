@@ -28,8 +28,8 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 				});
 
 				/* Test */
-				var publishTask = publisher.PublishAsync(new BasicMessage(), token: sendCts.Token);
 				sendCts.CancelAfter(TimeSpan.FromTicks(400));
+				var publishTask = publisher.PublishAsync(new BasicMessage(), token: sendCts.Token);
 				recievedTcs.Task.Wait(100);
 
 				/* Assert */

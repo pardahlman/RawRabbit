@@ -28,14 +28,14 @@ namespace RawRabbit.Pipe.Middleware
 			SaveInContext = options?.SaveInContext ?? ((ctx, subscription) => ctx.Properties.Add(PipeKey.Subscription, subscription));
 		}
 
-		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
+		public override async Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var consumer = GetConsumer(context);
 			var queueName = GetQueueName(context);
 			var subscription = CreateSubscription(consumer, queueName);
 			SaveSubscriptionInContext(context, subscription);
 			SaveSubscriptionInRepo(subscription);
-			return Next.InvokeAsync(context, token);
+			await Next.InvokeAsync(context, token);
 		}
 
 		protected virtual IBasicConsumer GetConsumer(IPipeContext context)

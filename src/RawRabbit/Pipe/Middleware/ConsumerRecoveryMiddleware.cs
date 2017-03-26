@@ -33,18 +33,20 @@ namespace RawRabbit.Pipe.Middleware
 			ConsumeConfigFunc = options?.ConsumeConfigFunc ?? (context => context.GetConsumeConfiguration());
 		}
 
-		public override Task InvokeAsync(IPipeContext context, CancellationToken token = new CancellationToken())
+		public override async Task InvokeAsync(IPipeContext context, CancellationToken token = new CancellationToken())
 		{
 			if (!IsEnabled(context))
 			{
 				_logger.LogDebug("Consumer Recovery Disabled.");
-				return Next.InvokeAsync(context, token);
+				await Next.InvokeAsync(context, token);
+				return;
 			}
 
 			var basicConsumer = GetConsumer(context) as EventingBasicConsumer;
 			if (basicConsumer == null)
 			{
-				return Next.InvokeAsync(context, token);
+				await Next.InvokeAsync(context, token);
+				return;
 			}
 			basicConsumer.Shutdown += (sender, args) =>
 			{
@@ -91,7 +93,7 @@ namespace RawRabbit.Pipe.Middleware
 				}, null, GetRecoverTimeSpan(context), new TimeSpan(-1));
 			};
 			
-			return Next.InvokeAsync(context, token);
+			await Next.InvokeAsync(context, token);
 		}
 
 		protected virtual IBasicConsumer GetConsumer(IPipeContext context)

@@ -6,13 +6,10 @@ namespace RawRabbit.Pipe.Middleware
 {
 	public class CancellationMiddleware : Middleware
 	{
-		public override Task InvokeAsync(IPipeContext context, CancellationToken token = new CancellationToken())
+		public override async Task InvokeAsync(IPipeContext context, CancellationToken token = new CancellationToken())
 		{
-			if (token.IsCancellationRequested)
-			{
-				return TaskUtil.FromCancelled();
-			}
-			return Next.InvokeAsync(context, token);
+			token.ThrowIfCancellationRequested();
+			await Next.InvokeAsync(context, token);
 		}
 	}
 }

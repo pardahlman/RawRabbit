@@ -29,33 +29,31 @@ namespace RawRabbit.Operations.Publish.Middleware
 			PostInvoke = options?.PostInvokeAction;
 		}
 
-		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
+		public override async Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var callback = GetCallback(context);
 			if (callback == null)
 			{
 				_logger.LogDebug("No Mandatory Callback registered.");
-				return Next.InvokeAsync(context, token);
+				await Next.InvokeAsync(context, token);
+				return;
 			}
 
 			var channel = GetChannel(context);
 			if (channel == null)
 			{
 				_logger.LogWarning("Channel not found in Pipe Context. Mandatory Callback not registered.");
-				return Next.InvokeAsync(context, token);
+				await Next.InvokeAsync(context, token);
+				return;
 			}
 
 			_logger.LogDebug($"Register Mandatory Callback on channel '{channel.ChannelNumber}'");
 			channel.BasicReturn += callback;
 			PostInvoke?.Invoke(context, callback);
 
-			return Next
-				.InvokeAsync(context, token)
-				.ContinueWith(t =>
-				{
-					_logger.LogDebug($"Removing Mandatory Callback on channel '{channel.ChannelNumber}'");
-					channel.BasicReturn -= callback;
-				}, token);
+			await Next.InvokeAsync(context, token);
+			_logger.LogDebug($"Removing Mandatory Callback on channel '{channel.ChannelNumber}'");
+			channel.BasicReturn -= callback;
 		}
 
 		protected virtual IModel GetChannel(IPipeContext context)

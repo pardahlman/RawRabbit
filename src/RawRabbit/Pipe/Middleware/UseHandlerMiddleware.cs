@@ -13,9 +13,9 @@ namespace RawRabbit.Pipe.Middleware
 			_handler = handler;
 		}
 
-		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
+		public override async Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
-			return _handler(context, () => Next.InvokeAsync(context, token));
+			await  _handler(context, () => Next.InvokeAsync(context, token));
 		}
 	}
 }

@@ -28,21 +28,17 @@ namespace RawRabbit.Pipe.Middleware
 			PostExecuteAction = options?.PostExecuteAction;
 		}
 
-		public override Task InvokeAsync(IPipeContext context, CancellationToken token = default(CancellationToken))
+		public override async Task InvokeAsync(IPipeContext context, CancellationToken token = default(CancellationToken))
 		{
-			if (!ShouldCreateChannel(context))
+			if (ShouldCreateChannel(context))
 			{
-				return Next.InvokeAsync(context, token);
+				var channel = await GetOrCreateChannelAsync(ChannelFactory, token);
+				context.Properties.TryAdd(PipeKey.Channel, channel);
+				PostExecuteAction?.Invoke(context, channel);
 			}
 
-			return GetOrCreateChannelAsync(ChannelFactory, token)
-				.ContinueWith(tChannel =>
-				{
-					context.Properties.TryAdd(PipeKey.Channel, tChannel.Result);
-					PostExecuteAction?.Invoke(context, tChannel.Result);
-					return Next.InvokeAsync(context, token);
-				}, token)
-				.Unwrap();
+			await Next.InvokeAsync(context, token);
+
 		}
 
 		protected virtual Task<IModel> GetOrCreateChannelAsync(IChannelFactory factory, CancellationToken token)

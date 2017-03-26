@@ -29,15 +29,14 @@ namespace RawRabbit.Pipe.Middleware
 			RoutingKeyFunc = options?.RoutingKeyFunc ?? (context => context.GetConsumeConfiguration()?.RoutingKey);
 		}
 
-		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
+		public override async Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var queueName = GetQueueName(context);
 			var exchangeName = GetExchangeName(context);
 			var routingKey = GetRoutingKey(context);
 
-			return BindQueueAsync(queueName, exchangeName, routingKey, context, token)
-				.ContinueWith(t => Next.InvokeAsync(context, token), token)
-				.Unwrap();
+			await BindQueueAsync(queueName, exchangeName, routingKey, context, token);
+			await Next.InvokeAsync(context, token);
 		}
 
 		protected virtual Task BindQueueAsync(string queue, string exchange, string routingKey, IPipeContext context, CancellationToken ct)

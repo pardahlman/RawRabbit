@@ -37,17 +37,18 @@ namespace RawRabbit.Pipe.Middleware
 			NoAckFunc = options?.NoAckFunc ?? (context => context.GetConsumeConfiguration().NoAck);
 		}
 
-		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
+		public override async Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var noAck = GetNoAck(context);
-			if (noAck)
+			if (!noAck)
 			{
-				return Next.InvokeAsync(context, token);
+				var ack = AcknowledgeMessage(context);
+				if (AbortExecution(ack))
+				{
+					return;
+				}
 			}
-			var ack = AcknowledgeMessage(context);
-			return AbortExecution(ack)
-				? Task.FromResult(0)
-				: Next.InvokeAsync(context, token);
+			await Next.InvokeAsync(context, token);
 		}
 		
 		protected virtual Acknowledgement AcknowledgeMessage(IPipeContext context)

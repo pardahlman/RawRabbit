@@ -72,8 +72,8 @@ namespace RawRabbit.IntegrationTests.Enrichers
 			using (var subscriber = RawRabbitFactory.CreateTestClient())
 			{
 				/* Setup */
-				var contextTsc = new TaskCompletionSource<IMessageContext>();
-				await subscriber.SubscribeAsync<BasicMessage, IMessageContext>((request, context) =>
+				var contextTsc = new TaskCompletionSource<TestMessageContext>();
+				await subscriber.SubscribeAsync<BasicMessage, TestMessageContext>((request, context) =>
 				{
 					contextTsc.TrySetResult(context);
 					return Task.FromResult(0);
@@ -98,8 +98,8 @@ namespace RawRabbit.IntegrationTests.Enrichers
 			using (var subscriber = RawRabbitFactory.CreateTestClient())
 			{
 				/* Setup */
-				var contextTsc = new TaskCompletionSource<IMessageContext>();
-				await subscriber.SubscribeAsync<BasicMessage, IMessageContext>((request, context) =>
+				var contextTsc = new TaskCompletionSource<TestMessageContext>();
+				await subscriber.SubscribeAsync<BasicMessage, TestMessageContext>((request, context) =>
 				{
 					contextTsc.TrySetResult(context);
 					return Task.FromResult(0);

@@ -30,11 +30,11 @@ namespace RawRabbit.Pipe.Middleware
 			PersistAction = options?.PersistAction ?? ((context, msg) => context.Properties.TryAdd(PipeKey.Message, msg));
 		}
 
-		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
+		public override async Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var message = GetMessage(context);
 			SaveInContext(context, message);
-			return Next.InvokeAsync(context, token);
+			await Next.InvokeAsync(context, token);
 		}
 
 		protected virtual object GetMessage(IPipeContext context)

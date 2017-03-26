@@ -34,14 +34,14 @@ namespace RawRabbit.Pipe.Middleware
 			Serializer = serializer;
 		}
 
-		public override Task InvokeAsync(IPipeContext context, CancellationToken token = default(CancellationToken))
+		public override async Task InvokeAsync(IPipeContext context, CancellationToken token = default(CancellationToken))
 		{
 			var headerObject = GetHeaderObject(context);
 			if (headerObject != null)
 			{
 				SaveInContext(context, headerObject);
 			}
-			return Next.InvokeAsync(context, token);
+			await Next.InvokeAsync(context, token);
 		}
 
 		protected virtual void SaveInContext(IPipeContext context, object headerValue)

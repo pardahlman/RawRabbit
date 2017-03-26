@@ -114,15 +114,10 @@ namespace RawRabbit.Compatibility.Legacy.Configuration
 				Exclusive = true
 			};
 
-			var exchangeConfig = new ExchangeConfiguration(_clientConfig.Exchange)
-			{
-				ExchangeName = _conventions.ExchangeNamingConvention(requestType)
-			};
-
 			var defaultConfig = new RequestConfiguration
 			{
 				ReplyQueue = replyQueueConfig,
-				Exchange = exchangeConfig,
+				Exchange = ExchangeConfiguration.Default,
 				RoutingKey = _conventions.QueueNamingConvention(requestType),
 				ReplyQueueRoutingKey = replyQueueConfig.QueueName
 			};

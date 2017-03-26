@@ -57,24 +57,17 @@ namespace RawRabbit
 					BodyFunc = c => Encoding.UTF8.GetBytes(c.Get<string>(PipeKey.SerializedMessage))
 				});
 
-		public static Task<TResponse> RequestAsync<TRequest, TResponse>(this IBusClient client, TRequest message = default(TRequest), Action<IPipeContext> context = null, CancellationToken ct = default(CancellationToken))
+		public static async Task<TResponse> RequestAsync<TRequest, TResponse>(this IBusClient client, TRequest message = default(TRequest), Action<IPipeContext> context = null, CancellationToken ct = default(CancellationToken))
 		{
-			return client
+			var result = await client
 				.InvokeAsync(RequestPipe, ctx =>
 				{
 					ctx.Properties.Add(RequestKey.OutgoingMessageType, typeof(TRequest));
 					ctx.Properties.Add(RequestKey.IncommingMessageType, typeof(TResponse));
 					ctx.Properties.Add(PipeKey.Message, message);
 					context?.Invoke(ctx);
-				}, ct)
-				.ContinueWith(tContext =>
-				{
-					if (tContext.IsFaulted)
-					{
-						throw tContext?.Exception?.InnerException ?? new Exception();
-					}
-					return tContext.Result.Get<TResponse>(RequestKey.ResponseMessage);
 				}, ct);
+			return result.Get<TResponse>(RequestKey.ResponseMessage);
 		}
 	}
 }

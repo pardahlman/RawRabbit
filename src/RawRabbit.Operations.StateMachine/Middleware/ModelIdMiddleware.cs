@@ -25,13 +25,13 @@ namespace RawRabbit.Operations.StateMachine.Middleware
 			ModelIdFunc = options?.ModelIdFunc ?? (context => context.GetModelId());
 		}
 
-		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
+		public override async Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var corrFunc = GetCorrelationFunc(context);
 			var corrArgs = GetCorrelationArgs(context);
 			var id = GetModelId(context, corrFunc, corrArgs);
 			context.Properties.TryAdd(StateMachineKey.ModelId, id);
-			return Next.InvokeAsync(context, token);
+			await Next.InvokeAsync(context, token);
 		}
 
 		protected virtual Func<object[], Guid> GetCorrelationFunc(IPipeContext context)

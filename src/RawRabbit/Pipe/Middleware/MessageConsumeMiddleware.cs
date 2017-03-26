@@ -33,7 +33,7 @@ namespace RawRabbit.Pipe.Middleware
 			ThrottledExecutionFunc = options?.ThrottleFuncFunc ?? (context => context.GetConsumeThrottleAction());
 		}
 
-		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
+		public override async Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var consumer = ConsumeFunc(context);
 			var throttlingFunc = GetThrottlingFunc(context);
@@ -42,7 +42,7 @@ namespace RawRabbit.Pipe.Middleware
 				throttlingFunc(() => InvokeConsumePipeAsync(context, args, token), token);
 			});
 
-			return Next.InvokeAsync(context, token);
+			await Next.InvokeAsync(context, token);
 		}
 
 		private Action<Func<Task>, CancellationToken> GetThrottlingFunc(IPipeContext context)
@@ -50,12 +50,20 @@ namespace RawRabbit.Pipe.Middleware
 			return ThrottledExecutionFunc(context);
 		}
 
-		protected virtual Task InvokeConsumePipeAsync(IPipeContext context, BasicDeliverEventArgs args, CancellationToken token)
+		protected virtual async Task InvokeConsumePipeAsync(IPipeContext context, BasicDeliverEventArgs args, CancellationToken token)
 		{
 			_logger.LogDebug($"Invoking consumer pipe for message '{args?.BasicProperties?.MessageId}'.");
 			var consumeContext = ContextFactory.CreateContext(context.Properties.ToArray());
 			consumeContext.Properties.Add(PipeKey.DeliveryEventArgs, args);
-			return ConsumePipe.InvokeAsync(consumeContext, token);
+			try
+			{
+				await ConsumePipe.InvokeAsync(consumeContext, token);
+			}
+			catch (Exception e)
+			{
+				_logger.LogError($"An unhandled exception was thrown when consuming message with routing key {args.RoutingKey}", e);
+				throw;
+			}
 		}
 	}
 }

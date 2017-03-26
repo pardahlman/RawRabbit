@@ -24,12 +24,12 @@ namespace RawRabbit.Pipe.Middleware
 			PersistAction = options?.PersistAction ?? ((c, s) => c.Properties.TryAdd(PipeKey.SerializedMessage, s));
 		}
 
-		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
+		public override async Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var message = GetMessage(context);
 			var serialized = SerializeMessage(message);
 			AddSerializedMessageToContext(context, serialized);
-			return Next.InvokeAsync(context, token);
+			await Next.InvokeAsync(context, token);
 		}
 
 		protected virtual object GetMessage(IPipeContext context)

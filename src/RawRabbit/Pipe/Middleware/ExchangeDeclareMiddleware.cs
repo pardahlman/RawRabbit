@@ -28,23 +28,24 @@ namespace RawRabbit.Pipe.Middleware
 			ThrowOnFailFunc = options?.ThrowOnFailFunc ?? (context => false);
 		}
 
-		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
+		public override async Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var exchangeCfg = GetExchangeDeclaration(context);
 
 			if (exchangeCfg != null)
 			{
 				_logger.LogDebug($"Exchange configuration found. Declaring '{exchangeCfg.Name}'.");
-				return DeclareExchangeAsync(exchangeCfg, context, token)
-					.ContinueWith(t => Next.InvokeAsync(context, token), token)
-					.Unwrap();
+				await DeclareExchangeAsync(exchangeCfg, context, token);
+			}
+			else
+			{
+				if (GetThrowOnFail(context))
+				{
+					throw new ArgumentNullException(nameof(exchangeCfg));
+				}
 			}
 
-			if (GetThrowOnFail(context))
-			{
-				throw new ArgumentNullException(nameof(exchangeCfg));
-			}
-			return Next.InvokeAsync(context, token);
+			await Next.InvokeAsync(context, token);
 		}
 
 		protected virtual ExchangeDeclaration GetExchangeDeclaration(IPipeContext context)

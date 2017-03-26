@@ -32,19 +32,14 @@ namespace RawRabbit.Operations.StateMachine.Middleware
 			PostExecuteAction = options?.PostExecuteAction;
 		}
 
-		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
+		public override async Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var id = GetModelId(context);
 			var stateMachineType = GetStateMachineType(context);
-			var stateMachineTask = GetStateMachineAsync(context, id, stateMachineType);
-			return stateMachineTask
-				.ContinueWith(tMachine =>
-				{
-					context.Properties.TryAdd(StateMachineKey.Machine, tMachine.Result);
-					PostExecuteAction?.Invoke(tMachine.Result, context);
-					return Next.InvokeAsync(context, token);
-				}, token)
-				.Unwrap();
+			var stateMachine = await GetStateMachineAsync(context, id, stateMachineType);
+			context.Properties.TryAdd(StateMachineKey.Machine, stateMachine);
+			PostExecuteAction?.Invoke(stateMachine, context);
+			await Next.InvokeAsync(context, token);
 		}
 
 		protected virtual Task<StateMachineBase> GetStateMachineAsync(IPipeContext context, Guid id, Type type)

@@ -23,11 +23,11 @@ namespace RawRabbit
 				ContentFunc = context => context.GetBasicGetResult()
 			});
 
-		public static Task<Ackable<BasicGetResult>> GetAsync(this IBusClient busClient, Action<IGetConfigurationBuilder> config = null, CancellationToken token = default(CancellationToken))
+		public static async Task<Ackable<BasicGetResult>> GetAsync(this IBusClient busClient, Action<IGetConfigurationBuilder> config = null, CancellationToken token = default(CancellationToken))
 		{
-			return busClient
-				.InvokeAsync(UntypedGetPipe, context => context.Properties.Add(PipeKey.ConfigurationAction, config), token)
-				.ContinueWith(tContext => tContext.Result.Get<Ackable<object>>(GetKey.AckableResult).AsAckable<BasicGetResult>(), token);
+			var result = await busClient
+				.InvokeAsync(UntypedGetPipe, context => context.Properties.Add(PipeKey.ConfigurationAction, config), token);
+			return result.Get<Ackable<object>>(GetKey.AckableResult).AsAckable<BasicGetResult>();
 		}
 	}
 }

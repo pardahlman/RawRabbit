@@ -28,20 +28,16 @@ namespace RawRabbit.Pipe.Middleware
 			ConsumerFunc = options?.ConsumerFunc ?? ((factory, token, context) => factory.CreateConsumerAsync(token: token));
 		}
 
-		public override Task InvokeAsync(IPipeContext context, CancellationToken token = default(CancellationToken))
+		public override async Task InvokeAsync(IPipeContext context, CancellationToken token = default(CancellationToken))
 		{
-			return GetOrCreateConsumerAsync(context, token)
-				.ContinueWith(tConsumer =>
-					{
-						var config = GetConfiguration(context);
-						if (config != null)
-						{
-							ConsumerFactory.ConfigureConsume(tConsumer.Result, config);
-						}
-						context.Properties.TryAdd(PipeKey.Consumer, tConsumer.Result);
-						return Next.InvokeAsync(context, token);
-					}, token)
-				.Unwrap();
+			var consumer = await GetOrCreateConsumerAsync(context, token);
+			var config = GetConfiguration(context);
+			if (config != null)
+			{
+				ConsumerFactory.ConfigureConsume(consumer, config);
+			}
+			context.Properties.TryAdd(PipeKey.Consumer, consumer);
+			await Next.InvokeAsync(context, token);
 		}
 
 		protected virtual ConsumeConfiguration GetConfiguration(IPipeContext context)

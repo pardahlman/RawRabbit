@@ -20,11 +20,12 @@ namespace RawRabbit.Operations.Request.Middleware
 			TimeSpanFunc = options?.TimeSpanFunc ?? (context => context.GetRequestTimeout());
 		}
 
-		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
+		public override async Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			if (token != default(CancellationToken))
 			{
-				return Next.InvokeAsync(context, token);
+				await Next.InvokeAsync(context, token);
+				return;
 			}
 
 			var timeout = GetTimeoutTimeSpan(context);
@@ -37,9 +38,8 @@ namespace RawRabbit.Operations.Request.Middleware
 				var cfg = context?.GetRequestConfiguration();
 				timeoutTsc.TrySetException(new TimeoutException($"The request '{correlationId}' with routing key '{cfg?.Request.RoutingKey}' timed out after {timeout:g}."));
 			});
-			
-			var pipeTask = Next
-				.InvokeAsync(context, ctc.Token)
+
+			var pipeTask = Next.InvokeAsync(context, ctc.Token)
 				.ContinueWith(t =>
 				{
 					timeoutTsc.TrySetResult(true);
@@ -47,13 +47,13 @@ namespace RawRabbit.Operations.Request.Middleware
 				}, token)
 				.Unwrap();
 
-			return timeoutTsc.Task
-				.ContinueWith(t =>
-				{
-					ctc.Dispose();
-					return t.IsFaulted ? t : pipeTask;
-				}, token)
-				.Unwrap();
+			await timeoutTsc.Task;
+			await pipeTask;
+			ctc.Dispose();
+			if (pipeTask.IsFaulted)
+			{
+				throw pipeTask.Exception;
+			}
 		}
 
 		protected virtual TimeSpan GetTimeoutTimeSpan(IPipeContext context)

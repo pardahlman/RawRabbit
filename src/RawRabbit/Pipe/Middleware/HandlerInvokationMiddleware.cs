@@ -24,16 +24,10 @@ namespace RawRabbit.Pipe.Middleware
 			PostInvokeAction = options?.PostInvokeAction;
 		}
 
-		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
+		public override async Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
-			return InvokeMessageHandler(context, token)
-				.ContinueWith(t =>
-				{
-					if (t.IsFaulted)
-						throw t.Exception;
-					return Next.InvokeAsync(context, token);
-				}, token)
-				.Unwrap();
+			await InvokeMessageHandler(context, token);
+			await Next.InvokeAsync(context, token);
 		}
 
 		protected virtual Task InvokeMessageHandler(IPipeContext context, CancellationToken token)

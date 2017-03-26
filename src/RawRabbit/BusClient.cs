@@ -18,26 +18,13 @@ namespace RawRabbit
 			_contextFactory = contextFactory;
 		}
 
-		public Task<IPipeContext> InvokeAsync(Action<IPipeBuilder> pipeCfg, Action<IPipeContext> contextCfg = null, CancellationToken token = default(CancellationToken))
+		public async Task<IPipeContext> InvokeAsync(Action<IPipeBuilder> pipeCfg, Action<IPipeContext> contextCfg = null, CancellationToken token = default(CancellationToken))
 		{
 			var pipe = _pipeBuilderFactory.Create(pipeCfg);
 			var context = _contextFactory.CreateContext();
 			contextCfg?.Invoke(context);
-			return pipe
-				.InvokeAsync(context, token)
-				.ContinueWith(t =>
-				{
-					if (t.IsCanceled)
-					{
-						return TaskUtil.FromCancelled<IPipeContext>();
-					}
-					if (t.IsFaulted)
-					{
-						return TaskUtil.FromException<IPipeContext>(t.Exception.InnerException);
-					}
-					return Task.FromResult(context);
-				}, token)
-				.Unwrap();
+			await pipe.InvokeAsync(context, token);
+			return context;
 		}
 	}
 }

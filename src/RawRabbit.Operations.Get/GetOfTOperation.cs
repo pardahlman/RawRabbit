@@ -34,18 +34,16 @@ namespace RawRabbit
 			return GetAsync<TMessage>(busClient, config, null, token);
 		}
 
-		internal static Task<Ackable<TMessage>> GetAsync<TMessage>(this IBusClient busClient, Action<IGetConfigurationBuilder> config = null, Action<IPipeContext> pipeAction = null, CancellationToken token = default(CancellationToken))
+		internal static async Task<Ackable<TMessage>> GetAsync<TMessage>(this IBusClient busClient, Action<IGetConfigurationBuilder> config = null, Action<IPipeContext> pipeAction = null, CancellationToken token = default(CancellationToken))
 		{
-			return busClient
+			var result = await busClient
 				.InvokeAsync(DeserializedBodyGetPipe, context =>
 				{
 					context.Properties.Add(PipeKey.ConfigurationAction, config);
 					context.Properties.Add(PipeKey.MessageType, typeof(TMessage));
 					pipeAction?.Invoke(context);
-				}, token)
-				.ContinueWith(tContext => tContext.Result.Get<Ackable<object>>(GetKey.AckableResult).AsAckable<TMessage>(), token);
+				}, token);
+			return result.Get<Ackable<object>>(GetKey.AckableResult).AsAckable<TMessage>();
 		}
-
-
 	}
 }

@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Common;
+using RawRabbit.Enrichers.MessageContext.Respond;
 using RawRabbit.Operations.Respond.Acknowledgement;
 using RawRabbit.Operations.Respond.Core;
 using RawRabbit.Operations.Respond.Middleware;
@@ -27,6 +28,7 @@ namespace RawRabbit
 					.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
 					{
 						HeaderKeyFunc = c => PropertyHeaders.Context,
+						HeaderTypeFunc = c => c.GetMessageContextType(),
 						ContextSaveAction = (pipeCtx, msgCtx) => pipeCtx.Properties.TryAdd(PipeKey.MessageContext, msgCtx)
 					}))
 			});
@@ -67,6 +69,7 @@ namespace RawRabbit
 						}, ct));
 					ctx.Properties.Add(RespondKey.IncommingMessageType, typeof(TRequest));
 					ctx.Properties.Add(RespondKey.OutgoingMessageType, typeof(TResponse));
+					ctx.AddMessageContextType<TMessageContext>();
 					ctx.Properties.Add(PipeKey.MessageHandler, genericHandler);
 					context?.Invoke(ctx);
 				}, ct);

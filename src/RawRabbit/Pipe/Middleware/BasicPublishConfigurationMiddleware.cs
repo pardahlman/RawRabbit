@@ -24,7 +24,7 @@ namespace RawRabbit.Pipe.Middleware
 			PostInvokeAction = options?.PostInvokeAction;
 		}
 
-		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
+		public override async Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var config = GetInitialConfig(context);
 			var configAction = GetConfigurationAction(context);
@@ -36,7 +36,7 @@ namespace RawRabbit.Pipe.Middleware
 			}
 			PostInvokeAction?.Invoke(context, config);
 			context.Properties.TryAdd(PipeKey.BasicPublishConfiguration, config);
-			return Next.InvokeAsync(context, token);
+			await Next.InvokeAsync(context, token);
 		}
 
 		protected virtual BasicPublishConfiguration GetInitialConfig(IPipeContext context)

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Common;
@@ -25,20 +24,21 @@ namespace RawRabbit.Pipe.Middleware
 			QueueDeclareFunc = options?.QueueDeclarationFunc ?? (context => context.GetQueueDeclaration());
 		}
 
-		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
+		public override async Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var queue = GetQueueDeclaration(context);
 
-			if (queue == null)
+			if (queue != null)
+			{
+				_logger.LogDebug($"Declaring queue '{queue.Name}'.");
+				await DeclareQueueAsync(queue, context, token);
+			}
+			else
 			{
 				_logger.LogInformation("Queue will not be declaired: no queue declaration found in context.");
-				return Next.InvokeAsync(context, token);
 			}
 
-			_logger.LogDebug($"Declaring queue '{queue.Name}'.");
-			return DeclareQueueAsync(queue, context, token)
-				.ContinueWith(t => Next.InvokeAsync(context, token), token)
-				.Unwrap();
+			await Next.InvokeAsync(context, token);
 		}
 
 		protected virtual QueueDeclaration GetQueueDeclaration(IPipeContext context)

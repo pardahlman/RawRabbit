@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Consumer;
+using RawRabbit.Enrichers.MessageContext.Subscribe;
 using RawRabbit.Operations.StateMachine;
 using RawRabbit.Operations.StateMachine.Middleware;
 using RawRabbit.Operations.StateMachine.Trigger;
@@ -48,6 +49,7 @@ namespace RawRabbit.Operations.MessageSequence.Trigger
 			return configurer.From(SubscribePipe,context =>
 			{
 				context.Properties.Add(StateMachineKey.Type, typeof(TStateMachine));
+				context.AddMessageContextType<TMessageContext>();
 				context.Properties.Add(StateMachineKey.CorrelationFunc, genericCorrFunc);
 				context.UseLazyCorrelationArgs(ctx => new[] { ctx.GetMessage(), ctx.GetMessageContext() });
 				context.Properties.Add(PipeKey.MessageType, typeof(TMessage));

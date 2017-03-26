@@ -37,7 +37,7 @@ namespace RawRabbit.Pipe.Middleware
 			ConfigActionFunc = options?.ConfigActionFunc ?? (context => context.Get<Action<IConsumerConfigurationBuilder>>(PipeKey.ConfigurationAction));
 		}
 
-		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
+		public override async Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var config = ExtractConfigFromMessageType(context)
 				?? ExtractConfigFromStrings(context)
@@ -57,7 +57,7 @@ namespace RawRabbit.Pipe.Middleware
 			context.Properties.TryAdd(PipeKey.QueueDeclaration, config.Queue);
 			context.Properties.TryAdd(PipeKey.ExchangeDeclaration, config.Exchange);
 
-			return Next.InvokeAsync(context, token);
+			await Next.InvokeAsync(context, token);
 		}
 
 		protected virtual Type GetMessageType(IPipeContext context)

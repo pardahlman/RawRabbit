@@ -252,51 +252,41 @@ namespace RawRabbit.Channel
 			_logger.LogDebug("'GetChannel' has been processed.");
 		}
 
-		public Task<IModel> CreateChannelAsync(CancellationToken token = default(CancellationToken))
+		public async Task<IModel> CreateChannelAsync(CancellationToken token = default(CancellationToken))
 		{
-			if (token.IsCancellationRequested)
-			{
-				return TaskUtil.FromCancelled<IModel>();
-			}
-
-			return GetConnectionAsync(token)
-				.ContinueWith(tConnection => tConnection.Result.CreateModel(), token);
+			token.ThrowIfCancellationRequested();
+			var connection = await GetConnectionAsync(token);
+			return connection.CreateModel();
 		}
 
-		internal virtual Task<IModel> CreateAndWireupAsync(CancellationToken token = default(CancellationToken))
+		internal virtual async Task<IModel> CreateAndWireupAsync(CancellationToken token = default(CancellationToken))
 		{
-			return GetConnectionAsync(token)
-				.ContinueWith(tConnection =>
+			var connection = await GetConnectionAsync(token);
+			var channel = connection.CreateModel();
+			if (_config.AutoCloseConnection && !connection.AutoClose)
+			{
+				connection.AutoClose = true;
+			}
+			_logger.LogInformation($"Channel '{channel.ChannelNumber}' has been created.");
+			var recoverable = channel as IRecoverable;
+			if (recoverable != null)
+			{
+				recoverable.Recovery += (sender, args) =>
 				{
-					var channel = tConnection.Result.CreateModel();
-					if (_config.AutoCloseConnection && !tConnection.Result.AutoClose)
+					if (!_channels.Contains(channel))
 					{
-						tConnection.Result.AutoClose = true;
+						_logger.LogInformation($"Channel '{_current.Value.ChannelNumber}' is recovered. Adding it to pool.");
+						_channels.AddLast(channel);
 					}
-					_logger.LogInformation($"Channel '{channel.ChannelNumber}' has been created.");
-					var recoverable = channel as IRecoverable;
-					if (recoverable != null)
-					{
-						recoverable.Recovery += (sender, args) =>
-						{
-							if (!_channels.Contains(channel))
-							{
-								_logger.LogInformation($"Channel '{_current.Value.ChannelNumber}' is recovered. Adding it to pool.");
-								_channels.AddLast(channel);
-							}
-						};
-					}
-					_channels.AddLast(new LinkedListNode<IModel>(channel));
-					return channel;
-				}, token);
+				};
+			}
+			_channels.AddLast(new LinkedListNode<IModel>(channel));
+			return channel;
 		}
 
 		private Task<IConnection> GetConnectionAsync(CancellationToken token = default(CancellationToken))
 		{
-			if (token.IsCancellationRequested)
-			{
-				return TaskUtil.FromCancelled<IConnection>();
-			}
+			token.ThrowIfCancellationRequested();
 			if (_connection == null)
 			{
 				_logger.LogDebug($"Creating a new connection for {_config.Hostnames.Count} hosts.");

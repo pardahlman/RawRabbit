@@ -25,13 +25,13 @@ namespace RawRabbit.Pipe.Middleware
 			IfUsedFunc = options?.IfUsedFunc ?? (context => false);
 		}
 
-		public override Task InvokeAsync(IPipeContext context, CancellationToken token = new CancellationToken())
+		public override async Task InvokeAsync(IPipeContext context, CancellationToken token = new CancellationToken())
 		{
 			var channel = GetChannel(context);
 			var exchangeName = GetExchangeName(context);
 			var ifUsed = GetIfUsed(context);
 			DeleteEchange(channel, exchangeName, ifUsed);
-			return Next.InvokeAsync(context, token);
+			await Next.InvokeAsync(context, token);
 		}
 
 		protected virtual void DeleteEchange(IModel channel, string exchangeName, bool ifUsed)

@@ -12,11 +12,10 @@ namespace RawRabbit
 		public static readonly Action<IPipeBuilder> CreateChannelPipe = pipe => pipe
 			.Use<ChannelCreationMiddleware>();
 
-		public static Task<IModel> CreateChannelAsync(this IBusClient busClient, ChannelCreationOptions options = null, CancellationToken token = default(CancellationToken))
+		public static async Task<IModel> CreateChannelAsync(this IBusClient busClient, ChannelCreationOptions options = null, CancellationToken token = default(CancellationToken))
 		{
-			return busClient
-				.InvokeAsync(CreateChannelPipe, token: token)
-				.ContinueWith(tContext => tContext.Result.GetChannel(), token);
+			var context = await busClient.InvokeAsync(CreateChannelPipe, token: token);
+			return context.GetChannel();
 		}
 	}
 }

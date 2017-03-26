@@ -84,26 +84,36 @@ namespace RawRabbit.Pipe
 		{
 			_additional.Invoke(this);
 
-			var stageMarkerOptions = Pipe
-				.Where(info => info.Type == typeof(StageMarkerMiddleware))
-				.SelectMany(info => info.ConstructorArgs.OfType<StageMarkerOptions>());
-
-			var stageMwInfo = Pipe
+			var stagedMwInfo = Pipe
 				.Where(info => typeof(StagedMiddleware).GetTypeInfo().IsAssignableFrom(info.Type))
 				.ToList();
-			var stagedMiddleware = stageMwInfo
+			var stagedMiddleware = stagedMwInfo
 				.Select(CreateInstance)
 				.OfType<StagedMiddleware>()
 				.ToList();
 
-			foreach (var stageMarkerOption in stageMarkerOptions)
+			var sortedMws = new List<Middleware.Middleware>();
+			foreach (var mwInfo in Pipe)
 			{
-				var thisStageMws = stagedMiddleware.Where(mw => mw.StageMarker == stageMarkerOption.Stage).ToList<Middleware.Middleware>();
-				stageMarkerOption.EntryPoint = Build(thisStageMws);
+				if (typeof(StagedMiddleware).GetTypeInfo().IsAssignableFrom(mwInfo.Type))
+				{
+					continue;
+				}
+
+				var middleware = CreateInstance(mwInfo);
+				sortedMws.Add(middleware);
+
+				var stageMarkerMw = middleware as StageMarkerMiddleware;
+				if (stageMarkerMw != null)
+				{
+					var thisStageMws = stagedMiddleware
+						.Where(mw => mw.StageMarker == stageMarkerMw.Stage)
+						.ToList<Middleware.Middleware>();
+					sortedMws.AddRange(thisStageMws);
+				}
 			}
-			Pipe = Pipe.Except(stageMwInfo).ToList();
-			var middlewares = Pipe.Select(CreateInstance).ToList();
-			return Build(middlewares);
+
+			return Build(sortedMws);
 		}
 
 		protected virtual Middleware.Middleware Build(IList<Middleware.Middleware> middlewares)

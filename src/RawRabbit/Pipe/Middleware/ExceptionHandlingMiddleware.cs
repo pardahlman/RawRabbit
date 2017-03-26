@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using RawRabbit.Logging;
 
 namespace RawRabbit.Pipe.Middleware
 {
@@ -14,6 +15,7 @@ namespace RawRabbit.Pipe.Middleware
 	{
 		protected Func<Exception, IPipeContext, CancellationToken, Task> HandlingFunc;
 		public Middleware InnerPipe;
+		private readonly ILogger _logger = LogManager.GetLogger<ExceptionHandlingMiddleware>();
 
 		public ExceptionHandlingMiddleware(IPipeBuilderFactory factory, ExceptionHandlingOptions options = null)
 		{
@@ -21,20 +23,17 @@ namespace RawRabbit.Pipe.Middleware
 			InnerPipe = factory.Create(options?.InnerPipe);
 		}
 
-		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
+		public override async Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			try
 			{
-				return InnerPipe
-					.InvokeAsync(context, token)
-					.ContinueWith(t => t.IsFaulted
-						? OnExceptionAsync(t.Exception, context, token)
-						: Next.InvokeAsync(context, token), token)
-					.Unwrap();
+				await InnerPipe.InvokeAsync(context, token);
+				await Next.InvokeAsync(context, token);
 			}
 			catch (Exception e)
 			{
-				return OnExceptionAsync(e, context, token);
+				_logger.LogError("Exception thrown. Will be handled by Exception Handler", e);
+				await OnExceptionAsync(e, context, token);
 			}
 		}
 

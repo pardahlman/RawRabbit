@@ -39,7 +39,7 @@ namespace RawRabbit.Pipe.Middleware
 			BodyFunc = options?.BodyFunc ?? (c => c.GetBasicPublishConfiguration()?.Body);
 		}
 
-		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
+		public override async Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var channel = GetOrCreateChannel(context);
 			var exchangeName = GetExchangeName(context);
@@ -62,7 +62,7 @@ namespace RawRabbit.Pipe.Middleware
 					), token
 			);
 
-			return Next.InvokeAsync(context, token);
+			await Next.InvokeAsync(context, token);
 		}
 
 		protected virtual void BasicPublish(IModel channel, string exchange, string routingKey, bool mandatory, IBasicProperties basicProps, byte[] body, IPipeContext context)

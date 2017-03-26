@@ -36,24 +36,26 @@ namespace RawRabbit.Pipe.Middleware
 			HeaderKeyFunc = options?.HeaderKeyFunc ?? (context => null);
 		}
 
-		public override Task InvokeAsync(IPipeContext context, CancellationToken token = default(CancellationToken))
+		public override async Task InvokeAsync(IPipeContext context, CancellationToken token = default(CancellationToken))
 		{
 			if (!ShouldExecute(context))
 			{
-				return Next.InvokeAsync(context, token);
+				await Next.InvokeAsync(context, token);
+				return;
 			}
 			var properties = GetBasicProperties(context);
 			var headerKey = GetHeaderKey(context);
 			if (properties.Headers.ContainsKey(headerKey))
 			{
-				return Next.InvokeAsync(context, token);
+				await Next.InvokeAsync(context, token);
+				return;
 			}
 
 			var item = GetHeaderItem(context) ?? CreateHeaderItem(context);
 			var serializedItem = SerializeItem(item, context);
 			properties.Headers.TryAdd(headerKey, serializedItem);
 
-			return Next.InvokeAsync(context, token);
+			await Next.InvokeAsync(context, token);
 		}
 
 		protected virtual bool ShouldExecute(IPipeContext context)

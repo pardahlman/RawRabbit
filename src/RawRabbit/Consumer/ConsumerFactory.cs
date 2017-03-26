@@ -13,42 +13,37 @@ namespace RawRabbit.Consumer
 	public class ConsumerFactory : IConsumerFactory
 	{
 		private readonly IChannelFactory _channelFactory;
-		private readonly ConcurrentDictionary<string, Lazy<Task<IBasicConsumer>>> _noAckConsumers;
-		private readonly ConcurrentDictionary<string, Lazy<Task<IBasicConsumer>>> _ackConsumers;
+		private static readonly ConcurrentDictionary<string, Lazy<Task<IBasicConsumer>>> NoAckConsumers = new ConcurrentDictionary<string, Lazy<Task<IBasicConsumer>>>();
+		private static readonly ConcurrentDictionary<string, Lazy<Task<IBasicConsumer>>> AckConsumers = new ConcurrentDictionary<string, Lazy<Task<IBasicConsumer>>>();
 		private readonly ILogger _logger = LogManager.GetLogger<ConsumerFactory>();
 
 		public ConsumerFactory(IChannelFactory channelFactory)
 		{
 			_channelFactory = channelFactory;
-			_noAckConsumers = new ConcurrentDictionary<string, Lazy<Task<IBasicConsumer>>>();
-			_ackConsumers = new ConcurrentDictionary<string, Lazy<Task<IBasicConsumer>>>();
 		}
 
 		public Task<IBasicConsumer> GetConsumerAsync(ConsumeConfiguration cfg, IModel channel = null, CancellationToken token = default(CancellationToken))
 		{
-			var cache = cfg.NoAck ? _noAckConsumers : _ackConsumers;
+			var cache = cfg.NoAck ? NoAckConsumers : AckConsumers;
 			var lazyConsumerTask = cache.GetOrAdd(cfg.RoutingKey, routingKey =>
 			{
-				return new Lazy<Task<IBasicConsumer>>(() =>
+				return new Lazy<Task<IBasicConsumer>>(async () =>
 				{
-					return CreateConsumerAsync(channel, token)
-						.ContinueWith(tChannel =>
-						{
-							ConfigureConsume(tChannel.Result, cfg);
-							return tChannel.Result;
-						}, token);
+					var consumer = await CreateConsumerAsync(channel, token);
+					ConfigureConsume(consumer, cfg);
+					return consumer;
 				});
 			});
 			return lazyConsumerTask.Value;
 		}
 
-		public Task<IBasicConsumer> CreateConsumerAsync(IModel channel = null, CancellationToken token = default(CancellationToken))
+		public async Task<IBasicConsumer> CreateConsumerAsync(IModel channel = null, CancellationToken token = default(CancellationToken))
 		{
-			var channelTask = channel != null
-				? Task.FromResult(channel)
-				: GetOrCreateChannelAsync(token);
-			return channelTask
-				.ContinueWith(tChannel => new EventingBasicConsumer(tChannel.Result) as IBasicConsumer, token);
+			if (channel == null)
+			{
+				channel = await GetOrCreateChannelAsync(token);
+			}
+			return new EventingBasicConsumer(channel);
 		}
 
 		public IBasicConsumer ConfigureConsume(IBasicConsumer consumer, ConsumeConfiguration cfg)

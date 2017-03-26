@@ -28,19 +28,21 @@ namespace RawRabbit.Pipe.Middleware
 			NoAckFunc = options?.NoAckFunc ?? (context => context.GetConsumeConfiguration()?.NoAck ?? false);
 		}
 
-		public override Task InvokeAsync(IPipeContext context, CancellationToken token = default(CancellationToken))
+		public override async Task InvokeAsync(IPipeContext context, CancellationToken token = default(CancellationToken))
 		{
 			var noAck = GetNoAck(context);
 			if (noAck)
 			{
 				_logger.LogDebug("NoAck is enabled, continuing without sending ack.");
-				return Next.InvokeAsync(context, token);
+			}
+			else
+			{
+				var deliveryArgs = GetDeliveryArgs(context);
+				var channel = GetChannel(context);
+				AckMessage(channel, deliveryArgs);
 			}
 
-			var deliveryArgs = GetDeliveryArgs(context);
-			var channel = GetChannel(context);
-			AckMessage(channel, deliveryArgs);
-			return Next.InvokeAsync(context, token);
+			await Next.InvokeAsync(context, token);
 		}
 
 		protected virtual BasicDeliverEventArgs GetDeliveryArgs(IPipeContext context)

@@ -61,6 +61,7 @@ namespace RawRabbit.Operations.Request.Middleware
 			context.Properties.Add(PipeKey.Consumer, consumer);
 			responses.TryAdd(correlationId, responseTsc);
 			await Next.InvokeAsync(context, token);
+			token.Register(() => responseTsc.TrySetCanceled());
 			await responseTsc.Task;
 			_logger.LogInformation($"Message '{responseTsc.Task.Result.BasicProperties.MessageId}' for correlatrion '{correlationId}' recieved.");
 			context.Properties.Add(PipeKey.DeliveryEventArgs, responseTsc.Task.Result);
