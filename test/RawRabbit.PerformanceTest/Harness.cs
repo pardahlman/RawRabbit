@@ -9,7 +9,7 @@ namespace RawRabbit.PerformanceTest
 		[Fact]
 		public void PublishAcknowledge()
 		{
-			var result = BenchmarkRunner.Run<PubSubBenchmarks>();
+			var result = BenchmarkRunner.Run<DeliveryModePerf>();
 			Assert.NotEqual(TimeSpan.Zero, result.TotalTime);
 		}
 	}
