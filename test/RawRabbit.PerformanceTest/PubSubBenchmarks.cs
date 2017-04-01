@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using RawRabbit.Instantiation;
+using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
 
 namespace RawRabbit.PerformanceTest
@@ -56,6 +57,38 @@ namespace RawRabbit.PerformanceTest
 			MessageRecieved += onMessageRecieved;
 
 			_busClient.PublishAsync(_message);
+			await msgTsc.Task;
+			MessageRecieved -= onMessageRecieved;
+		}
+
+		[Benchmark]
+		public async Task DeliveryMode_NonPersistant()
+		{
+			var msgTsc = new TaskCompletionSource<Message>();
+
+			EventHandler onMessageRecieved = (sender, args) => { msgTsc.TrySetResult(sender as Message); };
+			MessageRecieved += onMessageRecieved;
+
+			_busClient.PublishAsync(_message, ctx => ctx
+				.UsePublisherConfiguration(cfg => cfg
+					.WithProperties(p => p.DeliveryMode = 1))
+			);
+			await msgTsc.Task;
+			MessageRecieved -= onMessageRecieved;
+		}
+
+		[Benchmark]
+		public async Task DeliveryMode_Persistant()
+		{
+			var msgTsc = new TaskCompletionSource<Message>();
+
+			EventHandler onMessageRecieved = (sender, args) => { msgTsc.TrySetResult(sender as Message); };
+			MessageRecieved += onMessageRecieved;
+
+			_busClient.PublishAsync(_message, ctx => ctx
+				.UsePublisherConfiguration(cfg => cfg
+					.WithProperties(p => p.DeliveryMode = 2))
+			);
 			await msgTsc.Task;
 			MessageRecieved -= onMessageRecieved;
 		}
