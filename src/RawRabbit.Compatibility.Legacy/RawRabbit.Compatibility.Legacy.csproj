@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>Bus Client that is API compatible with 1.x.</Description>
     <AssemblyTitle>RawRabbit.Compatibility.Legacy</AssemblyTitle>
-    <VersionPrefix>2.0.0-alpha</VersionPrefix>
+    <Version>2.0.0-alpha</Version>
     <Authors>pardahlman</Authors>
     <TargetFrameworks>netstandard1.5;net451</TargetFrameworks>
     <AssemblyName>RawRabbit.Compatibility.Legacy</AssemblyName>
