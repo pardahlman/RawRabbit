@@ -4,7 +4,7 @@ using RawRabbit.Configuration.Queue;
 
 namespace RawRabbit.Configuration.Respond
 {
-	class ResponderConfigurationBuilder : IResponderConfigurationBuilder
+	public class ResponderConfigurationBuilder : IResponderConfigurationBuilder
 	{
 		private readonly ExchangeConfigurationBuilder _exchangeBuilder;
 		private readonly QueueConfigurationBuilder _queueBuilder;
