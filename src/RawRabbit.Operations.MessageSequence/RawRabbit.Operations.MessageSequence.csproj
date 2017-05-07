@@ -21,6 +21,7 @@
     <ProjectReference Include="..\RawRabbit.Operations.Publish\RawRabbit.Operations.Publish.csproj" />
     <ProjectReference Include="..\RawRabbit.Enrichers.MessageContext.Subscribe\RawRabbit.Enrichers.MessageContext.Subscribe.csproj" />
     <ProjectReference Include="..\RawRabbit.Operations.StateMachine\RawRabbit.Operations.StateMachine.csproj" />
+    <ProjectReference Include="..\RawRabbit.Operations.Tools\RawRabbit.Operations.Tools.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using RabbitMQ.Client;
 using RawRabbit.Logging;
 using RawRabbit.Operations.MessageSequence.Configuration;
 using RawRabbit.Operations.MessageSequence.Configuration.Abstraction;
@@ -11,6 +12,7 @@ using RawRabbit.Operations.MessageSequence.Trigger;
 using RawRabbit.Operations.StateMachine;
 using RawRabbit.Operations.StateMachine.Trigger;
 using RawRabbit.Pipe;
+using RawRabbit.Pipe.Middleware;
 using Stateless;
 
 namespace RawRabbit.Operations.MessageSequence.StateMachine
@@ -24,6 +26,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 		private readonly Queue<StepDefinition> _stepDefinitions;
 		private readonly List<Subscription.ISubscription> _subscriptions;
 		private readonly ILogger _logger = LogManager.GetLogger<MessageSequence>();
+		private IModel _channel;
 
 		public MessageSequence(IBusClient client, SequenceModel model = null) : base(model)
 		{
@@ -186,6 +189,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 					{
 						subscription.Dispose();
 					}
+					_channel.Dispose();
 				});
 
 			var trigger = StateMachine.SetTriggerParameters<TMessage>(typeof(TMessage));
@@ -222,12 +226,15 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 					)
 				);
 
+			_channel = _client.CreateChannelAsync().GetAwaiter().GetResult();
+
 			foreach (var triggerCfg in _triggerConfigurer.TriggerConfiguration)
 			{
 				triggerCfg.Context += context =>
 				{
 					context.Properties.Add(StateMachineKey.ModelId, Model.Id);
 					context.Properties.Add(StateMachineKey.Machine, this);
+					context.Properties.TryAdd(PipeKey.Channel, _channel);
 				};
 				var ctx = _client.InvokeAsync(triggerCfg.Pipe, triggerCfg.Context).GetAwaiter().GetResult();
 				_subscriptions.Add(ctx.GetSubscription());
