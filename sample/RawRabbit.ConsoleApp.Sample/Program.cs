@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using RawRabbit.Configuration;
 using RawRabbit.Enrichers.GlobalExecutionId;
 using RawRabbit.Enrichers.MessageContext;
 using RawRabbit.Enrichers.MessageContext.Context;
@@ -24,9 +25,11 @@ namespace RawRabbit.ConsoleApp.Sample
 		{
 			_client = RawRabbitFactory.CreateSingleton(new RawRabbitOptions
 			{
-				Configuration = cfg => cfg
+				ClientConfiguration = new ConfigurationBuilder()
 					.SetBasePath(Directory.GetCurrentDirectory())
-					.AddJsonFile("rawrabbit.json"),
+					.AddJsonFile("rawrabbit.json")
+					.Build()
+					.Get<RawRabbitConfiguration>(),
 				Plugins = p => p
 					.UseGlobalExecutionId()
 					.UseMessageContext<MessageContext>()

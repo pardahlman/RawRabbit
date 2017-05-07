@@ -22,15 +22,6 @@ namespace RawRabbit.vNext.Pipe
 			var collection = applicationCollection ?? new ServiceCollection();
 			var ioc = new ServiceCollectionAdapter(collection);
 
-			if (options?.Configuration != null)
-			{
-				var builder = new ConfigurationBuilder();
-				options.Configuration.Invoke(builder);
-				var mainCfg = RawRabbitConfiguration.Local;
-				builder.Build().Bind(mainCfg);
-				mainCfg.Hostnames = mainCfg.Hostnames.Distinct(StringComparer.CurrentCultureIgnoreCase).ToList();
-				ioc.AddSingleton(c => mainCfg);
-			}
 			Action<IDependecyRegister> di = register =>
 			{
 				options?.DependencyInjection?.Invoke(collection);
