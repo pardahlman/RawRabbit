@@ -25,7 +25,7 @@ namespace RawRabbit.Pipe.Middleware
 		{
 			ConsumerFactory = consumerFactory;
 			ConfigFunc = options?.ConfigurationFunc ?? (context => context.GetConsumeConfiguration());
-			ConsumerFunc = options?.ConsumerFunc ?? ((factory, token, context) => factory.CreateConsumerAsync(token: token));
+			ConsumerFunc = options?.ConsumerFunc ?? ((factory, token, context) => factory.CreateConsumerAsync(context.GetChannel(), token));
 		}
 
 		public override async Task InvokeAsync(IPipeContext context, CancellationToken token = default(CancellationToken))
