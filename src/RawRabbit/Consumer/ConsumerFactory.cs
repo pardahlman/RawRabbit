@@ -13,12 +13,14 @@ namespace RawRabbit.Consumer
 	public class ConsumerFactory : IConsumerFactory
 	{
 		private readonly IChannelFactory _channelFactory;
-		private static readonly ConcurrentDictionary<string, Lazy<Task<IBasicConsumer>>> NoAckConsumers = new ConcurrentDictionary<string, Lazy<Task<IBasicConsumer>>>();
-		private static readonly ConcurrentDictionary<string, Lazy<Task<IBasicConsumer>>> AckConsumers = new ConcurrentDictionary<string, Lazy<Task<IBasicConsumer>>>();
+		private readonly ConcurrentDictionary<string, Lazy<Task<IBasicConsumer>>> NoAckConsumers;
+		private readonly ConcurrentDictionary<string, Lazy<Task<IBasicConsumer>>> AckConsumers;
 		private readonly ILogger _logger = LogManager.GetLogger<ConsumerFactory>();
 
 		public ConsumerFactory(IChannelFactory channelFactory)
 		{
+			NoAckConsumers = new ConcurrentDictionary<string, Lazy<Task<IBasicConsumer>>>();
+			AckConsumers = new ConcurrentDictionary<string, Lazy<Task<IBasicConsumer>>>();
 			_channelFactory = channelFactory;
 		}
 

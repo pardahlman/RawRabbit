@@ -67,7 +67,7 @@ namespace RawRabbit.DependecyInjection
 					PreserveReferencesHandling = PreserveReferencesHandling.Objects,
 					NullValueHandling = NullValueHandling.Ignore
 				}))
-				.AddTransient<IConsumerFactory, ConsumerFactory>()
+				.AddSingleton<IConsumerFactory, ConsumerFactory>()
 				.AddSingleton<IChannelFactory, ChannelFactory>()
 				.AddSingleton<ISubscriptionRepository, SubscriptionRepository>()
 				.AddSingleton<ChannelFactoryConfiguration, ChannelFactoryConfiguration>(c => ChannelFactoryConfiguration.Default)
