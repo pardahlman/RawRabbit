@@ -1,3 +1,22 @@
+# 2.0.0-beta6
+
+ - [#209](https://github.com/pardahlman/RawRabbit/issues/219) - Adding Serilog to dotnet core Console application
+ - [#209](https://github.com/pardahlman/RawRabbit/issues/224) - Channels Not Closing in 2.0
+ - [#209](https://github.com/pardahlman/RawRabbit/issues/216) - Configuration not correctly bound when using ConfigurationBuilder
+ - [#208](https://github.com/pardahlman/RawRabbit/issues/208) - PipeContextHttpExtensions does not have any methods
+ - [#207](https://github.com/pardahlman/RawRabbit/issues/207) - WithPrefetchCount is not honored ?
+ - [#206](https://github.com/pardahlman/RawRabbit/issues/206) - BasicConsumeAsync throws when FromQueue("QueueName") is not specified
+ - [#201](https://github.com/pardahlman/RawRabbit/issues/201) - Update TypeNameHandling for serializer
+ - [#199](https://github.com/pardahlman/RawRabbit/issues/199) - Serializing published message behaviour changed
+ - [#198](https://github.com/pardahlman/RawRabbit/pull/198) - Added starter documentation for publish and consume operations contributed by Cemre Mengu ([cemremengu](https://github.com/cemremengu))
+ - [#190](https://github.com/pardahlman/RawRabbit/pull/190) - Added content for getting started and fixed some sentences contributed by Cemre Mengu ([cemremengu](https://github.com/cemremengu))
+ - [#185](https://github.com/pardahlman/RawRabbit/issues/185) - Create Enrichers for HttpContext
+ - [#175](https://github.com/pardahlman/RawRabbit/issues/175) - Recover consumers from fail-over
+ - [#164](https://github.com/pardahlman/RawRabbit/issues/164) - Migrate Message Sequence
+
+Commits: da036aded6...abfbd85672
+
+
 # 1.10.3
 
  - [#163](https://github.com/pardahlman/RawRabbit/pull/163) - Added queue assume initialized and tests contributed by Cemre Mengu ([cemremengu](https://github.com/cemremengu))
@@ -16,6 +35,7 @@
 
 Commits: 4b6e57e351...52573f4164
 
+
 # 1.10.2
 
  - [#117](https://github.com/pardahlman/RawRabbit/issues/117) - Propegate Topology Exception for Consumers
@@ -23,6 +43,7 @@ Commits: 4b6e57e351...52573f4164
  - [#111](https://github.com/pardahlman/RawRabbit/issues/111) - Guard against OperationInteruptedException in TopologyProvider
 
 Commits: af0bda979e...331e174a02
+
 
 # 1.10.1
 
