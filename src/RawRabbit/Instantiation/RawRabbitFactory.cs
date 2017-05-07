@@ -28,7 +28,6 @@ namespace RawRabbit.Instantiation
 		{
 			register.AddRawRabbit(options);
 			var resolver = resolverFunc(register);
-			LogManager.CurrentFactory = resolver.GetService<ILoggerFactory>();
 			return new InstanceFactory(resolver);
 		}
 	}

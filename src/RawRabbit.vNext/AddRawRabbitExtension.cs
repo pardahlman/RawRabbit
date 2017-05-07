@@ -9,9 +9,9 @@ namespace RawRabbit.vNext
 	{
 		public static IServiceCollection AddRawRabbit(this IServiceCollection collection, RawRabbitOptions options = null)
 		{
-			options?.DependencyInjection?.Invoke(collection);
 			var adapter = new ServiceCollectionAdapter(collection);
 			adapter.AddRawRabbit(options);
+			options?.DependencyInjection?.Invoke(collection);
 			return collection;
 		}
 	}

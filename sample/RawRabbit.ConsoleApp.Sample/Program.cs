@@ -2,10 +2,12 @@
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using RawRabbit.Configuration;
 using RawRabbit.Enrichers.GlobalExecutionId;
 using RawRabbit.Enrichers.MessageContext;
 using RawRabbit.Enrichers.MessageContext.Context;
+using RawRabbit.Logging;
 using RawRabbit.Messages.Sample;
 using RawRabbit.vNext;
 using RawRabbit.vNext.Pipe;
@@ -32,7 +34,9 @@ namespace RawRabbit.ConsoleApp.Sample
 					.Get<RawRabbitConfiguration>(),
 				Plugins = p => p
 					.UseGlobalExecutionId()
-					.UseMessageContext<MessageContext>()
+					.UseMessageContext<MessageContext>(),
+				DependencyInjection = ioc => ioc
+					.AddSingleton<ILoggerFactory>(provider => new LoggerFactory(s => new ConsoleLogger(LogLevel.Debug, s)))
 			});
 
 			await _client.SubscribeAsync<ValuesRequested, MessageContext>((requested, ctx) => ServeValuesAsync(requested, ctx));
