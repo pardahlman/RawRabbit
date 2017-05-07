@@ -1,8 +1,8 @@
 # 2.0.0-beta6
 
- - [#209](https://github.com/pardahlman/RawRabbit/issues/219) - Adding Serilog to dotnet core Console application
- - [#209](https://github.com/pardahlman/RawRabbit/issues/224) - Channels Not Closing in 2.0
- - [#209](https://github.com/pardahlman/RawRabbit/issues/216) - Configuration not correctly bound when using ConfigurationBuilder
+ - [#219](https://github.com/pardahlman/RawRabbit/issues/219) - Adding Serilog to dotnet core Console application
+ - [#224](https://github.com/pardahlman/RawRabbit/issues/224) - Channels Not Closing in 2.0
+ - [#216](https://github.com/pardahlman/RawRabbit/issues/216) - Configuration not correctly bound when using ConfigurationBuilder
  - [#208](https://github.com/pardahlman/RawRabbit/issues/208) - PipeContextHttpExtensions does not have any methods
  - [#207](https://github.com/pardahlman/RawRabbit/issues/207) - WithPrefetchCount is not honored ?
  - [#206](https://github.com/pardahlman/RawRabbit/issues/206) - BasicConsumeAsync throws when FromQueue("QueueName") is not specified
