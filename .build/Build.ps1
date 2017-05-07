@@ -20,7 +20,8 @@ foreach ($src in ls ../src/*) {
 
 	write-host "build: Packaging project in $src" -ForegroundColor Green
 
-	& dotnet pack -c Release -o ..\..\artifacts --version-suffix="beta2"
+	& dotnet msbuild "/t:Restore;Pack" /p:VersionSuffix=beta6 /p:Configuration=Release
+	# & dotnet pack -c Release -o ..\..\artifacts --version-suffix="beta2"
 	if($LASTEXITCODE -ne 0) { exit 1 }
 
 	Pop-Location
