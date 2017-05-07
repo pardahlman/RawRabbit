@@ -13,21 +13,19 @@ namespace RawRabbit.Consumer
 	public class ConsumerFactory : IConsumerFactory
 	{
 		private readonly IChannelFactory _channelFactory;
-		private readonly ConcurrentDictionary<string, Lazy<Task<IBasicConsumer>>> NoAckConsumers;
-		private readonly ConcurrentDictionary<string, Lazy<Task<IBasicConsumer>>> AckConsumers;
+		private readonly ConcurrentDictionary<string, Lazy<Task<IBasicConsumer>>> _consumerCache;
 		private readonly ILogger _logger = LogManager.GetLogger<ConsumerFactory>();
 
 		public ConsumerFactory(IChannelFactory channelFactory)
 		{
-			NoAckConsumers = new ConcurrentDictionary<string, Lazy<Task<IBasicConsumer>>>();
-			AckConsumers = new ConcurrentDictionary<string, Lazy<Task<IBasicConsumer>>>();
+			_consumerCache = new ConcurrentDictionary<string, Lazy<Task<IBasicConsumer>>>();
 			_channelFactory = channelFactory;
 		}
 
 		public Task<IBasicConsumer> GetConsumerAsync(ConsumeConfiguration cfg, IModel channel = null, CancellationToken token = default(CancellationToken))
 		{
-			var cache = cfg.NoAck ? NoAckConsumers : AckConsumers;
-			var lazyConsumerTask = cache.GetOrAdd(cfg.RoutingKey, routingKey =>
+			var consumerKey = CreateConsumerKey(cfg);
+			var lazyConsumerTask = _consumerCache.GetOrAdd(consumerKey, routingKey =>
 			{
 				return new Lazy<Task<IBasicConsumer>>(async () =>
 				{
@@ -94,6 +92,11 @@ namespace RawRabbit.Consumer
 		{
 			_logger.LogInformation("Creating a dedicated channel for consumer.");
 			return _channelFactory.CreateChannelAsync(token);
+		}
+
+		protected string CreateConsumerKey(ConsumeConfiguration cfg)
+		{
+			return $"{cfg.QueueName}:{cfg.RoutingKey}:{cfg.NoAck}";
 		}
 	}
 
