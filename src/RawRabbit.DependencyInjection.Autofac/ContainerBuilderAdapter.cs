@@ -1,10 +1,10 @@
 ﻿using System;
 using Autofac;
-using RawRabbit.DependecyInjection;
+using RawRabbit.DependencyInjection;
 
 namespace RawRabbit.DependencyInjection.Autofac
 {
-	public class ContainerBuilderAdapter : IDependecyRegister
+	public class ContainerBuilderAdapter : IDependencyRegister
 	{
 		private readonly ContainerBuilder _builder;
 
@@ -13,7 +13,7 @@ namespace RawRabbit.DependencyInjection.Autofac
 			_builder = builder;
 		}
 
-		public IDependecyRegister AddTransient<TService, TImplementation>(Func<IDependecyResolver, TImplementation> instanceCreator) where TService : class where TImplementation : class, TService
+		public IDependencyRegister AddTransient<TService, TImplementation>(Func<IDependencyResolver, TImplementation> instanceCreator) where TService : class where TImplementation : class, TService
 		{
 			_builder
 				.Register<TImplementation>(context => instanceCreator(new ComponentContextAdapter(context.Resolve<IComponentContext>())))
@@ -22,7 +22,7 @@ namespace RawRabbit.DependencyInjection.Autofac
 			return this;
 		}
 
-		public IDependecyRegister AddTransient<TService, TImplementation>() where TService : class where TImplementation : class, TService
+		public IDependencyRegister AddTransient<TService, TImplementation>() where TService : class where TImplementation : class, TService
 		{
 			_builder
 				.RegisterType<TImplementation>()
@@ -31,7 +31,7 @@ namespace RawRabbit.DependencyInjection.Autofac
 			return this;
 		}
 
-		public IDependecyRegister AddSingleton<TService>(TService instance) where TService : class
+		public IDependencyRegister AddSingleton<TService>(TService instance) where TService : class
 		{
 			_builder
 				.Register<TService>(context => instance)
@@ -40,7 +40,7 @@ namespace RawRabbit.DependencyInjection.Autofac
 			return this;
 		}
 
-		public IDependecyRegister AddSingleton<TService, TImplementation>(Func<IDependecyResolver, TService> instanceCreator) where TService : class where TImplementation : class, TService
+		public IDependencyRegister AddSingleton<TService, TImplementation>(Func<IDependencyResolver, TService> instanceCreator) where TService : class where TImplementation : class, TService
 		{
 			_builder
 				.Register<TService>(context => instanceCreator(new ComponentContextAdapter(context.Resolve<IComponentContext>())))
@@ -49,7 +49,7 @@ namespace RawRabbit.DependencyInjection.Autofac
 			return this;
 		}
 
-		public IDependecyRegister AddSingleton<TService, TImplementation>() where TService : class where TImplementation : class, TService
+		public IDependencyRegister AddSingleton<TService, TImplementation>() where TService : class where TImplementation : class, TService
 		{
 			_builder
 				.RegisterType<TImplementation>()

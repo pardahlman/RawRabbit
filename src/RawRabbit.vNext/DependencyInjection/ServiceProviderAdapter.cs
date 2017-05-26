@@ -1,10 +1,10 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
-using RawRabbit.DependecyInjection;
+using RawRabbit.DependencyInjection;
 
-namespace RawRabbit.vNext.DependecyInjection
+namespace RawRabbit.vNext.DependencyInjection
 {
-	public class ServiceProviderAdapter : IDependecyResolver
+	public class ServiceProviderAdapter : IDependencyResolver
 	{
 		private readonly IServiceProvider _provider;
 
@@ -15,7 +15,7 @@ namespace RawRabbit.vNext.DependecyInjection
 
 		public ServiceProviderAdapter(IServiceCollection collection)
 		{
-			collection.AddSingleton<IDependecyResolver, ServiceProviderAdapter>(provider => this);
+			collection.AddSingleton<IDependencyResolver, ServiceProviderAdapter>(provider => this);
 			_provider = collection.BuildServiceProvider();
 		}
 

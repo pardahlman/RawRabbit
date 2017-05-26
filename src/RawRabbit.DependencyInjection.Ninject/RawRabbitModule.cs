@@ -1,6 +1,6 @@
 ﻿using Ninject;
 using Ninject.Modules;
-using RawRabbit.DependecyInjection;
+using RawRabbit.DependencyInjection;
 using RawRabbit.Instantiation;
 
 namespace RawRabbit.DependencyInjection.Ninject
@@ -11,7 +11,7 @@ namespace RawRabbit.DependencyInjection.Ninject
 		{
 #if NETSTANDARD1_5
 			KernelConfiguration
-				.Bind<IDependecyResolver>()
+				.Bind<IDependencyResolver>()
 				.ToMethod(context => new NinjectAdapter(context));
 
 			KernelConfiguration
@@ -25,7 +25,7 @@ namespace RawRabbit.DependencyInjection.Ninject
 #endif
 #if NET451
 			Kernel
-				.Bind<IDependecyResolver>()
+				.Bind<IDependencyResolver>()
 				.ToMethod(context => new NinjectAdapter(context));
 
 			Kernel

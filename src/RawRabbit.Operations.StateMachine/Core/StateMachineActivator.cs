@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using RawRabbit.DependecyInjection;
+using RawRabbit.DependencyInjection;
 
 namespace RawRabbit.Operations.StateMachine.Core
 {
@@ -13,9 +13,9 @@ namespace RawRabbit.Operations.StateMachine.Core
 	public class StateMachineActivator : IStateMachineActivator
 	{
 		private readonly IModelRepository _modelRepo;
-		private readonly IDependecyResolver _resolver;
+		private readonly IDependencyResolver _resolver;
 
-		public StateMachineActivator(IModelRepository modelRepo, IDependecyResolver resolver)
+		public StateMachineActivator(IModelRepository modelRepo, IDependencyResolver resolver)
 		{
 			_modelRepo = modelRepo;
 			_resolver = resolver;
