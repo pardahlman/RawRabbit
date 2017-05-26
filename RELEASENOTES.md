@@ -1,3 +1,13 @@
+# 2.0.0-beta7
+
+ - [#231](https://github.com/pardahlman/RawRabbit/pull/231) - Fix typo in spelling `Dependency` contributed by Serhii Almazov ([almazik](https://github.com/almazik))
+ - [#230](https://github.com/pardahlman/RawRabbit/issues/230) - Message sequences time out for generic classes (v2) +fix
+ - [#228](https://github.com/pardahlman/RawRabbit/issues/228) - v2 First subscribed message not raising handler +fix
+
+
+Commits: b176e78186...e40eea22a5
+
+
 # 2.0.0-beta6
 
  - [#219](https://github.com/pardahlman/RawRabbit/issues/219) - Adding Serilog to dotnet core Console application
