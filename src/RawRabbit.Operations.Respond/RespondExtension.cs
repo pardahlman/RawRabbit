@@ -61,13 +61,10 @@ namespace RawRabbit
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ExchangeDeclared))
 			.Use<QueueBindMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.QueueBound))
-			.Use<ConsumerMiddleware>()
+			.Use<ConsumerCreationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ConsumerCreated))
-			.Use<ConsumerRecoveryMiddleware>(new ConsumerRecoveryOptions
-			{
-				ConsumeConfigFunc = context => context.GetConsumeConfiguration(),
-			})
-			.Use<MessageConsumeMiddleware>(new ConsumeOptions { Pipe = ConsumePipe })
+			.Use<ConsumerMessageHandlerMiddleware>(new ConsumeOptions { Pipe = ConsumePipe })
+			.Use<ConsumerConsumeMiddleware>()
 			.Use<SubscriptionMiddleware>();
 
 		public static Task RespondAsync<TRequest, TResponse>(

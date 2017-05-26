@@ -8,9 +8,9 @@ using RawRabbit.Pipe.Middleware;
 
 namespace RawRabbit.Enrichers.Polly.Middleware
 {
-	public class ConsumerMiddleware : Pipe.Middleware.ConsumerMiddleware
+	public class ConsumerCreationMiddleware : Pipe.Middleware.ConsumerCreationMiddleware
 	{
-		public ConsumerMiddleware(IConsumerFactory consumerFactory, ConsumerOptions options = null)
+		public ConsumerCreationMiddleware(IConsumerFactory consumerFactory, ConsumerCreationOptions options = null)
 			: base(consumerFactory, options) { }
 
 		protected override Task<IBasicConsumer> GetOrCreateConsumerAsync(IPipeContext context, CancellationToken token)

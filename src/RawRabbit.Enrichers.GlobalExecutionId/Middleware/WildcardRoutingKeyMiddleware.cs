@@ -24,7 +24,7 @@ namespace RawRabbit.Enrichers.GlobalExecutionId.Middleware
 
 		public WildcardRoutingKeyMiddleware(WildcardRoutingKeyOptions options = null)
 		{
-			EnableRoutingFunc = options?.EnableRoutingFunc ?? (c => c.GetClientConfiguration()?.RouteWithGlobalId ?? false);
+			EnableRoutingFunc = options?.EnableRoutingFunc ?? (c => c.GetWildcardRoutingSuffixActive());
 			ExecutionIdFunc = options?.ExecutionIdFunc ?? (c => c.GetGlobalExecutionId());
 			UpdateAction = options?.UpdateAction ?? ((context, executionId) =>
 			{
@@ -67,7 +67,21 @@ namespace RawRabbit.Enrichers.GlobalExecutionId.Middleware
 		{
 			return ExecutionIdFunc(context);
 		}
+	}
 
+	public static class WildcardRoutingKeyExtensions
+	{
+		private const string SubscribeWithWildCard = "SubscribeWithWildCard";
 
+		public static IPipeContext UseWildcardRoutingSuffix(this IPipeContext context, bool withWildCard = true)
+		{
+			context.Properties.AddOrReplace(SubscribeWithWildCard, withWildCard);
+			return context;
+		}
+
+		public static bool GetWildcardRoutingSuffixActive(this IPipeContext context)
+		{
+			return context.Get(SubscribeWithWildCard, true);
+		}
 	}
 }

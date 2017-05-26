@@ -24,8 +24,8 @@ namespace RawRabbit
 						{
 							ExchangeNameFunc = ctx => ctx.GetConsumeConfiguration()?.ExchangeName
 						})
-						.Use<ConsumerMiddleware>()
-						.Use<MessageConsumeMiddleware>(new ConsumeOptions
+						.Use<ConsumerCreationMiddleware>()
+						.Use<ConsumerMessageHandlerMiddleware>(new ConsumeOptions
 						{
 							Pipe = p => p
 								.Use<HandlerInvokationMiddleware>(new HandlerInvokationOptions
@@ -33,7 +33,8 @@ namespace RawRabbit
 									HandlerArgsFunc = ctx => new object[] { ctx.GetDeliveryEventArgs()},
 								})
 								.Use<ExplicitAckMiddleware>()
-						}),
+						})
+						.Use<ConsumerConsumeMiddleware>(),
 					ctx =>
 					{
 						ctx.Properties.Add(PipeKey.MessageHandler, genericFunc);

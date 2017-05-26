@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Framing;
 using RawRabbit.Common;
@@ -248,6 +249,28 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 
 				/* Assert */
 				Assert.Equal(message.Prop, msgTcs.Task.Result.Prop);
+			}
+		}
+
+		[Fact]
+		public async Task Should_Consume_Message_Already_In_Queue()
+		{
+			using (var subscriber = RawRabbitFactory.CreateTestClient())
+			using (var publisher = RawRabbitFactory.CreateTestClient())
+			{
+				var msgTcs = new TaskCompletionSource<BasicMessage>();
+				var msg = new BasicMessage { Prop = Guid.NewGuid().ToString() };
+				await subscriber.DeclareQueueAsync<BasicMessage>();
+				await subscriber.DeclareExchangeAsync<BasicMessage>();
+				await subscriber.BindQueueAsync<BasicMessage>();
+				await publisher.PublishAsync(msg);
+				await subscriber.SubscribeAsync<BasicMessage>(message =>
+				{
+					msgTcs.TrySetResult(message);
+					return Task.FromResult(true);
+				});
+				await msgTcs.Task;
+				Assert.Equal(msg.Prop, msgTcs.Task.Result.Prop);
 			}
 		}
 	}

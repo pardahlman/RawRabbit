@@ -28,7 +28,7 @@ namespace RawRabbit.Operations.StateMachine.Trigger
 
 		public static readonly Action<IPipeBuilder> SubscribePipe =
 			SubscribeMessageExtension.SubscribePipe + (p => p
-				.Replace<MessageConsumeMiddleware, MessageConsumeMiddleware>(args: new ConsumeOptions {Pipe = ConsumePipe})
+				.Replace<ConsumerMessageHandlerMiddleware, ConsumerMessageHandlerMiddleware>(args: new ConsumeOptions {Pipe = ConsumePipe})
 			);
 
 		public static TriggerConfigurer FromMessage<TStateMachine, TMessage>(

@@ -11,7 +11,7 @@ namespace RawRabbit
 	public static class CreateConsumerExtension
 	{
 		public static readonly Action<IPipeBuilder> ConsumerAction = pipe => pipe
-			.Use<ConsumerMiddleware>();
+			.Use<ConsumerCreationMiddleware>();
 
 		public static async Task<IBasicConsumer> CreateConsumerAsync(this IBusClient client, ConsumeConfiguration config = null, CancellationToken ct = default(CancellationToken))
 		{

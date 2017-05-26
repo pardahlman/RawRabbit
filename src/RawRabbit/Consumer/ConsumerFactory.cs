@@ -30,6 +30,20 @@ namespace RawRabbit.Consumer
 				return new Lazy<Task<IBasicConsumer>>(async () =>
 				{
 					var consumer = await CreateConsumerAsync(channel, token);
+					return consumer;
+				});
+			});
+			return lazyConsumerTask.Value;
+		}
+
+		public Task<IBasicConsumer> GetConfiguredConsumerAsync(ConsumeConfiguration cfg, IModel channel = null, CancellationToken token = default(CancellationToken))
+		{
+			var consumerKey = CreateConsumerKey(cfg);
+			var lazyConsumerTask = _consumerCache.GetOrAdd(consumerKey, routingKey =>
+			{
+				return new Lazy<Task<IBasicConsumer>>(async () =>
+				{
+					var consumer = await CreateConsumerAsync(channel, token);
 					ConfigureConsume(consumer, cfg);
 					return consumer;
 				});
@@ -49,16 +63,6 @@ namespace RawRabbit.Consumer
 		public IBasicConsumer ConfigureConsume(IBasicConsumer consumer, ConsumeConfiguration cfg)
 		{
 			CheckPropertyValues(cfg);
-			_logger.LogInformation($"Preparing to consume message from queue '{cfg.QueueName}'.");
-
-			consumer.Model.BasicConsume(
-				queue: cfg.QueueName,
-				noAck: cfg.NoAck,
-				consumerTag: cfg.ConsumerTag,
-				noLocal: cfg.NoLocal,
-				exclusive: cfg.Exclusive,
-				arguments: cfg.Arguments,
-				consumer: consumer);
 
 			if (cfg.PrefetchCount > 0)
 			{
@@ -69,6 +73,17 @@ namespace RawRabbit.Consumer
 					global: false
 				);
 			}
+
+			_logger.LogInformation($"Preparing to consume message from queue '{cfg.QueueName}'.");
+
+			consumer.Model.BasicConsume(
+				queue: cfg.QueueName,
+				noAck: cfg.NoAck,
+				consumerTag: cfg.ConsumerTag,
+				noLocal: cfg.NoLocal,
+				exclusive: cfg.Exclusive,
+				arguments: cfg.Arguments,
+				consumer: consumer);
 			return consumer;
 		}
 

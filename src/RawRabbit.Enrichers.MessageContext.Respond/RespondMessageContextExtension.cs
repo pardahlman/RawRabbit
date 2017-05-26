@@ -15,7 +15,7 @@ namespace RawRabbit
 	{
 		public static Action<IPipeBuilder> RespondPipe = RespondExtension.RespondPipe + (pipe =>
 		{
-			pipe.Replace<MessageConsumeMiddleware, MessageConsumeMiddleware>(args: new ConsumeOptions
+			pipe.Replace<ConsumerMessageHandlerMiddleware, ConsumerMessageHandlerMiddleware>(args: new ConsumeOptions
 			{
 				Pipe = RespondExtension.ConsumePipe + (consume => consume
 					.Replace<RespondExceptionMiddleware, RespondExceptionMiddleware>(args: new RespondExceptionOptions

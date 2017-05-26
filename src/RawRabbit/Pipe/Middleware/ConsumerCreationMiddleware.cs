@@ -8,46 +8,29 @@ using RawRabbit.Logging;
 
 namespace RawRabbit.Pipe.Middleware
 {
-	public class ConsumerOptions
+	public class ConsumerCreationOptions
 	{
-		public Func<IPipeContext, ConsumeConfiguration> ConfigurationFunc { get; set; }
 		public Func<IConsumerFactory, CancellationToken, IPipeContext, Task<IBasicConsumer>> ConsumerFunc { get; set; }
 	}
 
-	public class ConsumerMiddleware : Middleware
+	public class ConsumerCreationMiddleware : Middleware
 	{
 		protected IConsumerFactory ConsumerFactory;
 		protected Func<IPipeContext, ConsumeConfiguration> ConfigFunc;
 		protected Func<IConsumerFactory, CancellationToken, IPipeContext, Task<IBasicConsumer>> ConsumerFunc;
-		private readonly ILogger _logger = LogManager.GetLogger<ConsumerMiddleware>();
+		private readonly ILogger _logger = LogManager.GetLogger<ConsumerCreationMiddleware>();
 
-		public ConsumerMiddleware(IConsumerFactory consumerFactory, ConsumerOptions options = null)
+		public ConsumerCreationMiddleware(IConsumerFactory consumerFactory, ConsumerCreationOptions options = null)
 		{
 			ConsumerFactory = consumerFactory;
-			ConfigFunc = options?.ConfigurationFunc ?? (context => context.GetConsumeConfiguration());
 			ConsumerFunc = options?.ConsumerFunc ?? ((factory, token, context) => factory.CreateConsumerAsync(context.GetChannel(), token));
 		}
 
 		public override async Task InvokeAsync(IPipeContext context, CancellationToken token = default(CancellationToken))
 		{
 			var consumer = await GetOrCreateConsumerAsync(context, token);
-			var config = GetConfiguration(context);
-			if (config != null)
-			{
-				ConsumerFactory.ConfigureConsume(consumer, config);
-			}
 			context.Properties.TryAdd(PipeKey.Consumer, consumer);
 			await Next.InvokeAsync(context, token);
-		}
-
-		protected virtual ConsumeConfiguration GetConfiguration(IPipeContext context)
-		{
-			var config = ConfigFunc(context);
-			if (config == null)
-			{
-				_logger.LogInformation("Consumer configuration not found in Pipe context.");
-			}
-			return config;
 		}
 
 		protected virtual Task<IBasicConsumer> GetOrCreateConsumerAsync(IPipeContext context, CancellationToken token)

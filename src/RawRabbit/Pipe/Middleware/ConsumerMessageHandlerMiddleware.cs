@@ -16,16 +16,16 @@ namespace RawRabbit.Pipe.Middleware
 		public Func<IPipeContext, Action<Func<Task>, CancellationToken>> ThrottleFuncFunc { get; set; }
 	}
 
-	public class MessageConsumeMiddleware : Middleware
+	public class ConsumerMessageHandlerMiddleware : Middleware
 	{
 		protected IPipeContextFactory ContextFactory;
 		protected Middleware ConsumePipe;
 		protected Func<IPipeContext, IBasicConsumer> ConsumeFunc;
 		protected Func<IPipeContext, SemaphoreSlim> SemaphoreFunc;
 		protected Func<IPipeContext, Action<Func<Task>, CancellationToken>> ThrottledExecutionFunc;
-		private readonly ILogger _logger = LogManager.GetLogger<MessageConsumeMiddleware>();
+		private readonly ILogger _logger = LogManager.GetLogger<ConsumerMessageHandlerMiddleware>();
 
-		public MessageConsumeMiddleware(IPipeBuilderFactory pipeBuilderFactory, IPipeContextFactory contextFactory, ConsumeOptions options = null)
+		public ConsumerMessageHandlerMiddleware(IPipeBuilderFactory pipeBuilderFactory, IPipeContextFactory contextFactory, ConsumeOptions options = null)
 		{
 			ContextFactory = contextFactory;
 			ConsumeFunc = options?.ConsumerFunc ?? (context =>context.GetConsumer());

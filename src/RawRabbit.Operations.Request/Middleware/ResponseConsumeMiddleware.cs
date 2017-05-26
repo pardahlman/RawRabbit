@@ -43,7 +43,7 @@ namespace RawRabbit.Operations.Request.Middleware
 			var correlationId = GetCorrelationid(context);
 			var responseTsc = new TaskCompletionSource<BasicDeliverEventArgs>();
 
-			var consumer = await ConsumerFactory.GetConsumerAsync(respondCfg.Consume, token: token);
+			var consumer = await ConsumerFactory.GetConfiguredConsumerAsync(respondCfg.Consume, token: token);
 			var responses = AllResponses.GetOrAdd(consumer, c =>
 				{
 					var pendings = new ConcurrentDictionary<string, TaskCompletionSource<BasicDeliverEventArgs>>();

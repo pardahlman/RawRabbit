@@ -38,7 +38,7 @@ namespace RawRabbit
 
 		public static readonly Action<IPipeBuilder> SubscribePipe = SubscribeMessageExtension.SubscribePipe + (pipe =>
 		{
-			pipe.Replace<MessageConsumeMiddleware, MessageConsumeMiddleware>(args: new ConsumeOptions { Pipe = ConsumePipe });
+			pipe.Replace<ConsumerMessageHandlerMiddleware, ConsumerMessageHandlerMiddleware>(args: new ConsumeOptions { Pipe = ConsumePipe });
 		});
 
 		public static Task<IPipeContext> SubscribeAsync<TMessage, TMessageContext>(this IBusClient client, Func<TMessage, TMessageContext, Task> subscribeMethod, Action<IPipeContext> context = null, CancellationToken ct = default(CancellationToken))
