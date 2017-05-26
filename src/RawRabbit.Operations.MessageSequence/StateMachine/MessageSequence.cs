@@ -4,6 +4,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
+using RawRabbit.Channel.Abstraction;
+using RawRabbit.Common;
+using RawRabbit.Configuration;
 using RawRabbit.Logging;
 using RawRabbit.Operations.MessageSequence.Configuration;
 using RawRabbit.Operations.MessageSequence.Configuration.Abstraction;
@@ -21,6 +24,8 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 			IMessageChainPublisher, IMessageSequenceBuilder
 	{
 		private readonly IBusClient _client;
+		private readonly INamingConventions _naming;
+		private readonly RawRabbitConfiguration _clientCfg;
 		private Action _fireAction;
 		private readonly TriggerConfigurer _triggerConfigurer;
 		private readonly Queue<StepDefinition> _stepDefinitions;
@@ -28,9 +33,11 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 		private readonly ILogger _logger = LogManager.GetLogger<MessageSequence>();
 		private IModel _channel;
 
-		public MessageSequence(IBusClient client, SequenceModel model = null) : base(model)
+		public MessageSequence(IBusClient client, INamingConventions naming, RawRabbitConfiguration clientCfg, SequenceModel model = null) : base(model)
 		{
 			_client = client;
+			_naming = naming;
+			_clientCfg = clientCfg;
 			_triggerConfigurer = new TriggerConfigurer();
 			_stepDefinitions = new Queue<StepDefinition>();
 			_subscriptions = new List<Subscription.ISubscription>();
@@ -162,7 +169,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 							.WithNameSuffix(Model.Id.ToString())
 							.WithExclusivity()
 							.WithAutoDelete())
-						.Consume(c => c.WithRoutingKey($"{typeof(TMessage).Name.ToLower()}.{Model.Id}")
+						.Consume(c => c.WithRoutingKey($"{_naming.RoutingKeyConvention(typeof(TMessage))}.{Model.Id}")
 					)
 				);
 			return this;
@@ -222,7 +229,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 							.WithNameSuffix(Model.Id.ToString())
 							.WithExclusivity()
 							.WithAutoDelete())
-						.Consume(c => c.WithRoutingKey($"{typeof(TMessage).Name.ToLower()}.{Model.Id}")
+						.Consume(c => c.WithRoutingKey($"{_naming.RoutingKeyConvention(typeof(TMessage))}.{Model.Id}")
 					)
 				);
 
@@ -240,23 +247,17 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 				_subscriptions.Add(ctx.GetSubscription());
 			}
 
-			var requestTimeout = _client
-				.InvokeAsync(builder => { })
-				.ContinueWith(tContext => tContext.Result.GetClientConfiguration().RequestTimeout)
-				.GetAwaiter()
-				.GetResult();
-
 			Timer requestTimer = null;
 			requestTimer = new Timer(state =>
 			{
 				requestTimer?.Dispose();
 				tsc.TrySetException(new TimeoutException(
-					$"Unable to complete sequence {Model.Id} in {requestTimeout:g}. Operation Timed out."));
+					$"Unable to complete sequence {Model.Id} in {_clientCfg.RequestTimeout:g}. Operation Timed out."));
 				if (StateMachine.PermittedTriggers.Contains(typeof(CancelSequence)))
 				{
 					StateMachine.Fire(typeof(CancelSequence));
 				}
-			}, null, requestTimeout, new TimeSpan(-1));
+			}, null, _clientCfg.RequestTimeout, new TimeSpan(-1));
 
 			_fireAction();
 

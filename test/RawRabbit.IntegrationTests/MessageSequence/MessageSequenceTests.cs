@@ -343,5 +343,34 @@ namespace RawRabbit.IntegrationTests.MessageSequence
 				Assert.Equal(firstTcs.Task.Result.GlobalRequestId, secondTcs.Task.Result.GlobalRequestId);
 			}
 		}
+
+		[Fact]
+		public async Task Should_Work_With_Generic_Messages()
+		{
+			using (var client = RawRabbitFactory.CreateTestClient(new RawRabbitOptions
+			{
+				Plugins = p => p
+					.UseStateMachine()
+					.UseMessageContext(context => new MessageContext {GlobalRequestId = Guid.NewGuid()})
+					.UseContextForwarding()
+					.UseGlobalExecutionId()
+			}))
+			{
+				/* Setup */
+				var guidMsg = new GenericMessage<Guid>{ Prop = Guid.NewGuid()};
+				await client.SubscribeAsync<GenericMessage<string>>(message =>
+					client.PublishAsync(guidMsg)
+				);
+
+				/* Test */
+				var sequence = client.ExecuteSequence(s => s
+					.PublishAsync(new GenericMessage<string>())
+					.Complete<GenericMessage<Guid>>()
+				);
+
+				/* Assert */
+				Assert.Equal(sequence.Task.Result.Prop, guidMsg.Prop);
+			}
+		}
 	}
 }
