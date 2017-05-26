@@ -3,9 +3,9 @@ using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RawRabbit.Configuration;
-using RawRabbit.DependecyInjection;
+using RawRabbit.DependencyInjection;
 using RawRabbit.Instantiation;
-using RawRabbit.vNext.DependecyInjection;
+using RawRabbit.vNext.DependencyInjection;
 
 namespace RawRabbit.vNext.Pipe
 {
@@ -22,7 +22,7 @@ namespace RawRabbit.vNext.Pipe
 			var collection = applicationCollection ?? new ServiceCollection();
 			var ioc = new ServiceCollectionAdapter(collection);
 
-			Action<IDependecyRegister> di = register =>
+			Action<IDependencyRegister> di = register =>
 			{
 				options?.DependencyInjection?.Invoke(collection);
 			};

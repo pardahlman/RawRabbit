@@ -3,11 +3,11 @@ using System.Linq;
 using Ninject;
 using Ninject.Activation;
 using Ninject.Parameters;
-using RawRabbit.DependecyInjection;
+using RawRabbit.DependencyInjection;
 
 namespace RawRabbit.DependencyInjection.Ninject
 {
-	public class NinjectAdapter : IDependecyResolver
+	public class NinjectAdapter : IDependencyResolver
 	{
 		private readonly IContext _context;
 

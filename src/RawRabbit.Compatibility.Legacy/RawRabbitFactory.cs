@@ -1,6 +1,6 @@
 ﻿using System;
 using RawRabbit.Compatibility.Legacy.Configuration;
-using RawRabbit.DependecyInjection;
+using RawRabbit.DependencyInjection;
 using RawRabbit.Enrichers.MessageContext;
 using RawRabbit.Enrichers.MessageContext.Context;
 using RawRabbit.Instantiation;
@@ -23,7 +23,7 @@ namespace RawRabbit.Compatibility.Legacy
 			options.Plugins += builder => builder
 				.UseMessageContext(context => new MessageContext { GlobalRequestId = Guid.NewGuid() })
 				.UseContextForwarding();
-			var simpleIoc = new SimpleDependecyInjection();
+			var simpleIoc = new SimpleDependencyInjection();
 			var client = Instantiation.RawRabbitFactory.CreateSingleton(options, simpleIoc, ioc => simpleIoc);
 			return new BusClient<TMessageContext>(client, simpleIoc.GetService<IConfigurationEvaluator>());
 		}
@@ -38,7 +38,7 @@ namespace RawRabbit.Compatibility.Legacy
 			options.Plugins += builder => builder
 				.UseMessageContext(context => new MessageContext {GlobalRequestId = Guid.NewGuid()})
 				.UseContextForwarding();
-			var simpleIoc = new SimpleDependecyInjection();
+			var simpleIoc = new SimpleDependencyInjection();
 			var client = Instantiation.RawRabbitFactory.CreateSingleton(options, simpleIoc, ioc => simpleIoc);
 			return new BusClient(client, simpleIoc.GetService<IConfigurationEvaluator>());
 		}

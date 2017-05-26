@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace RawRabbit.DependecyInjection
+namespace RawRabbit.DependencyInjection
 {
-	public interface IDependecyResolver
+	public interface IDependencyResolver
 	{
 		TService GetService<TService>(params object[] additional);
 		object GetService(Type serviceType, params object[] additional);

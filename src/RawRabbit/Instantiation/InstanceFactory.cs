@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Configuration;
-using RawRabbit.DependecyInjection;
+using RawRabbit.DependencyInjection;
 using RawRabbit.Pipe;
 using RawRabbit.Subscription;
 
@@ -15,9 +15,9 @@ namespace RawRabbit.Instantiation
 
 	public class InstanceFactory : IDisposable, IInstanceFactory
 	{
-		private readonly IDependecyResolver _resolver;
+		private readonly IDependencyResolver _resolver;
 
-		public InstanceFactory(IDependecyResolver resolver)
+		public InstanceFactory(IDependencyResolver resolver)
 		{
 			_resolver = resolver;
 		}

@@ -20,11 +20,11 @@ using RawRabbit.Pipe;
 using RawRabbit.Serialization;
 using RawRabbit.Subscription;
 
-namespace RawRabbit.DependecyInjection
+namespace RawRabbit.DependencyInjection
 {
 	public static class RawRabbitDependencyRegisterExtension
 	{
-		public static IDependecyRegister AddRawRabbit(this IDependecyRegister register, RawRabbitOptions options = null)
+		public static IDependencyRegister AddRawRabbit(this IDependencyRegister register, RawRabbitOptions options = null)
 		{
 			var clientBuilder = new ClientBuilder();
 			options?.Plugins?.Invoke(clientBuilder);

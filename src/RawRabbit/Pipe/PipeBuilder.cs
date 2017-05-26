@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using RawRabbit.DependecyInjection;
+using RawRabbit.DependencyInjection;
 using RawRabbit.Pipe.Middleware;
 
 namespace RawRabbit.Pipe
@@ -24,11 +24,11 @@ namespace RawRabbit.Pipe
 
 	public class PipeBuilder : IExtendedPipeBuilder
 	{
-		private readonly IDependecyResolver _resolver;
+		private readonly IDependencyResolver _resolver;
 		protected List<MiddlewareInfo> Pipe;
 		private readonly Action<IPipeBuilder> _additional;
 
-		public PipeBuilder(IDependecyResolver resolver)
+		public PipeBuilder(IDependencyResolver resolver)
 		{
 			_resolver = resolver;
 			_additional = _resolver.GetService<Action<IPipeBuilder>>() ?? (builder => {});

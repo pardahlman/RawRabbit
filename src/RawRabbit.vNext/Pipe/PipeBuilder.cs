@@ -1,13 +1,13 @@
-﻿using RawRabbit.DependecyInjection;
+﻿using RawRabbit.DependencyInjection;
 using RawRabbit.Pipe.Middleware;
 
 namespace RawRabbit.vNext.Pipe
 {
 	public class PipeBuilder : RawRabbit.Pipe.PipeBuilder
 	{
-		private readonly IDependecyResolver _resolver;
+		private readonly IDependencyResolver _resolver;
 
-		public PipeBuilder(IDependecyResolver resolver) : base(resolver)
+		public PipeBuilder(IDependencyResolver resolver) : base(resolver)
 		{
 			_resolver = resolver;
 		}

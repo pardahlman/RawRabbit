@@ -3,11 +3,11 @@ using System.Linq;
 using Autofac;
 using Autofac.Core;
 using Autofac.Core.Registration;
-using RawRabbit.DependecyInjection;
+using RawRabbit.DependencyInjection;
 
 namespace RawRabbit.DependencyInjection.Autofac
 {
-	public class ComponentContextAdapter : IDependecyResolver
+	public class ComponentContextAdapter : IDependencyResolver
 	{
 		public static ComponentContextAdapter Create(IComponentContext context)
 		{

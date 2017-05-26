@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using RawRabbit.DependecyInjection;
-using RawRabbit.vNext.DependecyInjection;
+using RawRabbit.DependencyInjection;
+using RawRabbit.vNext.DependencyInjection;
 using RawRabbitOptions = RawRabbit.vNext.Pipe.RawRabbitOptions;
 
 namespace RawRabbit.vNext
