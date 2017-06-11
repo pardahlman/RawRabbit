@@ -2,6 +2,7 @@
 using RawRabbit.Common;
 using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
+using System.Threading.Tasks;
 
 namespace RawRabbit.Enrichers.Polly.Middleware
 {
@@ -13,12 +14,12 @@ namespace RawRabbit.Enrichers.Polly.Middleware
 		protected override Acknowledgement AcknowledgeMessage(IPipeContext context)
 		{
 			var policy = context.GetPolicy(PolicyKeys.MessageAcknowledge);
-			return policy.Execute(
-				action: () => base.AcknowledgeMessage(context),
+			return policy.ExecuteAsync(
+				action: () => { return Task.FromResult(base.AcknowledgeMessage(context)); },
 				contextData: new Dictionary<string, object>
 				{
 					[RetryKey.PipeContext] = context
-				});
+				}).GetAwaiter().GetResult();
 		}
 	}
 }
