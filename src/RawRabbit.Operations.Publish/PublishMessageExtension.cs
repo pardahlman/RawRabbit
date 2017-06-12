@@ -43,7 +43,7 @@ namespace RawRabbit
 				PublishPipeAction,
 				ctx =>
 				{
-					ctx.Properties.Add(PipeKey.MessageType, typeof(TMessage));
+					ctx.Properties.Add(PipeKey.MessageType, message?.GetType() ?? typeof(TMessage));
 					ctx.Properties.Add(PipeKey.Message, message);
 					context?.Invoke(ctx);
 				}, token);
