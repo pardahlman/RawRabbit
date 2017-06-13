@@ -42,7 +42,7 @@ namespace RawRabbit.Pipe.Middleware
 			var noAck = GetNoAck(context);
 			if (!noAck)
 			{
-				var ack = AcknowledgeMessage(context);
+				var ack = await AcknowledgeMessage(context);
 				if (AbortExecution(ack))
 				{
 					return;
@@ -51,7 +51,7 @@ namespace RawRabbit.Pipe.Middleware
 			await Next.InvokeAsync(context, token);
 		}
 		
-		protected virtual Acknowledgement AcknowledgeMessage(IPipeContext context)
+		protected virtual Task<Acknowledgement> AcknowledgeMessage(IPipeContext context)
 		{
 			var ack = (InvokationResultFunc(context) as Task<Acknowledgement>)?.Result;
 			if (ack == null)
@@ -64,22 +64,22 @@ namespace RawRabbit.Pipe.Middleware
 			if (ack is Ack)
 			{
 				HandleAck(ack as Ack, channel, deliveryArgs);
-				return ack;
+				return Task.FromResult(ack);
 			}
 			if (ack is Nack)
 			{
 				HandleNack(ack as Nack, channel, deliveryArgs);
-				return ack;
+				return Task.FromResult(ack);
 			}
 			if (ack is Reject)
 			{
 				HandleReject(ack as Reject, channel, deliveryArgs);
-				return ack;
+				return Task.FromResult(ack);
 			}
 			if (ack is Retry)
 			{
 				HandleRetry(ack as Retry, channel, deliveryArgs);
-				return ack;
+				return Task.FromResult(ack);
 			}
 
 			throw new NotSupportedException($"Unable to handle {ack.GetType()} as an Acknowledgement.");
