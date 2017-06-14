@@ -65,7 +65,7 @@ namespace RawRabbit.Pipe.Middleware
 			await Next.InvokeAsync(context, token);
 		}
 
-		protected virtual void BasicPublish(IModel channel, string exchange, string routingKey, bool mandatory, IBasicProperties basicProps, byte[] body, IPipeContext context)
+		protected virtual Task BasicPublish(IModel channel, string exchange, string routingKey, bool mandatory, IBasicProperties basicProps, byte[] body, IPipeContext context)
 		{
 			channel.BasicPublish(
 				exchange: exchange,
@@ -74,6 +74,7 @@ namespace RawRabbit.Pipe.Middleware
 				basicProperties: basicProps,
 				body: body
 			);
+			return Task.FromResult(0);
 		}
 
 		protected virtual void ExclusiveExecute(IModel channel, Action<IModel> action, CancellationToken token)

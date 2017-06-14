@@ -11,10 +11,10 @@ namespace RawRabbit.Enrichers.Polly
 			return context.Get(policyName, fallback);
 		}
 
-		public static IPipeContext UsePolicy(this IPipeContext context, Policy poliocy, string policyName = null)
+		public static IPipeContext UsePolicy(this IPipeContext context, Policy policy, string policyName = null)
 		{
 			policyName = policyName ?? PolicyKeys.DefaultPolicy;
-			context.Properties.TryAdd(policyName, poliocy);
+			context.Properties.TryAdd(policyName, policy);
 			return context;
 		}
 	}

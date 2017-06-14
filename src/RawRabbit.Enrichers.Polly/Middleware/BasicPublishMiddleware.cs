@@ -3,6 +3,7 @@ using RabbitMQ.Client;
 using RawRabbit.Common;
 using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
+using System.Threading.Tasks;
 
 namespace RawRabbit.Enrichers.Polly.Middleware
 {
@@ -11,7 +12,7 @@ namespace RawRabbit.Enrichers.Polly.Middleware
 		public BasicPublishMiddleware(IExclusiveLock exclusive, BasicPublishOptions options = null)
 			: base(exclusive, options) { }
 
-		protected override void BasicPublish(
+		protected override async Task BasicPublish(
 				IModel channel,
 				string exchange,
 				string routingKey,
@@ -21,8 +22,7 @@ namespace RawRabbit.Enrichers.Polly.Middleware
 				IPipeContext context)
 		{
 			var policy = context.GetPolicy(PolicyKeys.BasicPublish);
-			policy.Execute(
-				action: () => base.BasicPublish(channel, exchange, routingKey, mandatory, basicProps, body, context),
+			await policy.ExecuteAsync(action: () => { base.BasicPublish(channel, exchange, routingKey, mandatory, basicProps, body, context); return Task.FromResult(0); },
 				contextData: new Dictionary<string, object>
 				{
 					[RetryKey.PipeContext] = context,
@@ -31,7 +31,7 @@ namespace RawRabbit.Enrichers.Polly.Middleware
 					[RetryKey.PublishMandatory] = mandatory,
 					[RetryKey.BasicProperties] = basicProps,
 					[RetryKey.PublishBody] = body,
-				});
+				});			
 		}
 	}
 }

@@ -2,6 +2,7 @@
 using RawRabbit.Common;
 using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
+using System.Threading.Tasks;
 
 namespace RawRabbit.Enrichers.Polly.Middleware
 {
@@ -10,15 +11,16 @@ namespace RawRabbit.Enrichers.Polly.Middleware
 		public ExplicitAckMiddleware(INamingConventions conventions, ExplicitAckOptions options = null)
 				: base(conventions, options) { }
 
-		protected override Acknowledgement AcknowledgeMessage(IPipeContext context)
+		protected override async Task<Acknowledgement> AcknowledgeMessage(IPipeContext context)
 		{
 			var policy = context.GetPolicy(PolicyKeys.MessageAcknowledge);
-			return policy.Execute(
-				action: () => base.AcknowledgeMessage(context),
+			var result = await policy.ExecuteAsync(
+				action: () => { return Task.FromResult(base.AcknowledgeMessage(context)); },
 				contextData: new Dictionary<string, object>
 				{
 					[RetryKey.PipeContext] = context
 				});
+			return await result;
 		}
 	}
 }
