@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Enrichers.MessageContext.Context;
 using RawRabbit.IntegrationTests.TestMessages;
+using RawRabbit.IntegrationTests.TestMessages.Extras;
 using Xunit;
 
 namespace RawRabbit.IntegrationTests.PublishAndSubscribe
@@ -331,6 +332,84 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 
 				/* Assert */
 				Assert.Equal(1, (secondTsc.Task.Result - firstTsc.Task.Result).Seconds);
+			}
+		}
+
+		[Fact]
+		public async Task Should_Be_Able_To_Retry_Multiple_Times()
+		{
+			using (var publisher = RawRabbitFactory.CreateTestClient())
+			using (var subscriber = RawRabbitFactory.CreateTestClient())
+			{
+				/* Setup */
+				var firstTsc = new TaskCompletionSource<DateTime>();
+				var secondTsc = new TaskCompletionSource<DateTime>();
+				var thirdTsc = new TaskCompletionSource<DateTime>();
+				await subscriber.SubscribeAsync<BasicMessage>(async recieved =>
+				{
+					var recievedAt = DateTime.Now;
+					if (firstTsc.TrySetResult(recievedAt))
+					{
+						return Retry.In(TimeSpan.FromSeconds(1));
+					}
+					if (secondTsc.TrySetResult(recievedAt))
+					{
+						return Retry.In(TimeSpan.FromSeconds(1));
+					}
+					thirdTsc.TrySetResult(recievedAt);
+					return new Ack();
+				});
+
+				/* Test */
+				await publisher.PublishAsync(new BasicMessage { Prop = "Hello, world!" });
+				Task.WaitAll(firstTsc.Task, secondTsc.Task, thirdTsc.Task);
+
+				/* Assert */
+				Assert.Equal(1, (secondTsc.Task.Result - firstTsc.Task.Result).Seconds);
+				Assert.Equal(1, (thirdTsc.Task.Result - secondTsc.Task.Result).Seconds);
+			}
+		}
+
+		[Fact]
+		public async Task Should_Handle_Concurrent_Retries()
+		{
+			using (var publisher = RawRabbitFactory.CreateTestClient())
+			using (var subscriber = RawRabbitFactory.CreateTestClient())
+			{
+				/* Setup */
+				var firstTsc = new TaskCompletionSource<DateTime>();
+				var secondTsc = new TaskCompletionSource<DateTime>();
+				var thirdTsc = new TaskCompletionSource<DateTime>();
+				var forthTsc = new TaskCompletionSource<DateTime>();
+				await subscriber.SubscribeAsync<BasicMessage> (async recieved =>
+				{
+					var recievedAt = DateTime.Now;
+					if (firstTsc.TrySetResult(recievedAt))
+					{
+						subscriber.PublishAsync(new NamespacedMessages());
+						return Retry.In(TimeSpan.FromSeconds(1));
+					}
+					thirdTsc.TrySetResult(recievedAt);
+					return new Ack();
+				});
+				await subscriber.SubscribeAsync<NamespacedMessages>(async second =>
+				{
+					var recievedAt = DateTime.Now;
+					if (secondTsc.TrySetResult(recievedAt))
+						 {
+						return Retry.In(TimeSpan.FromSeconds(1));
+					}
+					forthTsc.TrySetResult(recievedAt);
+					return new Ack();
+				});
+
+				/* Test */
+				await publisher.PublishAsync(new BasicMessage());
+				Task.WaitAll(firstTsc.Task, secondTsc.Task, thirdTsc.Task, forthTsc.Task);
+
+				/* Assert */
+				Assert.Equal(1, (thirdTsc.Task.Result - firstTsc.Task.Result).Seconds);
+				Assert.Equal(1, (forthTsc.Task.Result - secondTsc.Task.Result).Seconds);
 			}
 		}
 	}
