@@ -381,11 +381,13 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 				var secondTsc = new TaskCompletionSource<DateTime>();
 				var thirdTsc = new TaskCompletionSource<DateTime>();
 				var forthTsc = new TaskCompletionSource<DateTime>();
+
 				await subscriber.SubscribeAsync<BasicMessage> (async recieved =>
 				{
 					var recievedAt = DateTime.Now;
 					if (firstTsc.TrySetResult(recievedAt))
 					{
+						await Task.Delay(TimeSpan.FromMilliseconds(100));
 						subscriber.PublishAsync(new NamespacedMessages());
 						return Retry.In(TimeSpan.FromSeconds(1));
 					}
