@@ -75,7 +75,7 @@ Configuration can be supplied in configuration files. See the [configuration sec
 Two of the main messaging patterns for RabbitMq are [remote procedure calls](https://www.rabbitmq.com/tutorials/tutorial-six-dotnet.html) (sometimes refered to as `RPC` or _request/reply_) and [publish/subscribe](https://www.rabbitmq.com/tutorials/tutorial-three-dotnet.html).
 
 ### Publish/Subscribe
-Implementing the publish/subscribe pattern can be done with just a few lines of code. The `SubscribeAsyn<TMessage>` method takes one argument `Func<TMessage,TMessageContext,Task>` that will be invoked as the message is recived. Read more about the `TMessageContext` in the [Message Context](fixme) section. Publish a message by calling `PublishAsync<TMessage>` with an instance of the message as argument.
+Implementing the publish/subscribe pattern can be done with just a few lines of code. The `SubscribeAsync<TMessage>` method takes one argument `Func<TMessage,TMessageContext,Task>` that will be invoked as the message is received. Read more about the `TMessageContext` in the [Message Context](fixme) section. Publish a message by calling `PublishAsync<TMessage>` with an instance of the message as argument.
 ```csharp
 var client = BusClientFactory.CreateDefault();
 client.SubscribeAsync<BasicMessage>(async (msg, context) =>
