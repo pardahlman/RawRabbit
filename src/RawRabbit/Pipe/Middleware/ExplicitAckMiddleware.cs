@@ -127,7 +127,6 @@ namespace RawRabbit.Pipe.Middleware
 			await Topology.DeclareExchangeAsync(new ExchangeDeclaration
 			{
 				Name = deadLeterExchangeName,
-				AutoDelete = true,
 				Durable = true,
 				ExchangeType = ExchangeType.Direct
 			});
@@ -135,7 +134,6 @@ namespace RawRabbit.Pipe.Middleware
 			{
 				Name = deadLetterQueueName,
 				Durable = true,
-				AutoDelete = false,
 				Arguments = new Dictionary<string, object>
 				{
 					{QueueArgument.DeadLetterExchange, deliveryArgs.Exchange},
