@@ -39,10 +39,14 @@ namespace RawRabbit.Operations.Request.Middleware
 				timeoutTsc.TrySetException(new TimeoutException($"The request '{correlationId}' with routing key '{cfg?.Request.RoutingKey}' timed out after {timeout:g}."));
 			});
 
-			var pipeTask = Next.InvokeAsync(context, ctc.Token)
+			var pipeTask = Next
+				.InvokeAsync(context, ctc.Token)
 				.ContinueWith(t =>
 				{
-					timeoutTsc.TrySetResult(true);
+					if (!ctc.IsCancellationRequested)
+					{
+						timeoutTsc.TrySetResult(true);
+					}
 					return t;
 				}, token)
 				.Unwrap();
@@ -50,10 +54,6 @@ namespace RawRabbit.Operations.Request.Middleware
 			await timeoutTsc.Task;
 			await pipeTask;
 			ctc.Dispose();
-			if (pipeTask.IsFaulted)
-			{
-				throw pipeTask.Exception;
-			}
 		}
 
 		protected virtual TimeSpan GetTimeoutTimeSpan(IPipeContext context)
