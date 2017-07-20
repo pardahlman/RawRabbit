@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Autofac;
 using Autofac.Core;
 using RawRabbit.Common;
@@ -10,7 +9,7 @@ using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.Logging;
 using Xunit;
 
-namespace RawRabbit.IntegrationTests.DependecyInjection
+namespace RawRabbit.IntegrationTests.DependencyInjection
 {
 	public class AutofacTests
 	{

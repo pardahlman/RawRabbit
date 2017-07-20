@@ -4,7 +4,7 @@ using RawRabbit.DependencyInjection.Ninject;
 using RawRabbit.Instantiation;
 using Xunit;
 
-namespace RawRabbit.IntegrationTests.DependecyInjection
+namespace RawRabbit.IntegrationTests.DependencyInjection
 {
 	public class NinjectTests
 	{

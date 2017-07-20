@@ -4,7 +4,7 @@ using RawRabbit.Configuration;
 using RawRabbit.vNext.Pipe;
 using Xunit;
 
-namespace RawRabbit.IntegrationTests.DependecyInjection
+namespace RawRabbit.IntegrationTests.DependencyInjection
 {
 	public class SimpleDependencyTests
 	{
