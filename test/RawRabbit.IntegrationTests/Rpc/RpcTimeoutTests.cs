@@ -17,9 +17,9 @@ namespace RawRabbit.IntegrationTests.Rpc
 				/* Setup */
 				/* Test */
 				/* Assert */
-				await Assert.ThrowsAsync<TimeoutException>(() =>
-					requester.RequestAsync<BasicRequest, BasicResponse>(context: ctx => ctx
-						.UseRequestTimeout(TimeSpan.FromMilliseconds(500)))
+				await Assert.ThrowsAsync<TimeoutException>(async () =>
+					await requester.RequestAsync<BasicRequest, BasicResponse>(context: ctx => ctx
+						.UseRequestTimeout(TimeSpan.FromMilliseconds(100)))
 				);
 			}
 		}
