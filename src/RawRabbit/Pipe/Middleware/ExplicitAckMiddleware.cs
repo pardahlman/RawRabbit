@@ -69,6 +69,16 @@ namespace RawRabbit.Pipe.Middleware
 			var deliveryArgs = DeliveryArgsFunc(context);
 			var channel = ConsumerFunc(context).Model;
 
+			if (channel == null)
+			{
+				throw new NullReferenceException("Unable to retrieve channel for delivered message.");
+			}
+
+			if (channel.IsClosed)
+			{
+				return new Ack();
+			}
+
 			if (ack is Ack)
 			{
 				HandleAck(ack as Ack, channel, deliveryArgs);

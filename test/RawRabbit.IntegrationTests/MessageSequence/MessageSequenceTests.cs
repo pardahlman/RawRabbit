@@ -372,5 +372,47 @@ namespace RawRabbit.IntegrationTests.MessageSequence
 				Assert.Equal(sequence.Task.Result.Prop, guidMsg.Prop);
 			}
 		}
+
+		[Fact]
+		public async Task Should_Support_Chained_Message_Sequences()
+		{
+			var sequenceOptions = new RawRabbitOptions
+			{
+				Plugins = p => p
+					.UseStateMachine()
+					.UseMessageContext(context => new MessageContext {GlobalRequestId = Guid.NewGuid()})
+					.UseContextForwarding()
+					.UseGlobalExecutionId()
+			};
+			using (var serviceA = RawRabbitFactory.CreateTestClient(sequenceOptions))
+			using (var serviceB = RawRabbitFactory.CreateTestClient(sequenceOptions))
+			using (var serviceC = RawRabbitFactory.CreateTestClient(sequenceOptions))
+			{
+				/* Setup */
+				await serviceB.SubscribeAsync<FirstMessage>(async message =>
+					{
+						var nestedSequence = serviceB.ExecuteSequence(s => s
+							.PublishAsync(new SecondMessage())
+							.Complete<ThirdMessage>());
+						await nestedSequence.Task;
+						await serviceB.PublishAsync(new ForthMessage());
+					}
+				);
+				await serviceC.SubscribeAsync<SecondMessage>(message =>
+				{
+					return serviceC.PublishAsync(new ThirdMessage());
+				});
+
+				/* Test */
+				var mainSequence = serviceA.ExecuteSequence(s => s
+					.PublishAsync(new FirstMessage())
+					.Complete<ForthMessage>()
+				);
+				await mainSequence.Task;
+
+				/* Assert */
+				Assert.True(true, "Shoud complete sequence");
+			}
+		}
 	}
 }
