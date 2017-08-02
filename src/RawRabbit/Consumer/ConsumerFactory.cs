@@ -14,7 +14,7 @@ namespace RawRabbit.Consumer
 	{
 		private readonly IChannelFactory _channelFactory;
 		private readonly ConcurrentDictionary<string, Lazy<Task<IBasicConsumer>>> _consumerCache;
-		private readonly ILogger _logger = LogManager.GetLogger<ConsumerFactory>();
+		private readonly ILog _logger = LogProvider.For<ConsumerFactory>();
 
 		public ConsumerFactory(IChannelFactory channelFactory)
 		{
@@ -66,7 +66,7 @@ namespace RawRabbit.Consumer
 
 			if (cfg.PrefetchCount > 0)
 			{
-				_logger.LogInformation($"Setting Prefetch Count to {cfg.PrefetchCount}.");
+				_logger.Info("Setting Prefetch Count to {prefetchCount}.", cfg.PrefetchCount);
 				consumer.Model.BasicQos(
 					prefetchSize: 0,
 					prefetchCount: cfg.PrefetchCount,
@@ -74,7 +74,7 @@ namespace RawRabbit.Consumer
 				);
 			}
 
-			_logger.LogInformation($"Preparing to consume message from queue '{cfg.QueueName}'.");
+			_logger.Info("Preparing to consume message from queue '{queueName}'.", cfg.QueueName);
 
 			consumer.Model.BasicConsume(
 				queue: cfg.QueueName,
@@ -105,7 +105,7 @@ namespace RawRabbit.Consumer
 
 		protected virtual Task<IModel> GetOrCreateChannelAsync(CancellationToken token = default(CancellationToken))
 		{
-			_logger.LogInformation("Creating a dedicated channel for consumer.");
+			_logger.Info("Creating a dedicated channel for consumer.");
 			return _channelFactory.CreateChannelAsync(token);
 		}
 

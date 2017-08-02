@@ -26,7 +26,7 @@ namespace RawRabbit.Pipe.Middleware
 		protected Func<IPipeContext, bool> MandatoryFunc;
 		protected Func<IPipeContext, IBasicProperties> BasicPropsFunc;
 		protected Func<IPipeContext, byte[]> BodyFunc;
-		private ILogger _logger = LogManager.GetLogger<BasicPublishMiddleware>();
+		private ILog _logger = LogProvider.For<BasicPublishMiddleware>();
 
 		public BasicPublishMiddleware(IExclusiveLock exclusive, BasicPublishOptions options = null)
 		{
@@ -48,7 +48,7 @@ namespace RawRabbit.Pipe.Middleware
 			var basicProps = GetBasicProps(context);
 			var body = GetMessageBody(context);
 
-			_logger.LogInformation($"Performing basic publish with routing key {routingKey} on exchange {exchangeName}.");
+			_logger.Info("Performing basic publish with routing key {routingKey} on exchange {exchangeName}.", routingKey, exchangeName);
 
 			ExclusiveExecute(channel, c =>
 					BasicPublish(
@@ -87,7 +87,7 @@ namespace RawRabbit.Pipe.Middleware
 			var body = BodyFunc(context);
 			if (body == null)
 			{
-				_logger.LogWarning("No body found in the Pipe context.");
+				_logger.Warn("No body found in the Pipe context.");
 			}
 			return body;
 		}
@@ -97,7 +97,7 @@ namespace RawRabbit.Pipe.Middleware
 			var props = BasicPropsFunc(context);
 			if (props == null)
 			{
-				_logger.LogWarning("No basic properties found in the Pipe context.");
+				_logger.Warn("No basic properties found in the Pipe context.");
 			}
 			return props;
 		}
@@ -112,7 +112,7 @@ namespace RawRabbit.Pipe.Middleware
 			var routingKey =  RoutingKeyFunc(context);
 			if (routingKey == null)
 			{
-				_logger.LogWarning("No routing key found in the Pipe context.");
+				_logger.Warn("No routing key found in the Pipe context.");
 			}
 			return routingKey;
 		}
@@ -122,7 +122,7 @@ namespace RawRabbit.Pipe.Middleware
 			var exchange = ExchangeNameFunc(context);
 			if (exchange == null)
 			{
-				_logger.LogWarning("No exchange name found in the Pipe context.");
+				_logger.Warn("No exchange name found in the Pipe context.");
 			}
 			return exchange;
 		}
@@ -132,7 +132,7 @@ namespace RawRabbit.Pipe.Middleware
 			var channel = ChannelFunc(context);
 			if (channel == null)
 			{
-				_logger.LogWarning("No channel to perform publish found.");
+				_logger.Warn("No channel to perform publish found.");
 			}
 			return channel;
 		}

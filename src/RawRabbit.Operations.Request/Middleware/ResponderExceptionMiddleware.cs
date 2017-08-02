@@ -25,7 +25,7 @@ namespace RawRabbit.Operations.Request.Middleware
 		private readonly ISerializer _serializer;
 		protected Func<IPipeContext, object> ExceptionInfoFunc;
 		protected Func<ExceptionInformation, IPipeContext, Task> HandlerFunc;
-		private readonly ILogger _logger = LogManager.GetLogger<ResponderExceptionMiddleware>();
+		private readonly ILog _logger = LogProvider.For<ResponderExceptionMiddleware>();
 		protected Func<IPipeContext, Type> ResponseTypeFunc;
 		private Func<IPipeContext, BasicDeliverEventArgs> _deliveryArgFunc;
 
@@ -78,7 +78,7 @@ namespace RawRabbit.Operations.Request.Middleware
 
 		protected virtual Task HandleRespondException(ExceptionInformation exceptionInfo, IPipeContext context)
 		{
-			_logger.LogInformation($"An unhandled exception occured when remote tried to handle request.\n  Message: {exceptionInfo.Message}\n  Stack Trace: {exceptionInfo.StackTrace}");
+			_logger.Info("An unhandled exception occured when remote tried to handle request.\n  Message: {exceptionMessage}\n  Stack Trace: {stackTrace}", exceptionInfo.Message, exceptionInfo.StackTrace);
 
 			if (HandlerFunc != null)
 			{

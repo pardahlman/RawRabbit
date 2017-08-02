@@ -23,7 +23,7 @@ namespace RawRabbit.Pipe.Middleware
 		protected Func<IPipeContext, IBasicConsumer> ConsumeFunc;
 		protected Func<IPipeContext, SemaphoreSlim> SemaphoreFunc;
 		protected Func<IPipeContext, Action<Func<Task>, CancellationToken>> ThrottledExecutionFunc;
-		private readonly ILogger _logger = LogManager.GetLogger<ConsumerMessageHandlerMiddleware>();
+		private readonly ILog _logger = LogProvider.For<ConsumerMessageHandlerMiddleware>();
 
 		public ConsumerMessageHandlerMiddleware(IPipeBuilderFactory pipeBuilderFactory, IPipeContextFactory contextFactory, ConsumeOptions options = null)
 		{
@@ -52,7 +52,7 @@ namespace RawRabbit.Pipe.Middleware
 
 		protected virtual async Task InvokeConsumePipeAsync(IPipeContext context, BasicDeliverEventArgs args, CancellationToken token)
 		{
-			_logger.LogDebug($"Invoking consumer pipe for message '{args?.BasicProperties?.MessageId}'.");
+			_logger.Debug("Invoking consumer pipe for message {messageId}", args?.BasicProperties?.MessageId);
 			var consumeContext = ContextFactory.CreateContext(context.Properties.ToArray());
 			consumeContext.Properties.Add(PipeKey.DeliveryEventArgs, args);
 			try
@@ -61,7 +61,7 @@ namespace RawRabbit.Pipe.Middleware
 			}
 			catch (Exception e)
 			{
-				_logger.LogError($"An unhandled exception was thrown when consuming message with routing key {args.RoutingKey}", e);
+				_logger.Error(e, "An unhandled exception was thrown when consuming message with routing key {routingKey}", args.RoutingKey);
 				throw;
 			}
 		}

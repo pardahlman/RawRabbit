@@ -23,7 +23,7 @@ namespace RawRabbit.Pipe.Middleware
 		protected Action<IPipeContext, object> ContextSaveAction;
 		protected Func<IPipeContext, string> HeaderKeyFunc;
 		protected Func<IPipeContext, Type> HeaderTypeFunc;
-		private readonly ILogger _logger = LogManager.GetLogger<HeaderDeserializationMiddleware>();
+		private readonly ILog _logger = LogProvider.For<HeaderDeserializationMiddleware>();
 
 		public HeaderDeserializationMiddleware(ISerializer serializer, HeaderDeserializationOptions options = null)
 		{
@@ -72,17 +72,17 @@ namespace RawRabbit.Pipe.Middleware
 			var args = GetDeliveryArgs(context);
 			if (string.IsNullOrEmpty(headerKey))
 			{
-				_logger.LogDebug($"Key '{headerKey}' not found.");
+				_logger.Debug("Key {headerKey} not found.", headerKey);
 				return null;
 			}
 			if (args == null)
 			{
-				_logger.LogDebug("DeliveryEventArgs not found.");
+				_logger.Debug("DeliveryEventArgs not found.");
 				return null;
 			}
 			if (!args.BasicProperties.Headers.ContainsKey(headerKey))
 			{
-				_logger.LogInformation($"BasicProperties Header does not contain '{headerKey}'");
+				_logger.Info("BasicProperties Header does not contain {headerKey}", headerKey);
 				return null;
 			}
 
@@ -97,7 +97,7 @@ namespace RawRabbit.Pipe.Middleware
 			var args = DeliveryArgsFunc(context);
 			if (args == null)
 			{
-				_logger.LogWarning("Unable to extract delivery args from Pipe Context.");
+				_logger.Warn("Unable to extract delivery args from Pipe Context.");
 			}
 			return args;
 		}
@@ -107,11 +107,11 @@ namespace RawRabbit.Pipe.Middleware
 			var key = HeaderKeyFunc(context);
 			if (key == null)
 			{
-				_logger.LogWarning("Unable to extract header key from Pipe context.");
+				_logger.Warn("Unable to extract header key from Pipe context.");
 			}
 			else
 			{
-				_logger.LogDebug($"Trying to extract {key} from header");
+				_logger.Debug("Trying to extract {headerKey} from header", key);
 			}
 			return key;
 		}
@@ -121,11 +121,11 @@ namespace RawRabbit.Pipe.Middleware
 			var type = HeaderTypeFunc(context);
 			if (type == null)
 			{
-				_logger.LogWarning("Unable to extract header type from Pipe context.");
+				_logger.Warn("Unable to extract header type from Pipe context.");
 			}
 			else
 			{
-				_logger.LogDebug($"Header type extracted: '{type.Name}'");
+				_logger.Debug("Header type extracted: '{headerType}'", type.Name);
 			}
 			return type;
 		}

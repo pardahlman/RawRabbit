@@ -19,7 +19,7 @@ namespace RawRabbit.Pipe.Middleware
 		protected readonly ITopologyProvider TopologyProvider;
 		protected readonly Func<IPipeContext, ExchangeDeclaration> ExchangeFunc;
 		protected Func<IPipeContext, bool> ThrowOnFailFunc;
-		private readonly ILogger _logger = LogManager.GetLogger<ExchangeDeclareMiddleware>();
+		private readonly ILog _logger = LogProvider.For<ExchangeDeclareMiddleware>();
 
 		public ExchangeDeclareMiddleware(ITopologyProvider topologyProvider, ExchangeDeclareOptions options = null)
 		{
@@ -34,7 +34,7 @@ namespace RawRabbit.Pipe.Middleware
 
 			if (exchangeCfg != null)
 			{
-				_logger.LogDebug($"Exchange configuration found. Declaring '{exchangeCfg.Name}'.");
+				_logger.Debug($"Exchange configuration found. Declaring '{exchangeCfg.Name}'.");
 				await DeclareExchangeAsync(exchangeCfg, context, token);
 			}
 			else

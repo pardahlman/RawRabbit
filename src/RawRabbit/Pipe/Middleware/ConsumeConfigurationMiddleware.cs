@@ -25,7 +25,7 @@ namespace RawRabbit.Pipe.Middleware
 		protected Func<IPipeContext, string> RoutingKeyFunc;
 		protected Func<IPipeContext, Type> MessageTypeFunc;
 		protected Func<IPipeContext, Action<IConsumerConfigurationBuilder>> ConfigActionFunc;
-		private readonly ILogger _logger = LogManager.GetLogger<ConsumeConfigurationMiddleware>();
+		private readonly ILog _logger = LogProvider.For<ConsumeConfigurationMiddleware>();
 
 		public ConsumeConfigurationMiddleware(IConsumerConfigurationFactory configFactory, ConsumeConfigurationOptions options = null)
 		{
@@ -46,7 +46,7 @@ namespace RawRabbit.Pipe.Middleware
 			var action = GetConfigurationAction(context);
 			if (action != null)
 			{
-				_logger.LogInformation($"Configuration action for '{config.Queue?.Name}' found.");
+				_logger.Info("Configuration action for {queueName} found.", config.Queue?.Name);
 				var builder = new ConsumerConfigurationBuilder(config);
 				action(builder);
 				config = builder.Config;
@@ -85,7 +85,7 @@ namespace RawRabbit.Pipe.Middleware
 			var routingKey = RoutingKeyFunc(context);
 			var queueName = QueueFunc(context);
 			var exchangeName = ExchangeFunc(context);
-			_logger.LogDebug($"Consuming from queue '{queueName}' on '{exchangeName}' with routing key '{routingKey}'");
+			_logger.Debug("Consuming from queue {queueName} on {exchangeName} with routing key {routingKey}", queueName, exchangeName, routingKey);
 			return ConfigFactory.Create(queueName, exchangeName, routingKey);
 		}
 
@@ -94,7 +94,7 @@ namespace RawRabbit.Pipe.Middleware
 			var messageType = MessageTypeFunc(context);
 			if (messageType != null)
 			{
-				_logger.LogDebug($"Found message type '{messageType.Name}' in context. Creating consume config based on it.");
+				_logger.Debug("Found message type {messageType} in context. Creating consume config based on it.", messageType.Name);
 			}
 			return messageType == null
 				? null

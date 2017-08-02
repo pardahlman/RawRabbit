@@ -25,7 +25,7 @@ namespace RawRabbit.Operations.Publish.Middleware
 		protected readonly Func<IPipeContext, string> ExchangeFunc;
 		protected readonly Func<IPipeContext, string> RoutingKeyFunc;
 		protected readonly Func<IPipeContext, Type> MessageTypeFunc;
-		private readonly ILogger _logger = LogManager.GetLogger<PublisherConfigurationMiddleware>();
+		private readonly ILog _logger = LogProvider.For<PublisherConfigurationMiddleware>();
 
 		public PublisherConfigurationMiddleware(IPublisherConfigurationFactory publisherFactory, PublishConfigurationOptions options = null)
 		{
@@ -40,14 +40,14 @@ namespace RawRabbit.Operations.Publish.Middleware
 			var config = ExtractConfigFromMessageType(context) ?? ExtractConfigFromStrings(context);
 			if (config == null)
 			{
-				_logger.LogWarning("Unable to find PublisherConfiguration from message type or parameters.");
+				_logger.Warn("Unable to find PublisherConfiguration from message type or parameters.");
 				throw new ArgumentNullException(nameof(config));
 			}
 
 			var action = context.Get<Action<IPublisherConfigurationBuilder>>(PipeKey.ConfigurationAction);
 			if (action != null)
 			{
-				_logger.LogDebug($"Custom configuration supplied. Applying.");
+				_logger.Debug($"Custom configuration supplied. Applying.");
 				var builder = new PublisherConfigurationBuilder(config);
 				action(builder);
 				config = builder.Config;

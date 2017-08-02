@@ -20,7 +20,7 @@ namespace RawRabbit.Operations.Publish.Middleware
 		protected Func<IPipeContext, EventHandler<BasicReturnEventArgs>> CallbackFunc;
 		protected Func<IPipeContext, IModel> ChannelFunc;
 		protected Action<IPipeContext, EventHandler<BasicReturnEventArgs>> PostInvoke;
-		private readonly ILogger _logger = LogManager.GetLogger<MandatoryCallbackMiddleware>();
+		private readonly ILog _logger = LogProvider.For<MandatoryCallbackMiddleware>();
 
 		public MandatoryCallbackMiddleware(MandatoryCallbackOptions options = null)
 		{
@@ -34,7 +34,7 @@ namespace RawRabbit.Operations.Publish.Middleware
 			var callback = GetCallback(context);
 			if (callback == null)
 			{
-				_logger.LogDebug("No Mandatory Callback registered.");
+				_logger.Debug("No Mandatory Callback registered.");
 				await Next.InvokeAsync(context, token);
 				return;
 			}
@@ -42,17 +42,17 @@ namespace RawRabbit.Operations.Publish.Middleware
 			var channel = GetChannel(context);
 			if (channel == null)
 			{
-				_logger.LogWarning("Channel not found in Pipe Context. Mandatory Callback not registered.");
+				_logger.Warn("Channel not found in Pipe Context. Mandatory Callback not registered.");
 				await Next.InvokeAsync(context, token);
 				return;
 			}
 
-			_logger.LogDebug($"Register Mandatory Callback on channel '{channel.ChannelNumber}'");
+			_logger.Debug("Register Mandatory Callback on channel {channelNumber}", channel.ChannelNumber);
 			channel.BasicReturn += callback;
 			PostInvoke?.Invoke(context, callback);
 
 			await Next.InvokeAsync(context, token);
-			_logger.LogDebug($"Removing Mandatory Callback on channel '{channel.ChannelNumber}'");
+			_logger.Debug("Removing Mandatory Callback on channel {channelNumber}", channel.ChannelNumber);
 			channel.BasicReturn -= callback;
 		}
 

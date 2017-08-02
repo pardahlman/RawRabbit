@@ -9,7 +9,7 @@ namespace RawRabbit.Pipe.Middleware
 	public class TransientChannelMiddleware : Middleware
 	{
 		protected readonly IChannelFactory ChannelFactory;
-		private readonly ILogger _logger = LogManager.GetLogger<TransientChannelMiddleware>();
+		private readonly ILog _logger = LogProvider.For<TransientChannelMiddleware>();
 
 		public TransientChannelMiddleware(IChannelFactory channelFactory)
 		{
@@ -19,7 +19,7 @@ namespace RawRabbit.Pipe.Middleware
 		public override async Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			var channel = await CreateChannelAsync(context, token);
-			_logger.LogDebug($"Adding channel {channel.ChannelNumber} to Execution Context.");
+			_logger.Debug("Adding channel {channelNumber} to Execution Context.", channel.ChannelNumber);
 			context.Properties.Add(PipeKey.TransientChannel, channel);
 			await Next.InvokeAsync(context, token);
 		}

@@ -16,7 +16,7 @@ namespace RawRabbit.Pipe.Middleware
 	{
 		protected readonly Func<IPipeContext, QueueDeclaration> QueueDeclareFunc;
 		protected readonly ITopologyProvider Topology;
-		private readonly ILogger _logger = LogManager.GetLogger<QueueDeclareMiddleware>();
+		private readonly ILog _logger = LogProvider.For<QueueDeclareMiddleware>();
 
 		public QueueDeclareMiddleware(ITopologyProvider topology, QueueDeclareOptions options = null )
 		{
@@ -30,12 +30,12 @@ namespace RawRabbit.Pipe.Middleware
 
 			if (queue != null)
 			{
-				_logger.LogDebug($"Declaring queue '{queue.Name}'.");
+				_logger.Debug("Declaring queue '{queueName}'.", queue.Name);
 				await DeclareQueueAsync(queue, context, token);
 			}
 			else
 			{
-				_logger.LogInformation("Queue will not be declaired: no queue declaration found in context.");
+				_logger.Info("Queue will not be declaired: no queue declaration found in context.");
 			}
 
 			await Next.InvokeAsync(context, token);

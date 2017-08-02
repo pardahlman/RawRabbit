@@ -21,7 +21,7 @@ namespace RawRabbit.Pipe.Middleware
 		protected Func<IPipeContext, ConsumeConfiguration> ConsumeConfigFunc;
 		protected Func<IPipeContext, IBasicConsumer> ConsumerFunc;
 		protected Func<IPipeContext, bool> ConfigValidatePredicate;
-		private readonly ILogger _logger = LogManager.GetLogger<ConsumerConsumeMiddleware>();
+		private readonly ILog _logger = LogProvider.For<ConsumerConsumeMiddleware>();
 
 		public ConsumerConsumeMiddleware(IConsumerFactory factory, BasicConsumeOptions options = null)
 		{
@@ -36,14 +36,14 @@ namespace RawRabbit.Pipe.Middleware
 			var config = GetConsumeConfiguration(context);
 			if (config == null)
 			{
-				_logger.LogInformation("Consumer configuration not found, skipping consume.");
+				_logger.Info("Consumer configuration not found, skipping consume.");
 				return;
 			}
 
 			var consumer = GetConsumer(context);
 			if (consumer == null)
 			{
-				_logger.LogInformation($"Consumer not found. Will not consume on queue {config.QueueName}.");
+				_logger.Info("Consumer not found. Will not consume on queue {queueName}.", config.QueueName);
 				return;
 			}
 

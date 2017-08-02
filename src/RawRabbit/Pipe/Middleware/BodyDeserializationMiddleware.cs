@@ -20,7 +20,7 @@ namespace RawRabbit.Pipe.Middleware
 		protected Func<IPipeContext, Type> MessageTypeFunc;
 		protected Func<IPipeContext, byte[]> BodyBytesFunc;
 		protected Action<IPipeContext, object> PersistAction;
-		private readonly ILogger _logger = LogManager.GetLogger<BodyDeserializationMiddleware>();
+		private readonly ILog _logger = LogProvider.For<BodyDeserializationMiddleware>();
 
 		public BodyDeserializationMiddleware(ISerializer serializer, MessageDeserializationOptions options = null)
 		{
@@ -56,7 +56,7 @@ namespace RawRabbit.Pipe.Middleware
 			var msgType = MessageTypeFunc(context);
 			if (msgType == null)
 			{
-				_logger.LogWarning("Unable to find message type in Pipe context.");
+				_logger.Warn("Unable to find message type in Pipe context.");
 			}
 			return msgType;
 		}
@@ -66,7 +66,7 @@ namespace RawRabbit.Pipe.Middleware
 			var bodyBytes = BodyBytesFunc(context);
 			if (bodyBytes == null)
 			{
-				_logger.LogWarning("Unable to find Body (bytes) in Pipe context");
+				_logger.Warn("Unable to find Body (bytes) in Pipe context");
 			}
 			return bodyBytes;
 		}
@@ -75,7 +75,7 @@ namespace RawRabbit.Pipe.Middleware
 		{
 			if (PersistAction == null)
 			{
-				_logger.LogWarning("No persist action defined. Message will not be saved in Pipe context.");
+				_logger.Warn("No persist action defined. Message will not be saved in Pipe context.");
 			}
 			PersistAction?.Invoke(context, message);
 		}

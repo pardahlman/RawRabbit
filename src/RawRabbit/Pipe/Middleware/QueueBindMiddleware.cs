@@ -19,7 +19,7 @@ namespace RawRabbit.Pipe.Middleware
 		protected Func<IPipeContext, string> QueueNameFunc;
 		protected Func<IPipeContext, string> ExchangeNameFunc;
 		protected Func<IPipeContext, string> RoutingKeyFunc;
-		private readonly ILogger _logger = LogManager.GetLogger<QueueBindMiddleware>();
+		private readonly ILog _logger = LogProvider.For<QueueBindMiddleware>();
 
 		public QueueBindMiddleware(ITopologyProvider topologyProvider, QueueBindOptions options = null)
 		{
@@ -49,7 +49,7 @@ namespace RawRabbit.Pipe.Middleware
 			var routingKey = RoutingKeyFunc(context);
 			if (routingKey == null)
 			{
-				_logger.LogWarning("Routing key not found in Pipe context.");
+				_logger.Warn("Routing key not found in Pipe context.");
 			}
 			return routingKey;
 		}
@@ -59,7 +59,7 @@ namespace RawRabbit.Pipe.Middleware
 			var exchange = ExchangeNameFunc(context);
 			if (exchange == null)
 			{
-				_logger.LogWarning("Exchange name not found in Pipe context.");
+				_logger.Warn("Exchange name not found in Pipe context.");
 			}
 			return exchange;
 		}
@@ -69,7 +69,7 @@ namespace RawRabbit.Pipe.Middleware
 			var queue = QueueNameFunc(context);
 			if (queue == null)
 			{
-				_logger.LogWarning("Queue name not found in Pipe context.");
+				_logger.Warn("Queue name not found in Pipe context.");
 			}
 			return queue;
 		}

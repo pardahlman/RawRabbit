@@ -19,7 +19,7 @@ namespace RawRabbit.Enrichers.GlobalExecutionId.Middleware
 		public override string StageMarker => Pipe.StageMarker.ProducerInitialized;
 		protected Func<IPipeContext, string> ExecutionIdFunc;
 		protected Action<IPipeContext, string> SaveInContext;
-		private readonly ILogger _logger = LogManager.GetLogger<AppendGlobalExecutionIdMiddleware>();
+		private readonly ILog _logger = LogProvider.For<AppendGlobalExecutionIdMiddleware>();
 
 		public AppendGlobalExecutionIdMiddleware(AppendGlobalExecutionIdOptions options = null)
 		{
@@ -32,19 +32,19 @@ namespace RawRabbit.Enrichers.GlobalExecutionId.Middleware
 			var fromContext = GetExecutionIdFromContext(context);
 			if (!string.IsNullOrWhiteSpace(fromContext))
 			{
-				_logger.LogInformation($"GlobalExecutionId '{fromContext}' was allready found in PipeContext.");
+				_logger.Info("GlobalExecutionId {globalExecutionId} was allready found in PipeContext.", fromContext);
 				return Next.InvokeAsync(context, token);
 			}
 			var fromProcess = GetExecutionIdFromProcess();
 			if (!string.IsNullOrWhiteSpace(fromProcess))
 			{
-				_logger.LogInformation($"Using GlobalExecutionId '{fromProcess}' that was found in the execution process.");
+				_logger.Info("Using GlobalExecutionId {globalExecutionId} that was found in the execution process.", fromProcess);
 				AddToContext(context, fromProcess);
 				return Next.InvokeAsync(context, token);
 			}
 			var created = CreateExecutionId(context);
 			AddToContext(context, created);
-			_logger.LogInformation($"Creating new GlobalExecutionId '{created}' for this execution.");
+			_logger.Info("Creating new GlobalExecutionId {globalExecutionId} for this execution.", created);
 			return Next.InvokeAsync(context, token);
 		}
 

@@ -34,9 +34,7 @@ namespace RawRabbit.ConsoleApp.Sample
 					.Get<RawRabbitConfiguration>(),
 				Plugins = p => p
 					.UseGlobalExecutionId()
-					.UseMessageContext<MessageContext>(),
-				DependencyInjection = ioc => ioc
-					.AddSingleton<ILoggerFactory>(provider => new LoggerFactory(s => new ConsoleLogger(LogLevel.Debug, s)))
+					.UseMessageContext<MessageContext>()
 			});
 
 			await _client.SubscribeAsync<ValuesRequested, MessageContext>((requested, ctx) => ServeValuesAsync(requested, ctx));

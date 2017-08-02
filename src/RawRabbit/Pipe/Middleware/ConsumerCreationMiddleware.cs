@@ -18,7 +18,7 @@ namespace RawRabbit.Pipe.Middleware
 		protected IConsumerFactory ConsumerFactory;
 		protected Func<IPipeContext, ConsumeConfiguration> ConfigFunc;
 		protected Func<IConsumerFactory, CancellationToken, IPipeContext, Task<IBasicConsumer>> ConsumerFunc;
-		private readonly ILogger _logger = LogManager.GetLogger<ConsumerCreationMiddleware>();
+		private readonly ILog _logger = LogProvider.For<ConsumerCreationMiddleware>();
 
 		public ConsumerCreationMiddleware(IConsumerFactory consumerFactory, ConsumerCreationOptions options = null)
 		{
@@ -38,7 +38,7 @@ namespace RawRabbit.Pipe.Middleware
 			var consumerTask = ConsumerFunc(ConsumerFactory, token, context);
 			if (consumerTask == null)
 			{
-				_logger.LogWarning("No Consumer creation task found in Pipe context.");
+				_logger.Warn("No Consumer creation task found in Pipe context.");
 			}
 			return consumerTask;
 		}

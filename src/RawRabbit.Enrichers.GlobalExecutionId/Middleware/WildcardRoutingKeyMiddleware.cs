@@ -20,7 +20,7 @@ namespace RawRabbit.Enrichers.GlobalExecutionId.Middleware
 		protected Func<IPipeContext, bool> EnableRoutingFunc;
 		protected Func<IPipeContext, string> ExecutionIdFunc;
 		protected Func<IPipeContext, string, string> UpdateAction;
-		private readonly ILogger _logger = LogManager.GetLogger<ExecutionIdRoutingMiddleware>();
+		private readonly ILog _logger = LogProvider.For<ExecutionIdRoutingMiddleware>();
 
 		public WildcardRoutingKeyMiddleware(WildcardRoutingKeyOptions options = null)
 		{
@@ -43,7 +43,7 @@ namespace RawRabbit.Enrichers.GlobalExecutionId.Middleware
 			var enabled = GetRoutingEnabled(context);
 			if (!enabled)
 			{
-				_logger.LogDebug("Routing with GlobalExecutionId disabled.");
+				_logger.Debug("Routing with GlobalExecutionId disabled.");
 				return Next.InvokeAsync(context, token);
 			}
 			var executionId = GetExecutionId(context);
@@ -53,9 +53,9 @@ namespace RawRabbit.Enrichers.GlobalExecutionId.Middleware
 
 		protected virtual void UpdateRoutingKey(IPipeContext context, string executionId)
 		{
-			_logger.LogDebug($"Updating routing key with GlobalExecutionId '{executionId}'");
+			_logger.Debug("Updating routing key with GlobalExecutionId {globalExecutionId}", executionId);
 			var updated = UpdateAction(context, executionId);
-			_logger.LogInformation($"Routing key updated with GlobalExecutionId: {updated}.");
+			_logger.Info("Routing key updated with GlobalExecutionId: {globalExecutionId}", updated);
 		}
 
 		protected virtual bool GetRoutingEnabled(IPipeContext pipeContext)

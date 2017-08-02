@@ -23,7 +23,7 @@ namespace RawRabbit.Pipe.Middleware
 		protected Func<IPipeContext, TimeSpan> RecoverTimeSpan;
 		protected Func<IPipeContext, bool> EnabledFunc;
 		protected Func<IPipeContext, ConsumeConfiguration> ConsumeConfigFunc;
-		private readonly ILogger _logger = LogManager.GetLogger<ConsumerRecoveryMiddleware>();
+		private readonly ILog _logger = LogProvider.For<ConsumerRecoveryMiddleware>();
 
 		public ConsumerRecoveryMiddleware(ConsumerRecoveryOptions options = null)
 		{
@@ -37,7 +37,7 @@ namespace RawRabbit.Pipe.Middleware
 		{
 			if (!IsEnabled(context))
 			{
-				_logger.LogDebug("Consumer Recovery Disabled.");
+				_logger.Debug("Consumer Recovery Disabled.");
 				await Next.InvokeAsync(context, token);
 				return;
 			}
@@ -50,27 +50,27 @@ namespace RawRabbit.Pipe.Middleware
 			}
 			basicConsumer.Shutdown += (sender, args) =>
 			{
-				_logger.LogInformation($"Consumer has been shut down.\n  Reason: {args.Cause}\n  Initiator: {args.Initiator}\n  Reply Text: {args.ReplyText}");
+				_logger.Info("Consumer has been shut down.\n  Reason: {shutdowCause}\n  Initiator: {shutdownInitiator}\n  Reply Text: {shutdownReplyText}", args.Cause, args.Initiator, args.ReplyText);
 				if (args.Initiator == ShutdownInitiator.Application)
 				{
-					_logger.LogInformation($"Initiator is Application. No further action will be taken");
+					_logger.Info($"Initiator is Application. No further action will be taken");
 					return;
 				}
 				var consumer = sender as IBasicConsumer;
 				var config = GetConsumeConfig(context);
 				config.ConsumerTag = Guid.NewGuid().ToString();
-				_logger.LogDebug($"Updating consumer tag to {config.ConsumerTag}");
+				_logger.Debug("Updating consumer tag to {consumerTag}", config.ConsumerTag);
 				var channel = consumer.Model;
 				if (channel.IsOpen)
 				{
-					_logger.LogInformation($"Channel '{channel.ChannelNumber}' is open. Reconnecting consumer.");
+					_logger.Info("Channel {channelNumber} is open. Reconnecting consumer.", channel.ChannelNumber);
 					WireUpConsumer(channel, consumer, config);
 					return;
 				}
-				_logger.LogInformation($"Channel '{channel.ChannelNumber}' is closed.");
+				_logger.Info("Channel '{channelNumber}' is closed.", channel.ChannelNumber);
 				if (!IsRecoverable(channel))
 				{
-					_logger.LogInformation($"Channel '{channel.ChannelNumber}' is not recoverable. No further action will be taken.");
+					_logger.Info("Channel '{channelNumber}' is not recoverable. No further action will be taken.", channel.ChannelNumber);
 					return;
 				}
 
@@ -78,7 +78,7 @@ namespace RawRabbit.Pipe.Middleware
 				EventHandler<EventArgs> consumeOnRecovery = null;
 				consumeOnRecovery = (o, eventArgs) =>
 				{
-					_logger.LogInformation($"Recovery event recieved. Wiring up consumer on {channel.ChannelNumber}.");
+					_logger.Info("Recovery event recieved. Wiring up consumer on {channelNumber}.", channel.ChannelNumber);
 					recoverable.Recovery -= consumeOnRecovery;
 					WireUpConsumer(channel, consumer, config);
 				};
@@ -87,7 +87,7 @@ namespace RawRabbit.Pipe.Middleware
 				Timer retryTimoutTimer = null;
 				retryTimoutTimer = new Timer(state =>
 				{
-					_logger.LogInformation($"The retry timeout has expired. No further action will be taken.");
+					_logger.Info("The retry timeout has expired. No further action will be taken.");
 					retryTimoutTimer?.Dispose();
 					recoverable.Recovery -= consumeOnRecovery;
 				}, null, GetRecoverTimeSpan(context), new TimeSpan(-1));

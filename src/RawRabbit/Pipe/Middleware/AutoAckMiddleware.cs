@@ -19,7 +19,7 @@ namespace RawRabbit.Pipe.Middleware
 		protected readonly Func<IPipeContext, BasicDeliverEventArgs> DeliveryArgsFunc;
 		protected readonly Func<IPipeContext, IBasicConsumer> ConsumerFunc;
 		protected Func<IPipeContext, bool> NoAckFunc;
-		private readonly ILogger _logger = LogManager.GetLogger<AutoAckMiddleware>();
+		private readonly ILog _logger = LogProvider.For<AutoAckMiddleware>();
 
 		public AutoAckMiddleware(AutoAckOptions options = null)
 		{
@@ -33,7 +33,7 @@ namespace RawRabbit.Pipe.Middleware
 			var noAck = GetNoAck(context);
 			if (noAck)
 			{
-				_logger.LogDebug("NoAck is enabled, continuing without sending ack.");
+				_logger.Debug("NoAck is enabled, continuing without sending ack.");
 			}
 			else
 			{
@@ -50,7 +50,7 @@ namespace RawRabbit.Pipe.Middleware
 			var args = DeliveryArgsFunc(context);
 			if (args == null)
 			{
-				_logger.LogWarning("Unable to extract delivery args from Pipe context.");
+				_logger.Warn("Unable to extract delivery args from Pipe context.");
 			}
 			return args;
 		}
@@ -60,7 +60,7 @@ namespace RawRabbit.Pipe.Middleware
 			var consumer = ConsumerFunc(context);
 			if (consumer == null)
 			{
-				_logger.LogWarning("Unable to find consumer in Pipe context.");
+				_logger.Warn("Unable to find consumer in Pipe context.");
 			}
 			return consumer?.Model;
 		}

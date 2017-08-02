@@ -22,7 +22,7 @@ namespace RawRabbit.Operations.Subscribe.Middleware
 		private readonly IChannelFactory _channelFactory;
 		private readonly ITopologyProvider _provider;
 		private readonly INamingConventions _conventions;
-		private readonly ILogger _logger = LogManager.GetLogger<SubscriptionExceptionMiddleware>();
+		private readonly ILog _logger = LogProvider.For<SubscriptionExceptionMiddleware>();
 		protected Func<IPipeContext, IChannelFactory, Task<IModel>> ChannelFunc;
 
 		public SubscriptionExceptionMiddleware(
@@ -41,7 +41,7 @@ namespace RawRabbit.Operations.Subscribe.Middleware
 
 		protected override async Task OnExceptionAsync(Exception exception, IPipeContext context, CancellationToken token)
 		{
-			_logger.LogError($"Unhandled exception thrown when consuming message", exception);
+			_logger.Error(exception, "Unhandled exception thrown when consuming message");
 			try
 			{
 				var exchangeCfg = GetExchangeDeclaration(context);
@@ -52,7 +52,7 @@ namespace RawRabbit.Operations.Subscribe.Middleware
 			}
 			catch (Exception e)
 			{
-				_logger.LogError($"Unable to publish message to Error Exchange", e);
+				_logger.Error(e, "Unable to publish message to Error Exchange");
 			}
 			await Next.InvokeAsync(context, token);
 		}

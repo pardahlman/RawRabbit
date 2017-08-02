@@ -3,10 +3,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using RawRabbit.Configuration;
 using RawRabbit.Enrichers.GlobalExecutionId;
 using RawRabbit.vNext;
-using RawRabbit.vNext.Logging;
 using RawRabbit.vNext.Pipe;
 using Serilog;
 using Serilog.Events;
@@ -36,7 +34,6 @@ namespace RawRabbit.AspNet.Sample
 				.AddRawRabbit(new RawRabbitOptions
 					{
 						ClientConfiguration = Configuration.ForRawRabbit(),
-						DependencyInjection = ioc => ioc.AddSingleton(LoggingFactory.ApplicationLogger),
 						Plugins = p => p
 							.UseStateMachine()
 							.UseGlobalExecutionId()

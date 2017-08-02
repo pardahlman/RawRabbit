@@ -20,7 +20,7 @@ namespace RawRabbit.Pipe.Middleware
 	public class PublishAcknowledgeMiddleware : Middleware
 	{
 		private readonly IExclusiveLock _exclusive;
-		private readonly ILogger _logger = LogManager.GetLogger<PublishAcknowledgeMiddleware>();
+		private readonly ILog _logger = LogProvider.For<PublishAcknowledgeMiddleware>();
 		protected Func<IPipeContext, TimeSpan> TimeOutFunc;
 		protected Func<IPipeContext, IModel> ChannelFunc;
 		protected Func<IPipeContext, bool> EnabledFunc;
@@ -40,7 +40,7 @@ namespace RawRabbit.Pipe.Middleware
 			var enabled = GetEnabled(context);
 			if (!enabled)
 			{
-				_logger.LogDebug("Publish Acknowledgement is disabled.");
+				_logger.Debug("Publish Acknowledgement is disabled.");
 				await Next.InvokeAsync(context, token);
 				return;
 			}
@@ -56,7 +56,7 @@ namespace RawRabbit.Pipe.Middleware
 			SetupTimeout(context, sequence, ackTcs);
 			if (!GetChannelDictionary(channel).TryAdd(sequence, ackTcs))
 			{
-				_logger.LogInformation($"Unable to add ack tack for '{sequence}' on channel {channel.ChannelNumber}");
+				_logger.Info("Unable to add ack '{publishSequence}' on channel {channelNumber}", sequence, channel.ChannelNumber);
 			};
 
 			await Next.InvokeAsync(context, token);
@@ -106,7 +106,7 @@ namespace RawRabbit.Pipe.Middleware
 
 		protected virtual void EnableAcknowledgement(IModel channel, CancellationToken token)
 		{
-			_logger.LogInformation($"Setting 'Publish Acknowledge' for channel '{channel.ChannelNumber}'");
+			_logger.Info("Setting 'Publish Acknowledge' for channel '{channelNumber}'", channel.ChannelNumber);
 			_exclusive.Execute(channel, c =>
 			{
 				if (PublishAcknowledgeEnabled(c))
@@ -149,12 +149,11 @@ namespace RawRabbit.Pipe.Middleware
 		{
 			var timeout = GetAcknowledgeTimeOut(context);
 			Timer ackTimer = null;
-			_logger.LogInformation($"Setting up publish acknowledgement for {sequence} with timeout {timeout:g}");
+			_logger.Info("Setting up publish acknowledgement for {publishSequence} with timeout {timeout:g}", sequence, timeout);
 			ackTimer = new Timer(state =>
 			{
 				ackTcs.TrySetException(
-					new PublishConfirmException(
-						$"The broker did not send a publish acknowledgement for message {sequence} within {timeout:g}."));
+					new PublishConfirmException($"The broker did not send a publish acknowledgement for message {sequence} within {timeout:g}."));
 				ackTimer?.Dispose();
 			}, null, timeout, new TimeSpan(-1));
 		}

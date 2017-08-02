@@ -17,7 +17,7 @@ namespace RawRabbit.Channel
 	public class ChannelFactory : IChannelFactory
 	{
 		private readonly ConcurrentQueue<TaskCompletionSource<IModel>> _requestQueue;
-		private readonly ILogger _logger = LogManager.GetLogger<ChannelFactory>();
+		private readonly ILog _logger = LogProvider.For<ChannelFactory>();
 		internal readonly ChannelFactoryConfiguration _channelConfig;
 		private readonly IConnectionFactory _connectionFactory;
 		private readonly RawRabbitConfiguration _config;
@@ -50,7 +50,7 @@ namespace RawRabbit.Channel
 			}
 			catch (BrokerUnreachableException e)
 			{
-				_logger.LogError("Unable to connect to broker", e);
+				_logger.Info("Unable to connect to broker", e);
 				throw e.InnerException;
 			}
 		}
@@ -61,25 +61,25 @@ namespace RawRabbit.Channel
 			var recoverable = connection as IRecoverable;
 			if (recoverable == null)
 			{
-				_logger.LogInformation("Connection is not Recoverable. Failed connection will cause unhandled exception to be thrown.");
+				_logger.Info("Connection is not Recoverable. Failed connection will cause unhandled exception to be thrown.");
 				return;
 			}
-			_logger.LogDebug("Setting up Connection Recovery");
+			_logger.Debug("Setting up Connection Recovery");
 			recoverable.Recovery += (sender, args) =>
 			{
-				_logger.LogInformation($"Connection has been recovered. Starting channel processing.");
+				_logger.Info($"Connection has been recovered. Starting channel processing.");
 				EnsureRequestsAreHandled();
 			};
 		}
 
 		internal virtual void Initialize()
 		{
-			_logger.LogDebug($"Initiating {_channelConfig.InitialChannelCount} channels.");
+			_logger.Debug($"Initiating {_channelConfig.InitialChannelCount} channels.");
 			for (var i = 0; i < _channelConfig.InitialChannelCount; i++)
 			{
 				if (i > _channelConfig.MaxChannelCount)
 				{
-					_logger.LogDebug($"Trying to create channel number {i}, but max allowed channels are {_channelConfig.MaxChannelCount}");
+					_logger.Debug("Trying to create channel number {channelIndex}, but max allowed channels are {maxChannelCount}", i, _channelConfig.MaxChannelCount);
 					continue;
 				}
 				CreateAndWireupAsync().Wait();
@@ -88,7 +88,7 @@ namespace RawRabbit.Channel
 
 			if (_channelConfig.EnableScaleDown || _channelConfig.EnableScaleUp)
 			{
-				_logger.LogInformation($"Scaling is enabled with interval set to {_channelConfig.ScaleInterval}.");
+				_logger.Info("Scaling is enabled with interval set to {channelScaleInterval}.", _channelConfig.ScaleInterval);
 				_scaleTimer = new Timer(state =>
 				{
 					AdjustChannelCount(_channels.Count, _requestQueue.Count);
@@ -96,7 +96,7 @@ namespace RawRabbit.Channel
 			}
 			else
 			{
-				_logger.LogInformation("Channel scaling is disabled.");
+				_logger.Info("Channel scaling is disabled.");
 			}
 		}
 
@@ -104,14 +104,14 @@ namespace RawRabbit.Channel
 		{
 			if (channelCount == 0)
 			{
-				_logger.LogWarning("Channel count is 0. Skipping channel scaling.");
+				_logger.Warn("Channel count is 0. Skipping channel scaling.");
 				return;
 			}
 
 			var workPerChannel = requestCount / channelCount;
 			var canCreateChannel = channelCount < _channelConfig.MaxChannelCount;
 			var canCloseChannel = channelCount > 1;
-			_logger.LogDebug($"Begining channel scaling.\n  Channel count: {channelCount}\n  Work per channel: {workPerChannel}");
+			_logger.Debug("Begining channel scaling.\n  Channel count: {channelCount}\n  Work per channel: {workPerChannel}", channelCount, workPerChannel);
 
 			if (_channelConfig.EnableScaleUp && canCreateChannel && workPerChannel > _channelConfig.WorkThreshold)
 			{
@@ -121,7 +121,7 @@ namespace RawRabbit.Channel
 			if (_channelConfig.EnableScaleDown && canCloseChannel && requestCount == 0)
 			{
 				var toClose = _channels.Last.Value;
-				_logger.LogInformation($"Channel '{toClose.ChannelNumber}' will be closed in {_channelConfig.GracefulCloseInterval}.");
+				_logger.Info("Channel '{channelNumber}' will be closed in {gracefulCloseInterval}.", toClose.ChannelNumber, _channelConfig.GracefulCloseInterval);
 				_channels.Remove(toClose);
 
 				Timer graceful = null;
@@ -176,7 +176,7 @@ namespace RawRabbit.Channel
 			}
 			if (!_channels.Any() && _channelConfig.InitialChannelCount > 0)
 			{
-				_logger.LogInformation("Currently no available channels.");
+				_logger.Info("Currently no available channels.");
 				return;
 			}
 			lock (_processLock)
@@ -186,7 +186,7 @@ namespace RawRabbit.Channel
 					return;
 				}
 				_processingRequests = true;
-				_logger.LogDebug("Begining to process 'GetChannel' requests.");
+				_logger.Debug("Begining to process 'GetChannel' requests.");
 			}
 
 			TaskCompletionSource<IModel> channelTcs;
@@ -211,12 +211,12 @@ namespace RawRabbit.Channel
 						continue;
 					}
 
-					_logger.LogInformation($"Channel '{_current.Value.ChannelNumber}' is closed. Removing it from pool.");
+					_logger.Info("Channel '{channelNumber}' is closed. Removing it from pool.", _current.Value.ChannelNumber);
 					_channels.Remove(_current);
 
 					if (_current.Value.CloseReason.Initiator == ShutdownInitiator.Application)
 					{
-						_logger.LogInformation($"Channel '{_current.Value.ChannelNumber}' is closed by application. Disposing channel.");
+						_logger.Info("Channel '{channelNumber}' is closed by application. Disposing channel.", _current.Value.ChannelNumber);
 						_current.Value.Dispose();
 						if (!_channels.Any())
 						{
@@ -232,7 +232,7 @@ namespace RawRabbit.Channel
 				var openChannel = _channels.FirstOrDefault(c => c.IsOpen);
 				if (openChannel != null)
 				{
-					_logger.LogInformation($"Using channel '{openChannel.ChannelNumber}', which is open.");
+					_logger.Info("Using channel '{channelNumber}', which is open.", openChannel.ChannelNumber);
 					channelTcs.TrySetResult(openChannel);
 					continue;
 				}
@@ -243,13 +243,13 @@ namespace RawRabbit.Channel
 					throw new ChannelAvailabilityException("Unable to retreive channel. All existing channels are closed and none of them are recoverable.");
 				}
 
-				_logger.LogInformation("Unable to find an open channel. Requeue TaskCompletionSource for future process and abort execution.");
+				_logger.Info("Unable to find an open channel. Requeue TaskCompletionSource for future process and abort execution.");
 				_requestQueue.Enqueue(channelTcs);
 				_processingRequests = false;
 				return;
 			}
 			_processingRequests = false;
-			_logger.LogDebug("'GetChannel' has been processed.");
+			_logger.Debug("'GetChannel' has been processed.");
 		}
 
 		public async Task<IModel> CreateChannelAsync(CancellationToken token = default(CancellationToken))
@@ -267,7 +267,7 @@ namespace RawRabbit.Channel
 			{
 				connection.AutoClose = true;
 			}
-			_logger.LogInformation($"Channel '{channel.ChannelNumber}' has been created.");
+			_logger.Info("Channel '{channelNumber}' has been created.", channel.ChannelNumber);
 			var recoverable = channel as IRecoverable;
 			if (recoverable != null)
 			{
@@ -275,7 +275,7 @@ namespace RawRabbit.Channel
 				{
 					if (!_channels.Contains(channel))
 					{
-						_logger.LogInformation($"Channel '{_current.Value.ChannelNumber}' is recovered. Adding it to pool.");
+						_logger.Info("Channel '{channelNumber}' is recovered. Adding it to pool.", _current.Value.ChannelNumber);
 						_channels.AddLast(channel);
 					}
 				};
@@ -289,19 +289,19 @@ namespace RawRabbit.Channel
 			token.ThrowIfCancellationRequested();
 			if (_connection == null)
 			{
-				_logger.LogDebug($"Creating a new connection for {_config.Hostnames.Count} hosts.");
+				_logger.Debug("Creating a new connection for {hostNameCount} hosts.", _config.Hostnames.Count);
 				_connection = _connectionFactory.CreateConnection(_config.Hostnames);
 			}
 			if (_connection.IsOpen)
 			{
-				_logger.LogDebug("Existing connection is open and will be used.");
+				_logger.Debug("Existing connection is open and will be used.");
 				return Task.FromResult(_connection);
 			}
-			_logger.LogInformation("The existing connection is not open.");
+			_logger.Info("The existing connection is not open.");
 
 			if (_connection.CloseReason.Initiator == ShutdownInitiator.Application)
 			{
-				_logger.LogInformation("Connection is closed with Application as initiator. It will not be recovered.");
+				_logger.Info("Connection is closed with Application as initiator. It will not be recovered.");
 				_connection.Dispose();
 				throw new Exception("Application shutdown is initiated by the Application. A new connection will not be created.");
 			}
@@ -309,18 +309,18 @@ namespace RawRabbit.Channel
 			var recoverable = _connection as IRecoverable;
 			if (recoverable == null)
 			{
-				_logger.LogInformation("Connection is not recoverable, trying to create a new connection.");
+				_logger.Info("Connection is not recoverable, trying to create a new connection.");
 				_connection.Dispose();
 				throw new Exception("The non recoverable connection is closed. A channel can not be obtained.");
 			}
 
-			_logger.LogDebug("Connection is recoverable. Waiting for 'Recovery' event to be triggered. ");
+			_logger.Debug("Connection is recoverable. Waiting for 'Recovery' event to be triggered. ");
 			var recoverTcs = new TaskCompletionSource<IConnection>();
 
 			EventHandler<EventArgs> completeTask = null;
 			completeTask = (sender, args) =>
 			{
-				_logger.LogDebug("Connection has been recovered!");
+				_logger.Debug("Connection has been recovered!");
 				recoverTcs.TrySetResult(recoverable as IConnection);
 				recoverable.Recovery -= completeTask;
 			};

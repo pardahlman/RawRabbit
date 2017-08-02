@@ -33,7 +33,7 @@ namespace RawRabbit.Common
 		private readonly List<string> _initQueues;
 		private readonly List<string> _queueBinds;
 		private readonly ConcurrentQueue<ScheduledTopologyTask> _topologyTasks;
-		private readonly ILogger _logger = LogManager.GetLogger<TopologyProvider>();
+		private readonly ILog _logger = LogProvider.For<TopologyProvider>();
 
 		public TopologyProvider(IChannelFactory channelFactory)
 		{
@@ -44,7 +44,7 @@ namespace RawRabbit.Common
 			_topologyTasks = new ConcurrentQueue<ScheduledTopologyTask>();
 			_disposeTimer = new Timer(state =>
 			{
-				_logger.LogInformation("Disposing topology channel (if exists).");
+				_logger.Info("Disposing topology channel (if exists).");
 				_channel?.Dispose();
 				_disposeTimer.Change(TimeSpan.FromHours(1), new TimeSpan(-1));
 			}, null, TimeSpan.FromSeconds(2), new TimeSpan(-1));
@@ -135,7 +135,7 @@ namespace RawRabbit.Common
 				return;
 			}
 
-			_logger.LogInformation($"Binding queue '{bind.Queue}' to exchange '{bind.Exchange}' with routing key '{bind.RoutingKey}'");
+			_logger.Info("Binding queue {queueName} to exchange {exchangeName} with routing key {routingKey}", bind.Queue, bind.Exchange, bind.RoutingKey);
 
 			var channel = GetOrCreateChannel();
 			channel.QueueBind(
@@ -148,7 +148,7 @@ namespace RawRabbit.Common
 
 		private void UnbindQueueFromExchange(ScheduledUnbindQueueTask bind)
 		{
-			_logger.LogInformation($"Unbinding queue '{bind.Queue}' from exchange '{bind.Exchange}' with routing key '{bind.RoutingKey}'");
+			_logger.Info("Unbinding queue {queueName} from exchange {exchangeName} with routing key {routingKey}", bind.Queue, bind.Exchange, bind.RoutingKey);
 
 			var channel = GetOrCreateChannel();
 			channel.QueueUnbind(
@@ -171,7 +171,7 @@ namespace RawRabbit.Common
 				return;
 			}
 
-			_logger.LogInformation($"Declaring queue '{queue.Name}'.");
+			_logger.Info("Declaring queue {queueName}.", queue.Name);
 
 			var channel = GetOrCreateChannel();
 			channel.QueueDeclare(
@@ -194,7 +194,7 @@ namespace RawRabbit.Common
 				return;
 			}
 
-			_logger.LogInformation($"Declaring exchange '{exchange.Name}'.");
+			_logger.Info("Declaring exchange {exchangeName}.", exchange.Name);
 			var channel = GetOrCreateChannel();
 			channel.ExchangeDeclare(
 				exchange.Name,
@@ -228,7 +228,7 @@ namespace RawRabbit.Common
 					}
 					catch (Exception e)
 					{
-						_logger.LogError($"Unable to declare exchange {exchange.Declaration.Name}", e);
+						_logger.Error(e, "Unable to declare exchange {exchangeName}", exchange.Declaration.Name);
 						exchange.TaskCompletionSource.TrySetException(e);
 					}
 
@@ -245,7 +245,7 @@ namespace RawRabbit.Common
 					}
 					catch (Exception e)
 					{
-						_logger.LogError($"Unable to declare queue", e);
+						_logger.Error(e, "Unable to declare queue");
 						queue.TaskCompletionSource.TrySetException(e);
 					}
 
@@ -262,7 +262,7 @@ namespace RawRabbit.Common
 					}
 					catch (Exception e)
 					{
-						_logger.LogError($"Unable to bind queue", e);
+						_logger.Error(e, "Unable to bind queue");
 						bind.TaskCompletionSource.TrySetException(e);
 					}
 					continue;
@@ -278,14 +278,14 @@ namespace RawRabbit.Common
 					}
 					catch (Exception e)
 					{
-						_logger.LogError($"Unable to unbind queue", e);
+						_logger.Error(e, "Unable to unbind queue");
 						unbind.TaskCompletionSource.TrySetException(e);
 					}
 					
 					continue;
 				}
 			}
-			_logger.LogDebug($"Done processing topology work.");
+			_logger.Debug("Done processing topology work.");
 			Monitor.Exit(_processLock);
 		}
 

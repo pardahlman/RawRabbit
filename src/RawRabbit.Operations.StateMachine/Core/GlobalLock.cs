@@ -34,7 +34,7 @@ namespace RawRabbit.Operations.StateMachine.Core
 	public class ProcessGlobalLock : IGlobalLock
 	{
 		private readonly ConcurrentDictionary<Guid, SemaphoreSlim> _semaphores;
-		private readonly ILogger _logger = LogManager.GetLogger<ProcessGlobalLock>();
+		private readonly ILog _logger = LogProvider.For<ProcessGlobalLock>();
 
 		public ProcessGlobalLock()
 		{
@@ -51,7 +51,7 @@ namespace RawRabbit.Operations.StateMachine.Core
 			}
 			catch (Exception e)
 			{
-				_logger.LogError("Unhandled exception during execution under Global Lock", e);
+				_logger.Error(e, "Unhandled exception during execution under Global Lock");
 			}
 			finally
 			{

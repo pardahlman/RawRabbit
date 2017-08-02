@@ -15,7 +15,6 @@ using RawRabbit.Operations.MessageSequence.Trigger;
 using RawRabbit.Operations.StateMachine;
 using RawRabbit.Operations.StateMachine.Trigger;
 using RawRabbit.Pipe;
-using RawRabbit.Pipe.Middleware;
 using Stateless;
 
 namespace RawRabbit.Operations.MessageSequence.StateMachine
@@ -30,7 +29,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 		private readonly TriggerConfigurer _triggerConfigurer;
 		private readonly Queue<StepDefinition> _stepDefinitions;
 		private readonly List<Subscription.ISubscription> _subscriptions;
-		private readonly ILogger _logger = LogManager.GetLogger<MessageSequence>();
+		private readonly ILog _logger = LogProvider.For<MessageSequence>();
 		private IModel _channel;
 
 		public MessageSequence(IBusClient client, INamingConventions naming, RawRabbitConfiguration clientCfg, SequenceModel model = null) : base(model)
@@ -65,7 +64,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 		{
 			if (globalMessageId != Guid.Empty)
 			{
-				_logger.LogInformation($"Setting Global Message Id to {globalMessageId}");
+				_logger.Info("Setting Global Message Id to {globalMessageId}", globalMessageId);
 				Model.Id = globalMessageId;
 			}
 			return PublishAsync(message, context => { });
@@ -74,7 +73,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 		public IMessageSequenceBuilder PublishAsync<TMessage>(TMessage message, Action<IPipeContext> context, CancellationToken ct = new CancellationToken())
 			where TMessage : new()
 		{
-			_logger.LogInformation($"Initializing Message Sequence that starts with {typeof(TMessage).Name}.");
+			_logger.Info("Initializing Message Sequence that starts with {messageType}.", typeof(TMessage).Name);
 
 			var entryTrigger = StateMachine.SetTriggerParameters<TMessage>(typeof(TMessage));
 
@@ -111,13 +110,13 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 				.Configure(SequenceState.Active)
 				.InternalTransitionAsync(trigger, async (message, transition) =>
 				{
-					_logger.LogDebug($"Recieved message of type {transition.Trigger.Name} for sequence {Model.Id}.");
+					_logger.Debug("Recieved message of type {messageType} for sequence {sequenceId}.", transition.Trigger.Name, Model.Id);
 					var matchFound = false;
 					do
 					{
 						if (_stepDefinitions.Peek() == null)
 						{
-							_logger.LogInformation($"No matching steps found for sequence. Perhaps {transition.Trigger.Name} isn't a registered message for sequence {Model.Id}.");
+							_logger.Info("No matching steps found for sequence. Perhaps {messageType} isn't a registered message for sequence {sequenceId}.", transition.Trigger.Name, Model.Id);
 							return;
 						}
 						var step = _stepDefinitions.Dequeue();
@@ -125,7 +124,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 						{
 							if (step.Optional)
 							{
-								_logger.LogInformation($"The step for {step.Type.Name} is optional. Skipping, as recieved message is of type {typeof(TMessage).Name}.");
+								_logger.Info("The step for {optionalMessageType} is optional. Skipping, as recieved message is of type {currentMessageType}.", step.Type.Name, typeof(TMessage).Name);
 								Model.Skipped.Add(new ExecutionResult
 								{
 									Type = step.Type,
@@ -134,7 +133,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 							}
 							else
 							{
-								_logger.LogInformation($"The step for {step.Type.Name} is mandatory. Current message, {typeof(TMessage).Name} will be dismissed.");
+								_logger.Info("The step for {messageType} is mandatory. Current message, {currentMessageType} will be dismissed.", step.Type.Name, typeof(TMessage).Name);
 								return;
 							}
 						}
@@ -144,7 +143,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 						}
 					} while (!matchFound);
 
-					_logger.LogDebug($"Invoking message handler for {typeof(TMessage).Name}.");
+					_logger.Debug("Invoking message handler for {messageType}", typeof(TMessage).Name);
 					await func(message.Message, message.Context);
 					Model.Completed.Add(new ExecutionResult
 					{
@@ -191,7 +190,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 				.Configure(SequenceState.Active)
 				.OnExit(() =>
 				{
-					_logger.LogDebug($"Disposing subscriptions for Message Sequence '{Model.Id}'.");
+					_logger.Debug("Disposing subscriptions for Message Sequence '{sequenceId}'.", Model.Id);
 					foreach (var subscription in _subscriptions)
 					{
 						subscription.Dispose();
@@ -204,7 +203,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 				.Configure(SequenceState.Completed)
 				.OnEntryFrom(trigger, message =>
 				{
-					_logger.LogInformation($"Sequence '{Model.Id}' completed with message '{typeof(TMessage).Name}'.");
+					_logger.Info("Sequence {sequenceId} completed with message '{messageType}'.", Model.Id, typeof(TMessage).Name);
 					sequence.Completed = Model.Completed;
 					sequence.Skipped = Model.Skipped;
 					tsc.TrySetResult(message);

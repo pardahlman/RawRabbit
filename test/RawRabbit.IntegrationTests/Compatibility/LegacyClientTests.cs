@@ -8,7 +8,6 @@ using RawRabbit.Enrichers.MessageContext;
 using RawRabbit.Enrichers.MessageContext.Context;
 using RawRabbit.Instantiation;
 using RawRabbit.IntegrationTests.TestMessages;
-using RawRabbit.Logging;
 using Xunit;
 
 namespace RawRabbit.IntegrationTests.Compatibility
@@ -24,8 +23,7 @@ namespace RawRabbit.IntegrationTests.Compatibility
 			clientCfg.Queue.AutoDelete = true;
 			_legacyConfig = new RawRabbitOptions
 			{
-				ClientConfiguration = clientCfg,
-				DependencyInjection = ioc => ioc.AddSingleton<ILoggerFactory, VoidLoggerFactory>()
+				ClientConfiguration = clientCfg
 			};
 		}
 

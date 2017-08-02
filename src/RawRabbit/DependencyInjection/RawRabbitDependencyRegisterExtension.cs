@@ -35,7 +35,6 @@ namespace RawRabbit.DependencyInjection
 				.AddSingleton(options?.ClientConfiguration ?? RawRabbitConfiguration.Local)
 				.AddSingleton<IConnectionFactory, ConnectionFactory>(provider =>
 				{
-					LogManager.CurrentFactory = provider.GetService<ILoggerFactory>();
 					var cfg = provider.GetService<RawRabbitConfiguration>();
 					return new ConnectionFactory
 					{
@@ -52,7 +51,6 @@ namespace RawRabbit.DependencyInjection
 					};
 				})
 				.AddSingleton<IClientPropertyProvider, ClientPropertyProvider>()
-				.AddSingleton<ILoggerFactory, LoggerFactory>()
 				.AddSingleton<ISerializer>(resolver => new Serialization.JsonSerializer(new Newtonsoft.Json.JsonSerializer
 				{
 					TypeNameAssemblyFormat = FormatterAssemblyStyle.Simple,

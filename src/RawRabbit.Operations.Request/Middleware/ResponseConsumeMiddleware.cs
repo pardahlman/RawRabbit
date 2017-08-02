@@ -23,7 +23,7 @@ namespace RawRabbit.Operations.Request.Middleware
 	{
 		protected readonly IConsumerFactory ConsumerFactory;
 		protected readonly Pipe.Middleware.Middleware ResponsePipe;
-		private readonly ILogger _logger = LogManager.GetLogger<ResponseConsumeMiddleware>();
+		private readonly ILog _logger = LogProvider.For<ResponseConsumeMiddleware>();
 		protected readonly ConcurrentDictionary<IBasicConsumer, ConcurrentDictionary<string, TaskCompletionSource<BasicDeliverEventArgs>>> AllResponses;
 		protected Func<IPipeContext, ConsumerConfiguration> ResponseConfigFunc;
 		protected Func<IPipeContext, string> CorrelationidFunc;
@@ -63,7 +63,7 @@ namespace RawRabbit.Operations.Request.Middleware
 			await Next.InvokeAsync(context, token);
 			token.Register(() => responseTsc.TrySetCanceled());
 			await responseTsc.Task;
-			_logger.LogInformation($"Message '{responseTsc.Task.Result.BasicProperties.MessageId}' for correlatrion '{correlationId}' recieved.");
+			_logger.Info("Message '{messageId}' for correlatrion '{correlationId}' recieved.", responseTsc.Task.Result.BasicProperties.MessageId, correlationId);
 			context.Properties.Add(PipeKey.DeliveryEventArgs, responseTsc.Task.Result);
 			try
 			{
@@ -71,7 +71,7 @@ namespace RawRabbit.Operations.Request.Middleware
 			}
 			catch (Exception e)
 			{
-				_logger.LogError($"Response pipe for message '{responseTsc.Task.Result.BasicProperties.MessageId}' executed unsuccessfully.", e);
+				_logger.Error(e, "Response pipe for message '{messageId}' executed unsuccessfully.", responseTsc.Task.Result.BasicProperties.MessageId);
 				throw;
 			}
 		}

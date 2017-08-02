@@ -21,7 +21,7 @@ namespace RawRabbit.Operations.Respond.Middleware
 		protected Func<IPipeContext, BasicDeliverEventArgs> DeliveryArgsFunc;
 		protected Func<BasicDeliverEventArgs, PublicationAddress> ReplyToFunc;
 		protected Action<IPipeContext, PublicationAddress> ContextSaveAction;
-		private readonly ILogger _logger = LogManager.GetLogger<ReplyToExtractionMiddleware>();
+		private readonly ILog _logger = LogProvider.For<ReplyToExtractionMiddleware>();
 
 		public ReplyToExtractionMiddleware(ReplyToExtractionOptions options = null)
 		{
@@ -44,7 +44,7 @@ namespace RawRabbit.Operations.Respond.Middleware
 			var args = DeliveryArgsFunc(context);
 			if (args == null)
 			{
-				_logger.LogWarning("Delivery args not found in Pipe context.");
+				_logger.Warn("Delivery args not found in Pipe context.");
 			}
 			return args;
 		}
@@ -54,12 +54,12 @@ namespace RawRabbit.Operations.Respond.Middleware
 			var replyTo = ReplyToFunc(args);
 			if (replyTo == null)
 			{
-				_logger.LogWarning("Reply to address not found in Pipe context.");
+				_logger.Warn("Reply to address not found in Pipe context.");
 			}
 			else
 			{
 				args.BasicProperties.ReplyTo = replyTo.RoutingKey;
-				_logger.LogInformation($"Using reply address with exchange '{replyTo.ExchangeName}' and routing key '{replyTo.RoutingKey}'");
+				_logger.Info("Using reply address with exchange {exchangeName} and routing key '{routingKey}'", replyTo.ExchangeName, replyTo.RoutingKey);
 			}
 			return replyTo;
 		}
@@ -68,7 +68,7 @@ namespace RawRabbit.Operations.Respond.Middleware
 		{
 			if (ContextSaveAction == null)
 			{
-				_logger.LogWarning("No context save action found. Reply to address will not be saved.");
+				_logger.Warn("No context save action found. Reply to address will not be saved.");
 			}
 			ContextSaveAction?.Invoke(context, replyTo);
 		}

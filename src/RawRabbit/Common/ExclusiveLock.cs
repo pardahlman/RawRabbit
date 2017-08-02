@@ -18,7 +18,7 @@ namespace RawRabbit.Common
 	{
 		private readonly ConcurrentDictionary<object, SemaphoreSlim> _semaphoreDictionary;
 		private readonly ConcurrentDictionary<object, object> _lockDictionary;
-		private readonly ILogger _logger = LogManager.GetLogger<ExclusiveLock>();
+		private readonly ILog _logger = LogProvider.For<ExclusiveLock>();
 
 		public ExclusiveLock()
 		{
@@ -53,7 +53,7 @@ namespace RawRabbit.Common
 			}
 			catch (Exception e)
 			{
-				_logger.LogError("Exception when performing exclusive execute", e);
+				_logger.Error("Exception when performing exclusive execute", e);
 			}
 			finally
 			{

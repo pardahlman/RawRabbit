@@ -18,10 +18,7 @@ namespace RawRabbit.IntegrationTests.DependencyInjection
 		{
 			/* Setup */
 			var builder = new ContainerBuilder();
-			builder.RegisterRawRabbit(new RawRabbitOptions
-			{
-				DependencyInjection = ioc => ioc.AddSingleton<ILoggerFactory, VoidLoggerFactory>()
-			});
+			builder.RegisterRawRabbit();
 			var container = builder.Build();
 
 			/* Test */
@@ -38,10 +35,7 @@ namespace RawRabbit.IntegrationTests.DependencyInjection
 		{
 			/* Setup */
 			var builder = new ContainerBuilder();
-			builder.RegisterRawRabbit(new RawRabbitOptions
-			{
-				DependencyInjection = ioc => ioc.AddSingleton<ILoggerFactory, VoidLoggerFactory>()
-			});
+			builder.RegisterRawRabbit();
 			var container = builder.Build();
 
 			/* Test */
@@ -68,8 +62,7 @@ namespace RawRabbit.IntegrationTests.DependencyInjection
 			{
 				builder.RegisterRawRabbit(new RawRabbitOptions
 				{
-					ClientConfiguration = config,
-					DependencyInjection = ioc => ioc.AddSingleton<ILoggerFactory, VoidLoggerFactory>()
+					ClientConfiguration = config
 				});
 				var container = builder.Build();
 				var client = container.Resolve<IBusClient>();

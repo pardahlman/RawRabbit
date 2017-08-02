@@ -15,7 +15,7 @@ namespace RawRabbit.Pipe.Middleware
 	{
 		protected Func<Exception, IPipeContext, CancellationToken, Task> HandlingFunc;
 		public Middleware InnerPipe;
-		private readonly ILogger _logger = LogManager.GetLogger<ExceptionHandlingMiddleware>();
+		private readonly ILog _logger = LogProvider.For<ExceptionHandlingMiddleware>();
 
 		public ExceptionHandlingMiddleware(IPipeBuilderFactory factory, ExceptionHandlingOptions options = null)
 		{
@@ -32,7 +32,7 @@ namespace RawRabbit.Pipe.Middleware
 			}
 			catch (Exception e)
 			{
-				_logger.LogError("Exception thrown. Will be handled by Exception Handler", e);
+				_logger.Error("Exception thrown. Will be handled by Exception Handler", e);
 				await OnExceptionAsync(e, context, token);
 			}
 		}
