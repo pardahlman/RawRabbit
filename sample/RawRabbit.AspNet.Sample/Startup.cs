@@ -43,8 +43,9 @@ namespace RawRabbit.AspNet.Sample
 
 		public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
 		{
+			Log.Logger = GetConfiguredSerilogger();
 			loggerFactory
-				.AddSerilog(GetConfiguredSerilogger())
+				.AddSerilog()
 				.AddConsole(Configuration.GetSection("Logging"));
 
 			app.UseMvc();
@@ -54,6 +55,7 @@ namespace RawRabbit.AspNet.Sample
 		{
 			return new LoggerConfiguration()
 				.WriteTo.File($"{_rootPath}/Logs/serilog.log", LogEventLevel.Debug)
+				.WriteTo.LiterateConsole()
 				.CreateLogger();
 		}
 	}

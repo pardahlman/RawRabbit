@@ -11,6 +11,7 @@ using RawRabbit.Logging;
 using RawRabbit.Messages.Sample;
 using RawRabbit.vNext;
 using RawRabbit.vNext.Pipe;
+using Serilog;
 
 namespace RawRabbit.ConsoleApp.Sample
 {
@@ -25,6 +26,10 @@ namespace RawRabbit.ConsoleApp.Sample
 
 		public static async Task RunAsync()
 		{
+			Log.Logger = new LoggerConfiguration()
+				.WriteTo.LiterateConsole()
+				.CreateLogger();
+
 			_client = RawRabbitFactory.CreateSingleton(new RawRabbitOptions
 			{
 				ClientConfiguration = new ConfigurationBuilder()
