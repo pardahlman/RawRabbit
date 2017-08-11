@@ -4,9 +4,9 @@ using RabbitMQ.Client.Events;
 using RawRabbit.Enrichers.MessageContext;
 using RawRabbit.Enrichers.MessageContext.Context;
 using RawRabbit.Enrichers.MessageContext.Subscribe;
+using RawRabbit.Instantiation;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.Pipe;
-using RawRabbit.vNext.Pipe;
 using Xunit;
 
 namespace RawRabbit.IntegrationTests.Enrichers

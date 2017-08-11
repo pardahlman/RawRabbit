@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using RawRabbit.Configuration;
-using RawRabbit.vNext.Pipe;
+using RawRabbit.Instantiation;
 using Xunit;
 
 namespace RawRabbit.IntegrationTests.DependencyInjection

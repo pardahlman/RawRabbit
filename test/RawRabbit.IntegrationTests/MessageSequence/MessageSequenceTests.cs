@@ -2,15 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using RawRabbit.Configuration;
 using RawRabbit.Enrichers.GlobalExecutionId;
 using RawRabbit.Enrichers.MessageContext;
 using RawRabbit.Enrichers.MessageContext.Context;
+using RawRabbit.Instantiation;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.Operations.MessageSequence;
 using RawRabbit.Operations.MessageSequence.Model;
-using RawRabbit.vNext.Pipe;
 using Xunit;
 
 namespace RawRabbit.IntegrationTests.MessageSequence
@@ -280,7 +279,7 @@ namespace RawRabbit.IntegrationTests.MessageSequence
 				Plugins = p => p
 					.UseStateMachine()
 					.UseGlobalExecutionId(),
-				DependencyInjection = ioc => ioc.AddSingleton(cfg)
+				ClientConfiguration = cfg
 			}))
 			{
 				/* Test */

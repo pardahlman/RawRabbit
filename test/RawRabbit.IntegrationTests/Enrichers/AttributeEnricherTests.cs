@@ -2,10 +2,10 @@
 using RawRabbit.Configuration.Exchange;
 using RawRabbit.Enrichers.Attributes;
 using RawRabbit.Enrichers.Attributes.Middleware;
+using RawRabbit.Instantiation;
 using RawRabbit.Operations.Request.Core;
 using RawRabbit.Operations.Respond.Core;
 using RawRabbit.Pipe;
-using RawRabbit.vNext.Pipe;
 using Xunit;
 
 namespace RawRabbit.IntegrationTests.Enrichers

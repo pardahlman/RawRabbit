@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Stateless;
 
 namespace RawRabbit.Operations.StateMachine
@@ -17,7 +18,7 @@ namespace RawRabbit.Operations.StateMachine
 
 		protected StateMachineBase(TModel model = null)
 		{
-			Model = model ?? Initialize();
+			Model = model?.Id == Guid.Empty ? Initialize() : model;
 			StateMachine = new StateMachine<TState, TTrigger>(() => Model.State, s => Model.State = s);
 			ConfigureState(StateMachine);
 		}

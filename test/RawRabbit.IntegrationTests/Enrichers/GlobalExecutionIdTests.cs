@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 using RabbitMQ.Client.Events;
 using RawRabbit.Common;
 using RawRabbit.Enrichers.GlobalExecutionId;
+using RawRabbit.Instantiation;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
-using RawRabbit.vNext.Pipe;
 using Xunit;
 
 namespace RawRabbit.IntegrationTests.Enrichers

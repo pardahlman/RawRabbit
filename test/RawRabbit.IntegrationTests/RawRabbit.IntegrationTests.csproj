@@ -31,7 +31,6 @@
     <ProjectReference Include="..\..\src\RawRabbit.Enrichers.MessageContext.Respond\RawRabbit.Enrichers.MessageContext.Respond.csproj" />
     <ProjectReference Include="..\..\src\RawRabbit.DependencyInjection.Autofac\RawRabbit.DependencyInjection.Autofac.csproj" />
     <ProjectReference Include="..\..\src\RawRabbit.DependencyInjection.Ninject\RawRabbit.DependencyInjection.Ninject.csproj" />
-    <ProjectReference Include="..\..\src\RawRabbit.vNext\RawRabbit.vNext.csproj" />
   </ItemGroup>
 
   <ItemGroup>

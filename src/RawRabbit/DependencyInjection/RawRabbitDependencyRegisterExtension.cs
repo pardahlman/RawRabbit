@@ -15,7 +15,6 @@ using RawRabbit.Configuration.Publisher;
 using RawRabbit.Configuration.Queue;
 using RawRabbit.Consumer;
 using RawRabbit.Instantiation;
-using RawRabbit.Logging;
 using RawRabbit.Pipe;
 using RawRabbit.Serialization;
 using RawRabbit.Subscription;

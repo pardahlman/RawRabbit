@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using RawRabbit.Compatibility.Legacy.Configuration.Respond;
 using RawRabbit.Enrichers.QueueSuffix;
+using RawRabbit.Instantiation;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.Pipe;
-using RawRabbit.vNext.Pipe;
 using Xunit;
 
 namespace RawRabbit.IntegrationTests.Enrichers

@@ -2,15 +2,12 @@
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using RawRabbit.Configuration;
 using RawRabbit.Enrichers.GlobalExecutionId;
 using RawRabbit.Enrichers.MessageContext;
 using RawRabbit.Enrichers.MessageContext.Context;
-using RawRabbit.Logging;
+using RawRabbit.Instantiation;
 using RawRabbit.Messages.Sample;
-using RawRabbit.vNext;
-using RawRabbit.vNext.Pipe;
 using Serilog;
 
 namespace RawRabbit.ConsoleApp.Sample

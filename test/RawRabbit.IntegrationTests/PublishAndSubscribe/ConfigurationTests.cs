@@ -7,10 +7,10 @@ using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Queue;
 using RawRabbit.Enrichers.MessageContext.Subscribe;
 using RawRabbit.Enrichers.QueueSuffix;
+using RawRabbit.Instantiation;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
-using RawRabbit.vNext.Pipe;
 using Xunit;
 
 namespace RawRabbit.IntegrationTests.PublishAndSubscribe

@@ -1,8 +1,5 @@
-﻿using System.Linq;
-using Microsoft.Extensions.DependencyInjection;
-using RawRabbit.Configuration;
-using RawRabbit.Logging;
-using RawRabbit.vNext.Pipe;
+﻿using RawRabbit.Configuration;
+using RawRabbit.Instantiation;
 
 namespace RawRabbit.IntegrationTests
 {
@@ -10,31 +7,21 @@ namespace RawRabbit.IntegrationTests
 	{
 		public static Instantiation.Disposable.BusClient CreateTestClient(RawRabbitOptions options = null)
 		{
-			return vNext.Pipe.RawRabbitFactory.CreateSingleton(GetTestOptions(options));
+			return Instantiation.RawRabbitFactory.CreateSingleton(GetTestOptions(options));
 		}
 
-		public static Instantiation.InstanceFactory CreateTestInstanceFactory(RawRabbitOptions options = null)
+		public static InstanceFactory CreateTestInstanceFactory(RawRabbitOptions options = null)
 		{
-			return vNext.Pipe.RawRabbitFactory.CreateInstanceFactory(GetTestOptions(options));
+			return Instantiation.RawRabbitFactory.CreateInstanceFactory(GetTestOptions(options));
 		}
 
 		private static RawRabbitOptions GetTestOptions(RawRabbitOptions options)
 		{
 			options = options ?? new RawRabbitOptions();
-			var action = options.DependencyInjection ?? (collection => { });
-			action += collection =>
-			{
-				var registration = collection.LastOrDefault(c => c.ServiceType == typeof(RawRabbitConfiguration));
-				var prevRegged = registration?.ImplementationInstance as RawRabbitConfiguration ?? registration?.ImplementationFactory(null) as RawRabbitConfiguration;
-				if (prevRegged != null)
-				{
-					prevRegged.Queue.AutoDelete = true;
-					prevRegged.Exchange.AutoDelete = true;
-					collection.AddSingleton(p => prevRegged);
-				}
-				//collection.AddSingleton<ILoggerFactory, VoidLoggerFactory>();
-			};
-			options.DependencyInjection = action;
+			options.ClientConfiguration = options.ClientConfiguration ?? RawRabbitConfiguration.Local;
+			options.ClientConfiguration.Queue.AutoDelete = true;
+			options.ClientConfiguration.Exchange.AutoDelete = true;
+
 			return options;
 		}
 	}

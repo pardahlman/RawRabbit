@@ -4,6 +4,7 @@ using Polly;
 using RabbitMQ.Client.Exceptions;
 using RawRabbit.Configuration.Queue;
 using RawRabbit.Enrichers.Polly;
+using RawRabbit.Instantiation;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.Pipe;
 using Xunit;
@@ -35,7 +36,7 @@ namespace RawRabbit.IntegrationTests.Enrichers
 					await topology.DeclareQueueAsync(queue);
 				});
 
-			var options = new vNext.Pipe.RawRabbitOptions
+			var options = new RawRabbitOptions
 			{
 				Plugins = p => p.UsePolly(c => c
 					.UsePolicy(defaultPolicy)

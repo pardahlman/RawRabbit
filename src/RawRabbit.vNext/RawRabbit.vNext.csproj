@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Description>Take advantage of vNext for your RawRabbit setup. Extension for IServiceCollection, IConfiguration support and much more!</Description>
+    <Description>RawRabbit.vNext is deprecated. Use RawRabbit.DependencyInjection.ServiceCollection for dependency registration.</Description>
     <VersionPrefix>2.0.0</VersionPrefix>
     <Authors>pardahlman;enrique-avalon</Authors>
     <TargetFrameworks>netstandard1.5;net451</TargetFrameworks>
