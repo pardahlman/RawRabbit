@@ -97,9 +97,9 @@ namespace RawRabbit.Enrichers.Attributes.Middleware
 			{
 				config.Consume.PrefetchCount = routingAttr.PrefetchCount;
 			}
-			if (routingAttr.NullableNoAck.HasValue)
+			if (routingAttr.NullableAutoAck.HasValue)
 			{
-				config.Consume.NoAck = routingAttr.NoAck;
+				config.Consume.AutoAck = routingAttr.AutoAck;
 			}
 		}
 

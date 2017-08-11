@@ -33,7 +33,12 @@ namespace RawRabbit.Configuration.Consume
 
 		public IConsumeConfigurationBuilder WithNoAck(bool noAck = true)
 		{
-			Config.NoAck = noAck;
+			return WithAutoAck(noAck);
+		}
+
+		public IConsumeConfigurationBuilder WithAutoAck(bool autoAck = true)
+		{
+			Config.AutoAck = autoAck;
 			return this;
 		}
 

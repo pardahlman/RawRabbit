@@ -8,7 +8,9 @@ namespace RawRabbit.Compatibility.Legacy.Configuration.Subscribe
 	{
 		ISubscriptionConfigurationBuilder WithRoutingKey(string routingKey);
 		ISubscriptionConfigurationBuilder WithPrefetchCount(ushort prefetchCount);
+		[Obsolete("Property name changed. Use 'WithAutoAck' instead.")]
 		ISubscriptionConfigurationBuilder WithNoAck(bool noAck = true);
+		ISubscriptionConfigurationBuilder WithAutoAck(bool autoAck = true);
 		ISubscriptionConfigurationBuilder WithExchange(Action<IExchangeConfigurationBuilder> exchange);
 		ISubscriptionConfigurationBuilder WithQueue(Action<IQueueConfigurationBuilder> queue);
 

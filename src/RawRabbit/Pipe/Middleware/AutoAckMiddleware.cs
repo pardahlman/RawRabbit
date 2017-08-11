@@ -11,29 +11,29 @@ namespace RawRabbit.Pipe.Middleware
 	{
 		public Func<IPipeContext, BasicDeliverEventArgs> DeliveryArgFunc { get; set; }
 		public Func<IPipeContext, IBasicConsumer> ConsumerFunc { get; set; }
-		public Func<IPipeContext, bool> NoAckFunc { get; set; }
+		public Func<IPipeContext, bool> AutoAckFunc { get; set; }
 	}
 
 	public class AutoAckMiddleware : Middleware
 	{
 		protected readonly Func<IPipeContext, BasicDeliverEventArgs> DeliveryArgsFunc;
 		protected readonly Func<IPipeContext, IBasicConsumer> ConsumerFunc;
-		protected Func<IPipeContext, bool> NoAckFunc;
+		protected Func<IPipeContext, bool> AutoAckFunc;
 		private readonly ILog _logger = LogProvider.For<AutoAckMiddleware>();
 
 		public AutoAckMiddleware(AutoAckOptions options = null)
 		{
 			DeliveryArgsFunc = options?.DeliveryArgFunc ?? (context => context.GetDeliveryEventArgs());
 			ConsumerFunc = options?.ConsumerFunc ?? (context => context.GetConsumer());
-			NoAckFunc = options?.NoAckFunc ?? (context => context.GetConsumeConfiguration()?.NoAck ?? false);
+			AutoAckFunc = options?.AutoAckFunc ?? (context => context.GetConsumeConfiguration()?.AutoAck ?? false);
 		}
 
 		public override async Task InvokeAsync(IPipeContext context, CancellationToken token = default(CancellationToken))
 		{
-			var noAck = GetNoAck(context);
-			if (noAck)
+			var autoAck = GetAutoAck(context);
+			if (autoAck)
 			{
-				_logger.Debug("NoAck is enabled, continuing without sending ack.");
+				_logger.Debug("AutoAck is enabled, continuing without sending ack.");
 			}
 			else
 			{
@@ -70,9 +70,9 @@ namespace RawRabbit.Pipe.Middleware
 			channel.BasicAck(args.DeliveryTag, false);
 		}
 
-		protected virtual bool GetNoAck(IPipeContext context)
+		protected virtual bool GetAutoAck(IPipeContext context)
 		{
-			return NoAckFunc(context);
+			return AutoAckFunc(context);
 		}
 	}
 }

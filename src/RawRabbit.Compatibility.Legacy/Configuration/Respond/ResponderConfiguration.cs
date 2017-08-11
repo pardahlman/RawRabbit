@@ -5,7 +5,7 @@ namespace RawRabbit.Compatibility.Legacy.Configuration.Respond
 {
 	public class ResponderConfiguration : IConsumerConfiguration
 	{
-		public bool NoAck { get; set; }
+		public bool AutoAck { get; set; }
 		public ushort PrefetchCount { get; set; }
 		public ExchangeConfiguration Exchange { get; set; }
 		public QueueConfiguration Queue { get; set; }
@@ -15,13 +15,13 @@ namespace RawRabbit.Compatibility.Legacy.Configuration.Respond
 		{
 			Exchange = new ExchangeConfiguration();
 			Queue = new QueueConfiguration();
-			NoAck = true;
+			AutoAck = true;
 		}
 	}
 
 	public interface IConsumerConfiguration : IOperationConfiguration
 	{
-		bool NoAck { get; }
+		bool AutoAck { get; }
 		ushort PrefetchCount { get; }
 	}
 

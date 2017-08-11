@@ -125,7 +125,7 @@ namespace RawRabbit.Pipe.Middleware
 		{
 			channel.BasicConsume(
 				config.QueueName,
-				config.NoAck,
+				config.AutoAck,
 				config.ConsumerTag,
 				config.NoLocal,
 				config.Exclusive,

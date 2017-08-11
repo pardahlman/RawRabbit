@@ -55,7 +55,12 @@ namespace RawRabbit.Compatibility.Legacy.Configuration.Respond
 
 		public IResponderConfigurationBuilder WithNoAck(bool noAck)
 		{
-			Configuration.NoAck = noAck;
+			return WithAutoAck(noAck);
+		}
+
+		public IResponderConfigurationBuilder WithAutoAck(bool autoAck = true)
+		{
+			Configuration.AutoAck = autoAck;
 			return this;
 		}
 	}

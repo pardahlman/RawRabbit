@@ -6,7 +6,7 @@ namespace RawRabbit.Compatibility.Legacy.Configuration.Subscribe
 {
 	public class SubscriptionConfiguration : IConsumerConfiguration
 	{
-		public bool NoAck { get; set; }
+		public bool AutoAck { get; set; }
 		public ushort PrefetchCount { get; set; }
 		public ExchangeConfiguration Exchange { get; set; }
 		public QueueConfiguration Queue { get; set; }

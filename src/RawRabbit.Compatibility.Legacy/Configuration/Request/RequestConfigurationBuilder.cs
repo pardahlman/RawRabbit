@@ -39,7 +39,12 @@ namespace RawRabbit.Compatibility.Legacy.Configuration.Request
 
 		public IRequestConfigurationBuilder WithNoAck(bool noAck)
 		{
-			Configuration.NoAck = noAck;
+			return WithAutoAck(noAck);
+		}
+
+		public IRequestConfigurationBuilder WithAutoAck(bool autoAck)
+		{
+			Configuration.AutoAck = autoAck;
 			return this;
 		}
 	}

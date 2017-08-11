@@ -21,7 +21,7 @@ namespace RawRabbit.Operations.Request.Configuration
 			config.Response.Consume.RoutingKey = DirectReplyTo;
 			config.Response.Exchange.Name = DefaultExchange;
 			config.Response.Consume.ExchangeName = DefaultExchange;
-			config.Response.Consume.NoAck = true;
+			config.Response.Consume.AutoAck = true;
 			return config;
 		} 
 	}

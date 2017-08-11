@@ -17,7 +17,7 @@ namespace RawRabbit.Pipe.Middleware
 		public Func<IPipeContext, Task> InvokeMessageHandlerFunc { get; set; }
 		public Func<IPipeContext, IBasicConsumer> ConsumerFunc { get; set; }
 		public Func<IPipeContext, BasicDeliverEventArgs> DeliveryArgsFunc { get; set; }
-		public Func<IPipeContext, bool> NoAckFunc { get; set; }
+		public Func<IPipeContext, bool> AutoAckFunc { get; set; }
 		public Func<IPipeContext, Task> InvokationResultFunc { get; set; }
 		public Predicate<Acknowledgement> AbortExecution { get; set; }
 	}
@@ -31,7 +31,7 @@ namespace RawRabbit.Pipe.Middleware
 		protected Func<IPipeContext, IBasicConsumer> ConsumerFunc;
 		protected Func<IPipeContext, Task> InvokationResultFunc;
 		protected Predicate<Acknowledgement> AbortExecution;
-		protected Func<IPipeContext, bool> NoAckFunc;
+		protected Func<IPipeContext, bool> AutoAckFunc;
 
 		public ExplicitAckMiddleware(INamingConventions conventions, ITopologyProvider topology, IChannelFactory channelFactory, ExplicitAckOptions options = null)
 		{
@@ -42,13 +42,13 @@ namespace RawRabbit.Pipe.Middleware
 			ConsumerFunc = options?.ConsumerFunc ?? (context => context.GetConsumer());
 			InvokationResultFunc = options?.InvokationResultFunc ?? (context => context.GetMessageHandlerResult());
 			AbortExecution = options?.AbortExecution ?? (ack => !(ack is Ack));
-			NoAckFunc = options?.NoAckFunc ?? (context => context.GetConsumeConfiguration().NoAck);
+			AutoAckFunc = options?.AutoAckFunc ?? (context => context.GetConsumeConfiguration().AutoAck);
 		}
 
 		public override async Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
-			var noAck = GetNoAck(context);
-			if (!noAck)
+			var autoAck = GetAutoAck(context);
+			if (!autoAck)
 			{
 				var ack = await AcknowledgeMessageAsync(context);
 				if (AbortExecution(ack))
@@ -149,9 +149,9 @@ namespace RawRabbit.Pipe.Middleware
 			await Topology.UnbindQueueAsync(deadLetterQueueName, deadLeterExchangeName, deliveryArgs.RoutingKey);
 		}
 
-		protected virtual bool GetNoAck(IPipeContext context)
+		protected virtual bool GetAutoAck(IPipeContext context)
 		{
-			return NoAckFunc(context);
+			return AutoAckFunc(context);
 		}
 	}
 }

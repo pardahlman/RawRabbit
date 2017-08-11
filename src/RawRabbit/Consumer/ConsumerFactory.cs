@@ -78,7 +78,7 @@ namespace RawRabbit.Consumer
 
 			consumer.Model.BasicConsume(
 				queue: cfg.QueueName,
-				autoAck: cfg.NoAck,
+				autoAck: cfg.AutoAck,
 				consumerTag: cfg.ConsumerTag,
 				noLocal: cfg.NoLocal,
 				exclusive: cfg.Exclusive,
@@ -111,7 +111,7 @@ namespace RawRabbit.Consumer
 
 		protected string CreateConsumerKey(ConsumeConfiguration cfg)
 		{
-			return $"{cfg.QueueName}:{cfg.RoutingKey}:{cfg.NoAck}";
+			return $"{cfg.QueueName}:{cfg.RoutingKey}:{cfg.AutoAck}";
 		}
 	}
 

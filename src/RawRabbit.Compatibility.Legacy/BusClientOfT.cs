@@ -63,7 +63,7 @@ namespace RawRabbit.Compatibility.Legacy
 					ConsumerTag = Guid.NewGuid().ToString(),
 					ExchangeName = config.Exchange.ExchangeName,
 					QueueName = config.Queue.FullQueueName,
-					NoAck = config.NoAck,
+					AutoAck = config.AutoAck,
 					RoutingKey = config.RoutingKey,
 					PrefetchCount = config.PrefetchCount
 				}
@@ -151,7 +151,7 @@ namespace RawRabbit.Compatibility.Legacy
 					ConsumerTag = Guid.NewGuid().ToString(),
 					ExchangeName = config.Exchange.ExchangeName,
 					QueueName = config.Queue.FullQueueName,
-					NoAck = config.NoAck,
+					AutoAck = config.AutoAck,
 					RoutingKey = config.RoutingKey,
 					PrefetchCount = config.PrefetchCount
 				}
@@ -212,7 +212,7 @@ namespace RawRabbit.Compatibility.Legacy
 					{
 						ExchangeName = config.Exchange.ExchangeName,
 						ConsumerTag = Guid.NewGuid().ToString(),
-						NoAck = config.NoAck,
+						AutoAck = config.AutoAck,
 						RoutingKey = config.ReplyQueueRoutingKey,
 						QueueName = config.Queue.FullQueueName
 					}

@@ -16,7 +16,12 @@
 
 		public IGetConfigurationBuilder WithNoAck(bool noAck = true)
 		{
-			Configuration.NoAck = noAck;
+			return WithAutoAck(noAck);
+		}
+
+		public IGetConfigurationBuilder WithAutoAck(bool autoAck = true)
+		{
+			Configuration.AutoAck = autoAck;
 			return this;
 		}
 	}

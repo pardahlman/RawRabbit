@@ -183,17 +183,17 @@ namespace RawRabbit.IntegrationTests.Enrichers
 
 		[Queue(Name = "my_queue", MessageTtl = 300, DeadLeterExchange = "dlx", Durable = false)]
 		[Exchange(Name = "my_topic", Type = ExchangeType.Topic)]
-		[Routing(RoutingKey = "my_key", NoAck = true, PrefetchCount = 50)]
+		[Routing(RoutingKey = "my_key", AutoAck = true, PrefetchCount = 50)]
 		private class AttributedMessage { }
 
 		[Queue(Name = "attributed_request", MessageTtl = 300, DeadLeterExchange = "dlx", Durable = false)]
 		[Exchange(Name = "rpc_exchange", Type = ExchangeType.Topic)]
-		[Routing(RoutingKey = "my_request_key", NoAck = true, PrefetchCount = 50)]
+		[Routing(RoutingKey = "my_request_key", AutoAck = true, PrefetchCount = 50)]
 		private class AttributedRequest { }
 
 		[Queue(Name = "attributed_response", MessageTtl = 300, DeadLeterExchange = "dlx", Durable = false)]
 		[Exchange(Name = "rpc_exchange", Type = ExchangeType.Topic)]
-		[Routing(RoutingKey = "my_response_key", NoAck = true, PrefetchCount = 50)]
+		[Routing(RoutingKey = "my_response_key", AutoAck = true, PrefetchCount = 50)]
 		private class AttributedResponse { }
 	}
 }

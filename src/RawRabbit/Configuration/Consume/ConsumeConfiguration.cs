@@ -6,7 +6,7 @@ namespace RawRabbit.Configuration.Consume
 	{
 		public string QueueName { get; set; }
 		public string ExchangeName { get; set; }
-		public bool NoAck { get; set; }
+		public bool AutoAck { get; set; }
 		public string ConsumerTag { get; set; }
 		public string RoutingKey { get; set; }
 		public bool NoLocal { get; set; }

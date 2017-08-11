@@ -9,6 +9,8 @@ namespace RawRabbit.Compatibility.Legacy.Configuration.Request
 		IRequestConfigurationBuilder WithExchange(Action<IExchangeConfigurationBuilder> exchange);
 		IRequestConfigurationBuilder WithRoutingKey(string routingKey);
 		IRequestConfigurationBuilder WithReplyQueue(Action<IQueueConfigurationBuilder> replyTo);
+		[Obsolete("Property name changed. Use 'WithAutoAck' instead.")]
 		IRequestConfigurationBuilder WithNoAck(bool noAck);
+		IRequestConfigurationBuilder WithAutoAck(bool autoAck);
 	}
 }

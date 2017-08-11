@@ -39,7 +39,7 @@ namespace RawRabbit.IntegrationTests.Features
 			await singleton.PublishAsync(secondMsg);
 			await shutdownTask;
 
-			var secondRecieved = await singleton.GetAsync<BasicMessage>(get => get.WithNoAck());
+			var secondRecieved = await singleton.GetAsync<BasicMessage>(get => get.WithAutoAck());
 			await singleton.DeleteQueueAsync<BasicMessage>();
 			await singleton.DeleteExchangeAsync<BasicMessage>();
 			singleton.Dispose();

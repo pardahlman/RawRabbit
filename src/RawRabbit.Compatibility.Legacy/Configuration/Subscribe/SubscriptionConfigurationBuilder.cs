@@ -11,7 +11,7 @@ namespace RawRabbit.Compatibility.Legacy.Configuration.Subscribe
 			Queue = _queueBuilder.Configuration,
 			Exchange = _exchangeBuilder.Configuration,
 			RoutingKey = _routingKey ?? _queueBuilder.Configuration.QueueName,
-			NoAck = _noAck,
+			AutoAck = _autoAck,
 			PrefetchCount = _prefetchCount == 0 ? (ushort)50 : _prefetchCount
 		};
 
@@ -19,7 +19,7 @@ namespace RawRabbit.Compatibility.Legacy.Configuration.Subscribe
 		private readonly QueueConfigurationBuilder _queueBuilder;
 		private string _routingKey;
 		private ushort _prefetchCount;
-		private bool _noAck;
+		private bool _autoAck;
 
 		public SubscriptionConfigurationBuilder() : this(null, null, null)
 		{ }
@@ -45,7 +45,12 @@ namespace RawRabbit.Compatibility.Legacy.Configuration.Subscribe
 
 		public ISubscriptionConfigurationBuilder WithNoAck(bool noAck = true)
 		{
-			_noAck = noAck;
+			return WithAutoAck(noAck);
+		}
+
+		public ISubscriptionConfigurationBuilder WithAutoAck(bool autoAck = true)
+		{
+			_autoAck = autoAck;
 			return this;
 		}
 

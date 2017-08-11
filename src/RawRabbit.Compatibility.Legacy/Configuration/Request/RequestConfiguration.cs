@@ -10,7 +10,7 @@ namespace RawRabbit.Compatibility.Legacy.Configuration.Request
 		public string RoutingKey { get; set; }
 
 		/* Response Queue Configuration*/
-		public bool NoAck { get; set; }
+		public bool AutoAck { get; set; }
 		public ushort PrefetchCount => 1; // Only expect one response
 		public QueueConfiguration Queue => ReplyQueue;
 		public QueueConfiguration ReplyQueue { get; set; }
@@ -20,7 +20,7 @@ namespace RawRabbit.Compatibility.Legacy.Configuration.Request
 		{
 			Exchange = new ExchangeConfiguration();
 			ReplyQueue = new QueueConfiguration();
-			NoAck = true;
+			AutoAck = true;
 		}
 	}
 }

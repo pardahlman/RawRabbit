@@ -3,6 +3,6 @@
 	public class GetConfiguration
 	{
 		public string QueueName { get; set; }
-		public bool NoAck { get; set; }
+		public bool AutoAck { get; set; }
 	}
 }

@@ -48,7 +48,7 @@ namespace RawRabbit.Operations.Respond.Middleware
 
 		protected virtual void AddAcknowledgementToContext(IPipeContext context, ConsumeConfiguration cfg)
 		{
-			if (cfg.NoAck)
+			if (cfg.AutoAck)
 			{
 				return;
 			}
