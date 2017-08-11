@@ -78,7 +78,7 @@ namespace RawRabbit.Consumer
 
 			consumer.Model.BasicConsume(
 				queue: cfg.QueueName,
-				noAck: cfg.NoAck,
+				autoAck: cfg.NoAck,
 				consumerTag: cfg.ConsumerTag,
 				noLocal: cfg.NoLocal,
 				exclusive: cfg.Exclusive,
