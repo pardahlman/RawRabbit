@@ -11,6 +11,7 @@ It is easy getting started!
    installation
    register-client
    configuration
+   logging
 
 
 
