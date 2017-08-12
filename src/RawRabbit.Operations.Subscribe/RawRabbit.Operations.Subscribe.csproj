@@ -17,6 +17,10 @@
     <RepositoryUrl>https://github.com/pardahlman/RawRabbit</RepositoryUrl>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard1.5|AnyCPU'">
+    <DefineConstants>TRACE;DEBUG;NETSTANDARD1_5;LIBLOG_PORTABLE</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\RawRabbit\RawRabbit.csproj" />
   </ItemGroup>

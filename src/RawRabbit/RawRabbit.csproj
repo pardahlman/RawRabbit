@@ -14,10 +14,7 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard1.5|AnyCPU'">
-    <DefineConstants>TRACE;DEBUG;NETSTANDARD1_5;LIBLOG_PORTABLE</DefineConstants>
+    <DefineConstants>LIBLOG_PORTABLE</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
