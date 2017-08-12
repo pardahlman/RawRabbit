@@ -1,9 +1,34 @@
+# 2.0.0-beta8
+
+ - [#254](https://github.com/pardahlman/RawRabbit/issues/254) - Upgrade RabbitMQ.Client to 5
+ - [#253](https://github.com/pardahlman/RawRabbit/issues/253) - Replace RawRabbit.vNext with RawRabbit.DependencyInjection.ServiceCollection
+ - [#250](https://github.com/pardahlman/RawRabbit/issues/250) - 2.o documentation: Add information on the used packages?
+ - [#246](https://github.com/pardahlman/RawRabbit/issues/246) - When ContextDictionary is emptied (possible MemoryLeak) ?
+ - [#245](https://github.com/pardahlman/RawRabbit/issues/245) - Use LibLog
+ - [#243](https://github.com/pardahlman/RawRabbit/issues/243) - NoAck not working as expected?
+ - [#242](https://github.com/pardahlman/RawRabbit/pull/242) - Update Getting-started.md contributed by Alexander Stefurishin ([astef](https://github.com/astef))
+ - [#241](https://github.com/pardahlman/RawRabbit/issues/241) - Using the AddRawRabbit Extension should not overwrite registrations
+ - [#240](https://github.com/pardahlman/RawRabbit/issues/240) - Sample Configuration for "Work Queues" Pattern
+ - [#238](https://github.com/pardahlman/RawRabbit/issues/238) - RetryLater AutoDelete queue is causing problems
+ - [#237](https://github.com/pardahlman/RawRabbit/pull/237) - Update Getting-started.md contributed by Alexander Stefurishin ([astef](https://github.com/astef))
+ - [#236](https://github.com/pardahlman/RawRabbit/pull/236) - Changed type resolving for publish contributed by ([liri2006](https://github.com/liri2006))
+ - [#235](https://github.com/pardahlman/RawRabbit/pull/235) - fix: Changing all middlewares to use asynchronous policy execution. (fixes #232) contributed by ([videege](https://github.com/videege))
+ - [#234](https://github.com/pardahlman/RawRabbit/issues/234) - [Discussion] Create default (empty) message context in MessageContextProviderBase.ExtractContext() if it is missed
+ - [#232](https://github.com/pardahlman/RawRabbit/issues/232) - Use of Polly causes timeout exception
+ - [#231](https://github.com/pardahlman/RawRabbit/pull/231) - Fix typo in spelling `Dependency` contributed by Serhii Almazov ([almazik](https://github.com/almazik))
+ - [#230](https://github.com/pardahlman/RawRabbit/issues/230) - Message sequences time out for generic classes (v2) +fix
+ - [#228](https://github.com/pardahlman/RawRabbit/issues/228) - v2 First subscribed message not raising handler +fix
+ - [#226](https://github.com/pardahlman/RawRabbit/issues/226) - `AlreadyClosedException` during message sequences in 2.0
+ - [#212](https://github.com/pardahlman/RawRabbit/issues/212) - Executing all tests from CLI undeterministically fails after upgrade to csproj
+
+Commits: b176e78186...40cc2dc758
+
+
 # 2.0.0-beta7
 
  - [#231](https://github.com/pardahlman/RawRabbit/pull/231) - Fix typo in spelling `Dependency` contributed by Serhii Almazov ([almazik](https://github.com/almazik))
  - [#230](https://github.com/pardahlman/RawRabbit/issues/230) - Message sequences time out for generic classes (v2) +fix
  - [#228](https://github.com/pardahlman/RawRabbit/issues/228) - v2 First subscribed message not raising handler +fix
-
 
 Commits: b176e78186...e40eea22a5
 
