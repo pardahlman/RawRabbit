@@ -9,8 +9,6 @@ namespace RawRabbit
 		/// <summary>
 		/// Replaces the default serializer with Protobuf.
 		/// </summary>
-		/// <param name="builder"></param>
-		/// <returns></returns>
 		public static IClientBuilder UseProtobuf(this IClientBuilder builder)
 		{
 			builder.Register(

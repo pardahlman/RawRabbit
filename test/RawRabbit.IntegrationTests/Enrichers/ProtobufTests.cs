@@ -6,6 +6,7 @@ using ProtoBuf;
 using RawRabbit.Exceptions;
 using RawRabbit.Instantiation;
 using RawRabbit.Pipe;
+using RawRabbit.Pipe.Middleware;
 using Xunit;
 
 namespace RawRabbit.IntegrationTests.Enrichers
@@ -97,7 +98,7 @@ namespace RawRabbit.IntegrationTests.Enrichers
 		}
 
 		[Fact]
-		public async Task Should_Throw_Exception_If_Responder_Can_Not_Deserialize_Request()
+		public async Task Should_Throw_Exception_If_Responder_Can_Not_Deserialize_Request_And_Content_Type_Check_Is_Activated()
 		{
 			using (var protobufClient = RawRabbitFactory.CreateTestClient(new RawRabbitOptions { Plugins = p => p.UseProtobuf() }))
 			using (var jsonClient = RawRabbitFactory.CreateTestClient())
@@ -110,8 +111,8 @@ namespace RawRabbit.IntegrationTests.Enrichers
 				/* Test */
 				/* Assert */
 				var e = await Assert.ThrowsAsync<MessageHandlerException>(() =>
-					protobufClient.RequestAsync<ProtoRequest, ProtoResponse>(new ProtoRequest())
-				);
+					protobufClient.RequestAsync<ProtoRequest, ProtoResponse>(new ProtoRequest {  Id = Guid.NewGuid()}
+				, ctx => ctx.UseContentTypeCheck()));
 			}
 		}
 	}

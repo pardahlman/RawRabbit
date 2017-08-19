@@ -11,6 +11,7 @@ namespace RawRabbit.Pipe.Middleware
 	{
 		public Func<IPipeContext, Type> BodyTypeFunc { get; set; }
 		public Func<IPipeContext, string> BodyContentTypeFunc { get; set; }
+		public Func<IPipeContext, bool> ActivateContentTypeCheck{ get; set; }
 		public Func<IPipeContext, byte[]> BodyFunc { get; set; }
 		public Action<IPipeContext, object> PersistAction { get; set; }
 	}
@@ -21,6 +22,7 @@ namespace RawRabbit.Pipe.Middleware
 		protected Func<IPipeContext, Type> MessageTypeFunc;
 		protected Func<IPipeContext, byte[]> BodyBytesFunc;
 		protected Func<IPipeContext, string> BodyContentTypeFunc { get; set; }
+		protected Func<IPipeContext, bool> ActivateContentTypeCheck { get; set; }
 		protected Action<IPipeContext, object> PersistAction;
 		private readonly ILog _logger = LogProvider.For<BodyDeserializationMiddleware>();
 
@@ -31,18 +33,27 @@ namespace RawRabbit.Pipe.Middleware
 			BodyBytesFunc = options?.BodyFunc ?? (context =>context.GetDeliveryEventArgs()?.Body);
 			PersistAction = options?.PersistAction ?? ((context, msg) => context.Properties.TryAdd(PipeKey.Message, msg));
 			BodyContentTypeFunc = options?.BodyContentTypeFunc ?? (context => context.GetDeliveryEventArgs()?.BasicProperties.ContentType);
+			ActivateContentTypeCheck = options?.ActivateContentTypeCheck ?? (context => context.GetContentTypeCheckActivated());
 		}
 
 		public override async Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
-			var msgContentType = GetMessageContentType(context);
-			if (!CanSerializeMessage(msgContentType))
+			if (ContentTypeCheckActivated(context))
 			{
-				throw new SerializationException($"Registered serializer supports {Serializer.ContentType}, recieved message uses {msgContentType}.");
+				var msgContentType = GetMessageContentType(context);
+				if (!CanSerializeMessage(msgContentType))
+				{
+					throw new SerializationException($"Registered serializer supports {Serializer.ContentType}, recieved message uses {msgContentType}.");
+				}
 			}
 			var message = GetMessage(context);
 			SaveInContext(context, message);
 			await Next.InvokeAsync(context, token);
+		}
+
+		protected virtual bool ContentTypeCheckActivated(IPipeContext context)
+		{
+			return ActivateContentTypeCheck?.Invoke(context) ?? false;
 		}
 
 		protected virtual bool CanSerializeMessage(string msgContentType)
@@ -94,6 +105,22 @@ namespace RawRabbit.Pipe.Middleware
 				_logger.Warn("No persist action defined. Message will not be saved in Pipe context.");
 			}
 			PersistAction?.Invoke(context, message);
+		}
+	}
+
+	public static class BodyDeserializationMiddlewareExtensions
+	{
+		private const string ContentTypeCheck = "Deserialization:ContentType:Check";
+
+		public static IPipeContext UseContentTypeCheck(this IPipeContext context, bool check = true)
+		{
+			context.Properties.TryAdd(ContentTypeCheck, check);
+			return context;
+		}
+
+		public static bool GetContentTypeCheckActivated(this IPipeContext context)
+		{
+			return context.Get<bool>(ContentTypeCheck);
 		}
 	}
 }
