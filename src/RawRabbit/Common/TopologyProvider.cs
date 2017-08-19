@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
-using RawRabbit.Channel;
 using RawRabbit.Channel.Abstraction;
 using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Queue;
@@ -28,7 +27,6 @@ namespace RawRabbit.Common
 		private IModel _channel;
 		private readonly object _processLock = new object();
 		private readonly Task _completed = Task.FromResult(true);
-		private readonly Timer _disposeTimer;
 		private readonly List<string> _initExchanges;
 		private readonly List<string> _initQueues;
 		private readonly List<string> _queueBinds;
@@ -42,12 +40,6 @@ namespace RawRabbit.Common
 			_initQueues = new List<string>();
 			_queueBinds = new List<string>();
 			_topologyTasks = new ConcurrentQueue<ScheduledTopologyTask>();
-			_disposeTimer = new Timer(state =>
-			{
-				_logger.Info("Disposing topology channel (if exists).");
-				_channel?.Dispose();
-				_disposeTimer.Change(TimeSpan.FromHours(1), new TimeSpan(-1));
-			}, null, TimeSpan.FromSeconds(2), new TimeSpan(-1));
 		}
 
 		public Task DeclareExchangeAsync(ExchangeDeclaration exchange)
@@ -281,8 +273,6 @@ namespace RawRabbit.Common
 						_logger.Error(e, "Unable to unbind queue");
 						unbind.TaskCompletionSource.TrySetException(e);
 					}
-					
-					continue;
 				}
 			}
 			_logger.Debug("Done processing topology work.");
@@ -291,15 +281,15 @@ namespace RawRabbit.Common
 
 		private IModel GetOrCreateChannel()
 		{
-			_disposeTimer.Change(TimeSpan.FromSeconds(2), new TimeSpan(-1));
 			if (_channel?.IsOpen ?? false)
 			{
 				return _channel;
 			}
 
-			var channelTask = _channelFactory.CreateChannelAsync();
-			channelTask.Wait();
-			_channel = channelTask.Result;
+			_channel = _channelFactory
+				.CreateChannelAsync()
+				.GetAwaiter()
+				.GetResult();
 			return _channel;
 		}
 
