@@ -54,7 +54,7 @@ namespace RawRabbit
 					ExchangeNameFunc = c => c.GetRequestConfiguration()?.Request.ExchangeName,
 					RoutingKeyFunc = c => c.GetRequestConfiguration()?.Request.RoutingKey,
 					ChannelFunc = c => c.Get<IBasicConsumer>(PipeKey.Consumer)?.Model,
-					BodyFunc = c => Encoding.UTF8.GetBytes(c.Get<string>(PipeKey.SerializedMessage))
+					BodyFunc = c => c.Get<byte[]>(PipeKey.SerializedMessage)
 				});
 
 		public static async Task<TResponse> RequestAsync<TRequest, TResponse>(this IBusClient client, TRequest message = default(TRequest), Action<IPipeContext> context = null, CancellationToken ct = default(CancellationToken))

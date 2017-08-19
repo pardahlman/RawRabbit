@@ -4,25 +4,25 @@ using Newtonsoft.Json;
 
 namespace RawRabbit.Serialization
 {
-	public class JsonSerializer : ISerializer
+	public class JsonSerializer : StringSerializerBase
 	{
 		private readonly Newtonsoft.Json.JsonSerializer _json;
-		public string ContentType => "application/json";
+		public override string ContentType => "application/json";
 
 		public JsonSerializer(Newtonsoft.Json.JsonSerializer json)
 		{
 			_json = json;
 		}
 
-		public string Serialize(object obj)
+		public override string SerializeToString(object obj)
 		{
 			if (obj == null)
 			{
 				return string.Empty;
 			}
-			if (obj is string)
+			if (obj is string str)
 			{
-				return obj as string;
+				return str;
 			}
 			string serialized;
 			using (var sw = new StringWriter())
@@ -33,7 +33,7 @@ namespace RawRabbit.Serialization
 			return serialized;
 		}
 
-		public object Deserialize(Type type, string str)
+		public override object Deserialize(Type type, string str)
 		{
 			if (type == typeof(string))
 			{
@@ -45,11 +45,6 @@ namespace RawRabbit.Serialization
 				obj = _json.Deserialize(jsonReader, type);
 			}
 			return obj;
-		}
-
-		public TType Deserialize<TType>(string str)
-		{
-			return (TType)Deserialize(typeof(TType), str);
 		}
 	}
 }

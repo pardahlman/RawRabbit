@@ -63,17 +63,30 @@ namespace RawRabbit.Operations.Request.Middleware
 			return ResponseTypeFunc?.Invoke(context);
 		}
 
-		protected virtual string GetSerializedBody(IPipeContext context)
+		protected virtual byte[] GetMessageBody(IPipeContext context)
 		{
 			var deliveryArgs = GetDeliverEventArgs(context);
-			var serialized = Encoding.UTF8.GetString(deliveryArgs?.Body ?? new byte[0]);
-			return serialized;
+			return deliveryArgs?.Body ?? new byte[0];
 		}
 
 		protected virtual ExceptionInformation GetExceptionInfo(IPipeContext context)
 		{
-			var serialized = GetSerializedBody(context);
-			return _serializer.Deserialize<ExceptionInformation>(serialized);
+			var body = GetMessageBody(context);
+			try
+			{
+				return _serializer.Deserialize<ExceptionInformation>(body);
+			}
+			catch (Exception e)
+			{
+				return new ExceptionInformation
+				{
+					Message =
+						$"An unhandled exception was thrown by the responder, but the requesting client was unable to deserialize exception info. {Encoding.UTF8.GetString(body)}.",
+					InnerMessage = e.Message,
+					StackTrace = e.StackTrace,
+					ExceptionType = e.GetType().Name
+				};
+			}
 		}
 
 		protected virtual Task HandleRespondException(ExceptionInformation exceptionInfo, IPipeContext context)

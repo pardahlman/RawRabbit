@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Text;
+using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Logging;
@@ -47,8 +47,8 @@ namespace RawRabbit.Pipe.Middleware
 		protected virtual string GetSerializedMessage(IPipeContext context)
 		{
 			var bodyBytes = GetBodyBytes(context);
-			var serialized = Encoding.UTF8.GetString(bodyBytes ?? new byte[0]);
-			return serialized;
+			var messageType = GetMessageType(context);
+			return Serializer.Deserialize(messageType, bodyBytes);
 		}
 
 		protected virtual Type GetMessageType(IPipeContext context)

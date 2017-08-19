@@ -78,7 +78,7 @@ namespace RawRabbit.Pipe.Middleware
 			return CreateItemFunc?.Invoke(context);
 		}
 
-		protected virtual string SerializeItem(object item, IPipeContext context)
+		protected virtual byte[] SerializeItem(object item, IPipeContext context)
 		{
 			return Serializer.Serialize(item);
 		}

@@ -51,19 +51,13 @@ namespace RawRabbit.Pipe.Middleware
 
 		protected virtual object GetHeaderObject(IPipeContext context)
 		{
-			var serialized = GetSerializedHeader(context);
-			if (serialized == null)
+			var bytes = GetHeaderBytes(context);
+			if (bytes == null)
 			{
 				return null;
 			}
 			var type = GetHeaderType(context);
-			return Serializer.Deserialize(type, serialized);
-		}
-
-		protected virtual string GetSerializedHeader(IPipeContext context)
-		{
-			var headerBytes = GetHeaderBytes(context);
-			return Encoding.UTF8.GetString(headerBytes ?? new byte[0]);
+			return Serializer.Deserialize(type, bytes);
 		}
 
 		protected virtual byte[] GetHeaderBytes(IPipeContext context)

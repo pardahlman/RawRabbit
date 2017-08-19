@@ -33,7 +33,7 @@ namespace RawRabbit
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.PreMessagePublish))
 			.Use<BasicPublishMiddleware>(new BasicPublishOptions
 			{
-				BodyFunc = c => Encoding.UTF8.GetBytes(c.Get<string>(PipeKey.SerializedMessage))
+				BodyFunc = c => c.Get<byte[]>(PipeKey.SerializedMessage)
 			})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.MessagePublished));
 

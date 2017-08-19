@@ -5,8 +5,8 @@ namespace RawRabbit.Serialization
 	public interface ISerializer
 	{
 		string ContentType { get; }
-		string Serialize(object obj);
-		object Deserialize(Type type, string str);
-		TType Deserialize<TType>(string str);
+		byte[] Serialize(object obj);
+		object Deserialize(Type type, byte[] bytes);
+		TType Deserialize<TType>(byte[] bytes);
 	}
 }

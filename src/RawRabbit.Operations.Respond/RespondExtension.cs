@@ -47,7 +47,7 @@ namespace RawRabbit
 				ExchangeNameFunc = context => context.GetPublicationAddress()?.ExchangeName,
 				RoutingKeyFunc = context => context.GetPublicationAddress()?.RoutingKey,
 				MandatoryFunc = context => true,
-				BodyFunc = context => Encoding.UTF8.GetBytes(context.Get<string>(RespondKey.SerializedResponse))
+				BodyFunc = context => context.Get<byte[]>(RespondKey.SerializedResponse)
 			})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ResponsePublished));
 

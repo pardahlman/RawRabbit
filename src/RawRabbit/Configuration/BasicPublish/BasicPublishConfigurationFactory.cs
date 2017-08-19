@@ -82,8 +82,7 @@ namespace RawRabbit.Configuration.BasicPublish
 
 		protected virtual byte[] GetBody(object message)
 		{
-			var serialized = _serializer.Serialize(message);
-			return UTF8Encoding.UTF8.GetBytes(serialized);
+			return _serializer.Serialize(message);
 		}
 	}
 }
