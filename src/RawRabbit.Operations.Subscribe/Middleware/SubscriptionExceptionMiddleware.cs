@@ -41,7 +41,7 @@ namespace RawRabbit.Operations.Subscribe.Middleware
 
 		protected override async Task OnExceptionAsync(Exception exception, IPipeContext context, CancellationToken token)
 		{
-			_logger.Error(exception, "Unhandled exception thrown when consuming message");
+			_logger.Info(exception, "Unhandled exception thrown when consuming message");
 			try
 			{
 				var exchangeCfg = GetExchangeDeclaration(context);
@@ -54,7 +54,14 @@ namespace RawRabbit.Operations.Subscribe.Middleware
 			{
 				_logger.Error(e, "Unable to publish message to Error Exchange");
 			}
-			await Next.InvokeAsync(context, token);
+			try
+			{
+				await AckMessageIfApplicable(context);
+			}
+			catch (Exception e)
+			{
+				_logger.Error(e, "Unable to ack message.");
+			}
 		}
 
 		protected virtual Task<IModel> GetChannelAsync(IPipeContext context)
@@ -83,6 +90,34 @@ namespace RawRabbit.Operations.Subscribe.Middleware
 			args.BasicProperties.Headers?.TryAdd(PropertyHeaders.ExceptionType, exception.GetType().Name);
 			args.BasicProperties.Headers?.TryAdd(PropertyHeaders.ExceptionStackTrace, exception.StackTrace);
 			channel.BasicPublish(exchange.Name, args.RoutingKey, false, args.BasicProperties, args.Body);
+			return Task.FromResult(0);
+		}
+
+		protected virtual Task AckMessageIfApplicable(IPipeContext context)
+		{
+			var autoAck = context.GetConsumeConfiguration()?.AutoAck;
+			if (!autoAck.HasValue)
+			{
+				_logger.Debug("Unable to ack original message. Can not determen if AutoAck is configured.");
+				return Task.FromResult(0);
+			}
+			if (autoAck.Value)
+			{
+				_logger.Debug("Consuming in AutoAck mode. No ack'ing will be performed");
+				return Task.FromResult(0);
+			}
+			var deliveryTag = context.GetDeliveryEventArgs()?.DeliveryTag;
+			if (deliveryTag == null)
+			{
+				_logger.Info("Unable to ack original message. Delivery tag not found.");
+				return Task.FromResult(0);
+			}
+			var consumerChannel = context.GetConsumer()?.Model;
+			if (consumerChannel != null && consumerChannel.IsOpen && deliveryTag.HasValue)
+			{
+				_logger.Debug("Acking message with {deliveryTag} on channel {channelNumber}", deliveryTag, consumerChannel.ChannelNumber);
+				consumerChannel.BasicAck(deliveryTag.Value, false);
+			}
 			return Task.FromResult(0);
 		}
 	}
