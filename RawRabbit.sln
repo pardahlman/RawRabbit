@@ -68,6 +68,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RawRabbit.PerformanceTest",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RawRabbit.DependencyInjection.ServiceCollection", "src\RawRabbit.DependencyInjection.ServiceCollection\RawRabbit.DependencyInjection.ServiceCollection.csproj", "{CF308330-735E-411D-BBA9-0018DD079AF1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RawRabbit.Enrichers.Protobuf", "RawRabbit.Enrichers.Protobuf\RawRabbit.Enrichers.Protobuf.csproj", "{B0E40243-E916-4605-8DE6-7CB89C052B98}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -182,6 +184,10 @@ Global
 		{CF308330-735E-411D-BBA9-0018DD079AF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CF308330-735E-411D-BBA9-0018DD079AF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CF308330-735E-411D-BBA9-0018DD079AF1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0E40243-E916-4605-8DE6-7CB89C052B98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0E40243-E916-4605-8DE6-7CB89C052B98}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0E40243-E916-4605-8DE6-7CB89C052B98}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0E40243-E916-4605-8DE6-7CB89C052B98}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -214,5 +220,9 @@ Global
 		{48D9E6E9-D8E8-426C-B99F-F3B0B8A957D8} = {7FCF8D3B-BA55-4C47-AC60-5CEF75418BEB}
 		{2788DED9-2558-496C-81B1-B471CD42AB64} = {2F91E22A-AEBA-4BEF-9A03-C8232830F697}
 		{CF308330-735E-411D-BBA9-0018DD079AF1} = {7FCF8D3B-BA55-4C47-AC60-5CEF75418BEB}
+		{B0E40243-E916-4605-8DE6-7CB89C052B98} = {7FCF8D3B-BA55-4C47-AC60-5CEF75418BEB}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6EC93B92-1319-44D3-A596-9FBD9BD23050}
 	EndGlobalSection
 EndGlobal
