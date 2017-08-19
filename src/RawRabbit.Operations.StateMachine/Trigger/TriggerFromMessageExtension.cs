@@ -16,6 +16,7 @@ namespace RawRabbit.Operations.StateMachine.Trigger
 				.Replace<SubscriptionExceptionMiddleware, SubscriptionExceptionMiddleware>(args: new SubscriptionExceptionOptions
 				{
 					InnerPipe = inner => inner
+						.Use<BodyDeserializationMiddleware>()
 						.Use<ModelIdMiddleware>()
 						.Use<GlobalLockMiddleware>()
 						.Use<RetrieveStateMachineMiddleware>()

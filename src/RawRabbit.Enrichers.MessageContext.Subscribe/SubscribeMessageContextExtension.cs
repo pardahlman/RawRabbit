@@ -19,19 +19,20 @@ namespace RawRabbit
 				HeaderTypeFunc = c => c.GetMessageContextType(),
 				ContextSaveAction = (pipeCtx, msgCtx) => pipeCtx.Properties.TryAdd(PipeKey.MessageContext, msgCtx)
 			})
-			.Use<BodyDeserializationMiddleware>()
-			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.MessageDeserialized))
-			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.MessageContextDeserialized))
 			.Use<SubscriptionExceptionMiddleware>(new SubscriptionExceptionOptions
 			{
-				InnerPipe = p => p.Use<HandlerInvokationMiddleware>(new HandlerInvokationOptions
-				{
-					HandlerArgsFunc = context => new[]
+				InnerPipe = p => p
+					.Use<BodyDeserializationMiddleware>()
+					.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.MessageDeserialized))
+					.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.MessageContextDeserialized))
+					.Use<HandlerInvokationMiddleware>(new HandlerInvokationOptions
 					{
-						context.GetMessage(),
-						context.GetMessageContextResolver()?.Invoke(context) ?? context.GetMessageContext()
-					}
-				})
+						HandlerArgsFunc = context => new[]
+						{
+							context.GetMessage(),
+							context.GetMessageContextResolver()?.Invoke(context) ?? context.GetMessageContext()
+						}
+					})
 			})
 			.Use<ExplicitAckMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.HandlerInvoked));

@@ -1,16 +1,16 @@
 ﻿using System;
 using RabbitMQ.Client;
 using RawRabbit.Configuration.Consume;
-using RawRabbit.Configuration.Queue;
 using RawRabbit.Operations.Request.Core;
 using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
+using RawRabbit.Serialization;
 
 namespace RawRabbit.Operations.Request.Middleware
 {
 	public class BasicPropertiesMiddleware : Pipe.Middleware.BasicPropertiesMiddleware
 	{
-		public BasicPropertiesMiddleware(BasicPropertiesOptions options) :base(options)
+		public BasicPropertiesMiddleware(ISerializer serializer, BasicPropertiesOptions options) :base(serializer, options)
 		{ }
 
 		protected override void ModifyBasicProperties(IPipeContext context, IBasicProperties props)

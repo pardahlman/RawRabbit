@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
+using RawRabbit.Serialization;
 
 namespace RawRabbit.Pipe.Middleware
 {
@@ -16,19 +17,22 @@ namespace RawRabbit.Pipe.Middleware
 
 	public class BasicPropertiesMiddleware : Middleware
 	{
+		protected ISerializer Serializer;
 		protected Func<IPipeContext, IBasicProperties> GetOrCreatePropsFunc;
 		protected Action<IPipeContext, IBasicProperties> PropertyModifier;
 		protected Action<IPipeContext, IBasicProperties> PostCreateAction;
 
-		public BasicPropertiesMiddleware(BasicPropertiesOptions options = null)
+		public BasicPropertiesMiddleware(ISerializer serializer, BasicPropertiesOptions options = null)
 		{
+			Serializer = serializer;
 			PropertyModifier = options?.PropertyModier ?? ((ctx, props) => ctx.Get<Action<IBasicProperties>>(PipeKey.BasicPropertyModifier)?.Invoke(props));
 			PostCreateAction = options?.PostCreateAction;
 			GetOrCreatePropsFunc = options?.GetOrCreatePropsFunc ?? (ctx => ctx.GetBasicProperties() ?? new BasicProperties
 			{
 				MessageId = Guid.NewGuid().ToString(),
 				Headers = new Dictionary<string, object>(),
-				Persistent = ctx.GetClientConfiguration().PersistentDeliveryMode
+				Persistent = ctx.GetClientConfiguration().PersistentDeliveryMode,
+				ContentType = Serializer.ContentType
 			});
 		}
 

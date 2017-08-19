@@ -25,11 +25,6 @@ namespace RawRabbit.DependencyInjection
 	{
 		public static IDependencyRegister AddRawRabbit(this IDependencyRegister register, RawRabbitOptions options = null)
 		{
-			var clientBuilder = new ClientBuilder();
-			options?.Plugins?.Invoke(clientBuilder);
-			clientBuilder.DependencyInjection?.Invoke(register);
-			register.AddSingleton(clientBuilder.PipeBuilderAction);
-
 			register
 				.AddSingleton(options?.ClientConfiguration ?? RawRabbitConfiguration.Local)
 				.AddSingleton<IConnectionFactory, ConnectionFactory>(provider =>
@@ -83,6 +78,11 @@ namespace RawRabbit.DependencyInjection
 				.AddSingleton<IPipeContextFactory, PipeContextFactory>()
 				.AddTransient<IExtendedPipeBuilder, PipeBuilder>(resolver => new PipeBuilder(resolver))
 				.AddSingleton<IPipeBuilderFactory>(provider => new PipeBuilderFactory(provider));
+
+			var clientBuilder = new ClientBuilder();
+			options?.Plugins?.Invoke(clientBuilder);
+			clientBuilder.DependencyInjection?.Invoke(register);
+			register.AddSingleton(clientBuilder.PipeBuilderAction);
 
 			options?.DependencyInjection?.Invoke(register);
 			return register;

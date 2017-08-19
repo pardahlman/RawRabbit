@@ -10,6 +10,7 @@ namespace RawRabbit.Pipe.Middleware
 	public class MessageDeserializationOptions
 	{
 		public Func<IPipeContext, Type> BodyTypeFunc { get; set; }
+		public Func<IPipeContext, string> BodyContentTypeFunc { get; set; }
 		public Func<IPipeContext, byte[]> BodyFunc { get; set; }
 		public Action<IPipeContext, object> PersistAction { get; set; }
 	}
@@ -19,6 +20,7 @@ namespace RawRabbit.Pipe.Middleware
 		protected readonly ISerializer Serializer;
 		protected Func<IPipeContext, Type> MessageTypeFunc;
 		protected Func<IPipeContext, byte[]> BodyBytesFunc;
+		protected Func<IPipeContext, string> BodyContentTypeFunc { get; set; }
 		protected Action<IPipeContext, object> PersistAction;
 		private readonly ILog _logger = LogProvider.For<BodyDeserializationMiddleware>();
 
@@ -28,23 +30,37 @@ namespace RawRabbit.Pipe.Middleware
 			MessageTypeFunc = options?.BodyTypeFunc ?? (context => context.GetMessageType());
 			BodyBytesFunc = options?.BodyFunc ?? (context =>context.GetDeliveryEventArgs()?.Body);
 			PersistAction = options?.PersistAction ?? ((context, msg) => context.Properties.TryAdd(PipeKey.Message, msg));
+			BodyContentTypeFunc = options?.BodyContentTypeFunc ?? (context => context.GetDeliveryEventArgs()?.BasicProperties.ContentType);
 		}
 
 		public override async Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
+			var msgContentType = GetMessageContentType(context);
+			if (!CanSerializeMessage(msgContentType))
+			{
+				throw new SerializationException($"Registered serializer supports {Serializer.ContentType}, recieved message uses {msgContentType}.");
+			}
 			var message = GetMessage(context);
 			SaveInContext(context, message);
 			await Next.InvokeAsync(context, token);
 		}
 
-		protected virtual object GetMessage(IPipeContext context)
+		protected virtual bool CanSerializeMessage(string msgContentType)
 		{
-			var serialized = GetSerializedMessage(context);
-			var messageType = GetMessageType(context);
-			return  Serializer.Deserialize(messageType, serialized);
+			if (string.IsNullOrEmpty(msgContentType))
+			{
+				_logger.Debug("Recieved message has no content type defined. Assuming it can be processed.");
+				return true;
+			}
+			return string.Equals(msgContentType, Serializer.ContentType, StringComparison.CurrentCultureIgnoreCase);
 		}
 
-		protected virtual string GetSerializedMessage(IPipeContext context)
+		protected virtual string GetMessageContentType(IPipeContext context)
+		{
+			return BodyContentTypeFunc?.Invoke(context);
+		}
+
+		protected virtual object GetMessage(IPipeContext context)
 		{
 			var bodyBytes = GetBodyBytes(context);
 			var messageType = GetMessageType(context);

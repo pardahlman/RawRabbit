@@ -15,12 +15,13 @@ namespace RawRabbit
 	{
 		public static readonly Action<IPipeBuilder> ConsumePipe = pipe => pipe
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.MessageRecieved))
-			.Use<BodyDeserializationMiddleware>(new MessageDeserializationOptions
-			{
-				BodyTypeFunc = context => context.GetRequestMessageType()
-			})
-			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.MessageDeserialized))
-			.Use<RespondExceptionMiddleware>(new RespondExceptionOptions { InnerPipe = p => p.Use<RespondInvokationMiddleware>() })
+			.Use<RespondExceptionMiddleware>(new RespondExceptionOptions { InnerPipe = p => p
+				.Use<BodyDeserializationMiddleware>(new MessageDeserializationOptions
+				{
+					BodyTypeFunc = context => context.GetRequestMessageType()
+				})
+				.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.MessageDeserialized))
+				.Use<RespondInvokationMiddleware>() })
 			.Use<ExplicitAckMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.HandlerInvoked))
 			.Use<BasicPropertiesMiddleware>(new BasicPropertiesOptions

@@ -19,6 +19,9 @@ namespace RawRabbit.Operations.MessageSequence.Trigger
 				.Replace<SubscriptionExceptionMiddleware, SubscriptionExceptionMiddleware>(args: new SubscriptionExceptionOptions
 				{
 					InnerPipe = inner => inner
+						.Use<BodyDeserializationMiddleware>()
+						.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.MessageDeserialized))
+						.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.MessageContextDeserialized))
 						.Use<ModelIdMiddleware>()
 						.Use<GlobalLockMiddleware>()
 						.Use<RetrieveStateMachineMiddleware>()

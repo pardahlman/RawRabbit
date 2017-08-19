@@ -27,7 +27,7 @@ namespace RawRabbit.Operations.Request.Middleware
 		protected Func<ExceptionInformation, IPipeContext, Task> HandlerFunc;
 		private readonly ILog _logger = LogProvider.For<ResponderExceptionMiddleware>();
 		protected Func<IPipeContext, Type> ResponseTypeFunc;
-		private Func<IPipeContext, BasicDeliverEventArgs> _deliveryArgFunc;
+		private readonly Func<IPipeContext, BasicDeliverEventArgs> _deliveryArgFunc;
 
 		public ResponderExceptionMiddleware(ISerializer serializer, ResponderExceptionOptions options = null)
 		{
