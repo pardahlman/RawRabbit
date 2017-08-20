@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>Write RawRabbit's logs with Log4Net</Description>
+    <AssemblyTitle>RawRabbit.Logging.Log4Net</AssemblyTitle>
+    <VersionPrefix>1.10.3</VersionPrefix>
+    <Authors>par.dahlman</Authors>
+    <TargetFramework>net451</TargetFramework>
+    <AssemblyName>RawRabbit.Logging.Log4Net</AssemblyName>
+    <PackageId>RawRabbit.Logging.Log4Net</PackageId>
+    <PackageTags>raw;rabbit;rawrabbit;rabbitmq;logger;log4net</PackageTags>
+    <PackageIconUrl>http://pardahlman.se/raw/icon.png</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/pardahlman/RawRabbit</PackageProjectUrl>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RawRabbit\RawRabbit.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="log4net" Version="2.0.5" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
+</Project>
