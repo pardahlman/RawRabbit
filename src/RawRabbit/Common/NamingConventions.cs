@@ -53,7 +53,7 @@ namespace RawRabbit.Common
 			DeadLetterExchangeNamingConvention = () => "default_dead_letter_exchange";
 			RetryQueueNamingConvention = () => $"retry_{Guid.NewGuid()}";
 			SubscriberQueueSuffix = GetSubscriberQueueSuffix;
-			RetryLaterExchangeConvention = span => $"rety_in_{span.TotalMilliseconds}_ms";
+			RetryLaterExchangeConvention = span => $"retry_in_{span.TotalMilliseconds}_ms";
 		}
 
 		private string GetSubscriberQueueSuffix(Type messageType)
