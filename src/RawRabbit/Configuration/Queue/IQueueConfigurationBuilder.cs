@@ -3,6 +3,7 @@
 	public interface IQueueConfigurationBuilder
 	{
 		IQueueConfigurationBuilder WithName(string queueName);
+		IQueueConfigurationBuilder WithNameSuffix(string suffix);
 		IQueueConfigurationBuilder WithAutoDelete(bool autoDelete = true);
 		IQueueConfigurationBuilder WithDurability(bool durable = true);
 		IQueueConfigurationBuilder WithExclusivity(bool exclusive = true);
