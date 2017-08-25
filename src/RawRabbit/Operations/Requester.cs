@@ -70,7 +70,7 @@ namespace RawRabbit.Operations
 				return SendRequestAsync<TRequest, TResponse>(message, globalMessageId, cfg, _currentConsumer.Consumer);
 			}
 
-			return GetOrCreateConsumerAsync(cfg)
+			return GetOrCreateConsumerAsync<TResponse>(cfg)
 				.ContinueWith(tConsumer => SendRequestAsync<TRequest, TResponse>(message, globalMessageId, cfg, tConsumer.Result))
 				.Unwrap();
 		}
@@ -118,7 +118,7 @@ namespace RawRabbit.Operations
 			});
 		}
 
-		private Task<IRawConsumer> GetOrCreateConsumerAsync(IConsumerConfiguration cfg)
+		private Task<IRawConsumer> GetOrCreateConsumerAsync<TResponse>(IConsumerConfiguration cfg)
 		{
 			return _channelFactory
 				.GetChannelAsync()
@@ -128,7 +128,7 @@ namespace RawRabbit.Operations
 						if (_consumerCompletionSources.TryAdd(tChannel.Result, consumerCs))
 						{
 							var newConsumer = _consumerFactory.CreateConsumer(cfg, tChannel.Result);
-							WireUpConsumer(newConsumer, cfg);
+							WireUpConsumer<TResponse>(newConsumer, cfg);
 							consumerCs.ConsumerQueues.TryAdd(
 								key: cfg.Queue.FullQueueName,
 								value: newConsumer.Model.BasicConsume(cfg.Queue.FullQueueName, cfg.NoAck, newConsumer)
@@ -164,7 +164,7 @@ namespace RawRabbit.Operations
 				.Unwrap();
 		}
 
-		private void WireUpConsumer(IRawConsumer consumer, IConsumerConfiguration cfg)
+		private void WireUpConsumer<TResponse>(IRawConsumer consumer, IConsumerConfiguration cfg)
 		{
 			consumer.OnMessageAsync = (o, args) =>
 			{
@@ -181,7 +181,7 @@ namespace RawRabbit.Operations
 						{
 							return _completed;
 						}
-						var response = _serializer.Deserialize(args);
+						var response = _serializer.Deserialize<TResponse>(args.Body);
 						responseTcs.TrySetResult(response);
 						return _completed;
 					}
