@@ -1,3 +1,11 @@
+# 2.0.0-beta9
+
+ - [#256](https://github.com/pardahlman/RawRabbit/issues/256) - Beta8: Failed message handling
+ - [#255](https://github.com/pardahlman/RawRabbit/issues/255) - Beta8: Serialization type
+ 
+Commits: 48ffb29dc1...ccf57abc43
+
+
 # 2.0.0-beta8
 
  - [#254](https://github.com/pardahlman/RawRabbit/issues/254) - Upgrade RabbitMQ.Client to 5
