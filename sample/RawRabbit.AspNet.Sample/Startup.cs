@@ -2,12 +2,16 @@
 using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using RawRabbit.AspNet.Sample.Controllers;
 using RawRabbit.Configuration;
 using RawRabbit.DependencyInjection.ServiceCollection;
 using RawRabbit.Enrichers.GlobalExecutionId;
+using RawRabbit.Enrichers.HttpContext;
+using RawRabbit.Enrichers.MessageContext;
 using RawRabbit.Instantiation;
 using Serilog;
 using Serilog.Events;
@@ -40,6 +44,14 @@ namespace RawRabbit.AspNet.Sample
 						Plugins = p => p
 							.UseStateMachine()
 							.UseGlobalExecutionId()
+							.UseHttpContext()
+							.UseMessageContext(c =>
+							{
+								return new MessageContext
+								{
+									Source = c.GetHttpContext().Request.GetDisplayUrl()
+								};
+							})
 					})
 				.AddMvc();
 		}
