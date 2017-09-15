@@ -11,6 +11,7 @@ It is easy getting started!
    installation
    register-client
    configuration
+   modify-pre-defined-operations
    logging
 
 
