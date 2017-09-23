@@ -26,10 +26,10 @@ namespace RawRabbit
 								BodyTypeFunc = context => context.GetRequestMessageType()
 							})
 							.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.MessageDeserialized))
-							.Use<RespondInvokationMiddleware>(new HandlerInvokationOptions
+							.Use<HandlerInvokationMiddleware >(ResponseHandlerOptionFactory.Create(new HandlerInvokationOptions
 							{
 								HandlerArgsFunc = context => new[] { context.GetMessage(), context.GetMessageContext() }
-							})
+							}))
 					})
 					.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
 					{

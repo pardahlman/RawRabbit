@@ -21,7 +21,7 @@ namespace RawRabbit
 					BodyTypeFunc = context => context.GetRequestMessageType()
 				})
 				.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.MessageDeserialized))
-				.Use<RespondInvokationMiddleware>() })
+				.Use<HandlerInvokationMiddleware>(ResponseHandlerOptionFactory.Create()) })
 			.Use<ExplicitAckMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.HandlerInvoked))
 			.Use<BasicPropertiesMiddleware>(new BasicPropertiesOptions
