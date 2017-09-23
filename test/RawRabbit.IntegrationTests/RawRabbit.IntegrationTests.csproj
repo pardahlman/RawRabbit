@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\RawRabbit.Enrichers.Protobuf\RawRabbit.Enrichers.Protobuf.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.Enrichers.Protobuf\RawRabbit.Enrichers.Protobuf.csproj" />
     <ProjectReference Include="..\..\src\RawRabbit.Operations.Tools\RawRabbit.Operations.Tools.csproj" />
     <ProjectReference Include="..\..\src\RawRabbit\RawRabbit.csproj" />
     <ProjectReference Include="..\..\src\RawRabbit.Compatibility.Legacy\RawRabbit.Compatibility.Legacy.csproj" />
