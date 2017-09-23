@@ -16,7 +16,7 @@ namespace RawRabbit
 			.Use<SubscriptionExceptionMiddleware>(new SubscriptionExceptionOptions { InnerPipe = p => p
 				.Use<BodyDeserializationMiddleware>()
 				.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.MessageDeserialized))
-				.Use<SubscribeInvokationMiddleware>()})
+				.Use<SubscribeInvocationMiddleware>()})
 			.Use<ExplicitAckMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.HandlerInvoked));
 

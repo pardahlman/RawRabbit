@@ -25,7 +25,7 @@ namespace RawRabbit.Operations.MessageSequence.Trigger
 						.Use<ModelIdMiddleware>()
 						.Use<GlobalLockMiddleware>()
 						.Use<RetrieveStateMachineMiddleware>()
-						.Use<HandlerInvokationMiddleware>(new HandlerInvokationOptions
+						.Use<HandlerInvocationMiddleware>(new HandlerInvocationOptions
 						{
 							HandlerArgsFunc = context => context.GetLazyHandlerArgs()
 						})

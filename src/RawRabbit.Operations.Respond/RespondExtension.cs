@@ -21,7 +21,7 @@ namespace RawRabbit
 					BodyTypeFunc = context => context.GetRequestMessageType()
 				})
 				.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.MessageDeserialized))
-				.Use<HandlerInvokationMiddleware>(ResponseHandlerOptionFactory.Create()) })
+				.Use<HandlerInvocationMiddleware>(ResponseHandlerOptionFactory.Create()) })
 			.Use<ExplicitAckMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.HandlerInvoked))
 			.Use<BasicPropertiesMiddleware>(new BasicPropertiesOptions
@@ -105,7 +105,7 @@ namespace RawRabbit
 								return tResponse.Result.AsUntyped();
 							}, ct);
 
-						ctx.Properties.Add(RespondKey.IncommingMessageType, typeof(TRequest));
+						ctx.Properties.Add(RespondKey.IncomingMessageType, typeof(TRequest));
 						ctx.Properties.Add(RespondKey.OutgoingMessageType, typeof(TResponse));
 						ctx.Properties.Add(PipeKey.MessageHandler, genericHandler);
 						context?.Invoke(ctx);

@@ -28,7 +28,7 @@ namespace RawRabbit
 						.Use<ConsumerMessageHandlerMiddleware>(new ConsumeOptions
 						{
 							Pipe = p => p
-								.Use<HandlerInvokationMiddleware>(new HandlerInvokationOptions
+								.Use<HandlerInvocationMiddleware>(new HandlerInvocationOptions
 								{
 									HandlerArgsFunc = ctx => new object[] { ctx.GetDeliveryEventArgs()},
 								})

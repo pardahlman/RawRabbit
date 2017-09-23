@@ -8,9 +8,9 @@ namespace RawRabbit.Operations.Respond.Middleware
 {
 	public class ResponseHandlerOptionFactory
 	{
-		public static HandlerInvokationOptions Create(HandlerInvokationOptions options = null)
+		public static HandlerInvocationOptions Create(HandlerInvocationOptions options = null)
 		{
-			return new HandlerInvokationOptions
+			return new HandlerInvocationOptions
 			{
 				HandlerArgsFunc = options?.HandlerArgsFunc ?? (context => new[] {context.GetMessage()}),
 				PostInvokeAction = options?.PostInvokeAction ?? ((context, task) =>
