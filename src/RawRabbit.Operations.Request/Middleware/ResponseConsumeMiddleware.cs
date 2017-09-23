@@ -17,6 +17,7 @@ namespace RawRabbit.Operations.Request.Middleware
 		public Action<IPipeBuilder> ResponseRecieved { get; set; }
 		public Func<IPipeContext, ConsumerConfiguration> ResponseConfigFunc { get; set; }
 		public Func<IPipeContext, string> CorrelationIdFunc { get; set; }
+		public Func<IPipeContext, bool> UseDedicatedConsumer { get; set; }
 	}
 
 	public class ResponseConsumeMiddleware : Pipe.Middleware.Middleware
@@ -27,11 +28,13 @@ namespace RawRabbit.Operations.Request.Middleware
 		protected readonly ConcurrentDictionary<IBasicConsumer, ConcurrentDictionary<string, TaskCompletionSource<BasicDeliverEventArgs>>> AllResponses;
 		protected Func<IPipeContext, ConsumerConfiguration> ResponseConfigFunc;
 		protected Func<IPipeContext, string> CorrelationidFunc;
+		protected Func<IPipeContext, bool> DedicatedConsumerFunc;
 
 		public ResponseConsumeMiddleware(IConsumerFactory consumerFactory, IPipeBuilderFactory factory, ResponseConsumerOptions options)
 		{
 			ResponseConfigFunc = options?.ResponseConfigFunc ?? (context => context.GetResponseConfiguration());
 			CorrelationidFunc = options?.CorrelationIdFunc ?? (context => context.GetBasicProperties()?.CorrelationId);
+			DedicatedConsumerFunc = options?.UseDedicatedConsumer ?? (context => context.GetDedicatedResponseConsumer());
 			ConsumerFactory = consumerFactory;
 			ResponsePipe = factory.Create(options.ResponseRecieved);
 			AllResponses = new ConcurrentDictionary<IBasicConsumer, ConcurrentDictionary<string, TaskCompletionSource<BasicDeliverEventArgs>>>();
@@ -41,9 +44,19 @@ namespace RawRabbit.Operations.Request.Middleware
 		{
 			var respondCfg = GetResponseConfig(context);
 			var correlationId = GetCorrelationid(context);
+			var dedicatedConsumer = GetDedicatedConsumer(context);
 			var responseTsc = new TaskCompletionSource<BasicDeliverEventArgs>();
 
-			var consumer = await ConsumerFactory.GetConfiguredConsumerAsync(respondCfg.Consume, token: token);
+			IBasicConsumer consumer;
+			if (dedicatedConsumer)
+			{
+				consumer = await ConsumerFactory.CreateConsumerAsync(token: token);
+				ConsumerFactory.ConfigureConsume(consumer, respondCfg.Consume);
+			}
+			else
+			{
+				consumer = await ConsumerFactory.GetConfiguredConsumerAsync(respondCfg.Consume, token: token);
+			}
 			var responses = AllResponses.GetOrAdd(consumer, c =>
 				{
 					var pendings = new ConcurrentDictionary<string, TaskCompletionSource<BasicDeliverEventArgs>>();
@@ -57,13 +70,18 @@ namespace RawRabbit.Operations.Request.Middleware
 					return pendings;
 				}
 			);
-
 			context.Properties.Add(PipeKey.Consumer, consumer);
 			responses.TryAdd(correlationId, responseTsc);
 			await Next.InvokeAsync(context, token);
 			token.Register(() => responseTsc.TrySetCanceled());
 			await responseTsc.Task;
 			_logger.Info("Message '{messageId}' for correlatrion '{correlationId}' recieved.", responseTsc.Task.Result.BasicProperties.MessageId, correlationId);
+			if (dedicatedConsumer)
+			{
+				_logger.Info("Disposing dedicated consumer on queue {queueName}", respondCfg.Consume.QueueName);
+				consumer.Model.Dispose();
+				AllResponses.TryRemove(consumer, out _);
+			}
 			context.Properties.Add(PipeKey.DeliveryEventArgs, responseTsc.Task.Result);
 			try
 			{
@@ -84,6 +102,34 @@ namespace RawRabbit.Operations.Request.Middleware
 		protected virtual string GetCorrelationid(IPipeContext context)
 		{
 			return CorrelationidFunc?.Invoke(context);
+		}
+
+		protected virtual bool GetDedicatedConsumer(IPipeContext context)
+		{
+			return DedicatedConsumerFunc?.Invoke(context) ?? false;
+		}
+	}
+
+	public static class ResposeConsumerMiddlewareExtensions
+	{
+		private const string DedicatedResponseConsumer = "Request:DedicatedResponseConsumer";
+
+		/// <summary>
+		/// Use with caution!
+		/// 
+		/// Instruct the Request operation to create a unique consumer for
+		/// the response queue. The consumer will be cancelled once the
+		/// response message is recieved.
+		/// </summary>
+		public static IPipeContext UseDedicatedResponseConsumer(this IPipeContext context, bool useDedicated = true)
+		{
+			context.Properties.AddOrReplace(DedicatedResponseConsumer, useDedicated);
+			return context;
+		}
+
+		public static bool GetDedicatedResponseConsumer(this IPipeContext context)
+		{
+			return context.Get(DedicatedResponseConsumer, false);
 		}
 	}
 }

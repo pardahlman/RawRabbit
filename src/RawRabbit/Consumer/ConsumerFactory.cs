@@ -48,6 +48,11 @@ namespace RawRabbit.Consumer
 					return consumer;
 				});
 			});
+			if (lazyConsumerTask.Value.IsCompleted && lazyConsumerTask.Value.Result.Model.IsClosed)
+			{
+				_consumerCache.TryRemove(consumerKey, out _);
+				return GetConsumerAsync(cfg, channel, token);
+			}
 			return lazyConsumerTask.Value;
 		}
 
