@@ -25,7 +25,7 @@ namespace RawRabbit
 					.Use<BodyDeserializationMiddleware>()
 					.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.MessageDeserialized))
 					.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.MessageContextDeserialized))
-					.Use<HandlerInvokationMiddleware>(new HandlerInvokationOptions
+					.Use<HandlerInvocationMiddleware>(new HandlerInvocationOptions
 					{
 						HandlerArgsFunc = context => new[]
 						{

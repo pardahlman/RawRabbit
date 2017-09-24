@@ -10,6 +10,6 @@
 		public const string QueueBind = "QueueBind";
 		public const string ExchangeDeclare = "ExchangeDeclare";
 		public const string BasicPublish = "BasicPublish";
-		public const string HandlerInvokation = "HandlerInvokation";
+		public const string HandlerInvocation = "HandlerInvocation";
 	}
 }

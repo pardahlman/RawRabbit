@@ -23,7 +23,7 @@ namespace RawRabbit
 				.Replace<BasicPublishMiddleware, Enrichers.Polly.Middleware.BasicPublishMiddleware>(argsFunc: oldArgs => oldArgs)
 				.Replace<ExplicitAckMiddleware, Enrichers.Polly.Middleware.ExplicitAckMiddleware>(argsFunc: oldArgs => oldArgs)
 				.Replace<TransientChannelMiddleware, Enrichers.Polly.Middleware.TransientChannelMiddleware>(argsFunc: oldArgs => oldArgs)
-				.Replace<HandlerInvokationMiddleware, Enrichers.Polly.Middleware.HandlerInvokationMiddleware>(argsFunc: oldArgs => oldArgs)
+				.Replace<HandlerInvocationMiddleware, Enrichers.Polly.Middleware.HandlerInvocationMiddleware>(argsFunc: oldArgs => oldArgs)
 			);
 			return builder;
 		}

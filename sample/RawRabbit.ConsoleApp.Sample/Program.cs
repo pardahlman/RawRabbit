@@ -39,7 +39,7 @@ namespace RawRabbit.ConsoleApp.Sample
 					.UseMessageContext<MessageContext>()
 			});
 
-			await _client.SubscribeAsync<ValuesRequested, MessageContext>((requested, ctx) => ServeValuesAsync(requested, ctx));
+			await _client.SubscribeAsync<ValuesRequested, MessageContext>((requested, ctx) => ServerValuesAsync(requested, ctx));
 			await _client.RespondAsync<ValueRequest, ValueResponse>(request => SendValuesThoughRpcAsync(request));
 		}
 
@@ -51,7 +51,7 @@ namespace RawRabbit.ConsoleApp.Sample
 			});
 		}
 
-		private static Task ServeValuesAsync(ValuesRequested message, MessageContext ctx)
+		private static Task ServerValuesAsync(ValuesRequested message, MessageContext ctx)
 		{
 			var values = new List<string>();
 			for (var i = 0; i < message.NumberOfValues; i++)

@@ -3,9 +3,9 @@ using RawRabbit.Pipe.Middleware;
 
 namespace RawRabbit.Operations.Subscribe.Middleware
 {
-	public class SubscribeInvokationMiddleware : HandlerInvokationMiddleware
+	public class SubscribeInvocationMiddleware : HandlerInvocationMiddleware
 	{
-		public SubscribeInvokationMiddleware() : base(new HandlerInvokationOptions
+		public SubscribeInvocationMiddleware() : base(new HandlerInvocationOptions
 		{
 			HandlerArgsFunc = context => new []{ context.GetMessage()}
 		})

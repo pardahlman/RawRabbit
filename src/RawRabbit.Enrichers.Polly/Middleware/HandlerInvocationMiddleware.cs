@@ -6,14 +6,14 @@ using RawRabbit.Pipe.Middleware;
 
 namespace RawRabbit.Enrichers.Polly.Middleware
 {
-	public class HandlerInvokationMiddleware : Pipe.Middleware.HandlerInvokationMiddleware
+	public class HandlerInvocationMiddleware : Pipe.Middleware.HandlerInvocationMiddleware
 	{
-		public HandlerInvokationMiddleware(HandlerInvokationOptions options = null)
+		public HandlerInvocationMiddleware(HandlerInvocationOptions options = null)
 			: base(options) { }
 
 		protected override Task InvokeMessageHandler(IPipeContext context, CancellationToken token)
 		{
-			var policy = context.GetPolicy(PolicyKeys.HandlerInvokation);
+			var policy = context.GetPolicy(PolicyKeys.HandlerInvocation);
 			return policy.ExecuteAsync(
 				action: ct => base.InvokeMessageHandler(context, ct),
 				cancellationToken: token,

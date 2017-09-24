@@ -20,7 +20,7 @@ namespace RawRabbit.Operations.Respond.Core
 
 		public static Type GetRequestMessageType(this IPipeContext context)
 		{
-			return context.Get<Type>(RespondKey.IncommingMessageType);
+			return context.Get<Type>(RespondKey.IncomingMessageType);
 		}
 
 		public static Func<object, Task<object>> GetResponseMessageHandler(this IPipeContext context)
