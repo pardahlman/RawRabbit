@@ -4,7 +4,7 @@
     <Description>Take advantage of vNext for your RawRabbit setup. Extension for IServiceCollection, IConfiguration support and much more!</Description>
     <VersionPrefix>1.10.3</VersionPrefix>
     <Authors>pardahlman;enrique-avalon</Authors>
-    <TargetFrameworks>netstandard1.5;net451</TargetFrameworks>
+    <TargetFrameworks>netstandard1.5;net451;netstandard2.0</TargetFrameworks>
     <AssemblyName>RawRabbit.vNext</AssemblyName>
     <PackageId>RawRabbit.vNext</PackageId>
     <PackageTags>rabbitmq;raw;rawrabbit;attributes</PackageTags>
@@ -20,6 +20,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="2.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' != 'netstandard2.0'  ">
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="1.0.2" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="1.0.2" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="1.0.2" />

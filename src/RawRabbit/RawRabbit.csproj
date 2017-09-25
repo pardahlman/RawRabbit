@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <PackageReference Include="RabbitMQ.Client" Version="4.1.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">
