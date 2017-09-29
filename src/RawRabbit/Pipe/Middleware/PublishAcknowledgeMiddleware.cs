@@ -70,6 +70,10 @@ namespace RawRabbit.Pipe.Middleware
 				c => c.NextPublishSeqNo,
 				(c, seq) =>
 				{
+					if (c.NextPublishSeqNo == 1 && seq != 2)
+					{
+						return c.NextPublishSeqNo;
+					}
 					seq++;
 					return seq > c.NextPublishSeqNo
 						? seq
