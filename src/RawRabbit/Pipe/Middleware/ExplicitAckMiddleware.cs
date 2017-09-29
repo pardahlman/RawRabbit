@@ -74,7 +74,24 @@ namespace RawRabbit.Pipe.Middleware
 				throw new NullReferenceException("Unable to retrieve channel for delivered message.");
 			}
 
-			if (channel.IsClosed)
+			if (!channel.IsOpen)
+			{
+				if (channel is IRecoverable recoverable)
+				{
+					var recoverTsc = new TaskCompletionSource<bool>();
+
+					EventHandler<EventArgs> OnRecover = null;
+					OnRecover = (sender, args) =>
+					{
+						recoverTsc.TrySetResult(true);
+						recoverable.Recovery -= OnRecover;
+					};
+					recoverable.Recovery += OnRecover;
+					await recoverTsc.Task;
+				}
+			}
+
+			if (channel.NextPublishSeqNo < deliveryArgs.DeliveryTag)
 			{
 				return new Ack();
 			}
