@@ -1,3 +1,14 @@
+# 1.10.4
+
+ - [#273](https://github.com/pardahlman/RawRabbit/pull/273) - Added .Net Standard 2.0 target framework for vNext contributed by Manuel Cabral ([Manny651](https://github.com/Manny651))
+ - [#269](https://github.com/pardahlman/RawRabbit/pull/269) - Some typos contributed by ([cortex93](https://github.com/cortex93))
+ - [#257](https://github.com/pardahlman/RawRabbit/issues/257) - Error in BusClientFactory.CreateDefault() on net core 2.0
+ - [#233](https://github.com/pardahlman/RawRabbit/pull/233) - fix typo in NamingConventions.RetryLaterExchangeConvention contributed by Bohdan Sachkovskyi ([sachokFoX](https://github.com/sachokFoX))
+ - [#231](https://github.com/pardahlman/RawRabbit/pull/231) - Fix typo in spelling `Dependency` contributed by Serhii Almazov ([almazik](https://github.com/almazik))
+
+Commits: 36ae21d98a...4b1079f965
+
+
 # 1.10.3
 
  - [#163](https://github.com/pardahlman/RawRabbit/pull/163) - Added queue assume initialized and tests contributed by Cemre Mengu ([cemremengu](https://github.com/cemremengu))
@@ -16,6 +27,7 @@
 
 Commits: 4b6e57e351...52573f4164
 
+
 # 1.10.2
 
  - [#117](https://github.com/pardahlman/RawRabbit/issues/117) - Propegate Topology Exception for Consumers
@@ -23,6 +35,7 @@ Commits: 4b6e57e351...52573f4164
  - [#111](https://github.com/pardahlman/RawRabbit/issues/111) - Guard against OperationInteruptedException in TopologyProvider
 
 Commits: af0bda979e...331e174a02
+
 
 # 1.10.1
 
