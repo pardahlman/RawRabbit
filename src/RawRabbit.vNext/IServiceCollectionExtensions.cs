@@ -77,7 +77,7 @@ namespace RawRabbit.vNext
 				.AddTransient<IMessageSerializer, JsonMessageSerializer>()
 				.AddTransient(c => new JsonSerializer
 				{
-					TypeNameAssemblyFormat = FormatterAssemblyStyle.Simple,
+					TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
 					Formatting = Formatting.None,
 					CheckAdditionalContent = true,
 					ContractResolver = new CamelCasePropertyNamesContractResolver(),
