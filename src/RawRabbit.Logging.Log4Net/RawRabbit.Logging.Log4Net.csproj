@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>Write RawRabbit's logs with Log4Net</Description>
     <AssemblyTitle>RawRabbit.Logging.Log4Net</AssemblyTitle>
-    <VersionPrefix>1.10.3</VersionPrefix>
+    <VersionPrefix>1.10.4</VersionPrefix>
     <Authors>par.dahlman</Authors>
     <TargetFramework>net451</TargetFramework>
     <AssemblyName>RawRabbit.Logging.Log4Net</AssemblyName>

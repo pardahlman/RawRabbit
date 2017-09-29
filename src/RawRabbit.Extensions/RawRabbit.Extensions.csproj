@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>Make the most of RawRabbit with these extensions</Description>
     <AssemblyTitle>RawRabbit.Extensions</AssemblyTitle>
-    <VersionPrefix>1.10.3</VersionPrefix>
+    <VersionPrefix>1.10.4</VersionPrefix>
     <Authors>par.dahlman</Authors>
     <TargetFrameworks>netstandard1.5;net451</TargetFrameworks>
     <AssemblyName>RawRabbit.Extensions</AssemblyName>

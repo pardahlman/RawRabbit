@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>Write RawRabbit's logs with NLog</Description>
     <AssemblyTitle>RawRabbit.Logging.NLog</AssemblyTitle>
-    <VersionPrefix>1.10.3</VersionPrefix>
+    <VersionPrefix>1.10.4</VersionPrefix>
     <Authors>par.dahlman</Authors>
     <TargetFrameworks>netstandard1.5;net451</TargetFrameworks>
     <AssemblyName>RawRabbit.Logging.NLog</AssemblyName>

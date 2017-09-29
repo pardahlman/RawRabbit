@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>Configure messages and topology with attributes.</Description>
     <AssemblyTitle>RawRabbit.Attributes</AssemblyTitle>
-    <VersionPrefix>1.10.3</VersionPrefix>
+    <VersionPrefix>1.10.4</VersionPrefix>
     <Authors>pardahlman</Authors>
     <TargetFrameworks>netstandard1.5;net451</TargetFrameworks>
     <AssemblyName>RawRabbit.Attributes</AssemblyName>

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Take advantage of vNext for your RawRabbit setup. Extension for IServiceCollection, IConfiguration support and much more!</Description>
-    <VersionPrefix>1.10.3</VersionPrefix>
+    <VersionPrefix>1.10.4</VersionPrefix>
     <Authors>pardahlman;enrique-avalon</Authors>
     <TargetFrameworks>netstandard1.5;net451;netstandard2.0</TargetFrameworks>
     <AssemblyName>RawRabbit.vNext</AssemblyName>
