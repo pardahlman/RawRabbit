@@ -27,12 +27,24 @@ namespace RawRabbit.AspNet.Sample.Controllers
 		[Route("api/values")]
 		public async Task<IActionResult> GetAsync()
 		{
+			var response = await _busClient.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage
+			{
+				Id = Guid.NewGuid()
+			});
+
+			await _busClient.PublishAsync(new TestMessage
+			{
+				Id = Guid.NewGuid()
+			});
+
+			_logger.LogInformation($"Response Message Id: '{response.Id}'.");
+
 			_logger.LogDebug("Recieved Value Request.");
 			var valueSequence = _busClient.ExecuteSequence(s => s
 				.PublishAsync(new ValuesRequested
-					{
-						NumberOfValues = _random.Next(1,10)
-					})
+				{
+					NumberOfValues = _random.Next(1, 10)
+				})
 				.When<ValueCreationFailed, MessageContext>(
 					(failed, context) =>
 					{
@@ -60,7 +72,7 @@ namespace RawRabbit.AspNet.Sample.Controllers
 		public async Task<string> GetAsync(int id)
 		{
 			_logger.LogInformation("Requesting Value with id {valueId}", id);
-			var response = await _busClient.RequestAsync<ValueRequest, ValueResponse>(new ValueRequest {Value = id});
+			var response = await _busClient.RequestAsync<ValueRequest, ValueResponse>(new ValueRequest { Value = id });
 			return response.Value;
 		}
 	}
