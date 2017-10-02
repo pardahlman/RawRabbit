@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>Publish messages with Message Context and witrh Message Context Forwarding.</Description>
+    <AssemblyTitle>RawRabbit.Enrichers.MessageContext</AssemblyTitle>
+    <VersionPrefix>2.0.0</VersionPrefix>
+    <Authors>pardahlman</Authors>
+    <TargetFrameworks>netstandard1.5;net451</TargetFrameworks>
+    <AssemblyName>RawRabbit.Enrichers.MessageContext</AssemblyName>
+    <PackageId>RawRabbit.Enrichers.MessageContext</PackageId>
+    <PackageTags>rabbitmq;rawrabbit;messagecontext</PackageTags>
+    <PackageIconUrl>http://pardahlman.se/raw/icon.png</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/pardahlman/RawRabbit</PackageProjectUrl>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard1.5|AnyCPU'">
+    <DefineConstants>TRACE;DEBUG;NETSTANDARD1_5;LIBLOG_PORTABLE</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RawRabbit\RawRabbit.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
+</Project>

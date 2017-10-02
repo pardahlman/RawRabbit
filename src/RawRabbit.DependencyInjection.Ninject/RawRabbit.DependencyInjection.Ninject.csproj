@@ -1,14 +1,14 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <Description>Wire up RawRabbit with Ninject!</Description>
     <AssemblyTitle>RawRabbit.DependencyInjection.Ninject</AssemblyTitle>
-    <VersionPrefix>1.10.4</VersionPrefix>
+    <VersionPrefix>2.0.0</VersionPrefix>
     <Authors>par.dahlman;Joshua Barron</Authors>
     <TargetFrameworks>netstandard1.5;net451</TargetFrameworks>
     <AssemblyName>RawRabbit.DependencyInjection.Ninject</AssemblyName>
     <PackageId>RawRabbit.DependencyInjection.Ninject</PackageId>
-    <PackageTags>rabbitmq;raw;rawrabbit;ninject</PackageTags>
+    <PackageTags>rabbitmq;rawrabbit;ninject;ioc</PackageTags>
     <PackageIconUrl>http://pardahlman.se/raw/icon.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/pardahlman/RawRabbit</PackageProjectUrl>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
@@ -17,6 +17,10 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard1.5|AnyCPU'">
+    <DefineConstants>TRACE;DEBUG;NETSTANDARD1_5;LIBLOG_PORTABLE</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

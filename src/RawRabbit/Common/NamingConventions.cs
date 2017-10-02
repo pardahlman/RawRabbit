@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -13,11 +11,10 @@ namespace RawRabbit.Common
 	{
 		Func<Type, string> ExchangeNamingConvention { get; set; }
 		Func<Type, string> QueueNamingConvention { get; set; }
+		Func<Type, string> RoutingKeyConvention { get; set; }
 		Func<string> ErrorExchangeNamingConvention { get; set; }
-		Func<string> ErrorQueueNamingConvention { get; set; }
-		Func<string> DeadLetterExchangeNamingConvention { get; set; }
 		Func<TimeSpan,string> RetryLaterExchangeConvention { get; set; }
-		Func<string> RetryQueueNamingConvention { get; set; }
+		Func<string, TimeSpan,string> RetryLaterQueueNameConvetion { get; set; }
 		Func<Type, string> SubscriberQueueSuffix { get; set; }
 	}
 
@@ -33,12 +30,10 @@ namespace RawRabbit.Common
 
 		public virtual Func<Type, string> ExchangeNamingConvention { get; set; }
 		public virtual Func<Type, string> QueueNamingConvention { get; set; }
-		public virtual Func<Type, Type, string> RpcExchangeNamingConvention { get; set; }
+		public virtual Func<Type, string> RoutingKeyConvention { get; set; }
 		public virtual Func<string> ErrorExchangeNamingConvention { get; set; }
-		public virtual Func<string> ErrorQueueNamingConvention { get; set; }
-		public virtual Func<string> DeadLetterExchangeNamingConvention { get; set; }
 		public virtual Func<TimeSpan, string> RetryLaterExchangeConvention { get; set; }
-		public virtual Func<string> RetryQueueNamingConvention { get; set; }
+		public virtual Func<string, TimeSpan, string> RetryLaterQueueNameConvetion { get; set; }
 		public virtual Func<Type, string> SubscriberQueueSuffix { get; set; }
 
 		public NamingConventions()
@@ -48,12 +43,11 @@ namespace RawRabbit.Common
 
 			ExchangeNamingConvention = type => type?.Namespace?.ToLower() ?? string.Empty;
 			QueueNamingConvention = type => CreateShortAfqn(type);
-			ErrorQueueNamingConvention = () => "default_error_queue";
+			RoutingKeyConvention = type => CreateShortAfqn(type);
 			ErrorExchangeNamingConvention = () => "default_error_exchange";
-			DeadLetterExchangeNamingConvention = () => "default_dead_letter_exchange";
-			RetryQueueNamingConvention = () => $"retry_{Guid.NewGuid()}";
 			SubscriberQueueSuffix = GetSubscriberQueueSuffix;
-			RetryLaterExchangeConvention = span => $"retry_in_{span.TotalMilliseconds}_ms";
+			RetryLaterExchangeConvention = span => "default_retry_later_exchange";
+			RetryLaterQueueNameConvetion = (exchange, span) => $"retry_for_{exchange.Replace(".","_")}_in_{span.TotalMilliseconds}_ms";
 		}
 
 		private string GetSubscriberQueueSuffix(Type messageType)

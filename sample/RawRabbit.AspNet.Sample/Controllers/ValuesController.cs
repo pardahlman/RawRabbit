@@ -1,33 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using RawRabbit.Extensions.MessageSequence;
+using RawRabbit.Enrichers.MessageContext.Context;
 using RawRabbit.Messages.Sample;
-using Serilog;
-using ILogger = Microsoft.Extensions.Logging.ILogger;
+using RawRabbit.Operations.MessageSequence;
 
 namespace RawRabbit.AspNet.Sample.Controllers
 {
-	using IBusClient = Extensions.Client.IBusClient;
-
 	public class ValuesController : Controller
 	{
 		private readonly IBusClient _busClient;
 		private readonly Random _random;
 		private readonly ILogger<ValuesController> _logger;
 
-		public ValuesController(IBusClient busClient, ILoggerFactory loggerFactory)
+		public ValuesController(IBusClient legacyBusClient, ILoggerFactory loggerFactory)
 		{
-			_busClient = busClient;
+			_busClient = legacyBusClient;
 			_logger = loggerFactory.CreateLogger<ValuesController>();
 			_random = new Random();
 		}
 
 		[HttpGet]
 		[Route("api/values")]
-		public Task<List<string>> GetAsync()
+		public async Task<IActionResult> GetAsync()
 		{
 			_logger.LogDebug("Recieved Value Request.");
 			var valueSequence = _busClient.ExecuteSequence(s => s
@@ -35,7 +33,7 @@ namespace RawRabbit.AspNet.Sample.Controllers
 					{
 						NumberOfValues = _random.Next(1,10)
 					})
-				.When<ValueCreationFailed>(
+				.When<ValueCreationFailed, MessageContext>(
 					(failed, context) =>
 					{
 						_logger.LogWarning("Unable to create Values. Exception: {0}", failed.Exception);
@@ -44,25 +42,26 @@ namespace RawRabbit.AspNet.Sample.Controllers
 				.Complete<ValuesCalculated>()
 			);
 
-			return valueSequence.Task.ContinueWith(tResponse =>
+			try
 			{
-				if (tResponse.IsFaulted)
-					throw new Exception("No response recieved. Is the Console App started?");
-				
-				_logger.LogInformation("Successfully created {valueCount} values", tResponse.Result.Values.Count);
-				return valueSequence.Aborted
-					? new List<string>()
-					: tResponse.Result.Values;
-			});
+				await valueSequence.Task;
+			}
+			catch (Exception e)
+			{
+				return StatusCode((int)HttpStatusCode.InternalServerError, $"No response recieved. Is the Console App started? \n\nException: {e}");
+			}
+
+			_logger.LogInformation("Successfully created {valueCount} values", valueSequence.Task.Result.Values.Count);
+
+			return Ok(valueSequence.Task.Result.Values);
 		}
 
-		[HttpGet("{id}")]
-		public Task<string> GetAsync(int id)
+		[HttpGet("api/values/{id}")]
+		public async Task<string> GetAsync(int id)
 		{
 			_logger.LogInformation("Requesting Value with id {valueId}", id);
-			return _busClient
-				.RequestAsync<ValueRequest, ValueResponse>(new ValueRequest {Value = id})
-				.ContinueWith(tResponse => tResponse.Result.Value);
+			var response = await _busClient.RequestAsync<ValueRequest, ValueResponse>(new ValueRequest {Value = id});
+			return response.Value;
 		}
 	}
 }

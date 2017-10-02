@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp1.0</TargetFramework>
@@ -20,13 +20,19 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\RawRabbit\RawRabbit.csproj" />
-    <ProjectReference Include="..\..\src\RawRabbit.Extensions\RawRabbit.Extensions.csproj" />
-    <ProjectReference Include="..\..\src\RawRabbit.vNext\RawRabbit.vNext.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.Operations.Subscribe\RawRabbit.Operations.Subscribe.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.Operations.Publish\RawRabbit.Operations.Publish.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.Operations.Respond\RawRabbit.Operations.Respond.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.Enrichers.GlobalExecutionId\RawRabbit.Enrichers.GlobalExecutionId.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.Enrichers.MessageContext\RawRabbit.Enrichers.MessageContext.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.Enrichers.MessageContext.Subscribe\RawRabbit.Enrichers.MessageContext.Subscribe.csproj" />
     <ProjectReference Include="..\RawRabbit.Messages.Sample\RawRabbit.Messages.Sample.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="1.1.2" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.0.2" />
+    <PackageReference Include="Serilog.Sinks.Literate" Version="3.0.0" />
   </ItemGroup>
 
 </Project>

@@ -1,12 +1,18 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using System.Linq;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using RawRabbit.Attributes;
-using RawRabbit.Common;
-using RawRabbit.Extensions.Client;
-using RawRabbit.vNext.Logging;
+using RawRabbit.AspNet.Sample.Controllers;
+using RawRabbit.Configuration;
+using RawRabbit.DependencyInjection.ServiceCollection;
+using RawRabbit.Enrichers.GlobalExecutionId;
+using RawRabbit.Enrichers.HttpContext;
+using RawRabbit.Enrichers.MessageContext;
+using RawRabbit.Instantiation;
 using Serilog;
 using Serilog.Events;
 using ILogger = Serilog.ILogger;
@@ -32,18 +38,29 @@ namespace RawRabbit.AspNet.Sample
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services
-				.AddRawRabbit(
-					Configuration.GetSection("RawRabbit"),
-					ioc => ioc
-						.AddSingleton(LoggingFactory.ApplicationLogger))
-						.AddSingleton<IConfigurationEvaluator, AttributeConfigEvaluator>()
+				.AddRawRabbit(new RawRabbitOptions
+					{
+						ClientConfiguration = GetRawRabbitConfiguration(),
+						Plugins = p => p
+							.UseStateMachine()
+							.UseGlobalExecutionId()
+							.UseHttpContext()
+							.UseMessageContext(c =>
+							{
+								return new MessageContext
+								{
+									Source = c.GetHttpContext().Request.GetDisplayUrl()
+								};
+							})
+					})
 				.AddMvc();
 		}
 
 		public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
 		{
+			Log.Logger = GetConfiguredSerilogger();
 			loggerFactory
-				.AddSerilog(GetConfiguredSerilogger())
+				.AddSerilog()
 				.AddConsole(Configuration.GetSection("Logging"));
 
 			app.UseMvc();
@@ -53,7 +70,18 @@ namespace RawRabbit.AspNet.Sample
 		{
 			return new LoggerConfiguration()
 				.WriteTo.File($"{_rootPath}/Logs/serilog.log", LogEventLevel.Debug)
+				.WriteTo.LiterateConsole()
 				.CreateLogger();
+		}
+
+		private RawRabbitConfiguration GetRawRabbitConfiguration()
+		{
+			var section = Configuration.GetSection("RawRabbit");
+			if (!section.GetChildren().Any())
+			{
+				throw new ArgumentException($"Unable to configuration section 'RawRabbit'. Make sure it exists in the provided configuration");
+			}
+			return section.Get<RawRabbitConfiguration>();
 		}
 	}
 }

@@ -2,16 +2,6 @@
 
 [![Build Status](https://img.shields.io/appveyor/ci/pardahlman/rawrabbit.svg?style=flat-square)](https://ci.appveyor.com/project/pardahlman/rawrabbit) [![Documentation Status](https://readthedocs.org/projects/rawrabbit/badge/?version=latest&style=flat-square)](http://rawrabbit.readthedocs.org/) [![NuGet](https://img.shields.io/nuget/v/RawRabbit.svg?style=flat-square)](https://www.nuget.org/packages/RawRabbit) [![GitHub release](https://img.shields.io/github/release/pardahlman/rawrabbit.svg?style=flat-square)](https://github.com/pardahlman/rawrabbit/releases/latest)
 [![Slack Status](https://rawrabbit.herokuapp.com/badge.svg)](https://rawrabbit.herokuapp.com)
-
-## 2.0 beta1 released!
-
-Want to know more about the future of RawRabbit? Checkout the [2.0.0-beta1 release notes](https://github.com/pardahlman/RawRabbit/releases/tag/2.0.0-beta1) and read the blog posts:
-
-* [One method to rule them all](http://fellowdeveloper.se/dotnet/rawrabbit/2016/12/25/one-method-to-rule-them-all/): deep dive into the middleware architecture
-* [No such thing as perfect code](http://fellowdeveloper.se/dotnet/rawrabbit/2017/01/13/no-such-thing-as-perfect-code/): tweaking defaults of the client 
-* [Controlled concurrency](http://fellowdeveloper.se/dotnet/rawrabbit/2017/01/05/controlled-concurrency/): consume concurrency and unexpected synergies
-* [Making sense of all those logs](http://fellowdeveloper.se/dotnet/2017/01/25/making-sense-of-all-those-logs/): serilog + elastic + rawrabbit = first class logging experience
-
 ## Quick introduction
 `RawRabbit` is a modern .NET client for communication over [RabbitMq](http://rabbitmq.com/). It is written for [`.NET Core`](http://dot.net) and uses Microsoft’s new frameworks for [logging](https://github.com/aspnet/Logging), [configuration](https://github.com/aspnet/Configuration) and [dependecy injection](https://github.com/aspnet/DependencyInjection). Full documentation available at [`rawrabbit.readthedocs.org`](http://rawrabbit.readthedocs.org/).
 

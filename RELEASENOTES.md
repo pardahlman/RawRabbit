@@ -1,12 +1,63 @@
-# 1.10.4
+# 2.0.0-beta9
 
- - [#273](https://github.com/pardahlman/RawRabbit/pull/273) - Added .Net Standard 2.0 target framework for vNext contributed by Manuel Cabral ([Manny651](https://github.com/Manny651))
- - [#269](https://github.com/pardahlman/RawRabbit/pull/269) - Some typos contributed by ([cortex93](https://github.com/cortex93))
- - [#257](https://github.com/pardahlman/RawRabbit/issues/257) - Error in BusClientFactory.CreateDefault() on net core 2.0
- - [#233](https://github.com/pardahlman/RawRabbit/pull/233) - fix typo in NamingConventions.RetryLaterExchangeConvention contributed by Bohdan Sachkovskyi ([sachokFoX](https://github.com/sachokFoX))
+ - [#256](https://github.com/pardahlman/RawRabbit/issues/256) - Beta8: Failed message handling
+ - [#255](https://github.com/pardahlman/RawRabbit/issues/255) - Beta8: Serialization type
+ 
+Commits: 48ffb29dc1...ccf57abc43
+
+
+# 2.0.0-beta8
+
+ - [#254](https://github.com/pardahlman/RawRabbit/issues/254) - Upgrade RabbitMQ.Client to 5
+ - [#253](https://github.com/pardahlman/RawRabbit/issues/253) - Replace RawRabbit.vNext with RawRabbit.DependencyInjection.ServiceCollection
+ - [#250](https://github.com/pardahlman/RawRabbit/issues/250) - 2.o documentation: Add information on the used packages?
+ - [#246](https://github.com/pardahlman/RawRabbit/issues/246) - When ContextDictionary is emptied (possible MemoryLeak) ?
+ - [#245](https://github.com/pardahlman/RawRabbit/issues/245) - Use LibLog
+ - [#243](https://github.com/pardahlman/RawRabbit/issues/243) - NoAck not working as expected?
+ - [#242](https://github.com/pardahlman/RawRabbit/pull/242) - Update Getting-started.md contributed by Alexander Stefurishin ([astef](https://github.com/astef))
+ - [#241](https://github.com/pardahlman/RawRabbit/issues/241) - Using the AddRawRabbit Extension should not overwrite registrations
+ - [#240](https://github.com/pardahlman/RawRabbit/issues/240) - Sample Configuration for "Work Queues" Pattern
+ - [#238](https://github.com/pardahlman/RawRabbit/issues/238) - RetryLater AutoDelete queue is causing problems
+ - [#237](https://github.com/pardahlman/RawRabbit/pull/237) - Update Getting-started.md contributed by Alexander Stefurishin ([astef](https://github.com/astef))
+ - [#236](https://github.com/pardahlman/RawRabbit/pull/236) - Changed type resolving for publish contributed by ([liri2006](https://github.com/liri2006))
+ - [#235](https://github.com/pardahlman/RawRabbit/pull/235) - fix: Changing all middlewares to use asynchronous policy execution. (fixes #232) contributed by ([videege](https://github.com/videege))
+ - [#234](https://github.com/pardahlman/RawRabbit/issues/234) - [Discussion] Create default (empty) message context in MessageContextProviderBase.ExtractContext() if it is missed
+ - [#232](https://github.com/pardahlman/RawRabbit/issues/232) - Use of Polly causes timeout exception
  - [#231](https://github.com/pardahlman/RawRabbit/pull/231) - Fix typo in spelling `Dependency` contributed by Serhii Almazov ([almazik](https://github.com/almazik))
+ - [#230](https://github.com/pardahlman/RawRabbit/issues/230) - Message sequences time out for generic classes (v2) +fix
+ - [#228](https://github.com/pardahlman/RawRabbit/issues/228) - v2 First subscribed message not raising handler +fix
+ - [#226](https://github.com/pardahlman/RawRabbit/issues/226) - `AlreadyClosedException` during message sequences in 2.0
+ - [#212](https://github.com/pardahlman/RawRabbit/issues/212) - Executing all tests from CLI undeterministically fails after upgrade to csproj
 
-Commits: 36ae21d98a...4b1079f965
+Commits: b176e78186...40cc2dc758
+
+
+# 2.0.0-beta7
+
+ - [#231](https://github.com/pardahlman/RawRabbit/pull/231) - Fix typo in spelling `Dependency` contributed by Serhii Almazov ([almazik](https://github.com/almazik))
+ - [#230](https://github.com/pardahlman/RawRabbit/issues/230) - Message sequences time out for generic classes (v2) +fix
+ - [#228](https://github.com/pardahlman/RawRabbit/issues/228) - v2 First subscribed message not raising handler +fix
+
+Commits: b176e78186...e40eea22a5
+
+
+# 2.0.0-beta6
+
+ - [#219](https://github.com/pardahlman/RawRabbit/issues/219) - Adding Serilog to dotnet core Console application
+ - [#224](https://github.com/pardahlman/RawRabbit/issues/224) - Channels Not Closing in 2.0
+ - [#216](https://github.com/pardahlman/RawRabbit/issues/216) - Configuration not correctly bound when using ConfigurationBuilder
+ - [#208](https://github.com/pardahlman/RawRabbit/issues/208) - PipeContextHttpExtensions does not have any methods
+ - [#207](https://github.com/pardahlman/RawRabbit/issues/207) - WithPrefetchCount is not honored ?
+ - [#206](https://github.com/pardahlman/RawRabbit/issues/206) - BasicConsumeAsync throws when FromQueue("QueueName") is not specified
+ - [#201](https://github.com/pardahlman/RawRabbit/issues/201) - Update TypeNameHandling for serializer
+ - [#199](https://github.com/pardahlman/RawRabbit/issues/199) - Serializing published message behaviour changed
+ - [#198](https://github.com/pardahlman/RawRabbit/pull/198) - Added starter documentation for publish and consume operations contributed by Cemre Mengu ([cemremengu](https://github.com/cemremengu))
+ - [#190](https://github.com/pardahlman/RawRabbit/pull/190) - Added content for getting started and fixed some sentences contributed by Cemre Mengu ([cemremengu](https://github.com/cemremengu))
+ - [#185](https://github.com/pardahlman/RawRabbit/issues/185) - Create Enrichers for HttpContext
+ - [#175](https://github.com/pardahlman/RawRabbit/issues/175) - Recover consumers from fail-over
+ - [#164](https://github.com/pardahlman/RawRabbit/issues/164) - Migrate Message Sequence
+
+Commits: da036aded6...abfbd85672
 
 
 # 1.10.3

@@ -22,7 +22,6 @@ namespace RawRabbit.Tests.Channel
 
 		public ChannelFactoryTests()
 		{
-			LogManager.CurrentFactory = new VoidLoggerFactory();
 			_connectionFactory = new Mock<IConnectionFactory>();
 			_connection = new Mock<IConnection>();
 			_firstChannel = new Mock<IModel>();

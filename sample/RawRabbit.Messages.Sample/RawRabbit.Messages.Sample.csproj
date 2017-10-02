@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>netstandard1.5;net451</TargetFrameworks>
@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\RawRabbit.Attributes\RawRabbit.Attributes.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.Enrichers.Attributes\RawRabbit.Enrichers.Attributes.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">

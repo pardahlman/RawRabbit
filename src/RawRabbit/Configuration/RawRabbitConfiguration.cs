@@ -40,7 +40,7 @@ namespace RawRabbit.Configuration
 		/// Indicates if topology recovery (re-declare queues/exchanges, recover bindings and consumers) should be enabled
 		/// Defaults to true
 		/// </summary>
-		public bool TopologyRecovery { get; set;}
+		public bool TopologyRecovery { get; set; }
 
 		/// <summary>
 		/// The default values for exchnages. Can be overriden using the fluent configuration
@@ -71,7 +71,7 @@ namespace RawRabbit.Configuration
 		/// </summary>
 		public SslOption Ssl { get; set; }
 
-	    public string VirtualHost { get; set; }
+		public string VirtualHost { get; set; }
 		public string Username { get; set; }
 		public string Password { get; set; }
 		public int Port { get; set; }
@@ -89,7 +89,7 @@ namespace RawRabbit.Configuration
 			RouteWithGlobalId = true;
 			RecoveryInterval = TimeSpan.FromSeconds(10);
 			GracefulShutdown = TimeSpan.FromSeconds(10);
-			Ssl = new SslOption {Enabled = false};
+			Ssl = new SslOption { Enabled = false };
 			Hostnames = new List<string>();
 			Exchange = new GeneralExchangeConfiguration
 			{
@@ -103,11 +103,6 @@ namespace RawRabbit.Configuration
 				AutoDelete = false,
 				Durable = true
 			};
-		    VirtualHost = "/";
-		    Username = "guest";
-		    Password = "guest";
-		    Port = 5672;
-		    Hostnames = new List<string> {"localhost"};
 		}
 
 		public static RawRabbitConfiguration Local => new RawRabbitConfiguration
@@ -118,7 +113,6 @@ namespace RawRabbit.Configuration
 			Port = 5672,
 			Hostnames = new List<string> { "localhost" }
 		};
-		
 	}
 
 	public class GeneralQueueConfiguration

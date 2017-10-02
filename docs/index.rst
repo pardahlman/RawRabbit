@@ -7,27 +7,11 @@ Welcome to RawRabbit's documentations
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
-   Getting-started
-   understanding-message-context
-   configuration
-   Extending-RawRabbit
-   Bulk-fetching-messages
-   update-topology
-   message-sequence
-   Publisher-Acknowledgements
-   Message-Priority
-   Multiple-Subscribers-for-Messages
-   Delayed-requeue-of-messages
-   inner-workings
-   rabbitmq-features
-   error-handling
-   logging
-   configure-with-attributes
-   client-upgrade
-   contributing-guidelines
-
-
+   getting-started/index.rst
+   operations/index.rst
+   enrichers/index.rst
+   rabbitmq-features/index.rst
 
 
