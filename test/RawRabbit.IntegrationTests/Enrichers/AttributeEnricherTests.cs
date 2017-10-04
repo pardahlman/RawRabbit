@@ -58,7 +58,7 @@ namespace RawRabbit.IntegrationTests.Enrichers
 
 				/* Test */
 				await publisher.PublishAsync(new AttributedMessage(), ctx => ctx
-						.UsePublisherConfiguration(cfg => cfg
+						.UsePublishConfiguration(cfg => cfg
 							.OnDeclaredExchange(e => e
 								.WithName("my_topic")
 								.WithType(ExchangeType.Topic))

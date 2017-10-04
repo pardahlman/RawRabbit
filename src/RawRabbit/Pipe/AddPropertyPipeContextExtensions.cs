@@ -36,11 +36,5 @@ namespace RawRabbit.Pipe
 			context.Properties.Add(PipeKey.ConfigurationAction, configuration);
 			return context;
 		}
-
-		public static IPipeContext UsePublisherConfiguration(this IPipeContext context, Action<IPublisherConfigurationBuilder> configuration)
-		{
-			context.Properties.Add(PipeKey.ConfigurationAction, configuration);
-			return context;
-		}
 	}
 }

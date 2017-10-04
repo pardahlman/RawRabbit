@@ -70,7 +70,7 @@ namespace RawRabbit.PerformanceTest
 			MessageRecieved += onMessageRecieved;
 
 			_busClient.PublishAsync(_message, ctx => ctx
-				.UsePublisherConfiguration(cfg => cfg
+				.UsePublishConfiguration(cfg => cfg
 					.WithProperties(p => p.DeliveryMode = 1))
 			);
 			await msgTsc.Task;
@@ -86,7 +86,7 @@ namespace RawRabbit.PerformanceTest
 			MessageRecieved += onMessageRecieved;
 
 			_busClient.PublishAsync(_message, ctx => ctx
-				.UsePublisherConfiguration(cfg => cfg
+				.UsePublishConfiguration(cfg => cfg
 					.WithProperties(p => p.DeliveryMode = 2))
 			);
 			await msgTsc.Task;
