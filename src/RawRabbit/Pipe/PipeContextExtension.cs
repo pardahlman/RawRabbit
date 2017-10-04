@@ -1,19 +1,13 @@
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using RabbitMQ.Client.MessagePatterns;
 using RawRabbit.Configuration;
 using RawRabbit.Configuration.BasicPublish;
 using RawRabbit.Configuration.Consume;
 using RawRabbit.Configuration.Consumer;
 using RawRabbit.Configuration.Exchange;
-using RawRabbit.Configuration.Get;
 using RawRabbit.Configuration.Publisher;
 using RawRabbit.Configuration.Queue;
 using ISubscription = RawRabbit.Subscription.ISubscription;
@@ -55,11 +49,6 @@ namespace RawRabbit.Pipe
 		public static ExchangeDeclaration GetExchangeDeclaration(this IPipeContext context)
 		{
 			return context.Get<ExchangeDeclaration>(PipeKey.ExchangeDeclaration);
-		}
-
-		public static bool GetMandatoryPublishFlag(this IPipeContext context)
-		{
-			return GetReturnedMessageCallback(context) != null;
 		}
 
 		public static EventHandler<BasicReturnEventArgs> GetReturnedMessageCallback(this IPipeContext context)
