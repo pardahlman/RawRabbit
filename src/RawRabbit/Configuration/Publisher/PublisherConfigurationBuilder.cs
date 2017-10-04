@@ -28,8 +28,8 @@ namespace RawRabbit.Configuration.Publisher
 
 		public IPublisherConfigurationBuilder WithReturnCallback(Action<BasicReturnEventArgs> callback)
 		{
-			Config.MandatoryCallback = Config.MandatoryCallback ?? ((sender, args) =>{}) ;
-			Config.MandatoryCallback += (sender, args) => callback(args);
+			Config.ReturnCallback = Config.ReturnCallback ?? ((sender, args) =>{}) ;
+			Config.ReturnCallback += (sender, args) => callback(args);
 			Config.Mandatory = true;
 			return this;
 		}

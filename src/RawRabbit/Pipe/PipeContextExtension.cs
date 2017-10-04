@@ -51,9 +51,9 @@ namespace RawRabbit.Pipe
 			return context.Get<ExchangeDeclaration>(PipeKey.ExchangeDeclaration);
 		}
 
-		public static EventHandler<BasicReturnEventArgs> GetReturnedMessageCallback(this IPipeContext context)
+		public static EventHandler<BasicReturnEventArgs> GetReturnCallback(this IPipeContext context)
 		{
-			return context.Get<EventHandler<BasicReturnEventArgs>>(PipeKey.ReturnedMessageCallback);
+			return context.Get<EventHandler<BasicReturnEventArgs>>(PipeKey.ReturnCallback);
 		}
 
 		public static ConsumeConfiguration GetConsumeConfiguration(this IPipeContext context)

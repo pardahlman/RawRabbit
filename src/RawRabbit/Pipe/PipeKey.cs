@@ -26,7 +26,7 @@
 		public const string ExchangeDeclaration = "ExchangeDeclaration";
 		public const string Subscription = "Subscription";
 		public const string SerializedMessage = "SerializedMessage";
-		public const string ReturnedMessageCallback = "ReturnedMessageCallback";
+		public const string ReturnCallback = "ReturnCallback";
 		public const string BasicPropertyModifier = "BasicPropertyModifier";
 		public const string ClientConfiguration = "ClientConfiguration";
 	}

@@ -57,7 +57,7 @@ namespace RawRabbit.Operations.Publish.Middleware
 			context.Properties.TryAdd(PipeKey.BasicPublishConfiguration, config);
 			context.Properties.TryAdd(PipeKey.ExchangeDeclaration, config.Exchange);
 			context.Properties.TryAdd(PipeKey.BasicProperties, config.BasicProperties);
-			context.Properties.TryAdd(PipeKey.ReturnedMessageCallback, config.MandatoryCallback);
+			context.Properties.TryAdd(PipeKey.ReturnCallback, config.ReturnCallback);
 
 			return Next.InvokeAsync(context, token);
 		}

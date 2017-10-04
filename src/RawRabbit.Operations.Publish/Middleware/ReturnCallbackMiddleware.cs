@@ -8,23 +8,23 @@ using RawRabbit.Pipe;
 
 namespace RawRabbit.Operations.Publish.Middleware
 {
-	public class MandatoryCallbackOptions
+	public class ReturnCallbackOptions
 	{
 		public Func<IPipeContext, EventHandler<BasicReturnEventArgs>> CallbackFunc { get; set; }
 		public Func<IPipeContext, IModel> ChannelFunc { get; set; }
 		public Action<IPipeContext, EventHandler<BasicReturnEventArgs>> PostInvokeAction { get; set; }
 	}
 
-	public class MandatoryCallbackMiddleware : Pipe.Middleware.Middleware
+	public class ReturnCallbackMiddleware : Pipe.Middleware.Middleware
 	{
 		protected Func<IPipeContext, EventHandler<BasicReturnEventArgs>> CallbackFunc;
 		protected Func<IPipeContext, IModel> ChannelFunc;
 		protected Action<IPipeContext, EventHandler<BasicReturnEventArgs>> PostInvoke;
-		private readonly ILog _logger = LogProvider.For<MandatoryCallbackMiddleware>();
+		private readonly ILog _logger = LogProvider.For<ReturnCallbackMiddleware>();
 
-		public MandatoryCallbackMiddleware(MandatoryCallbackOptions options = null)
+		public ReturnCallbackMiddleware(ReturnCallbackOptions options = null)
 		{
-			CallbackFunc = options?.CallbackFunc ?? (context => context.GetReturnedMessageCallback());
+			CallbackFunc = options?.CallbackFunc ?? (context => context.GetReturnCallback());
 			ChannelFunc = options?.ChannelFunc?? (context => context.GetTransientChannel());
 			PostInvoke = options?.PostInvokeAction;
 		}

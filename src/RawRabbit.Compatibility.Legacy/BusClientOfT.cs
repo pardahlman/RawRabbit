@@ -104,7 +104,7 @@ namespace RawRabbit.Compatibility.Legacy
 				RoutingKey = config.RoutingKey,
 				BasicProperties = new BasicProperties(),
 				Mandatory = config.BasicReturn != null,
-				MandatoryCallback = config.BasicReturn
+				ReturnCallback = config.BasicReturn
 			};
 			config.PropertyModifier?.Invoke(publisherCfg.BasicProperties);
 
@@ -113,7 +113,7 @@ namespace RawRabbit.Compatibility.Legacy
 				context.Properties.TryAdd(PipeKey.PublisherConfiguration, publisherCfg);
 				context.Properties.TryAdd(PipeKey.BasicPublishConfiguration, publisherCfg);
 				context.Properties.TryAdd(PipeKey.ExchangeDeclaration, exchangeCfg);
-				context.Properties.TryAdd(PipeKey.ReturnedMessageCallback, publisherCfg.MandatoryCallback);
+				context.Properties.TryAdd(PipeKey.ReturnCallback, publisherCfg.ReturnCallback);
 			};
 			return _client.PublishAsync(message: message, context: ctxAction);
 		}

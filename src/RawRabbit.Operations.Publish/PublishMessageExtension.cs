@@ -28,7 +28,7 @@ namespace RawRabbit
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.BasicPropertiesCreated))
 			.Use<TransientChannelMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.ChannelCreated))
-			.Use<MandatoryCallbackMiddleware>()
+			.Use<ReturnCallbackMiddleware>()
 			.Use<PublishAcknowledgeMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.PreMessagePublish))
 			.Use<BasicPublishMiddleware>(new BasicPublishOptions
