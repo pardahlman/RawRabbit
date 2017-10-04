@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using RawRabbit.Configuration.Consumer;
-using RawRabbit.Configuration.Publisher;
 
 namespace RawRabbit.Pipe
 {
@@ -28,12 +26,6 @@ namespace RawRabbit.Pipe
 		public static IPipeContext UseThrottledConsume(this IPipeContext context, Action<Func<Task>, CancellationToken> throttle)
 		{
 			context.Properties.TryAdd(PipeKey.ConsumeThrottleAction, throttle);
-			return context;
-		}
-
-		public static IPipeContext UseConsumerConfiguration(this IPipeContext context, Action<IConsumerConfigurationBuilder> configuration)
-		{
-			context.Properties.Add(PipeKey.ConfigurationAction, configuration);
 			return context;
 		}
 	}

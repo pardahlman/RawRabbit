@@ -99,7 +99,7 @@ namespace RawRabbit.IntegrationTests.Enrichers
 					firstTsc.TrySetResult(message);
 					return Task.FromResult(0);
 				}, ctx => ctx
-					.UseConsumerConfiguration(cfg => cfg
+					.UseSubscribeConfiguration(cfg => cfg
 						.FromDeclaredQueue(q => q
 							.WithNameSuffix("custom"))));
 				await secondClient.SubscribeAsync<BasicMessage>(message =>
@@ -107,7 +107,7 @@ namespace RawRabbit.IntegrationTests.Enrichers
 					secondTsc.TrySetResult(message);
 					return Task.FromResult(0);
 				}, ctx => ctx
-					.UseConsumerConfiguration(cfg => cfg
+					.UseSubscribeConfiguration(cfg => cfg
 						.FromDeclaredQueue(q => q
 							.WithNameSuffix("custom"))));
 
@@ -252,7 +252,7 @@ namespace RawRabbit.IntegrationTests.Enrichers
 					secondTsc.TrySetResult(message);
 					return Task.FromResult(0);
 				}, ctx => ctx
-					.UseConsumerConfiguration(cfg => cfg
+					.UseSubscribeConfiguration(cfg => cfg
 						.FromDeclaredQueue(q => q
 							.WithNameSuffix("special"))));
 

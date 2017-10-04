@@ -81,7 +81,7 @@ namespace RawRabbit.IntegrationTests.Enrichers
 				{
 					tcs.TrySetResult(msg);
 					return Task.CompletedTask;
-				}, ctx => ctx.UseConsumerConfiguration(cfg => cfg
+				}, ctx => ctx.UseSubscribeConfiguration(cfg => cfg
 					.FromDeclaredQueue(q => q.WithName("error_queue"))
 					.OnDeclaredExchange(e => e.WithName("default_error_exchange"))
 				));

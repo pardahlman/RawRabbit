@@ -25,7 +25,7 @@ namespace RawRabbit.IntegrationTests.Enrichers
 					recievedTcs.TrySetResult(recieved);
 					return Task.FromResult(true);
 				}, ctx => ctx
-					.UseConsumerConfiguration(cfg => cfg
+					.UseSubscribeConfiguration(cfg => cfg
 						.Consume(c => c
 							.WithRoutingKey("my_key"))
 						.OnDeclaredExchange(e => e

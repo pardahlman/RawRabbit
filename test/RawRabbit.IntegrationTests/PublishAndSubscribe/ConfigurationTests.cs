@@ -80,7 +80,7 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 					recievedTcs.TrySetResult(recieved);
 					return Task.FromResult(true);
 				}, ctx => ctx
-					.UseConsumerConfiguration(cfg => cfg
+					.UseSubscribeConfiguration(cfg => cfg
 						.OnDeclaredExchange(e=> e
 							.WithName("custom_exchange")
 						))
@@ -110,7 +110,7 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 					recievedTcs.TrySetResult(recieved);
 					return Task.FromResult(true);
 				}, ctx => ctx
-					.UseConsumerConfiguration(cfg => cfg
+					.UseSubscribeConfiguration(cfg => cfg
 						.Consume(c => c
 							.WithRoutingKey("custom_key")
 							.WithConsumerTag("custom_tag")
@@ -201,7 +201,7 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 					msgTcs.TrySetResult(msg);
 					return Task.FromResult(0);
 				}, ctx => ctx
-					.UseConsumerConfiguration(cfg => cfg
+					.UseSubscribeConfiguration(cfg => cfg
 						.FromDeclaredQueue(q => q.WithName(queueName).WithAutoDelete())
 					)
 				);
@@ -235,7 +235,7 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 					msgTcs.TrySetResult(msg);
 					return Task.FromResult(0);
 				}, ctx => ctx
-					.UseConsumerConfiguration(cfg => cfg
+					.UseSubscribeConfiguration(cfg => cfg
 						.OnDeclaredExchange(e => e.WithName(exchangeName).WithAutoDelete())
 					)
 				);

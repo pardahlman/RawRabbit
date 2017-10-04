@@ -43,7 +43,7 @@ namespace RawRabbit.IntegrationTests.Enrichers
 						var tsc = taskCompletionSources.First(t => !t.Task.IsCompleted);
 						tsc.TrySetResult(args);
 						return Task.FromResult<Acknowledgement>(new Ack());
-					}, ctx => ctx.UseConsumerConfiguration(cfg => cfg
+					}, ctx => ctx.UseSubscribeConfiguration(cfg => cfg
 							.Consume(c => c
 								.OnExchange("rawrabbit.integrationtests.testmessages")
 								.WithRoutingKey("#"))
@@ -104,7 +104,7 @@ namespace RawRabbit.IntegrationTests.Enrichers
 					tsc.TrySetResult(args);
 					return Task.FromResult<Acknowledgement>(new Ack());
 				}, ctx => ctx
-					.UseConsumerConfiguration(cfg => cfg
+					.UseSubscribeConfiguration(cfg => cfg
 						.Consume(c => c
 							.OnExchange("rawrabbit.integrationtests.testmessages")
 							.WithRoutingKey("#"))

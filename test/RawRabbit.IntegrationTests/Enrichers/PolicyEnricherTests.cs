@@ -48,7 +48,7 @@ namespace RawRabbit.IntegrationTests.Enrichers
 			{
 				await client.SubscribeAsync<BasicMessage>(
 					message => Task.FromResult(0),
-					ctx => ctx.UseConsumerConfiguration(cfg => cfg
+					ctx => ctx.UseSubscribeConfiguration(cfg => cfg
 						.Consume(c => c
 							.FromQueue("does_not_exist"))
 					));

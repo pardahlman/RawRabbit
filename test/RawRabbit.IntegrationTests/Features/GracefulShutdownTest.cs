@@ -26,7 +26,7 @@ namespace RawRabbit.IntegrationTests.Features
 				firstTsc.TrySetResult(message);
 				await Task.Delay(processMs);
 			}, ctx => ctx
-				.UseConsumerConfiguration(cfg => cfg
+				.UseSubscribeConfiguration(cfg => cfg
 					.FromDeclaredQueue(q => q
 						.WithAutoDelete(false)
 				)
