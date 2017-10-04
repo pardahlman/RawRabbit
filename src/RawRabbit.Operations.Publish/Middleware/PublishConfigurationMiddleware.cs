@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using RawRabbit.Configuration.BasicPublish;
-using RawRabbit.Configuration.Exchange;
 using RawRabbit.Configuration.Publisher;
 using RawRabbit.Logging;
 using RawRabbit.Pipe;
-using RawRabbit.Pipe.Middleware;
 
 namespace RawRabbit.Operations.Publish.Middleware
 {
@@ -19,15 +14,15 @@ namespace RawRabbit.Operations.Publish.Middleware
 		public Func<IPipeContext, Type> MessageTypeFunc { get; set; }
 	}
 
-	public class PublisherConfigurationMiddleware : Pipe.Middleware.Middleware
+	public class PublishConfigurationMiddleware : Pipe.Middleware.Middleware
 	{
 		protected readonly IPublisherConfigurationFactory PublisherFactory;
 		protected readonly Func<IPipeContext, string> ExchangeFunc;
 		protected readonly Func<IPipeContext, string> RoutingKeyFunc;
 		protected readonly Func<IPipeContext, Type> MessageTypeFunc;
-		private readonly ILog _logger = LogProvider.For<PublisherConfigurationMiddleware>();
+		private readonly ILog _logger = LogProvider.For<PublishConfigurationMiddleware>();
 
-		public PublisherConfigurationMiddleware(IPublisherConfigurationFactory publisherFactory, PublishConfigurationOptions options = null)
+		public PublishConfigurationMiddleware(IPublisherConfigurationFactory publisherFactory, PublishConfigurationOptions options = null)
 		{
 			PublisherFactory = publisherFactory;
 			ExchangeFunc = options?.ExchangeFunc ?? (context => context.GetPublishConfiguration()?.Exchange.Name);
