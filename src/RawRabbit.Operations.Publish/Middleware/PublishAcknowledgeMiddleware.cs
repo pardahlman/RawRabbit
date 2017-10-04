@@ -7,8 +7,10 @@ using RabbitMQ.Client;
 using RawRabbit.Common;
 using RawRabbit.Exceptions;
 using RawRabbit.Logging;
+using RawRabbit.Operations.Publish.Context;
+using RawRabbit.Pipe;
 
-namespace RawRabbit.Pipe.Middleware
+namespace RawRabbit.Operations.Publish.Middleware
 {
 	public class PublishAcknowledgeOptions
 	{
@@ -17,7 +19,7 @@ namespace RawRabbit.Pipe.Middleware
 		public Func<IPipeContext, bool> EnabledFunc { get; set; }
 	}
 
-	public class PublishAcknowledgeMiddleware : Middleware
+	public class PublishAcknowledgeMiddleware : Pipe.Middleware.Middleware
 	{
 		private readonly IExclusiveLock _exclusive;
 		private readonly ILog _logger = LogProvider.For<PublishAcknowledgeMiddleware>();
@@ -31,7 +33,7 @@ namespace RawRabbit.Pipe.Middleware
 		{
 			_exclusive = exclusive;
 			TimeOutFunc = options?.TimeOutFunc ?? (context => context.GetPublishAcknowledgeTimeout());
-			ChannelFunc = options?.ChannelFunc ?? (context => context.GetTransientChannel());
+			ChannelFunc = options?.ChannelFunc ?? (context => PipeContextExtension.GetTransientChannel(context));
 			EnabledFunc = options?.EnabledFunc ?? (context => context.GetPublishAcknowledgeTimeout() != TimeSpan.MaxValue);
 		}
 
@@ -40,7 +42,7 @@ namespace RawRabbit.Pipe.Middleware
 			var enabled = GetEnabled(context);
 			if (!enabled)
 			{
-				_logger.Debug("Publish Acknowledgement is disabled.");
+				LogExtensions.Debug(_logger, "Publish Acknowledgement is disabled.");
 				await Next.InvokeAsync(context, token);
 				return;
 			}
@@ -56,7 +58,7 @@ namespace RawRabbit.Pipe.Middleware
 			SetupTimeout(context, sequence, ackTcs);
 			if (!GetChannelDictionary(channel).TryAdd(sequence, ackTcs))
 			{
-				_logger.Info("Unable to add ack '{publishSequence}' on channel {channelNumber}", sequence, channel.ChannelNumber);
+				LogExtensions.Info(_logger, "Unable to add ack '{publishSequence}' on channel {channelNumber}", sequence, channel.ChannelNumber);
 			};
 
 			await Next.InvokeAsync(context, token);
@@ -110,7 +112,7 @@ namespace RawRabbit.Pipe.Middleware
 
 		protected virtual void EnableAcknowledgement(IModel channel, CancellationToken token)
 		{
-			_logger.Info("Setting 'Publish Acknowledge' for channel '{channelNumber}'", channel.ChannelNumber);
+			LogExtensions.Info(_logger, "Setting 'Publish Acknowledge' for channel '{channelNumber}'", channel.ChannelNumber);
 			_exclusive.Execute(channel, c =>
 			{
 				if (PublishAcknowledgeEnabled(c))
@@ -125,7 +127,7 @@ namespace RawRabbit.Pipe.Middleware
 					{
 						if (args.Multiple)
 						{
-							foreach (var deliveryTag in dictionary.Keys.Where(k => k <= args.DeliveryTag).ToList())
+							foreach (var deliveryTag in Enumerable.Where<ulong>(dictionary.Keys, k => k <= args.DeliveryTag).ToList())
 							{
 								TaskCompletionSource<ulong> tcs;
 								if (!dictionary.TryRemove(deliveryTag, out tcs))
@@ -153,35 +155,41 @@ namespace RawRabbit.Pipe.Middleware
 		{
 			var timeout = GetAcknowledgeTimeOut(context);
 			Timer ackTimer = null;
-			_logger.Info("Setting up publish acknowledgement for {publishSequence} with timeout {timeout:g}", sequence, timeout);
+			LogExtensions.Info(_logger, "Setting up publish acknowledgement for {publishSequence} with timeout {timeout:g}", sequence, timeout);
 			ackTimer = new Timer(state =>
 			{
-				ackTcs.TrySetException(
-					new PublishConfirmException($"The broker did not send a publish acknowledgement for message {sequence} within {timeout:g}."));
+				ackTcs.TrySetException(new PublishConfirmException($"The broker did not send a publish acknowledgement for message {sequence} within {timeout:g}."));
 				ackTimer?.Dispose();
 			}, null, timeout, new TimeSpan(-1));
 		}
 	}
 
-	public static class PublishAcknowledgePipeExtensions
+	public static class PublishAcknowledgePipeGetExtensions
 	{
-		public static IPipeContext UsePublishAcknowledgeTimeout(this IPipeContext context, TimeSpan timeout)
-		{
-			context.Properties.TryAdd(PipeKey.PublishAcknowledgeTimeout, timeout);
-			return context;
-		}
-
-		public static IPipeContext UsePublishAcknowledge(this IPipeContext context, bool use = true)
-		{
-			return !use
-				? context.UsePublishAcknowledgeTimeout(TimeSpan.MaxValue)
-				: context;
-		}
-
 		public static TimeSpan GetPublishAcknowledgeTimeout(this IPipeContext context)
 		{
 			var fallback = context.GetClientConfiguration().PublishConfirmTimeout;
-			return context.Get(PipeKey.PublishAcknowledgeTimeout, fallback);
+			return context.Get(PublishKey.PublishAcknowledgeTimeout, fallback);
 		}
 	}
 }
+
+namespace RawRabbit
+{
+	public static class PublishAcknowledgePipeUseExtensions
+	{
+		public static IPublishContext UsePublishAcknowledge(this IPublishContext context, TimeSpan timeout)
+		{
+			context.Properties.TryAdd(Operations.Publish.PublishKey.PublishAcknowledgeTimeout, timeout);
+			return context;
+		}
+
+		public static IPublishContext UsePublishAcknowledge(this IPublishContext context, bool use = true)
+		{
+			return !use
+				? context.UsePublishAcknowledge(TimeSpan.MaxValue)
+				: context;
+		}
+	}
+}
+

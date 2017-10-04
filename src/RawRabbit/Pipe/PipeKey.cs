@@ -6,7 +6,6 @@
 		public const string ConsumerConfiguration = "ConsumerConfiguration";
 		public const string ConsumeConfiguration = "ConsumeConfiguration";
 		public const string PublisherConfiguration = "PublisherConfiguration";
-		public const string PublishAcknowledgeTimeout = "PublishAcknowledgeTimeout";
 		public const string BasicPublishConfiguration = "BasicPublishConfiguration";
 		public const string MessageBytes = "MessageBytes";
 		public const string MessageType = "MessageType";
