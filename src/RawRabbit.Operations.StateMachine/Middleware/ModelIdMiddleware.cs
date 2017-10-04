@@ -21,7 +21,7 @@ namespace RawRabbit.Operations.StateMachine.Middleware
 		public ModelIdMiddleware(ModelIdOptions options = null)
 		{
 			CorrelationFunc = options?.CorrelationFunc ?? (context => context.GetIdCorrelationFunc());
-			CorrelationArgsFunc = options?.CorrelationArgsFunc ?? (context => context.GetLazyIdCorrelationArgs());
+			CorrelationArgsFunc = options?.CorrelationArgsFunc ?? (context => context.GetLazyCorrelationArgs());
 			ModelIdFunc = options?.ModelIdFunc ?? (context => context.GetModelId());
 		}
 

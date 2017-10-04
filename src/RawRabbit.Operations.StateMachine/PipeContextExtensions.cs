@@ -32,7 +32,7 @@ namespace RawRabbit.Operations.StateMachine
 			return context.Get<Func<object[], Guid>>(StateMachineKey.CorrelationFunc);
 		}
 
-		public static object[] GetLazyIdCorrelationArgs(this IPipeContext context)
+		public static object[] GetLazyCorrelationArgs(this IPipeContext context)
 		{
 			var func = context.Get<Func<IPipeContext, Func<IPipeContext, object[]>>>(StateMachineKey.LazyCorrelationFuncArgs);
 			return func?.Invoke(context)?.Invoke(context);
