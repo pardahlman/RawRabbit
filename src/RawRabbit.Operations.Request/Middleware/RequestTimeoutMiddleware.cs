@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using RawRabbit.Operations.Request.Context;
 using RawRabbit.Operations.Request.Core;
 using RawRabbit.Pipe;
 
@@ -66,7 +67,7 @@ namespace RawRabbit.Operations.Request.Middleware
 	{
 		private const string RequestTimeout = "RequestTimeout";
 
-		public static IPipeContext UseRequestTimeout(this IPipeContext context, TimeSpan time)
+		public static IRequestContext UseRequestTimeout(this IRequestContext context, TimeSpan time)
 		{
 			context.Properties.TryAdd(RequestTimeout, time);
 			return context;
