@@ -7,6 +7,7 @@ using RabbitMQ.Client.Events;
 using RawRabbit.Configuration.Consumer;
 using RawRabbit.Consumer;
 using RawRabbit.Logging;
+using RawRabbit.Operations.Request.Context;
 using RawRabbit.Operations.Request.Core;
 using RawRabbit.Pipe;
 
@@ -121,7 +122,7 @@ namespace RawRabbit.Operations.Request.Middleware
 		/// the response queue. The consumer will be cancelled once the
 		/// response message is recieved.
 		/// </summary>
-		public static IPipeContext UseDedicatedResponseConsumer(this IPipeContext context, bool useDedicated = true)
+		public static IRequestContext UseDedicatedResponseConsumer(this IRequestContext context, bool useDedicated = true)
 		{
 			context.Properties.AddOrReplace(DedicatedResponseConsumer, useDedicated);
 			return context;

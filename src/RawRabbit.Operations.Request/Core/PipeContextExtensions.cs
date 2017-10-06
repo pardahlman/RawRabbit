@@ -68,10 +68,5 @@ namespace RawRabbit.Operations.Request.Core
 			return context.GetRequestConfiguration()?.Response;
 		}
 
-		public static IPipeContext UseRequestConfiguration(this IPipeContext context, Action<IRequestConfigurationBuilder> configuration)
-		{
-			context.Properties.Add(PipeKey.ConfigurationAction, configuration);
-			return context;
-		}
 	}
 }

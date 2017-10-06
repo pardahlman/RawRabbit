@@ -7,7 +7,6 @@ using RawRabbit.Operations.Request.Configuration;
 using RawRabbit.Operations.Request.Configuration.Abstraction;
 using RawRabbit.Operations.Request.Core;
 using RawRabbit.Pipe;
-using RawRabbit.Pipe.Middleware;
 
 namespace RawRabbit.Operations.Request.Middleware
 {

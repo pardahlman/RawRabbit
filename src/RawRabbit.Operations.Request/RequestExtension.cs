@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RawRabbit.Common;
+using RawRabbit.Operations.Request.Context;
 using RawRabbit.Operations.Request.Core;
 using RawRabbit.Operations.Request.Middleware;
 using RawRabbit.Pipe;
@@ -57,7 +57,7 @@ namespace RawRabbit
 					BodyFunc = c => c.Get<byte[]>(PipeKey.SerializedMessage)
 				});
 
-		public static async Task<TResponse> RequestAsync<TRequest, TResponse>(this IBusClient client, TRequest message = default(TRequest), Action<IPipeContext> context = null, CancellationToken ct = default(CancellationToken))
+		public static async Task<TResponse> RequestAsync<TRequest, TResponse>(this IBusClient client, TRequest message = default(TRequest), Action<IRequestContext> context = null, CancellationToken ct = default(CancellationToken))
 		{
 			var result = await client
 				.InvokeAsync(RequestPipe, ctx =>
@@ -65,7 +65,7 @@ namespace RawRabbit
 					ctx.Properties.Add(RequestKey.OutgoingMessageType, typeof(TRequest));
 					ctx.Properties.Add(RequestKey.IncommingMessageType, typeof(TResponse));
 					ctx.Properties.Add(PipeKey.Message, message);
-					context?.Invoke(ctx);
+					context?.Invoke(new RequestContext(ctx));
 				}, ct);
 			return result.Get<TResponse>(RequestKey.ResponseMessage);
 		}
