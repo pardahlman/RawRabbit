@@ -112,7 +112,7 @@ namespace RawRabbit.Pipe.Middleware
 	{
 		private const string ContentTypeCheck = "Deserialization:ContentType:Check";
 
-		public static IPipeContext UseContentTypeCheck(this IPipeContext context, bool check = true)
+		public static TPipeContext UseContentTypeCheck<TPipeContext>(this TPipeContext context, bool check = true) where TPipeContext : IPipeContext
 		{
 			context.Properties.TryAdd(ContentTypeCheck, check);
 			return context;

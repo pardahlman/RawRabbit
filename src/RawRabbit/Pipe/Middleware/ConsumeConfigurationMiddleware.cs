@@ -87,7 +87,7 @@ namespace RawRabbit.Pipe.Middleware
 
 	public static class BasicConsumeExtensions
 	{
-		public static IPipeContext UseConsumeConfiguration(this IPipeContext context, Action<IConsumeConfigurationBuilder> config)
+		public static TPipeContext UseConsumeConfiguration<TPipeContext>(this TPipeContext context, Action<IConsumeConfigurationBuilder> config) where TPipeContext : IPipeContext
 		{
 			context.Properties.TryAdd(PipeKey.ConfigurationAction, config);
 			return context;
