@@ -1,5 +1,6 @@
 ﻿using System;
 using RabbitMQ.Client.Events;
+using RawRabbit.Operations.Subscribe.Context;
 using RawRabbit.Pipe;
 
 namespace RawRabbit.Enrichers.MessageContext.Subscribe
@@ -9,7 +10,7 @@ namespace RawRabbit.Enrichers.MessageContext.Subscribe
 		public const string PipebasedContextFunc = "Subscribe:MessageContext:PipebasedContext";
 		private const string MessageContextType = "Subscribe:MessageContext:Type";
 
-		public static IPipeContext UseMessageContext(this IPipeContext context, Func<IPipeContext, object> contextFunc)
+		public static ISubscribeContext UseMessageContext(this ISubscribeContext context, Func<IPipeContext, object> contextFunc)
 		{
 			context.Properties.TryAdd(PipebasedContextFunc, contextFunc);
 			return context;
