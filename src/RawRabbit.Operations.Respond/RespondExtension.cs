@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Operations.Respond.Acknowledgement;
+using RawRabbit.Operations.Respond.Context;
 using RawRabbit.Operations.Respond.Core;
 using RawRabbit.Operations.Respond.Middleware;
 using RawRabbit.Pipe;
@@ -71,7 +72,7 @@ namespace RawRabbit
 		public static Task RespondAsync<TRequest, TResponse>(
 			this IBusClient client,
 			Func<TRequest, Task<TResponse>> handler,
-			Action<IPipeContext> context = null,
+			Action<IRespondContext> context = null,
 			CancellationToken ct = default(CancellationToken))
 		{
 			return client.RespondAsync<TRequest, TResponse>(request => handler
@@ -89,7 +90,7 @@ namespace RawRabbit
 		public static Task RespondAsync<TRequest, TResponse>(
 			this IBusClient client,
 			Func<TRequest, Task<TypedAcknowlegement<TResponse>>> handler,
-			Action<IPipeContext> context = null,
+			Action<IRespondContext> context = null,
 			CancellationToken ct = default(CancellationToken))
 		{
 			return client
@@ -108,7 +109,7 @@ namespace RawRabbit
 						ctx.Properties.Add(RespondKey.IncomingMessageType, typeof(TRequest));
 						ctx.Properties.Add(RespondKey.OutgoingMessageType, typeof(TResponse));
 						ctx.Properties.Add(PipeKey.MessageHandler, genericHandler);
-						context?.Invoke(ctx);
+						context?.Invoke(new RespondContext(ctx));
 					}, ct
 				);
 		}
