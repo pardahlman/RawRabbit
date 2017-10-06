@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using RawRabbit.Operations.StateMachine.Middleware;
+using RawRabbit.Operations.StateMachine.Context;
 using RawRabbit.Pipe;
 
 namespace RawRabbit.Operations.StateMachine
@@ -44,14 +43,14 @@ namespace RawRabbit.Operations.StateMachine
 			return func?.Invoke(context)?.Invoke(context);
 		}
 
-		public static IPipeContext UseLazyCorrelationArgs(this IPipeContext context, Func<IPipeContext, object[]> argsFunc)
+		public static IStateMachineContext UseLazyCorrelationArgs(this IStateMachineContext context, Func<IPipeContext, object[]> argsFunc)
 		{
 			Func<IPipeContext, Func<IPipeContext, object[]>> lazyFunc = pipeContext => argsFunc;
 			context.Properties.TryAdd(StateMachineKey.LazyCorrelationFuncArgs, lazyFunc);
 			return context;
 		}
 
-		public static IPipeContext UseLazyHandlerArgs(this IPipeContext context, Func<IPipeContext, object[]> argsFunc)
+		public static IStateMachineContext UseLazyHandlerArgs(this IStateMachineContext context, Func<IPipeContext, object[]> argsFunc)
 		{
 			Func<IPipeContext, Func<IPipeContext, object[]>> lazyFunc = pipeContext => argsFunc;
 			context.Properties.TryAdd(StateMachineKey.LazyHandlerArgsFunc, lazyFunc);

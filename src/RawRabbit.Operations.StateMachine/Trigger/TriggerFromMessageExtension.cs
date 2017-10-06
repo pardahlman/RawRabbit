@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Configuration.Consumer;
+using RawRabbit.Operations.StateMachine.Context;
 using RawRabbit.Operations.StateMachine.Middleware;
 using RawRabbit.Pipe;
 using RawRabbit.Operations.Subscribe.Middleware;
@@ -44,13 +45,14 @@ namespace RawRabbit.Operations.StateMachine.Trigger
 
 			return configurer.From(SubscribePipe, context =>
 			{
-				context.Properties.Add(StateMachineKey.Type, typeof(TStateMachine));
-				context.Properties.Add(StateMachineKey.CorrelationFunc, genericCorrFunc);
-				context.UseLazyCorrelationArgs(ctx => new[] { ctx.GetMessage()});
-				context.Properties.Add(PipeKey.MessageType, typeof(TMessage));
-				context.Properties.Add(PipeKey.ConfigurationAction, consumeConfig);
-				context.Properties.Add(PipeKey.MessageHandler, genericHandler);
-				context.UseLazyHandlerArgs(ctx => new[] { ctx.GetStateMachine(), ctx.GetMessage() });
+				var stateMachineContext = new StateMachineContext(context);
+				stateMachineContext.Properties.Add(StateMachineKey.Type, typeof(TStateMachine));
+				stateMachineContext.Properties.Add(StateMachineKey.CorrelationFunc, genericCorrFunc);
+				stateMachineContext.UseLazyCorrelationArgs(ctx => new[] { ctx.GetMessage()});
+				stateMachineContext.Properties.Add(PipeKey.MessageType, typeof(TMessage));
+				stateMachineContext.Properties.Add(PipeKey.ConfigurationAction, consumeConfig);
+				stateMachineContext.Properties.Add(PipeKey.MessageHandler, genericHandler);
+				stateMachineContext.UseLazyHandlerArgs(ctx => new[] { ctx.GetStateMachine(), ctx.GetMessage() });
 			});
 		}
 
