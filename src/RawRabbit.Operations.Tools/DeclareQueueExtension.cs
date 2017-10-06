@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Configuration.Queue;
+using RawRabbit.Operations.Tools.Middleware;
 using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
 
@@ -10,7 +11,7 @@ namespace RawRabbit
 	public static class DeclareQueueExtension
 	{
 		public static readonly Action<IPipeBuilder> DeclareQueueAction = pipe => pipe
-			.Use<ConsumeConfigurationMiddleware>()
+			.Use<QueueDeclarationMiddleware>()
 			.Use<QueueDeclareMiddleware>();
 
 		public static async Task DeclareQueueAsync(this IBusClient client, QueueDeclaration declaration, CancellationToken ct = default(CancellationToken))

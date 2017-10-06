@@ -18,8 +18,6 @@ namespace RawRabbit
 				.InvokeAsync(pipe =>
 					pipe
 						.Use<ConsumeConfigurationMiddleware>()
-						.Use<ExchangeDeclareMiddleware>()
-						.Use<QueueDeclareMiddleware>()
 						.Use<QueueBindMiddleware>(new QueueBindOptions
 						{
 							ExchangeNameFunc = ctx => ctx.GetConsumeConfiguration()?.ExchangeName

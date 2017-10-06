@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using RawRabbit.Common;
 
 namespace RawRabbit.Configuration.Queue
@@ -7,6 +8,7 @@ namespace RawRabbit.Configuration.Queue
 	{
 		QueueDeclaration Create(string queueName);
 		QueueDeclaration Create<TMessageType>();
+		QueueDeclaration Create(Type messageType);
 	}
 
 	public class QueueDeclarationFactory : IQueueConfigurationFactory
@@ -34,7 +36,12 @@ namespace RawRabbit.Configuration.Queue
 
 		public QueueDeclaration Create<TMessageType>()
 		{
-			var queueName = _conventions.QueueNamingConvention(typeof(TMessageType));
+			return Create(typeof(TMessageType));
+		}
+
+		public QueueDeclaration Create(Type messageType)
+		{
+			var queueName = _conventions.QueueNamingConvention(messageType);
 			return Create(queueName);
 		}
 	}

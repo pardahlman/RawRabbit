@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using RawRabbit.Operations.Tools.Middleware;
 using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
 
@@ -10,13 +11,13 @@ namespace RawRabbit
 		private const string QueueName = "DeleteQueue:QueueName";
 
 		public static readonly Action<IPipeBuilder> DeletePipe = builder => builder
-			.Use<ConsumeConfigurationMiddleware>()
+			.Use<QueueDeclarationMiddleware>()
 			.Use((context, func) =>
 			{
-				var consumeCfg = context.GetConsumeConfiguration();
+				var consumeCfg = context.GetQueueDeclaration();
 				if (consumeCfg != null)
 				{
-					context.Properties.TryAdd(QueueName, consumeCfg.QueueName);
+					context.Properties.TryAdd(QueueName, consumeCfg.Name);
 				}
 				return func();
 			})

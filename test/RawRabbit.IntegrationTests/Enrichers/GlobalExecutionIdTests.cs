@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RabbitMQ.Client.Events;
 using RawRabbit.Common;
+using RawRabbit.Configuration.Queue;
 using RawRabbit.Enrichers.GlobalExecutionId;
 using RawRabbit.Instantiation;
 using RawRabbit.IntegrationTests.TestMessages;
@@ -38,18 +39,20 @@ namespace RawRabbit.IntegrationTests.Enrichers
 				await firstSubscriber.SubscribeAsync<FirstMessage>(message => firstSubscriber.PublishAsync(new SecondMessage(), ctx => ctx.UsePublishAcknowledge(false)));
 				await secondSubscriber.SubscribeAsync<SecondMessage>(message => secondSubscriber.PublishAsync(new ThirdMessage()));
 				await thridSubscriber.SubscribeAsync<ThirdMessage>(message => Task.FromResult(0));
+				await consumer.DeclareQueueAsync(new QueueDeclaration
+				{
+					Name = "take_all",
+					AutoDelete = true
+				});
 				await consumer.BasicConsumeAsync(args =>
 					{
 						var tsc = taskCompletionSources.First(t => !t.Task.IsCompleted);
 						tsc.TrySetResult(args);
 						return Task.FromResult<Acknowledgement>(new Ack());
-					}, ctx => ctx.UseSubscribeConfiguration(cfg => cfg
-							.Consume(c => c
+					}, ctx => ctx.UseConsumeConfiguration(cfg => cfg
+								.FromQueue("take_all")
 								.OnExchange("rawrabbit.integrationtests.testmessages")
-								.WithRoutingKey("#"))
-							.FromDeclaredQueue(q => q
-								.WithName("take_all")
-								.WithAutoDelete())
+								.WithRoutingKey("#")
 						)
 				);
 
@@ -98,20 +101,23 @@ namespace RawRabbit.IntegrationTests.Enrichers
 				});
 				await secondResponder.SubscribeAsync<SecondMessage>(message => secondResponder.PublishAsync(new ThirdMessage()));
 				await thridResponder.SubscribeAsync<ThirdMessage>(message => Task.FromResult(0));
+				await consumer.DeclareQueueAsync(new QueueDeclaration
+				{
+					AutoDelete = true,
+					Name = "take_all",
+				});
 				await consumer.BasicConsumeAsync(args =>
 				{
 					var tsc = taskCompletionSources.First(t => !t.Task.IsCompleted);
 					tsc.TrySetResult(args);
 					return Task.FromResult<Acknowledgement>(new Ack());
 				}, ctx => ctx
-					.UseSubscribeConfiguration(cfg => cfg
-						.Consume(c => c
+					.UseConsumeConfiguration(cfg => cfg
+							.FromQueue("take_all")
 							.OnExchange("rawrabbit.integrationtests.testmessages")
-							.WithRoutingKey("#"))
-						.FromDeclaredQueue(q => q
-							.WithName("take_all")
-							.WithAutoDelete())
-				));
+							.WithRoutingKey("#")
+					)
+				);
 
 				/* Test */
 				await requester.RequestAsync<FirstRequest, FirstResponse>();

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using RawRabbit.Operations.Tools.Middleware;
 using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
 
@@ -11,13 +12,13 @@ namespace RawRabbit
 		private const string IfUsed = "DeleteExchange:IfUsed";
 
 		public static readonly Action<IPipeBuilder> DeleteExchangePipe = builder => builder
-			.Use<ConsumeConfigurationMiddleware>()
+			.Use<ExchangeDeclarationMiddleware>()
 			.Use((context, func) =>
 			{
-				var cfg = context.GetConsumeConfiguration();
+				var cfg = context.GetExchangeDeclaration();
 				if (cfg != null)
 				{
-					context.Properties.TryAdd(ExchangeName, cfg.ExchangeName);
+					context.Properties.TryAdd(ExchangeName, cfg.Name);
 				}
 				return func();
 			})

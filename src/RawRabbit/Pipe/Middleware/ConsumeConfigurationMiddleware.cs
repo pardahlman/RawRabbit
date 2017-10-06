@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using RawRabbit.Configuration.Consumer;
-using RawRabbit.Configuration.Exchange;
-using RawRabbit.Configuration.Queue;
+using RawRabbit.Configuration.Consume;
 using RawRabbit.Logging;
 
 namespace RawRabbit.Pipe.Middleware
@@ -14,48 +12,43 @@ namespace RawRabbit.Pipe.Middleware
 		public Func<IPipeContext, string> RoutingKeyFunc { get; set; }
 		public Func<IPipeContext, string> ExchangeFunc { get; set; }
 		public Func<IPipeContext, Type> MessageTypeFunc { get; set; }
-		public Func<IPipeContext, Action<IConsumerConfigurationBuilder>> ConfigActionFunc { get; set; }
+		public Func<IPipeContext, Action<IConsumeConfigurationBuilder>> ConfigActionFunc { get; set; }
 	}
 
 	public class ConsumeConfigurationMiddleware : Middleware
 	{
-		protected IConsumerConfigurationFactory ConfigFactory;
+		protected IConsumeConfigurationFactory ConfigFactory;
 		protected Func<IPipeContext, string> QueueFunc;
 		protected Func<IPipeContext, string> ExchangeFunc;
 		protected Func<IPipeContext, string> RoutingKeyFunc;
 		protected Func<IPipeContext, Type> MessageTypeFunc;
-		protected Func<IPipeContext, Action<IConsumerConfigurationBuilder>> ConfigActionFunc;
+		protected Func<IPipeContext, Action<IConsumeConfigurationBuilder>> ConfigActionFunc;
 		private readonly ILog _logger = LogProvider.For<ConsumeConfigurationMiddleware>();
 
-		public ConsumeConfigurationMiddleware(IConsumerConfigurationFactory configFactory, ConsumeConfigurationOptions options = null)
+		public ConsumeConfigurationMiddleware(IConsumeConfigurationFactory configFactory, ConsumeConfigurationOptions options = null)
 		{
 			ConfigFactory = configFactory;
 			QueueFunc = options?.QueueFunc ?? (context => context.GetQueueDeclaration()?.Name);
 			ExchangeFunc = options?.ExchangeFunc ?? (context => context.GetExchangeDeclaration()?.Name);
 			RoutingKeyFunc = options?.RoutingKeyFunc ?? (context => context.GetRoutingKey());
 			MessageTypeFunc = options?.MessageTypeFunc ?? (context => context.GetMessageType());
-			ConfigActionFunc = options?.ConfigActionFunc ?? (context => context.Get<Action<IConsumerConfigurationBuilder>>(PipeKey.ConfigurationAction));
+			ConfigActionFunc = options?.ConfigActionFunc ?? (context => context.Get<Action<IConsumeConfigurationBuilder>>(PipeKey.ConfigurationAction));
 		}
 
 		public override async Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
-			var config = ExtractConfigFromMessageType(context)
-				?? ExtractConfigFromStrings(context)
-				?? CreateDefaultConfig(context);
+			var config = ExtractConfigFromMessageType(context) ?? ExtractConfigFromStrings(context);
 
 			var action = GetConfigurationAction(context);
 			if (action != null)
 			{
-				_logger.Info("Configuration action for {queueName} found.", config.Queue?.Name);
-				var builder = new ConsumerConfigurationBuilder(config);
+				_logger.Info("Configuration action for {queueName} found.", config?.QueueName);
+				var builder = new ConsumeConfigurationBuilder(config);
 				action(builder);
 				config = builder.Config;
 			}
 
-			context.Properties.TryAdd(PipeKey.ConsumerConfiguration, config);
-			context.Properties.TryAdd(PipeKey.ConsumeConfiguration, config.Consume);
-			context.Properties.TryAdd(PipeKey.QueueDeclaration, config.Queue);
-			context.Properties.TryAdd(PipeKey.ExchangeDeclaration, config.Exchange);
+			context.Properties.TryAdd(PipeKey.ConsumeConfiguration, config);
 
 			await Next.InvokeAsync(context, token);
 		}
@@ -65,22 +58,12 @@ namespace RawRabbit.Pipe.Middleware
 			return MessageTypeFunc(context);
 		}
 
-		protected Action<IConsumerConfigurationBuilder> GetConfigurationAction(IPipeContext context)
+		protected Action<IConsumeConfigurationBuilder> GetConfigurationAction(IPipeContext context)
 		{
 			return ConfigActionFunc(context);
 		}
 
-		protected  virtual ConsumerConfiguration CreateDefaultConfig(IPipeContext context)
-		{
-			var clientCfg = context.GetClientConfiguration();
-			return new ConsumerConfiguration
-			{
-				Queue = new QueueDeclaration(clientCfg.Queue),
-				Exchange = new ExchangeDeclaration(clientCfg.Exchange),
-			};
-		}
-
-		protected virtual ConsumerConfiguration ExtractConfigFromStrings(IPipeContext context)
+		protected virtual ConsumeConfiguration ExtractConfigFromStrings(IPipeContext context)
 		{
 			var routingKey = RoutingKeyFunc(context);
 			var queueName = QueueFunc(context);
@@ -89,7 +72,7 @@ namespace RawRabbit.Pipe.Middleware
 			return ConfigFactory.Create(queueName, exchangeName, routingKey);
 		}
 
-		protected virtual ConsumerConfiguration ExtractConfigFromMessageType(IPipeContext context)
+		protected virtual ConsumeConfiguration ExtractConfigFromMessageType(IPipeContext context)
 		{
 			var messageType = MessageTypeFunc(context);
 			if (messageType != null)
@@ -99,6 +82,15 @@ namespace RawRabbit.Pipe.Middleware
 			return messageType == null
 				? null
 				: ConfigFactory.Create(messageType);
+		}
+	}
+
+	public static class BasicConsumeExtensions
+	{
+		public static IPipeContext UseConsumeConfiguration(this IPipeContext context, Action<IConsumeConfigurationBuilder> config)
+		{
+			context.Properties.TryAdd(PipeKey.ConfigurationAction, config);
+			return context;
 		}
 	}
 }
