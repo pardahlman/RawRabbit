@@ -188,68 +188,76 @@ namespace RawRabbit.Channel
 				_processingRequests = true;
 				_logger.Debug("Begining to process 'GetChannel' requests.");
 			}
-
-			TaskCompletionSource<IModel> channelTcs;
-			while (_requestQueue.TryDequeue(out channelTcs))
+			try
 			{
-				if (channelTcs.Task.IsCanceled)
+				TaskCompletionSource<IModel> channelTcs;
+				while (_requestQueue.TryDequeue(out channelTcs))
 				{
-					continue;
-				}
-				lock (_channelLock)
-				{
-					if (_current == null && _channelConfig.InitialChannelCount == 0)
+					if (channelTcs.Task.IsCanceled)
 					{
-						CreateAndWireupAsync().Wait();
-						_current = _channels.First;
-					}
-					_current = _current.Next ?? _channels.First;
-
-					if (_current.Value.IsOpen)
-					{
-						channelTcs.TrySetResult(_current.Value);
 						continue;
 					}
-
-					_logger.Info("Channel '{channelNumber}' is closed. Removing it from pool.", _current.Value.ChannelNumber);
-					_channels.Remove(_current);
-
-					if (_current.Value.CloseReason.Initiator == ShutdownInitiator.Application)
+					lock (_channelLock)
 					{
-						_logger.Info("Channel '{channelNumber}' is closed by application. Disposing channel.", _current.Value.ChannelNumber);
-						_current.Value.Dispose();
-						if (!_channels.Any())
+						if (_current == null && _channelConfig.InitialChannelCount == 0)
 						{
-							var newChannelTask = CreateAndWireupAsync();
-							newChannelTask.Wait();
-							_current = _channels.Last;
+							CreateAndWireupAsync().Wait();
+							_current = _channels.First;
+						}
+						_current = _current.Next ?? _channels.First;
+
+						if (_current.Value.IsOpen)
+						{
 							channelTcs.TrySetResult(_current.Value);
 							continue;
 						}
+
+						_logger.Info("Channel '{channelNumber}' is closed. Removing it from pool.", _current.Value.ChannelNumber);
+						_channels.Remove(_current);
+
+						if (_current.Value.CloseReason.Initiator == ShutdownInitiator.Application)
+						{
+							_logger.Info("Channel '{channelNumber}' is closed by application. Disposing channel.",
+								_current.Value.ChannelNumber);
+							_current.Value.Dispose();
+							if (!_channels.Any())
+							{
+								var newChannelTask = CreateAndWireupAsync();
+								newChannelTask.Wait();
+								_current = _channels.Last;
+								channelTcs.TrySetResult(_current.Value);
+								continue;
+							}
+						}
 					}
-				}
 
-				var openChannel = _channels.FirstOrDefault(c => c.IsOpen);
-				if (openChannel != null)
-				{
-					_logger.Info("Using channel '{channelNumber}', which is open.", openChannel.ChannelNumber);
-					channelTcs.TrySetResult(openChannel);
-					continue;
-				}
-				var isRecoverable = _channels.Any(c => c is IRecoverable);
-				if (!isRecoverable)
-				{
+					var openChannel = _channels.FirstOrDefault(c => c.IsOpen);
+					if (openChannel != null)
+					{
+						_logger.Info("Using channel '{channelNumber}', which is open.", openChannel.ChannelNumber);
+						channelTcs.TrySetResult(openChannel);
+						continue;
+					}
+					var isRecoverable = _channels.Any(c => c is IRecoverable);
+					if (!isRecoverable)
+					{
+						_processingRequests = false;
+						throw new ChannelAvailabilityException(
+							"Unable to retreive channel. All existing channels are closed and none of them are recoverable.");
+					}
+
+					_logger.Info(
+						"Unable to find an open channel. Requeue TaskCompletionSource for future process and abort execution.");
+					_requestQueue.Enqueue(channelTcs);
 					_processingRequests = false;
-					throw new ChannelAvailabilityException("Unable to retreive channel. All existing channels are closed and none of them are recoverable.");
+					return;
 				}
-
-				_logger.Info("Unable to find an open channel. Requeue TaskCompletionSource for future process and abort execution.");
-				_requestQueue.Enqueue(channelTcs);
-				_processingRequests = false;
-				return;
 			}
-			_processingRequests = false;
-			_logger.Debug("'GetChannel' has been processed.");
+			finally
+			{
+				_processingRequests = false;
+				_logger.Debug("'GetChannel' has been processed.");
+			}
 		}
 
 		public async Task<IModel> CreateChannelAsync(CancellationToken token = default(CancellationToken))
