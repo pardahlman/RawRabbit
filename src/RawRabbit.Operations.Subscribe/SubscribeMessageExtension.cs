@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Common;
+using RawRabbit.Operations.Subscribe.Context;
 using RawRabbit.Operations.Subscribe.Middleware;
 using RawRabbit.Operations.Subscribe.Stages;
 using RawRabbit.Pipe;
@@ -22,7 +23,7 @@ namespace RawRabbit
 
 		public static readonly Action<IPipeBuilder> SubscribePipe = pipe => pipe
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.Initialized))
-			.Use<ConsumeConfigurationMiddleware>()
+			.Use<SubscriptionConfigurationMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.ConsumeConfigured))
 			.Use<QueueDeclareMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(SubscribeStage.QueueDeclared))
@@ -38,7 +39,7 @@ namespace RawRabbit
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(SubscribeStage.ConsumerCreated))
 			.Use<SubscriptionMiddleware>();
 
-		public static Task SubscribeAsync<TMessage>(this IBusClient client, Func<TMessage, Task> subscribeMethod, Action<IPipeContext> context = null, CancellationToken ct = default(CancellationToken))
+		public static Task SubscribeAsync<TMessage>(this IBusClient client, Func<TMessage, Task> subscribeMethod, Action<ISubscribeContext> context = null, CancellationToken ct = default(CancellationToken))
 		{
 			return client.SubscribeAsync<TMessage>(
 				message => subscribeMethod
@@ -47,7 +48,7 @@ namespace RawRabbit
 				context, ct);
 		}
 
-		public static Task SubscribeAsync<TMessage>(this IBusClient client, Func<TMessage, Task<Acknowledgement>> subscribeMethod, Action<IPipeContext> context = null, CancellationToken ct = default(CancellationToken))
+		public static Task SubscribeAsync<TMessage>(this IBusClient client, Func<TMessage, Task<Acknowledgement>> subscribeMethod, Action<ISubscribeContext> context = null, CancellationToken ct = default(CancellationToken))
 		{
 			return client.InvokeAsync(
 				SubscribePipe,
@@ -57,7 +58,7 @@ namespace RawRabbit
 
 					ctx.Properties.Add(PipeKey.MessageType, typeof(TMessage));
 					ctx.Properties.Add(PipeKey.MessageHandler, genericHandler);
-					context?.Invoke(ctx);
+					context?.Invoke(new SubscribeContext(ctx));
 				}, ct);
 		}
 	}

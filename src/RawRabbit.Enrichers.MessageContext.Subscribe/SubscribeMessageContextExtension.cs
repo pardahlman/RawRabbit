@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Enrichers.MessageContext.Subscribe;
+using RawRabbit.Operations.Subscribe.Context;
 using RawRabbit.Operations.Subscribe.Middleware;
 using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
@@ -42,7 +43,7 @@ namespace RawRabbit
 			pipe.Replace<ConsumerMessageHandlerMiddleware, ConsumerMessageHandlerMiddleware>(args: new ConsumeOptions { Pipe = ConsumePipe });
 		});
 
-		public static Task<IPipeContext> SubscribeAsync<TMessage, TMessageContext>(this IBusClient client, Func<TMessage, TMessageContext, Task> subscribeMethod, Action<IPipeContext> context = null, CancellationToken ct = default(CancellationToken))
+		public static Task<IPipeContext> SubscribeAsync<TMessage, TMessageContext>(this IBusClient client, Func<TMessage, TMessageContext, Task> subscribeMethod, Action<ISubscribeContext> context = null, CancellationToken ct = default(CancellationToken))
 		{
 			return client.SubscribeAsync<TMessage, TMessageContext>(
 					(msg, ctx) => subscribeMethod
@@ -54,7 +55,7 @@ namespace RawRabbit
 		public static Task<IPipeContext> SubscribeAsync<TMessage, TMessageContext>(
 			this IBusClient client,
 			Func<TMessage, TMessageContext, Task<Acknowledgement>> subscribeMethod,
-			Action<IPipeContext> context = null,
+			Action<ISubscribeContext> context = null,
 			CancellationToken token = default(CancellationToken))
 		{
 			return client
@@ -64,7 +65,7 @@ namespace RawRabbit
 					{
 						Func<object[], Task> genericHandler = args => subscribeMethod((TMessage)args[0], (TMessageContext)args[1]);
 
-						context?.Invoke(ctx);
+						context?.Invoke(new SubscribeContext(ctx));
 						ctx.Properties.Add(PipeKey.MessageType, typeof(TMessage));
 						if (!ctx.Properties.ContainsKey(PipeContextExtensions.PipebasedContextFunc))
 						{
