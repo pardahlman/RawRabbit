@@ -88,11 +88,8 @@ namespace RawRabbit.Pipe.Middleware
 					};
 					recoverable.Recovery += OnRecover;
 					await recoverTsc.Task;
+					
 				}
-			}
-
-			if (channel.NextPublishSeqNo < deliveryArgs.DeliveryTag)
-			{
 				return new Ack();
 			}
 
