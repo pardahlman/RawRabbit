@@ -73,7 +73,7 @@ namespace RawRabbit.Enrichers.GlobalExecutionId.Middleware
 	{
 		private const string SubscribeWithWildCard = "SubscribeWithWildCard";
 
-		public static IPipeContext UseWildcardRoutingSuffix(this IPipeContext context, bool withWildCard = true)
+		public static TPipeContext UseWildcardRoutingSuffix<TPipeContext>(this TPipeContext context, bool withWildCard = true) where TPipeContext : IPipeContext
 		{
 			context.Properties.AddOrReplace(SubscribeWithWildCard, withWildCard);
 			return context;

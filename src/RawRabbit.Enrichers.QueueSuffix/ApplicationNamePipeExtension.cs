@@ -6,7 +6,7 @@ namespace RawRabbit.Enrichers.QueueSuffix
 	{
 		private const string ApplicationQueueSuffix = "ApplicationQueueSuffix";
 
-		public static IPipeContext UseApplicationQueueSuffix(this IPipeContext context, bool use = true)
+		public static TPipeContext UseApplicationQueueSuffix<TPipeContext>(this TPipeContext context, bool use = true) where TPipeContext : IPipeContext
 		{
 			context.Properties.TryAdd(ApplicationQueueSuffix, use);
 			return context;

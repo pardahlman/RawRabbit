@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using RawRabbit.Enrichers.QueueSuffix;
+﻿using RawRabbit.Enrichers.QueueSuffix;
 using RawRabbit.Instantiation;
-using RawRabbit.Pipe;
 
 namespace RawRabbit
 {

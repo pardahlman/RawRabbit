@@ -11,7 +11,7 @@ namespace RawRabbit.Enrichers.QueueSuffix
 			return context.Get(HostnameQueueSuffixActive, true);
 		}
 
-		public static IPipeContext UseHostnameQueueSuffix(this IPipeContext context, bool activated)
+		public static TPipeContext UseHostnameQueueSuffix<TPipeContext>(this TPipeContext context, bool activated) where TPipeContext : IPipeContext
 		{
 			context.Properties.TryAdd(HostnameQueueSuffixActive, activated);
 			return context;

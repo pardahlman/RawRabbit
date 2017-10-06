@@ -11,7 +11,7 @@ namespace RawRabbit.Enrichers.Polly
 			return context.Get(policyName, fallback);
 		}
 
-		public static IPipeContext UsePolicy(this IPipeContext context, Policy policy, string policyName = null)
+		public static TPipeContext UsePolicy<TPipeContext>(this TPipeContext context, Policy policy, string policyName = null) where TPipeContext : IPipeContext
 		{
 			policyName = policyName ?? PolicyKeys.DefaultPolicy;
 			context.Properties.TryAdd(policyName, policy);

@@ -7,13 +7,13 @@ namespace RawRabbit.Enrichers.QueueSuffix
 		private const string CustomQueueSuffix = "CustomQueueSuffix";
 		private const string CustomQueueSuffixActivated = "CustomQueueSuffixActivated";
 
-		public static IPipeContext UseCustomQueueSuffix(this IPipeContext context, string prefix)
+		public static TPipeContext UseCustomQueueSuffix<TPipeContext>(this TPipeContext context, string prefix) where TPipeContext : IPipeContext
 		{
 			context.Properties.AddOrReplace(CustomQueueSuffix, prefix);
 			return context;
 		}
 
-		public static IPipeContext UseCustomQueueSuffix(this IPipeContext context, bool activated)
+		public static TPipeContext UseCustomQueueSuffix<TPipeContext>(this TPipeContext context, bool activated) where TPipeContext : IPipeContext
 		{
 			context.Properties.TryAdd(CustomQueueSuffixActivated, activated);
 			return context;

@@ -6,13 +6,13 @@ namespace RawRabbit.Pipe
 {
 	public static class AddPropertyPipeContextExtensions
 	{
-		public static IPipeContext UseConsumerConcurrency(this IPipeContext context, uint concurrency)
+		public static TPipeContext UseConsumerConcurrency<TPipeContext>(this TPipeContext context, uint concurrency) where TPipeContext : IPipeContext
 		{
 			var semaphore = new SemaphoreSlim((int)concurrency, (int)concurrency);
 			return UseConsumeSemaphore(context, semaphore);
 		}
 
-		public static IPipeContext UseConsumeSemaphore(this IPipeContext context, SemaphoreSlim semaphore)
+		public static TPipeContext UseConsumeSemaphore<TPipeContext>(this TPipeContext context, SemaphoreSlim semaphore) where TPipeContext : IPipeContext
 		{
 			return UseThrottledConsume(context, (asyncAction, ct) => semaphore
 				.WaitAsync(ct)
@@ -23,7 +23,7 @@ namespace RawRabbit.Pipe
 				}, ct));
 		}
 
-		public static IPipeContext UseThrottledConsume(this IPipeContext context, Action<Func<Task>, CancellationToken> throttle)
+		public static TPipeContext UseThrottledConsume<TPipeContext>(this TPipeContext context, Action<Func<Task>, CancellationToken> throttle) where TPipeContext : IPipeContext
 		{
 			context.Properties.TryAdd(PipeKey.ConsumeThrottleAction, throttle);
 			return context;
