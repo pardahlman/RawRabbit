@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Framing.Impl;
 using RawRabbit.Common;
 using RawRabbit.Exceptions;
 using RawRabbit.Logging;
@@ -112,7 +113,7 @@ namespace RawRabbit.Operations.Publish.Middleware
 
 		protected virtual void EnableAcknowledgement(IModel channel, CancellationToken token)
 		{
-			LogExtensions.Info(_logger, "Setting 'Publish Acknowledge' for channel '{channelNumber}'", channel.ChannelNumber);
+			_logger.Info("Setting 'Publish Acknowledge' for channel '{channelNumber}'", channel.ChannelNumber);
 			_exclusive.Execute(channel, c =>
 			{
 				if (PublishAcknowledgeEnabled(c))
@@ -127,10 +128,9 @@ namespace RawRabbit.Operations.Publish.Middleware
 					{
 						if (args.Multiple)
 						{
-							foreach (var deliveryTag in Enumerable.Where<ulong>(dictionary.Keys, k => k <= args.DeliveryTag).ToList())
+							foreach (var deliveryTag in dictionary.Keys.Where<ulong>(k => k <= args.DeliveryTag).ToList())
 							{
-								TaskCompletionSource<ulong> tcs;
-								if (!dictionary.TryRemove(deliveryTag, out tcs))
+								if (!dictionary.TryRemove(deliveryTag, out var tcs))
 								{
 									continue;
 								}
@@ -142,8 +142,7 @@ namespace RawRabbit.Operations.Publish.Middleware
 						}
 						else
 						{
-							TaskCompletionSource<ulong> tcs;
-							dictionary.TryRemove(args.DeliveryTag, out tcs);
+							dictionary.TryRemove(args.DeliveryTag, out var tcs);
 							tcs?.TrySetResult(args.DeliveryTag);
 						}
 					}, token);
@@ -155,7 +154,7 @@ namespace RawRabbit.Operations.Publish.Middleware
 		{
 			var timeout = GetAcknowledgeTimeOut(context);
 			Timer ackTimer = null;
-			LogExtensions.Info(_logger, "Setting up publish acknowledgement for {publishSequence} with timeout {timeout:g}", sequence, timeout);
+			_logger.Info("Setting up publish acknowledgement for {publishSequence} with timeout {timeout:g}", sequence, timeout);
 			ackTimer = new Timer(state =>
 			{
 				ackTcs.TrySetException(new PublishConfirmException($"The broker did not send a publish acknowledgement for message {sequence} within {timeout:g}."));
