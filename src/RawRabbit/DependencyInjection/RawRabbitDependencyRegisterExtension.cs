@@ -44,6 +44,8 @@ namespace RawRabbit.DependencyInjection
 						Ssl = cfg.Ssl
 					};
 				})
+				.AddSingleton<IChannelPoolFactory, AutoScalingChannelPoolFactory>()
+				.AddSingleton(resolver => AutoScalingOptions.Default)
 				.AddSingleton<IClientPropertyProvider, ClientPropertyProvider>()
 				.AddSingleton<ISerializer>(resolver => new Serialization.JsonSerializer(new Newtonsoft.Json.JsonSerializer
 				{
@@ -60,9 +62,17 @@ namespace RawRabbit.DependencyInjection
 					NullValueHandling = NullValueHandling.Ignore
 				}))
 				.AddSingleton<IConsumerFactory, ConsumerFactory>()
-				.AddSingleton<IChannelFactory, ChannelFactory>()
+				.AddSingleton<IChannelFactory>(resolver =>
+				{
+					var channelFactory = new ChannelFactory(resolver.GetService<IConnectionFactory>(), resolver.GetService<RawRabbitConfiguration>());
+					channelFactory
+						.ConnectAsync()
+						.ConfigureAwait(false)
+						.GetAwaiter()
+						.GetResult();
+					return channelFactory;
+				})
 				.AddSingleton<ISubscriptionRepository, SubscriptionRepository>()
-				.AddSingleton<ChannelFactoryConfiguration, ChannelFactoryConfiguration>(c => ChannelFactoryConfiguration.Default)
 				.AddSingleton<ITopologyProvider, TopologyProvider>()
 				.AddTransient<IPublisherConfigurationFactory, PublisherConfigurationFactory>()
 				.AddTransient<IBasicPublishConfigurationFactory, BasicPublishConfigurationFactory>()
