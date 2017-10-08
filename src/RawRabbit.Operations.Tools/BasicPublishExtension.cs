@@ -11,7 +11,7 @@ namespace RawRabbit
 	{
 		public static readonly Action<IPipeBuilder> PublishPipe = builder => builder
 			.Use<BasicPublishConfigurationMiddleware>()
-			.Use<TransientChannelMiddleware>()
+			.Use<PooledChannelMiddleware>()
 			.Use<BasicPublishMiddleware>();
 
 		public static Task BasicPublishAsync(

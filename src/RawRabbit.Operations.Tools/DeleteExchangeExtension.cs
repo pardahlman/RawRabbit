@@ -22,7 +22,7 @@ namespace RawRabbit
 				}
 				return func();
 			})
-			.Use<TransientChannelMiddleware>()
+			.Use<PooledChannelMiddleware>()
 			.Use<ExchangeDeleteMiddleware>(new ExchangeDeleteOptions
 			{
 				ExchangeNameFunc = context => context.Get<string>(ExchangeName),

@@ -21,7 +21,7 @@ namespace RawRabbit
 				}
 				return func();
 			})
-			.Use<TransientChannelMiddleware>()
+			.Use<PooledChannelMiddleware>()
 			.Use<QueueDeleteMiddleware>(new QueueDeleteOptions
 			{
 				QueueNameFunc = context => context.Get<string>(QueueName)
