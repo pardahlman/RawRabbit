@@ -26,12 +26,12 @@ namespace RawRabbit.Channel
 			Channels = new ConcurrentBag<IModel>();
 		}
 
-		protected virtual void ConnectToBroker()
+		public virtual Task ConnectAsync(CancellationToken token = default(CancellationToken))
 		{
 			try
 			{
-				_connection = _connectionFactory.CreateConnection(_config.Hostnames);
-				SetupConnectionRecovery(_connection);
+				_logger.Debug("Creating a new connection for {hostNameCount} hosts.", ClientConfig.Hostnames.Count);
+				Connection = ConnectionFactory.CreateConnection(ClientConfig.Hostnames);
 			}
 			catch (BrokerUnreachableException e)
 			{
