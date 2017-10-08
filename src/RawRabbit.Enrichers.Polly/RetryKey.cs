@@ -26,7 +26,10 @@ namespace RawRabbit.Enrichers.Polly
 		public const string CancellationToken = "CancellationToken";
 		public const string TopologyProvider = "TopologyProvider";
 		public const string ChannelFactory = "ChannelFactory";
+		public const string ConnectionFactory = "ConnectionFactory";
 		public const string ConsumerFactory = "ConsumerFactory";
+		public const string ChannelPoolFactory = "ChannelPoolFactory";
+		public const string ClientConfiguration = "ClientConfiguration";
 	}
 
 	public static class RetryExtensions
