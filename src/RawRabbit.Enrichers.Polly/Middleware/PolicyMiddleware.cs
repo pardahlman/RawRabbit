@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using RawRabbit.Enrichers.Polly.Services;
 using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
 
@@ -9,6 +10,7 @@ namespace RawRabbit
 	public class PolicyOptions
 	{
 		public Action<IPipeContext> PolicyAction { get; set; }
+		public ConnectionPolicies ConnectionPolicies { get; set; }
 	}
 
 	public class PolicyMiddleware : StagedMiddleware

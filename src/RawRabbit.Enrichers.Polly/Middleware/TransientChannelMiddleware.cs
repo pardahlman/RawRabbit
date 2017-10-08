@@ -9,8 +9,8 @@ namespace RawRabbit.Enrichers.Polly.Middleware
 {
 	public class TransientChannelMiddleware : Pipe.Middleware.TransientChannelMiddleware
 	{
-		public TransientChannelMiddleware(IChannelFactory channelFactory)
-			: base(channelFactory) { }
+		public TransientChannelMiddleware(IChannelFactory factory)
+			: base(factory) { }
 
 		protected override Task<IModel> CreateChannelAsync(IPipeContext context, CancellationToken token)
 		{
@@ -22,7 +22,7 @@ namespace RawRabbit.Enrichers.Polly.Middleware
 				{
 					[RetryKey.PipeContext] = context,
 					[RetryKey.CancellationToken] = token,
-					[RetryKey.PipeContext] = ChannelFactory,
+					[RetryKey.ChannelFactory] = ChannelFactory
 				}
 			);
 		}
