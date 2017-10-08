@@ -24,7 +24,7 @@ namespace RawRabbit.Pipe.Middleware
 			QueueDeclareFunc = options?.QueueDeclarationFunc ?? (context => context.GetQueueDeclaration());
 		}
 
-		public override async Task InvokeAsync(IPipeContext context, CancellationToken token)
+		public override async Task InvokeAsync(IPipeContext context, CancellationToken token = default (CancellationToken))
 		{
 			var queue = GetQueueDeclaration(context);
 
