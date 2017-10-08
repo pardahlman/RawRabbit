@@ -17,9 +17,9 @@ namespace RawRabbit.Enrichers.Polly.Services
 		public ChannelFactory(IConnectionFactory connectionFactory, RawRabbitConfiguration config, ConnectionPolicies policies = null)
 			: base(connectionFactory, config)
 		{
-			CreateChannelPolicy = policies?.CreateChannel ?? Policy.NoOp();
-			ConnectPolicy = policies?.Connect ?? Policy.NoOp();
-			GetConnectionPolicy = policies?.GetConnection ?? Policy.NoOp();
+			CreateChannelPolicy = policies?.CreateChannel ?? Policy.NoOpAsync();
+			ConnectPolicy = policies?.Connect ?? Policy.NoOpAsync();
+			GetConnectionPolicy = policies?.GetConnection ?? Policy.NoOpAsync();
 		}
 
 		public override Task ConnectAsync(CancellationToken token = default(CancellationToken))
