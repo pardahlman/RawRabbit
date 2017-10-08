@@ -8,5 +8,6 @@
 		public const string IncomingMessageType = "IncommingMessageType";
 		public const string PublicationAddress = "PublicationAddress";
 		public const string Configuration = "Configuration";
+		public const string ChannelPoolName = "ChannelPool:Respond";
 	}
 }

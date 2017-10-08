@@ -42,7 +42,7 @@ namespace RawRabbit
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ResponseSerialized))
 			.Use<ReplyToExtractionMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.ReplyToExtracted))
-			.Use<TransientChannelMiddleware>()
+			.Use<PooledChannelMiddleware>(new PooledChannelOptions{ PoolNameFunc = c => RespondKey.ChannelPoolName})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.RespondChannelCreated))
 			.Use<BasicPublishMiddleware>(new BasicPublishOptions
 			{
