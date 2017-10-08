@@ -12,16 +12,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\RawRabbit\RawRabbit.csproj" />
     <ProjectReference Include="..\..\src\RawRabbit.DependencyInjection.Autofac\RawRabbit.DependencyInjection.Autofac.csproj" />
     <ProjectReference Include="..\..\src\RawRabbit.DependencyInjection.Ninject\RawRabbit.DependencyInjection.Ninject.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit\RawRabbit.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20170106-08" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
-    <PackageReference Include="Moq" Version="4.7.1" />
-    <PackageReference Include="xunit" Version="2.2.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.0" />
+    <PackageReference Include="Moq" Version="4.7.137" />
+    <PackageReference Include="xunit" Version="2.3.0" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
