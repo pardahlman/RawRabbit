@@ -26,7 +26,7 @@ namespace RawRabbit
 				props.Headers.TryAdd(PropertyHeaders.Sent, DateTime.UtcNow.ToString("O"));
 			}})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.BasicPropertiesCreated))
-			.Use<TransientChannelMiddleware>()
+			.Use<PooledChannelMiddleware>(new PooledChannelOptions{PoolNameFunc = c => PublishKey.Publish})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.ChannelCreated))
 			.Use<ReturnCallbackMiddleware>()
 			.Use<PublishAcknowledgeMiddleware>()
