@@ -1,8 +1,25 @@
+# 2.0.0-rc1
+
+ - [#279](https://github.com/pardahlman/RawRabbit/issues/279) - Re-write of channel management
+ - [#277](https://github.com/pardahlman/RawRabbit/issues/277) - Rename 'MandatoryCallback' to 'ReturnCallback'
+ - [#275](https://github.com/pardahlman/RawRabbit/issues/275) - Prohibit operation specific configuration to be used for unsupported operations
+ - [#274](https://github.com/pardahlman/RawRabbit/issues/274) - PublishConfirmException when doing RPC before publishing a message.
+ - [#272](https://github.com/pardahlman/RawRabbit/issues/272) - RequestAsync doesn't resume after broker restart (2.x)
+ - [#271](https://github.com/pardahlman/RawRabbit/issues/271) - Messages queued when the broker goes down in 2.x
+ - [#270](https://github.com/pardahlman/RawRabbit/issues/270) - Unexpected PublishConfirmExceptions with 2.x
+ - [#269](https://github.com/pardahlman/RawRabbit/pull/269) - Some typos contributed by ([cortex93](https://github.com/cortex93))
+ - [#268](https://github.com/pardahlman/RawRabbit/issues/268) - Polly Policies not Executing
+ - [#266](https://github.com/pardahlman/RawRabbit/issues/266) - Remove subscription for RPC request when queue name specified
+ - [#239](https://github.com/pardahlman/RawRabbit/issues/239) - Topology not recovering
+
+Commits: c2e788b37c...4c7f5c7aa4
+
+
 # 2.0.0-beta9
 
  - [#256](https://github.com/pardahlman/RawRabbit/issues/256) - Beta8: Failed message handling
  - [#255](https://github.com/pardahlman/RawRabbit/issues/255) - Beta8: Serialization type
- 
+
 Commits: 48ffb29dc1...ccf57abc43
 
 
