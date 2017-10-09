@@ -22,6 +22,7 @@
     <ProjectReference Include="..\..\src\RawRabbit.Operations.MessageSequence\RawRabbit.Operations.MessageSequence.csproj" />
     <ProjectReference Include="..\..\src\RawRabbit.Operations.Publish\RawRabbit.Operations.Publish.csproj" />
     <ProjectReference Include="..\..\src\RawRabbit.Operations.Request\RawRabbit.Operations.Request.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.Operations.Respond\RawRabbit.Operations.Respond.csproj" />
     <ProjectReference Include="..\RawRabbit.Messages.Sample\RawRabbit.Messages.Sample.csproj" />
   </ItemGroup>
 

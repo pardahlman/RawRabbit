@@ -16,6 +16,7 @@ using RawRabbit.Instantiation;
 using Serilog;
 using Serilog.Events;
 using ILogger = Serilog.ILogger;
+using Microsoft.Extensions.Hosting;
 
 namespace RawRabbit.AspNet.Sample
 {
@@ -54,6 +55,8 @@ namespace RawRabbit.AspNet.Sample
 							})
 					})
 				.AddMvc();
+
+			services.AddSingleton<IHostedService, BusService>();
 		}
 
 		public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
