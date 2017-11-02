@@ -29,7 +29,11 @@ namespace RawRabbit
 							.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.MessageDeserialized))
 							.Use<HandlerInvocationMiddleware >(ResponseHandlerOptionFactory.Create(new HandlerInvocationOptions
 							{
-								HandlerArgsFunc = context => new[] { context.GetMessage(), context.GetMessageContext() }
+								HandlerArgsFunc = context => new[]
+								{
+									context.GetMessage(),
+									context.GetMessageContextResolver()?.Invoke(context) ?? context.GetMessageContext()
+								}
 							}))
 					})
 					.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
