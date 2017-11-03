@@ -27,7 +27,7 @@ namespace RawRabbit
 								BodyTypeFunc = context => context.GetRequestMessageType()
 							})
 							.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.MessageDeserialized))
-							.Use<HandlerInvocationMiddleware >(ResponseHandlerOptionFactory.Create(new HandlerInvocationOptions
+							.Use<HandlerInvocationMiddleware>(ResponseHandlerOptionFactory.Create(new HandlerInvocationOptions
 							{
 								HandlerArgsFunc = context => new[]
 								{
@@ -71,7 +71,7 @@ namespace RawRabbit
 			return client
 				.InvokeAsync(RespondPipe, ctx =>
 				{
-					Func<object[], Task> genericHandler = args => (handler((TRequest) args[0], (TMessageContext) args[1])
+					Func<object[], Task> genericHandler = args => (handler((TRequest)args[0], (TMessageContext)args[1])
 						.ContinueWith(tResponse =>
 						{
 							if (tResponse.IsFaulted)
@@ -80,7 +80,10 @@ namespace RawRabbit
 						}, ct));
 					ctx.Properties.Add(RespondKey.IncomingMessageType, typeof(TRequest));
 					ctx.Properties.Add(RespondKey.OutgoingMessageType, typeof(TResponse));
-					ctx.AddMessageContextType<TMessageContext>();
+					if (!ctx.Properties.ContainsKey(Enrichers.MessageContext.Respond.PipeContextExtensions.PipebasedContextFunc))
+					{
+						ctx.AddMessageContextType<TMessageContext>();
+					}
 					ctx.Properties.Add(PipeKey.MessageHandler, genericHandler);
 					context?.Invoke(new RespondContext(ctx));
 				}, ct);
