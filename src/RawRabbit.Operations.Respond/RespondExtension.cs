@@ -23,8 +23,9 @@ namespace RawRabbit
 				})
 				.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.MessageDeserialized))
 				.Use<HandlerInvocationMiddleware>(ResponseHandlerOptionFactory.Create()) })
-			.Use<ExplicitAckMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.HandlerInvoked))
+			.Use<ExplicitAckMiddleware>()
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.MessageAcknowledged))
 			.Use<BasicPropertiesMiddleware>(new BasicPropertiesOptions
 			{
 				PropertyModier = (context, properties) =>

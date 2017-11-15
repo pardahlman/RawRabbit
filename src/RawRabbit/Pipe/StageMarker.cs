@@ -10,5 +10,6 @@
 		public const string MessageRecieved = "MessageRecieved";
 		public const string MessageDeserialized = "MessageDeserialized";
 		public const string HandlerInvoked = "HandlerInvoked";
+		public const string MessageAcknowledged = "MessageAcknowledged";
 	}
 }

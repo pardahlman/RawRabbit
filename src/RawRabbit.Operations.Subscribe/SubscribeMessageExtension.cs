@@ -18,8 +18,9 @@ namespace RawRabbit
 				.Use<BodyDeserializationMiddleware>()
 				.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.MessageDeserialized))
 				.Use<SubscribeInvocationMiddleware>()})
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.HandlerInvoked))
 			.Use<ExplicitAckMiddleware>()
-			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.HandlerInvoked));
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.MessageAcknowledged));
 
 		public static readonly Action<IPipeBuilder> SubscribePipe = pipe => pipe
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.Initialized))

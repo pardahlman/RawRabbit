@@ -32,6 +32,7 @@ namespace RawRabbit
 								HandlerArgsFunc = context => new[] { context.GetMessage(), context.GetMessageContext() }
 							}))
 					})
+					.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.HandlerInvoked))
 					.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
 					{
 						HeaderKeyFunc = c => PropertyHeaders.Context,
