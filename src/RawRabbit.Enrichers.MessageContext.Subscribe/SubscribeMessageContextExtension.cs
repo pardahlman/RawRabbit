@@ -64,7 +64,7 @@ namespace RawRabbit
 					SubscribePipe,
 					ctx =>
 					{
-						Func<object[], Task> genericHandler = args => subscribeMethod((TMessage)args[0], (TMessageContext)args[1]);
+						Func<object[], Task<Acknowledgement>> genericHandler = args => subscribeMethod((TMessage)args[0], (TMessageContext)args[1]);
 
 						ctx.Properties.TryAdd(PipeKey.MessageType, typeof(TMessage));
 						if (!ctx.Properties.ContainsKey(PipeContextExtensions.PipebasedContextFunc))

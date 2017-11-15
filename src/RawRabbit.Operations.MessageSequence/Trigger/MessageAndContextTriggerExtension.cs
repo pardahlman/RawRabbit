@@ -45,7 +45,7 @@ namespace RawRabbit.Operations.MessageSequence.Trigger
 			Action<IConsumerConfigurationBuilder> consumeConfig = null
 		)
 		{
-			Func<object[], Task> genericHandler = args => 
+			Func<object[], Task<Acknowledgement>> genericHandler = args => 
 				machineFunc((TStateMachine) args[0], (TMessage) args[1], (TMessageContext)args[2])
 					.ContinueWith<Acknowledgement>(t => new Ack());
 			Func<object, object, Guid> genericCorrFunc = (msg, ctx) => correlationFunc((TMessage) msg, (TMessageContext)ctx);

@@ -18,7 +18,7 @@ namespace RawRabbit.Pipe.Middleware
 		public Func<IPipeContext, IBasicConsumer> ConsumerFunc { get; set; }
 		public Func<IPipeContext, BasicDeliverEventArgs> DeliveryArgsFunc { get; set; }
 		public Func<IPipeContext, bool> AutoAckFunc { get; set; }
-		public Func<IPipeContext, Task> InvocationResultFunc { get; set; }
+		public Func<IPipeContext, Acknowledgement> GetMessageAcknowledgement { get; set; }
 		public Predicate<Acknowledgement> AbortExecution { get; set; }
 	}
 
@@ -29,7 +29,7 @@ namespace RawRabbit.Pipe.Middleware
 		protected readonly IChannelFactory ChannelFactory;
 		protected Func<IPipeContext, BasicDeliverEventArgs> DeliveryArgsFunc;
 		protected Func<IPipeContext, IBasicConsumer> ConsumerFunc;
-		protected Func<IPipeContext, Task> InvocationResultFunc;
+		protected Func<IPipeContext, Acknowledgement> MessageAcknowledgementFunc;
 		protected Predicate<Acknowledgement> AbortExecution;
 		protected Func<IPipeContext, bool> AutoAckFunc;
 
@@ -40,7 +40,7 @@ namespace RawRabbit.Pipe.Middleware
 			ChannelFactory = channelFactory;
 			DeliveryArgsFunc = options?.DeliveryArgsFunc ?? (context => context.GetDeliveryEventArgs());
 			ConsumerFunc = options?.ConsumerFunc ?? (context => context.GetConsumer());
-			InvocationResultFunc = options?.InvocationResultFunc ?? (context => context.GetMessageHandlerResult());
+			MessageAcknowledgementFunc = options?.GetMessageAcknowledgement ?? (context => context.GetMessageAcknowledgement());
 			AbortExecution = options?.AbortExecution ?? (ack => !(ack is Ack));
 			AutoAckFunc = options?.AutoAckFunc ?? (context => context.GetConsumeConfiguration().AutoAck);
 		}
@@ -61,10 +61,10 @@ namespace RawRabbit.Pipe.Middleware
 
 		protected virtual async Task<Acknowledgement> AcknowledgeMessageAsync(IPipeContext context)
 		{
-			var ack = (InvocationResultFunc(context) as Task<Acknowledgement>)?.Result;
+			var ack = MessageAcknowledgementFunc(context);
 			if (ack == null)
 			{
-				throw new NotSupportedException($"Invocation Result of Message Handler not found.");
+				throw new NotSupportedException("Invocation Result of Message Handler not found.");
 			}
 			var deliveryArgs = DeliveryArgsFunc(context);
 			var channel = ConsumerFunc(context).Model;

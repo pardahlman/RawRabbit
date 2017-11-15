@@ -52,7 +52,7 @@ namespace RawRabbit.Operations.Respond.Middleware
 			{
 				return;
 			}
-			context.Properties.TryAdd(PipeKey.MessageHandlerResult, Task.FromResult<Common.Acknowledgement>(new Ack()));
+			context.Properties.TryAdd(PipeKey.MessageAcknowledgement, new Ack());
 		}
 
 		protected virtual BasicDeliverEventArgs GetDeliveryArgs(IPipeContext context)

@@ -33,11 +33,6 @@ namespace RawRabbit.Operations.Request.Core
 			return context.Get<Type>(RequestKey.OutgoingMessageType);
 		}
 
-		public static Func<object, Task<object>> GetMessageHandler(this IPipeContext context)
-		{
-			return context.Get<Func<object, Task<object>>>(PipeKey.MessageHandler);
-		}
-
 		public static PublicationAddress GetPublicationAddress(this IPipeContext context)
 		{
 			return context.Get<PublicationAddress>(RequestKey.PublicationAddress);
