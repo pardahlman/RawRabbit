@@ -108,11 +108,6 @@ namespace RawRabbit.Pipe.Middleware
 				HandleReject(ack as Reject, channel, deliveryArgs);
 				return ack;
 			}
-			if (ack is Retry)
-			{
-				await HandleRetryAsync(ack as Retry, channel, deliveryArgs);
-				return ack;
-			}
 
 			throw new NotSupportedException($"Unable to handle {ack.GetType()} as an Acknowledgement.");
 		}
@@ -130,37 +125,6 @@ namespace RawRabbit.Pipe.Middleware
 		protected virtual void HandleReject(Reject reject, IModel channel, BasicDeliverEventArgs deliveryArgs)
 		{
 			channel.BasicReject(deliveryArgs.DeliveryTag, reject.Requeue);
-		}
-
-		protected virtual async Task HandleRetryAsync(Retry retry, IModel channel, BasicDeliverEventArgs deliveryArgs)
-		{
-			channel.BasicAck(deliveryArgs.DeliveryTag, false);
-
-			var deadLeterExchangeName = Conventions.RetryLaterExchangeConvention(retry.Span);
-			var deadLetterQueueName = Conventions.RetryLaterQueueNameConvetion(deliveryArgs.Exchange, retry.Span);
-			await Topology.DeclareExchangeAsync(new ExchangeDeclaration
-			{
-				Name = deadLeterExchangeName,
-				Durable = true,
-				ExchangeType = ExchangeType.Direct
-			});
-			await Topology.DeclareQueueAsync(new QueueDeclaration
-			{
-				Name = deadLetterQueueName,
-				Durable = true,
-				Arguments = new Dictionary<string, object>
-				{
-					{QueueArgument.DeadLetterExchange, deliveryArgs.Exchange},
-					{QueueArgument.Expires, Convert.ToInt32(retry.Span.Add(TimeSpan.FromSeconds(1)).TotalMilliseconds)},
-					{QueueArgument.MessageTtl, Convert.ToInt32(retry.Span.TotalMilliseconds)}
-				}
-			});
-			await Topology.BindQueueAsync(deadLetterQueueName, deadLeterExchangeName, deliveryArgs.RoutingKey);
-			using (var publishChannel = await ChannelFactory.CreateChannelAsync())
-			{
-				publishChannel.BasicPublish(deadLeterExchangeName, deliveryArgs.RoutingKey, deliveryArgs.BasicProperties, deliveryArgs.Body);
-			}
-			await Topology.UnbindQueueAsync(deadLetterQueueName, deadLeterExchangeName, deliveryArgs.RoutingKey);
 		}
 
 		protected virtual bool GetAutoAck(IPipeContext context)

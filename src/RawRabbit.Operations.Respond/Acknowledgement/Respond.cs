@@ -18,13 +18,5 @@ namespace RawRabbit.Operations.Respond.Acknowledgement
 		{
 			return new Reject<TResponse>(requeue);
 		}
-
-		public static Retry<TResponse> Retry<TResponse>(TimeSpan span)
-		{
-			return new Retry<TResponse>
-			{
-				Span = span
-			};
-		}
 	}
 }

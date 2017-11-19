@@ -1,10 +1,16 @@
-﻿using RawRabbit.Configuration;
+﻿using System;
+using RawRabbit.Configuration;
 using RawRabbit.Instantiation;
 
 namespace RawRabbit.IntegrationTests
 {
 	public static class RawRabbitFactory
 	{
+		public static Instantiation.Disposable.BusClient CreateTestClient(Action<IClientBuilder> plugins)
+		{
+			return CreateTestClient(new RawRabbitOptions {Plugins = plugins});
+		}
+
 		public static Instantiation.Disposable.BusClient CreateTestClient(RawRabbitOptions options = null)
 		{
 			return Instantiation.RawRabbitFactory.CreateSingleton(GetTestOptions(options));

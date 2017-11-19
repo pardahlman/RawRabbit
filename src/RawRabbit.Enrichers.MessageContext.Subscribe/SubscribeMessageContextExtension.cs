@@ -13,7 +13,7 @@ namespace RawRabbit
 	public static class SubscribeMessageContextExtension
 	{
 		public static readonly Action<IPipeBuilder> ConsumePipe = consume => consume
-			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.MessageRecieved))
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.MessageRecieved))
 			.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
 			{
 				HeaderKeyFunc = c => PropertyHeaders.Context,
