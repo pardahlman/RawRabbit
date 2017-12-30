@@ -273,5 +273,49 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 				Assert.Equal(msg.Prop, msgTcs.Task.Result.Prop);
 			}
 		}
+
+		[Fact]
+		public async Task Should_Be_Able_To_Declare_Exchange_And_Queue_Using_Declaration_Object()
+		{
+			const string ExchangeName = "rawrabbit.integrationtests.testmessages.declaration.object";
+			const string QueueName = "declaration.object.queue";
+			const string RoutingKey = "#";
+
+			using (var subscriber = RawRabbitFactory.CreateTestClient())
+			using (var publisher = RawRabbitFactory.CreateTestClient())
+			{
+				var msgTcs = new TaskCompletionSource<BasicMessage>();
+				var msg = new BasicMessage { Prop = Guid.NewGuid().ToString() };
+				await subscriber.DeclareExchangeAsync(new ExchangeDeclaration()
+				{
+					Name = ExchangeName,
+					ExchangeType = "fanout",
+					AutoDelete = true
+				});
+				await subscriber.DeclareQueueAsync(new QueueDeclaration()
+				{
+					Name = QueueName,
+					AutoDelete = true
+				});
+				await subscriber.BindQueueAsync(QueueName, ExchangeName, RoutingKey);
+
+				await publisher.PublishAsync(msg, ctx => ctx
+					.UsePublishConfiguration(cfg => cfg
+					.OnExchange(ExchangeName)));
+
+				await subscriber.SubscribeAsync<BasicMessage>(message =>
+				{
+					msgTcs.TrySetResult(message);
+					return Task.FromResult(true);
+				}, ctx => ctx.UseSubscribeConfiguration(cfg => cfg
+					.Consume(consume => consume
+						.OnExchange(ExchangeName)
+						.FromQueue(QueueName)
+						.WithRoutingKey(RoutingKey))));
+
+				await msgTcs.Task;
+				Assert.Equal(msg.Prop, msgTcs.Task.Result.Prop);
+			}
+		}
 	}
 }
