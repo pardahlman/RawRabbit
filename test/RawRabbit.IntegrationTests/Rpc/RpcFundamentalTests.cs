@@ -2,9 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using RawRabbit.IntegrationTests.TestMessages;
-using RawRabbit.Operations.Request.Core;
 using RawRabbit.Operations.Request.Middleware;
-using RawRabbit.Operations.Respond.Core;
 using Xunit;
 
 namespace RawRabbit.IntegrationTests.Rpc

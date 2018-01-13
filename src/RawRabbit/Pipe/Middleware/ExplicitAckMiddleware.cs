@@ -18,7 +18,7 @@ namespace RawRabbit.Pipe.Middleware
 		public Func<IPipeContext, IBasicConsumer> ConsumerFunc { get; set; }
 		public Func<IPipeContext, BasicDeliverEventArgs> DeliveryArgsFunc { get; set; }
 		public Func<IPipeContext, bool> AutoAckFunc { get; set; }
-		public Func<IPipeContext, Task> InvocationResultFunc { get; set; }
+		public Func<IPipeContext, Acknowledgement> GetMessageAcknowledgement { get; set; }
 		public Predicate<Acknowledgement> AbortExecution { get; set; }
 	}
 
@@ -29,7 +29,7 @@ namespace RawRabbit.Pipe.Middleware
 		protected readonly IChannelFactory ChannelFactory;
 		protected Func<IPipeContext, BasicDeliverEventArgs> DeliveryArgsFunc;
 		protected Func<IPipeContext, IBasicConsumer> ConsumerFunc;
-		protected Func<IPipeContext, Task> InvocationResultFunc;
+		protected Func<IPipeContext, Acknowledgement> MessageAcknowledgementFunc;
 		protected Predicate<Acknowledgement> AbortExecution;
 		protected Func<IPipeContext, bool> AutoAckFunc;
 
@@ -40,7 +40,7 @@ namespace RawRabbit.Pipe.Middleware
 			ChannelFactory = channelFactory;
 			DeliveryArgsFunc = options?.DeliveryArgsFunc ?? (context => context.GetDeliveryEventArgs());
 			ConsumerFunc = options?.ConsumerFunc ?? (context => context.GetConsumer());
-			InvocationResultFunc = options?.InvocationResultFunc ?? (context => context.GetMessageHandlerResult());
+			MessageAcknowledgementFunc = options?.GetMessageAcknowledgement ?? (context => context.GetMessageAcknowledgement());
 			AbortExecution = options?.AbortExecution ?? (ack => !(ack is Ack));
 			AutoAckFunc = options?.AutoAckFunc ?? (context => context.GetConsumeConfiguration().AutoAck);
 		}
@@ -61,10 +61,10 @@ namespace RawRabbit.Pipe.Middleware
 
 		protected virtual async Task<Acknowledgement> AcknowledgeMessageAsync(IPipeContext context)
 		{
-			var ack = (InvocationResultFunc(context) as Task<Acknowledgement>)?.Result;
+			var ack = MessageAcknowledgementFunc(context);
 			if (ack == null)
 			{
-				throw new NotSupportedException($"Invocation Result of Message Handler not found.");
+				throw new NotSupportedException("Invocation Result of Message Handler not found.");
 			}
 			var deliveryArgs = DeliveryArgsFunc(context);
 			var channel = ConsumerFunc(context).Model;
@@ -108,11 +108,6 @@ namespace RawRabbit.Pipe.Middleware
 				HandleReject(ack as Reject, channel, deliveryArgs);
 				return ack;
 			}
-			if (ack is Retry)
-			{
-				await HandleRetryAsync(ack as Retry, channel, deliveryArgs);
-				return ack;
-			}
 
 			throw new NotSupportedException($"Unable to handle {ack.GetType()} as an Acknowledgement.");
 		}
@@ -130,37 +125,6 @@ namespace RawRabbit.Pipe.Middleware
 		protected virtual void HandleReject(Reject reject, IModel channel, BasicDeliverEventArgs deliveryArgs)
 		{
 			channel.BasicReject(deliveryArgs.DeliveryTag, reject.Requeue);
-		}
-
-		protected virtual async Task HandleRetryAsync(Retry retry, IModel channel, BasicDeliverEventArgs deliveryArgs)
-		{
-			channel.BasicAck(deliveryArgs.DeliveryTag, false);
-
-			var deadLeterExchangeName = Conventions.RetryLaterExchangeConvention(retry.Span);
-			var deadLetterQueueName = Conventions.RetryLaterQueueNameConvetion(deliveryArgs.Exchange, retry.Span);
-			await Topology.DeclareExchangeAsync(new ExchangeDeclaration
-			{
-				Name = deadLeterExchangeName,
-				Durable = true,
-				ExchangeType = ExchangeType.Direct
-			});
-			await Topology.DeclareQueueAsync(new QueueDeclaration
-			{
-				Name = deadLetterQueueName,
-				Durable = true,
-				Arguments = new Dictionary<string, object>
-				{
-					{QueueArgument.DeadLetterExchange, deliveryArgs.Exchange},
-					{QueueArgument.Expires, Convert.ToInt32(retry.Span.Add(TimeSpan.FromSeconds(1)).TotalMilliseconds)},
-					{QueueArgument.MessageTtl, Convert.ToInt32(retry.Span.TotalMilliseconds)}
-				}
-			});
-			await Topology.BindQueueAsync(deadLetterQueueName, deadLeterExchangeName, deliveryArgs.RoutingKey);
-			using (var publishChannel = await ChannelFactory.CreateChannelAsync())
-			{
-				publishChannel.BasicPublish(deadLeterExchangeName, deliveryArgs.RoutingKey, deliveryArgs.BasicProperties, deliveryArgs.Body);
-			}
-			await Topology.UnbindQueueAsync(deadLetterQueueName, deadLeterExchangeName, deliveryArgs.RoutingKey);
 		}
 
 		protected virtual bool GetAutoAck(IPipeContext context)

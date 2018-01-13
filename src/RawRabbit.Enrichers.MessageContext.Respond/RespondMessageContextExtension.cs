@@ -32,6 +32,7 @@ namespace RawRabbit
 								HandlerArgsFunc = context => new[] { context.GetMessage(), context.GetMessageContext() }
 							}))
 					})
+					.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.HandlerInvoked))
 					.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
 					{
 						HeaderKeyFunc = c => PropertyHeaders.Context,
@@ -67,7 +68,7 @@ namespace RawRabbit
 			return client
 				.InvokeAsync(RespondPipe, ctx =>
 				{
-					Func<object[], Task> genericHandler = args => (handler((TRequest) args[0], (TMessageContext) args[1])
+					Func<object[], Task<Acknowledgement>> genericHandler = args => (handler((TRequest) args[0], (TMessageContext) args[1])
 						.ContinueWith(tResponse =>
 						{
 							if (tResponse.IsFaulted)

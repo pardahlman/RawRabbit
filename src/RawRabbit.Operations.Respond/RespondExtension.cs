@@ -23,8 +23,9 @@ namespace RawRabbit
 				})
 				.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.MessageDeserialized))
 				.Use<HandlerInvocationMiddleware>(ResponseHandlerOptionFactory.Create()) })
-			.Use<ExplicitAckMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(RespondStage.HandlerInvoked))
+			.Use<ExplicitAckMiddleware>()
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.MessageAcknowledged))
 			.Use<BasicPropertiesMiddleware>(new BasicPropertiesOptions
 			{
 				PropertyModier = (context, properties) =>
@@ -75,14 +76,11 @@ namespace RawRabbit
 			Action<IRespondContext> context = null,
 			CancellationToken ct = default(CancellationToken))
 		{
-			return client.RespondAsync<TRequest, TResponse>(request => handler
-					.Invoke(request)
-					.ContinueWith<TypedAcknowlegement<TResponse>>(t =>
-					{
-						if (t.IsFaulted)
-							throw t.Exception;
-						return new Ack<TResponse>(t.Result);
-					}, ct),
+			return client.RespondAsync<TRequest, TResponse>(async request =>
+				{
+					var response = await handler(request);
+					return new Ack<TResponse>(response);
+				},
 				context,
 				ct);
 		}
@@ -98,7 +96,7 @@ namespace RawRabbit
 					RespondPipe,
 					ctx =>
 					{
-						Func<object[], Task> genericHandler = args => handler((TRequest)args[0])
+						Func<object[], Task<Acknowledgement>> genericHandler = args => handler((TRequest)args[0])
 							.ContinueWith(tResponse =>
 							{
 								if (tResponse.IsFaulted)

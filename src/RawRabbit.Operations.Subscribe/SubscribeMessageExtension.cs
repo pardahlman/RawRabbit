@@ -18,8 +18,9 @@ namespace RawRabbit
 				.Use<BodyDeserializationMiddleware>()
 				.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.MessageDeserialized))
 				.Use<SubscribeInvocationMiddleware>()})
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.HandlerInvoked))
 			.Use<ExplicitAckMiddleware>()
-			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.HandlerInvoked));
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.MessageAcknowledged));
 
 		public static readonly Action<IPipeBuilder> SubscribePipe = pipe => pipe
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.Initialized))
@@ -41,11 +42,11 @@ namespace RawRabbit
 
 		public static Task SubscribeAsync<TMessage>(this IBusClient client, Func<TMessage, Task> subscribeMethod, Action<ISubscribeContext> context = null, CancellationToken ct = default(CancellationToken))
 		{
-			return client.SubscribeAsync<TMessage>(
-				message => subscribeMethod
-					.Invoke(message)
-					.ContinueWith<Acknowledgement>(t => new Ack(), ct),
-				context, ct);
+			return client.SubscribeAsync<TMessage>(async message =>
+			{
+				await subscribeMethod(message);
+				return new Ack();
+			}, context, ct);
 		}
 
 		public static Task SubscribeAsync<TMessage>(this IBusClient client, Func<TMessage, Task<Acknowledgement>> subscribeMethod, Action<ISubscribeContext> context = null, CancellationToken ct = default(CancellationToken))
@@ -54,10 +55,10 @@ namespace RawRabbit
 				SubscribePipe,
 				ctx =>
 				{
-					Func<object[], Task> genericHandler = args => subscribeMethod((TMessage) args[0]);
+					Func<object[], Task<Acknowledgement>> genericHandler = args => subscribeMethod((TMessage) args[0]);
 
-					ctx.Properties.Add(PipeKey.MessageType, typeof(TMessage));
-					ctx.Properties.Add(PipeKey.MessageHandler, genericHandler);
+					ctx.Properties.TryAdd(PipeKey.MessageType, typeof(TMessage));
+					ctx.Properties.TryAdd(PipeKey.MessageHandler, genericHandler);
 					context?.Invoke(new SubscribeContext(ctx));
 				}, ct);
 		}

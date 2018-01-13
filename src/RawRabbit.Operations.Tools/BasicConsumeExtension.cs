@@ -12,7 +12,7 @@ namespace RawRabbit
 		public static Task BasicConsumeAsync(this IBusClient busClient, Func<BasicDeliverEventArgs, Task<Acknowledgement>> consumeFunc,
 			Action<IPipeContext> context)
 		{
-			Func<object[], Task> genericFunc = args => consumeFunc(args[0] as BasicDeliverEventArgs);
+			Func<object[], Task<Acknowledgement>> genericFunc = args => consumeFunc(args[0] as BasicDeliverEventArgs);
 
 			return busClient
 				.InvokeAsync(pipe =>

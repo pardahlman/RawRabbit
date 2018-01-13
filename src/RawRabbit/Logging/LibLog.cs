@@ -39,7 +39,17 @@
 #pragma warning disable 1591
 
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
+[assembly: InternalsVisibleTo("RawRabbit.Enrichers.RetryLater")]
+[assembly: InternalsVisibleTo("RawRabbit.Operations.Get")]
+[assembly: InternalsVisibleTo("RawRabbit.Operations.MessageSequence")]
+[assembly: InternalsVisibleTo("RawRabbit.Operations.Publish")]
+[assembly: InternalsVisibleTo("RawRabbit.Operations.Request")]
+[assembly: InternalsVisibleTo("RawRabbit.Operations.Respond")]
+[assembly: InternalsVisibleTo("RawRabbit.Operations.StateMachine")]
+[assembly: InternalsVisibleTo("RawRabbit.Operations.Subscribe")]
+[assembly: InternalsVisibleTo("RawRabbit.Operations.Tools")]
 [assembly: SuppressMessage("Microsoft.Design", "CA1020:AvoidNamespacesWithFewTypes", Scope = "namespace", Target = "RawRabbit.Logging")]
 [assembly: SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed", Scope = "member", Target = "RawRabbit.Logging.Logger.#Invoke(RawRabbit.Logging.LogLevel,System.Func`1<System.String>,System.Exception,System.Object[])")]
 

@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using RawRabbit.Common;
 using RawRabbit.Enrichers.MessageContext.Context;
+using RawRabbit.Instantiation;
 using RawRabbit.IntegrationTests.TestMessages;
 using RawRabbit.IntegrationTests.TestMessages.Extras;
 using Xunit;
@@ -277,7 +278,7 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 		public async Task Should_Be_Able_To_Return_Retry()
 		{
 			using (var publisher = RawRabbitFactory.CreateTestClient())
-			using (var firstSubscriber = RawRabbitFactory.CreateTestClient())
+			using (var firstSubscriber = RawRabbitFactory.CreateTestClient(new RawRabbitOptions { Plugins = p => p.UseRetryLater()}))
 			using (var secondSubscriber = RawRabbitFactory.CreateTestClient())
 			{
 				/* Setup */
@@ -308,7 +309,7 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 		public async Task Should_Be_Able_To_Return_Retry_From_Subscriber_With_Context()
 		{
 			using (var publisher = RawRabbitFactory.CreateTestClient())
-			using (var firstSubscriber = RawRabbitFactory.CreateTestClient())
+			using (var firstSubscriber = RawRabbitFactory.CreateTestClient(p => p.UseRetryLater()))
 			using (var secondSubscriber = RawRabbitFactory.CreateTestClient())
 			{
 				/* Setup */
@@ -339,7 +340,7 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 		public async Task Should_Be_Able_To_Retry_Multiple_Times()
 		{
 			using (var publisher = RawRabbitFactory.CreateTestClient())
-			using (var subscriber = RawRabbitFactory.CreateTestClient())
+			using (var subscriber = RawRabbitFactory.CreateTestClient(p => p.UseRetryLater()))
 			{
 				/* Setup */
 				var firstTsc = new TaskCompletionSource<DateTime>();
@@ -374,7 +375,7 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 		public async Task Should_Handle_Concurrent_Retries()
 		{
 			using (var publisher = RawRabbitFactory.CreateTestClient())
-			using (var subscriber = RawRabbitFactory.CreateTestClient())
+			using (var subscriber = RawRabbitFactory.CreateTestClient(p => p.UseRetryLater()))
 			{
 				/* Setup */
 				var firstTsc = new TaskCompletionSource<DateTime>();

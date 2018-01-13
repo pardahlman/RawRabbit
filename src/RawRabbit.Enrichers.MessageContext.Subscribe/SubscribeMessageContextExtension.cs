@@ -13,7 +13,7 @@ namespace RawRabbit
 	public static class SubscribeMessageContextExtension
 	{
 		public static readonly Action<IPipeBuilder> ConsumePipe = consume => consume
-			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.MessageRecieved))
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.MessageRecieved))
 			.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
 			{
 				HeaderKeyFunc = c => PropertyHeaders.Context,
@@ -35,8 +35,9 @@ namespace RawRabbit
 						}
 					})
 			})
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.HandlerInvoked))
 			.Use<ExplicitAckMiddleware>()
-			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(MessageContextSubscibeStage.HandlerInvoked));
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.MessageAcknowledged));
 
 		public static readonly Action<IPipeBuilder> SubscribePipe = SubscribeMessageExtension.SubscribePipe + (pipe =>
 		{
@@ -63,15 +64,15 @@ namespace RawRabbit
 					SubscribePipe,
 					ctx =>
 					{
-						Func<object[], Task> genericHandler = args => subscribeMethod((TMessage)args[0], (TMessageContext)args[1]);
+						Func<object[], Task<Acknowledgement>> genericHandler = args => subscribeMethod((TMessage)args[0], (TMessageContext)args[1]);
 
-						context?.Invoke(new SubscribeContext(ctx));
-						ctx.Properties.Add(PipeKey.MessageType, typeof(TMessage));
+						ctx.Properties.TryAdd(PipeKey.MessageType, typeof(TMessage));
 						if (!ctx.Properties.ContainsKey(PipeContextExtensions.PipebasedContextFunc))
 						{
 							ctx.AddMessageContextType<TMessageContext>();
 						}
-						ctx.Properties.Add(PipeKey.MessageHandler, genericHandler);
+						ctx.Properties.TryAdd(PipeKey.MessageHandler, genericHandler);
+						context?.Invoke(new SubscribeContext(ctx));
 					}, token);
 		}
 	}

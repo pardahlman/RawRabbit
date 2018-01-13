@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RawRabbit.Common;
 using RawRabbit.Configuration;
 using RawRabbit.Configuration.BasicPublish;
 using RawRabbit.Configuration.Consume;
@@ -106,10 +107,9 @@ namespace RawRabbit.Pipe
 			return context.Get<BasicDeliverEventArgs>(PipeKey.DeliveryEventArgs);
 		}
 
-
-		public static Func<object[], Task> GetMessageHandler(this IPipeContext context)
+		public static Func<object[], Task<Acknowledgement>> GetMessageHandler(this IPipeContext context)
 		{
-			return context.Get<Func<object[], Task>>(PipeKey.MessageHandler);
+			return context.Get<Func<object[], Task<Acknowledgement>>>(PipeKey.MessageHandler);
 		}
 
 		public static object[] GetMessageHandlerArgs(this IPipeContext context)
@@ -120,6 +120,11 @@ namespace RawRabbit.Pipe
 		public static Task GetMessageHandlerResult(this IPipeContext context)
 		{
 			return context.Get<Task>(PipeKey.MessageHandlerResult);
+		}
+
+		public static Acknowledgement GetMessageAcknowledgement(this IPipeContext context)
+		{
+			return context.Get<Acknowledgement>(PipeKey.MessageAcknowledgement);
 		}
 
 		public static RawRabbitConfiguration GetClientConfiguration(this IPipeContext context)

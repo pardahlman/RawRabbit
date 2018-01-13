@@ -1,21 +1,22 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using RawRabbit.Common;
 
 namespace RawRabbit.Pipe.Middleware
 {
 	public class HandlerInvocationOptions
 	{
-		public Func<IPipeContext, Func<object[], Task>> MessageHandlerFunc { get; set; }
+		public Func<IPipeContext, Func<object[], Task<Acknowledgement>>> MessageHandlerFunc { get; set; }
 		public Func<IPipeContext, object[]> HandlerArgsFunc { get; set; }
-		public Action<IPipeContext, Task> PostInvokeAction { get; set; }
+		public Action<IPipeContext, Acknowledgement> PostInvokeAction { get; set; }
 	}
 
 	public class HandlerInvocationMiddleware : Middleware
 	{
 		protected Func<IPipeContext, object[]> HandlerArgsFunc;
-		protected Action<IPipeContext, Task> PostInvokeAction;
-		protected Func<IPipeContext, Func<object[], Task>> MessageHandlerFunc;
+		protected Action<IPipeContext, Acknowledgement> PostInvokeAction;
+		protected Func<IPipeContext, Func<object[], Task<Acknowledgement>>> MessageHandlerFunc;
 
 		public HandlerInvocationMiddleware(HandlerInvocationOptions options = null)
 		{
@@ -30,23 +31,14 @@ namespace RawRabbit.Pipe.Middleware
 			await Next.InvokeAsync(context, token);
 		}
 
-		protected virtual Task InvokeMessageHandler(IPipeContext context, CancellationToken token)
+		protected virtual async Task InvokeMessageHandler(IPipeContext context, CancellationToken token)
 		{
 			var args = HandlerArgsFunc(context);
 			var handler = MessageHandlerFunc(context);
 
-			return handler(args)
-				.ContinueWith(t =>
-				{
-					if (t.IsFaulted)
-					{
-						throw t.Exception;
-					}
-					context.Properties.TryAdd(PipeKey.MessageHandlerResult, t);
-					PostInvokeAction?.Invoke(context, t);
-					return t;
-				}, token)
-				.Unwrap();
+			var acknowledgement = await handler(args);
+			context.Properties.TryAdd(PipeKey.MessageAcknowledgement, acknowledgement);
+			PostInvokeAction?.Invoke(context, acknowledgement);
 		}
 	}
 }

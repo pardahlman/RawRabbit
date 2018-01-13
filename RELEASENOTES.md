@@ -1,3 +1,11 @@
+# 2.0.0-rc2
+
+ - [#289](https://github.com/pardahlman/RawRabbit/pull/289) - Add UseContext pipe extension to respond operation contributed by Paul Tierney ([tiredknees](https://github.com/tiredknees))
+ - [#263](https://github.com/pardahlman/RawRabbit/issues/263) - Retrying message in case of failure.
+
+Commits: 27b203ec76...35ecde7c03
+
+
 # 2.0.0-rc1
 
  - [#279](https://github.com/pardahlman/RawRabbit/issues/279) - Re-write of channel management
