@@ -1,36 +1,45 @@
 # Subscribe
 
-The extension methods again come to the rescue! Subscriptions again very much resembles the 1.x way of doing things with a cleaner separation of concerns.
+Subscribe is the act of receiving messages and act upon these. In order for a message to trigger the (user defined) message handler method, it has to be published to an exchange that has a queue bound to it with matching routing key to the published message's. By default RawRabbit setup compatible conventions so that any message published without any custom configuration can be subscribed to without any configuration.
 
-## BasicConsume
+## Install Subscribe Operation package
 
-First get the `Subscribe` operation package to enrich the BusClient with subscription/consuming capabilities
+The operation `SubscribeAsync` has its own NuGet package.
 
 ```nuget
 
   PM> Install-Package RawRabbit.Operations.Subscribe
 ```
 
-then you can
+Once installed messages can be subscribed to by calling
 
 ```csharp
+await busClient.SubscribeAsync<BasicMessage>(async message => {
+    // handle message here
+});
+```
 
-await _rabbitBus.BasicConsumeAsync(async args =>
-	{
-		await
-			Task.Run(() => MyTask());
+## Override default configuration
 
-		return new Ack();
+The configuration can be updated by enriching the pipe context with a `SubscribeConfiguration`
 
-	}, ctx => ctx
-		.UseConsumerConfiguration(cfg => cfg
-			.Consume(c => c
-					.WithRoutingKey("custom_routing_key")
-					.OnExchange("custom_exchange")
-					.WithPrefetchCount(100)
-			)
-			.FromDeclaredQueue(q => q
-					.WithName("custom_queue_name")
-			))
-);
+```charp
+await busClient.SubscribeAsync<BasicMessage>(async message =>
+{
+    // handle message here
+}, ctx => ctx
+    .UseSubscribeConfiguration(cfg => cfg
+        .Consume(c => c
+            .WithRoutingKey("custom_key")
+            .WithConsumerTag("custom_tag")
+            .WithPrefetchCount(2)
+            .WithNoLocal(false))
+        .FromDeclaredQueue(q => q
+            .WithName("custom_queue")
+            .WithAutoDelete()
+            .WithArgument(QueueArgument.DeadLetterExchange, "dlx"))
+        .OnDeclaredExchange(e=> e
+            .WithName("custom_exchange")
+            .WithType(ExchangeType.Topic))
+));
 ```
