@@ -32,6 +32,8 @@ namespace RawRabbit.Channel
 			{
 				_logger.Debug("Creating a new connection for {hostNameCount} hosts.", ClientConfig.Hostnames.Count);
 				Connection = ConnectionFactory.CreateConnection(ClientConfig.Hostnames);
+				Connection.ConnectionShutdown += (sender, args) =>
+					_logger.Warn("Connection was shutdown by {Initiator}. ReplyText {ReplyText}", args.Initiator, args.ReplyText);
 			}
 			catch (BrokerUnreachableException e)
 			{
@@ -43,8 +45,8 @@ namespace RawRabbit.Channel
 
 		public virtual async Task<IModel> CreateChannelAsync(CancellationToken token = default(CancellationToken))
 		{
-			token.ThrowIfCancellationRequested();
 			var connection = await GetConnectionAsync(token);
+			token.ThrowIfCancellationRequested();
 			var channel = connection.CreateModel();
 			Channels.Add(channel);
 			return channel;
@@ -80,11 +82,16 @@ namespace RawRabbit.Channel
 
 			_logger.Debug("Connection is recoverable. Waiting for 'Recovery' event to be triggered. ");
 			var recoverTcs = new TaskCompletionSource<IConnection>();
+			token.Register(() => recoverTcs.SetCanceled());
 
 			EventHandler<EventArgs> completeTask = null;
 			completeTask = (sender, args) =>
 			{
-				_logger.Debug("Connection has been recovered!");
+				if (recoverTcs.Task.IsCanceled)
+				{
+					return;
+				}
+				_logger.Info("Connection has been recovered!");
 				recoverTcs.TrySetResult(recoverable as IConnection);
 				recoverable.Recovery -= completeTask;
 			};

@@ -65,7 +65,7 @@ namespace RawRabbit.Channel
 
 			_timer = new Timer(state =>
 			{
-				var workPerChannel = ChannelRequestQueue.Count / Pool.Count;
+				var workPerChannel = Pool.Count == 0 ? int.MaxValue : ChannelRequestQueue.Count / Pool.Count;
 				var scaleUp = Pool.Count < _options.MaximumPoolSize;
 				var scaleDown = _options.MinimunPoolSize < Pool.Count;
 
@@ -73,12 +73,17 @@ namespace RawRabbit.Channel
 				if (scaleUp && _options.DesiredAverageWorkload < workPerChannel)
 				{
 					_logger.Debug("The estimated workload is {averageWorkload} operations/channel, which is higher than the desired workload ({desiredAverageWorkload}). Creating channel.", workPerChannel, _options.DesiredAverageWorkload);
+
+					var channelCancellation = new CancellationTokenSource(_options.RefreshInterval);
 					_factory
-						.CreateChannelAsync()
+						.CreateChannelAsync(channelCancellation.Token)
 						.ContinueWith(tChannel =>
 						{
-							Add(tChannel.Result);
-						});
+							if (tChannel.Status == TaskStatus.RanToCompletion)
+							{
+								Add(tChannel.Result);
+							}
+						}, CancellationToken.None);
 					return;
 				}
 
