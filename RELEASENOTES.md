@@ -1,3 +1,13 @@
+# 2.0.0-rc3
+
+ - [#301](https://github.com/pardahlman/RawRabbit/issues/301) - Recovery from the network failure
+ - [#299](https://github.com/pardahlman/RawRabbit/issues/299) - 2.0.0-rc1 - System.DivideByZeroException
+ - [#297](https://github.com/pardahlman/RawRabbit/issues/297) - RawRabbit Connection
+ - [#296](https://github.com/pardahlman/RawRabbit/pull/296) - Add extension method to declare exchange using ExchangeDeclaration object contributed by ([hopengfoong](https://github.com/hopengfoong))
+
+Commits: 5f06680b3d...ce749140ba
+
+
 # 2.0.0-rc2
 
  - [#289](https://github.com/pardahlman/RawRabbit/pull/289) - Add UseContext pipe extension to respond operation contributed by Paul Tierney ([tiredknees](https://github.com/tiredknees))
