@@ -6,7 +6,7 @@ using ZeroFormatter;
 
 namespace RawRabbit.Enrichers.ZeroFormatter
 {
-    public class ZeroFormatterSerializerWorker : ISerializer
+    internal class ZeroFormatterSerializerWorker : ISerializer
     {
         public string ContentType => "application/x-zeroformatter";
         private readonly MethodInfo _deserializeType;
