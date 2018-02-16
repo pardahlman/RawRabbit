@@ -23,10 +23,12 @@ namespace RawRabbit.Operations.Request.Middleware
 
 	public class ResponseConsumeMiddleware : Pipe.Middleware.Middleware
 	{
+		protected static readonly ConcurrentDictionary<IBasicConsumer, ConcurrentDictionary<string, TaskCompletionSource<BasicDeliverEventArgs>>> AllResponses =
+			new ConcurrentDictionary<IBasicConsumer, ConcurrentDictionary<string, TaskCompletionSource<BasicDeliverEventArgs>>>();
+
 		protected readonly IConsumerFactory ConsumerFactory;
 		protected readonly Pipe.Middleware.Middleware ResponsePipe;
 		private readonly ILog _logger = LogProvider.For<ResponseConsumeMiddleware>();
-		protected readonly ConcurrentDictionary<IBasicConsumer, ConcurrentDictionary<string, TaskCompletionSource<BasicDeliverEventArgs>>> AllResponses;
 		protected Func<IPipeContext, ConsumerConfiguration> ResponseConfigFunc;
 		protected Func<IPipeContext, string> CorrelationidFunc;
 		protected Func<IPipeContext, bool> DedicatedConsumerFunc;
@@ -38,7 +40,6 @@ namespace RawRabbit.Operations.Request.Middleware
 			DedicatedConsumerFunc = options?.UseDedicatedConsumer ?? (context => context.GetDedicatedResponseConsumer());
 			ConsumerFactory = consumerFactory;
 			ResponsePipe = factory.Create(options.ResponseRecieved);
-			AllResponses = new ConcurrentDictionary<IBasicConsumer, ConcurrentDictionary<string, TaskCompletionSource<BasicDeliverEventArgs>>>();
 		}
 
 		public override async Task InvokeAsync(IPipeContext context, CancellationToken token)
