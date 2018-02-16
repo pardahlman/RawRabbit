@@ -8,11 +8,11 @@ namespace RawRabbit.Enrichers.MessagePack
 		/// <summary>
 		/// Replaces the default serializer with MessagePack.
 		/// </summary>
-		public static IClientBuilder UseMessagePack(this IClientBuilder builder, bool useLz4 = false)
+		public static IClientBuilder UseMessagePack(this IClientBuilder builder, MessagePackFormat format = MessagePackFormat.Normal)
 		{
 			builder.Register(
 				pipe: p => { },
-				ioc: di => di.AddSingleton<ISerializer, MessagePackSerializerWorker>(resolver => new MessagePackSerializerWorker(useLz4)));
+				ioc: di => di.AddSingleton<ISerializer, MessagePackSerializerWorker>(resolver => new MessagePackSerializerWorker(format)));
 			return builder;
 		}
 	}

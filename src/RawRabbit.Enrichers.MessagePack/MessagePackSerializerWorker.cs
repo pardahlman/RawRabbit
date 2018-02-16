@@ -12,11 +12,11 @@ namespace RawRabbit.Enrichers.MessagePack
 		private readonly MethodInfo _deserializeType;
 		private readonly MethodInfo _serializeType;
 
-		public MessagePackSerializerWorker(bool useLz4)
+		public MessagePackSerializerWorker(MessagePackFormat format)
 		{
 			Type tp;
 
-			if (useLz4)
+			if (format == MessagePackFormat.LZ4Compression)
 				tp = typeof(LZ4MessagePackSerializer);
 			else
 				tp = typeof(MessagePackSerializer);
