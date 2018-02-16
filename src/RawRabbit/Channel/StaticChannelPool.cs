@@ -53,10 +53,17 @@ namespace RawRabbit.Channel
 			do
 			{
 				_current = _current?.Next ?? Pool.First;
+				if (_current == null)
+				{
+					_logger.Debug("Unable to server channels. Pool empty.");
+					Monitor.Exit(_workLock);
+					return;
+				}
 				if (_current.Value.IsClosed)
 				{
 					Pool.Remove(_current);
 					if (Pool.Count != 0) continue;
+					Monitor.Exit(_workLock);
 					if (Recoverables.Count == 0)
 					{
 						throw new ChannelAvailabilityException("No open channels in pool and no recoverable channels");

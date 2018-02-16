@@ -82,7 +82,7 @@ namespace RawRabbit.Channel
 
 			_logger.Debug("Connection is recoverable. Waiting for 'Recovery' event to be triggered. ");
 			var recoverTcs = new TaskCompletionSource<IConnection>();
-			token.Register(() => recoverTcs.SetCanceled());
+			token.Register(() => recoverTcs.TrySetCanceled());
 
 			EventHandler<EventArgs> completeTask = null;
 			completeTask = (sender, args) =>
