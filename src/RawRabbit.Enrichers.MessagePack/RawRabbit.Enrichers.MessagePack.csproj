@@ -3,6 +3,12 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard1.6;net451</TargetFrameworks>
     <Authors>LordMike</Authors>
+    <AssemblyTitle>RawRabbit.Enrichers.MessagePack</AssemblyTitle>
+    <VersionPrefix>2.0.0</VersionPrefix>
+    <PackageId>RawRabbit.Enrichers.MessagePack</PackageId>
+    <PackageTags>rabbitmq;rawrabbit;messagepack</PackageTags>
+    <PackageIconUrl>http://pardahlman.se/raw/icon.png</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/pardahlman/RawRabbit</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
