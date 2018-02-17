@@ -29,8 +29,8 @@ namespace RawRabbit
 			.Use<PooledChannelMiddleware>(new PooledChannelOptions{PoolNameFunc = c => PublishKey.Publish})
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.ChannelCreated))
 			.Use<ReturnCallbackMiddleware>()
-			.Use<PublishAcknowledgeMiddleware>()
 			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(PublishStage.PreMessagePublish))
+			.Use<PublishAcknowledgeMiddleware>()
 			.Use<BasicPublishMiddleware>(new BasicPublishOptions
 			{
 				BodyFunc = c => c.Get<byte[]>(PipeKey.SerializedMessage)
