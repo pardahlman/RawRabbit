@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Framing.Impl;
 using RawRabbit.Common;
 using RawRabbit.Exceptions;
 using RawRabbit.Logging;
@@ -27,14 +27,17 @@ namespace RawRabbit.Operations.Publish.Middleware
 		protected Func<IPipeContext, TimeSpan> TimeOutFunc;
 		protected Func<IPipeContext, IModel> ChannelFunc;
 		protected Func<IPipeContext, bool> EnabledFunc;
-		protected static ConcurrentDictionary<IModel, ConcurrentDictionary<ulong, TaskCompletionSource<ulong>>> ConfirmsDictionary = new ConcurrentDictionary<IModel, ConcurrentDictionary<ulong, TaskCompletionSource<ulong>>>();
-		protected static ConcurrentDictionary<IModel, ulong> ChannelSequences = new ConcurrentDictionary<IModel, ulong>();
+
+		protected static Dictionary<IModel, ConcurrentDictionary<ulong, TaskCompletionSource<ulong>>> ConfirmsDictionary =
+			new Dictionary<IModel, ConcurrentDictionary<ulong, TaskCompletionSource<ulong>>>();
+		protected static ConcurrentDictionary<IModel, object> ChannelLocks = new ConcurrentDictionary<IModel, object>();
+		protected static Dictionary<IModel, ulong> ChannelSequences = new Dictionary<IModel, ulong>();
 
 		public PublishAcknowledgeMiddleware(IExclusiveLock exclusive, PublishAcknowledgeOptions options = null)
 		{
 			_exclusive = exclusive;
 			TimeOutFunc = options?.TimeOutFunc ?? (context => context.GetPublishAcknowledgeTimeout());
-			ChannelFunc = options?.ChannelFunc ?? (context => PipeContextExtension.GetTransientChannel(context));
+			ChannelFunc = options?.ChannelFunc ?? (context => context.GetTransientChannel());
 			EnabledFunc = options?.EnabledFunc ?? (context => context.GetPublishAcknowledgeTimeout() != TimeSpan.MaxValue);
 		}
 
@@ -43,45 +46,33 @@ namespace RawRabbit.Operations.Publish.Middleware
 			var enabled = GetEnabled(context);
 			if (!enabled)
 			{
-				LogExtensions.Debug(_logger, "Publish Acknowledgement is disabled.");
+				_logger.Debug("Publish Acknowledgement is disabled.");
 				await Next.InvokeAsync(context, token);
 				return;
 			}
-
 			var channel = GetChannel(context);
+
 			if (!PublishAcknowledgeEnabled(channel))
 			{
 				EnableAcknowledgement(channel, token);
 			}
 
+			var channelLock = ChannelLocks.GetOrAdd(channel, c => new object());
 			var ackTcs = new TaskCompletionSource<ulong>();
-			var sequence = GetNextSequence(channel);
-			SetupTimeout(context, sequence, ackTcs);
-			if (!GetChannelDictionary(channel).TryAdd(sequence, ackTcs))
+
+			await _exclusive.ExecuteAsync(channelLock, o =>
 			{
-				LogExtensions.Info(_logger, "Unable to add ack '{publishSequence}' on channel {channelNumber}", sequence, channel.ChannelNumber);
-			};
-
-			await Next.InvokeAsync(context, token);
-			await ackTcs.Task;
-		}
-
-		protected virtual ulong GetNextSequence(IModel channel)
-		{
-			return ChannelSequences.AddOrUpdate(
-				channel,
-				c => c.NextPublishSeqNo,
-				(c, seq) =>
+				var sequence = channel.NextPublishSeqNo;
+				SetupTimeout(context, sequence, ackTcs);
+				if (!GetChannelDictionary(channel).TryAdd(sequence, ackTcs))
 				{
-					if (c.NextPublishSeqNo == 1 && seq != 2)
-					{
-						return c.NextPublishSeqNo;
-					}
-					seq++;
-					return seq > c.NextPublishSeqNo
-						? seq
-						: c.NextPublishSeqNo;
-				});
+					_logger.Info("Unable to add ack '{publishSequence}' on channel {channelNumber}", sequence, channel.ChannelNumber);
+				}
+				_logger.Info("Sequence {sequence} added to dictionary", sequence);
+
+				return Next.InvokeAsync(context, token);
+			}, token);
+			await ackTcs.Task;
 		}
 
 		protected virtual TimeSpan GetAcknowledgeTimeOut(IPipeContext context)
@@ -106,9 +97,11 @@ namespace RawRabbit.Operations.Publish.Middleware
 
 		protected virtual ConcurrentDictionary<ulong, TaskCompletionSource<ulong>> GetChannelDictionary(IModel channel)
 		{
-			return ConfirmsDictionary.GetOrAdd(
-				key: channel,
-				valueFactory: c => new ConcurrentDictionary<ulong, TaskCompletionSource<ulong>>());
+			if (!ConfirmsDictionary.ContainsKey(channel))
+			{
+				ConfirmsDictionary.Add(channel, new ConcurrentDictionary<ulong, TaskCompletionSource<ulong>>());
+			}
+			return ConfirmsDictionary[channel];
 		}
 
 		protected virtual void EnableAcknowledgement(IModel channel, CancellationToken token)
@@ -128,7 +121,7 @@ namespace RawRabbit.Operations.Publish.Middleware
 					{
 						if (args.Multiple)
 						{
-							foreach (var deliveryTag in dictionary.Keys.Where<ulong>(k => k <= args.DeliveryTag).ToList())
+							foreach (var deliveryTag in dictionary.Keys.Where(k => k <= args.DeliveryTag).ToList())
 							{
 								if (!dictionary.TryRemove(deliveryTag, out var tcs))
 								{
@@ -142,7 +135,11 @@ namespace RawRabbit.Operations.Publish.Middleware
 						}
 						else
 						{
-							dictionary.TryRemove(args.DeliveryTag, out var tcs);
+							_logger.Info("Recieived ack for {deliveryTag}", args.DeliveryTag);
+							if (!dictionary.TryRemove(args.DeliveryTag, out var tcs))
+							{
+								_logger.Warn("Unable to find ack tcs for {deliveryTag}", args.DeliveryTag);
+							}
 							tcs?.TrySetResult(args.DeliveryTag);
 						}
 					}, token);
