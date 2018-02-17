@@ -63,13 +63,14 @@ namespace RawRabbit.Middleware
 			_logger.Info("Message is marked for Retry. Will be published on exchange {exchangeName} with routing key {routingKey} in {retryIn}", deliveryArgs.Exchange, deliveryArgs.RoutingKey, retryAck.Span);
 			UpdateRetryHeaders(deliveryArgs, context);
 			var deadLetterQueueName = GetDeadLetterQueueName(deliveryArgs.Exchange, retryAck.Span);
+			var deadLetterExchange = context?.GetConsumerConfiguration()?.Exchange.Name ?? deliveryArgs.Exchange;
 			await TopologyProvider.DeclareQueueAsync(new QueueDeclaration
 			{
 				Name = deadLetterQueueName,
 				Durable = true,
 				Arguments = new Dictionary<string, object>
 				{
-					{QueueArgument.DeadLetterExchange, deliveryArgs.Exchange},
+					{QueueArgument.DeadLetterExchange, deadLetterExchange},
 					{QueueArgument.Expires, Convert.ToInt32(retryAck.Span.Add(TimeSpan.FromSeconds(1)).TotalMilliseconds)},
 					{QueueArgument.MessageTtl, Convert.ToInt32(retryAck.Span.TotalMilliseconds)}
 				}
