@@ -1,3 +1,16 @@
+# 2.0.0-rc4
+
+ - [#315](https://github.com/pardahlman/RawRabbit/issues/315) - Issues with Publish Acknowledgement when publishing multiple messages concurrently +fix
+ - [#314](https://github.com/pardahlman/RawRabbit/issues/314) - HandleRetryAsync: Watch out when working with ExchangeBindings
+ - [#310](https://github.com/pardahlman/RawRabbit/pull/310) - Add initial version of MessagePack formatter contributed by Michael Bisbjerg ([LordMike](https://github.com/LordMike))
+ - [#309](https://github.com/pardahlman/RawRabbit/pull/309) - Add initial version of ZeroFormatter enricher contributed by Michael Bisbjerg ([LordMike](https://github.com/LordMike))
+ - [#304](https://github.com/pardahlman/RawRabbit/pull/304) - (#301) Recovery from connection failure contributed by ([drak25](https://github.com/drak25))
+ - [#303](https://github.com/pardahlman/RawRabbit/issues/303) - Publishing suddenly stops and channel workload increases indefinetly
+ - [#301](https://github.com/pardahlman/RawRabbit/issues/301) - Recovery from the network failure
+
+Commits: 4446c3c65a...5fe32ab7ea
+
+
 # 2.0.0-rc3
 
  - [#301](https://github.com/pardahlman/RawRabbit/issues/301) - Recovery from the network failure
