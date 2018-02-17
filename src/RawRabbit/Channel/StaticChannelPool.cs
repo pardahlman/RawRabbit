@@ -122,7 +122,7 @@ namespace RawRabbit.Channel
 		public virtual Task<IModel> GetAsync(CancellationToken ct = default(CancellationToken))
 		{
 			var channelTcs = ChannelRequestQueue.Enqueue();
-			ct.Register(() => channelTcs.SetCanceled());
+			ct.Register(() => channelTcs.TrySetCanceled());
 			return channelTcs.Task;
 		}
 
