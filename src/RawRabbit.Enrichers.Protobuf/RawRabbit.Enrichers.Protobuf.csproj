@@ -2,6 +2,13 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard1.5;net451</TargetFrameworks>
+    <Authors>pardahlman</Authors>
+    <AssemblyTitle>RawRabbit.Enrichers.ZeroFormatter</AssemblyTitle>
+    <VersionPrefix>2.0.0</VersionPrefix>
+    <PackageId>RawRabbit.Enrichers.Protobuf</PackageId>
+    <PackageTags>rabbitmq;rawrabbit;protobuf</PackageTags>
+    <PackageIconUrl>http://pardahlman.se/raw/icon.png</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/pardahlman/RawRabbit</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
