@@ -1,11 +1,8 @@
 ﻿using System;
-using System.IO;
-using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using ProtoBuf;
 using RawRabbit.Exceptions;
 using RawRabbit.Instantiation;
-using RawRabbit.Pipe;
 using RawRabbit.Pipe.Middleware;
 using Xunit;
 
