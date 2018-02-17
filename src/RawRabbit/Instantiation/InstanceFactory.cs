@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using RawRabbit.Channel.Abstraction;
 using RawRabbit.Common;
 using RawRabbit.Configuration;
 using RawRabbit.DependencyInjection;
@@ -24,7 +25,7 @@ namespace RawRabbit.Instantiation
 
 		public IBusClient Create()
 		{
-			return new BusClient(_resolver.GetService<IPipeBuilderFactory>(), _resolver.GetService<IPipeContextFactory>());
+			return new BusClient(_resolver.GetService<IPipeBuilderFactory>(), _resolver.GetService<IPipeContextFactory>(), _resolver.GetService<IChannelFactory>());
 		}
 
 		public void Dispose()
