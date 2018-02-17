@@ -1,6 +1,5 @@
 ﻿using System;
 using RawRabbit.DependencyInjection;
-using RawRabbit.Logging;
 
 namespace RawRabbit.Instantiation
 {
