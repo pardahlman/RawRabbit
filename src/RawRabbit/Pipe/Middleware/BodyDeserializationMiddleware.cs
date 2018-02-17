@@ -36,7 +36,7 @@ namespace RawRabbit.Pipe.Middleware
 			ActivateContentTypeCheck = options?.ActivateContentTypeCheck ?? (context => context.GetContentTypeCheckActivated());
 		}
 
-		public override async Task InvokeAsync(IPipeContext context, CancellationToken token)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			if (ContentTypeCheckActivated(context))
 			{
@@ -48,7 +48,7 @@ namespace RawRabbit.Pipe.Middleware
 			}
 			var message = GetMessage(context);
 			SaveInContext(context, message);
-			await Next.InvokeAsync(context, token);
+			return Next.InvokeAsync(context, token);
 		}
 
 		protected virtual bool ContentTypeCheckActivated(IPipeContext context)

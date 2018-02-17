@@ -20,7 +20,7 @@ namespace RawRabbit.Pipe.Middleware
 			Stage = options.Stage;
 		}
 
-		public override async Task InvokeAsync(IPipeContext context, CancellationToken token)
+		public override Task InvokeAsync(IPipeContext context, CancellationToken token)
 		{
 			if (Next is NoOpMiddleware || Next is CancellationMiddleware)
 			{
@@ -30,7 +30,7 @@ namespace RawRabbit.Pipe.Middleware
 			{
 				_logger.Info("Invoking additional middlewares on stage {pipeStage}", Stage);
 			}
-			await Next.InvokeAsync(context, token);
+			return Next.InvokeAsync(context, token);
 		}
 	}
 
