@@ -38,7 +38,7 @@ Set up strongly typed publish/subscribe in just a few lines of code.
 var client = RawRabbitFactory.CreateSingleton();
 await client.SubscribeAsync<BasicMessage>(async msg =>
 {
-  Console.WriteLine($"Recieved: {msg.Prop}.");
+  Console.WriteLine($"Received: {msg.Prop}.");
 });
 
 await client.PublishAsync(new BasicMessage { Prop = "Hello, world!"});
@@ -97,9 +97,9 @@ await client.SubscribeAsync<BasicMessage>(async msg =>
 Add or change properties in the `IPipeContext` to tailor calls for specific type of messages. This makes it possible to modifly the topology features for calls, publish confirm timeout, consumer concurrency and much more
 
 ```csharp
-await subscriber.SubscribeAsync<BasicMessage>(recieved =>
+await subscriber.SubscribeAsync<BasicMessage>(received =>
 {
-  recievedTcs.TrySetResult(recieved);
+  receivedTcs.TrySetResult(received);
   return Task.FromResult(true);
 }, ctx => ctx
   .UseSubscribeConfiguration(cfg => cfg
