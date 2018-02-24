@@ -7,7 +7,8 @@ namespace RawRabbit.Serialization
 	public class JsonSerializer : StringSerializerBase
 	{
 		private readonly Newtonsoft.Json.JsonSerializer _json;
-		public override string ContentType => "application/json";
+		private const string _applicationJson = "application/json";
+		public override string ContentType => _applicationJson;
 
 		public JsonSerializer(Newtonsoft.Json.JsonSerializer json)
 		{
