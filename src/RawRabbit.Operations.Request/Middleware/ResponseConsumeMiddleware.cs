@@ -25,7 +25,7 @@ namespace RawRabbit.Operations.Request.Middleware
 	{
 		protected static readonly ConcurrentDictionary<IBasicConsumer, ConcurrentDictionary<string, TaskCompletionSource<BasicDeliverEventArgs>>> AllResponses =
 			new ConcurrentDictionary<IBasicConsumer, ConcurrentDictionary<string, TaskCompletionSource<BasicDeliverEventArgs>>>();
-
+		
 		protected readonly IConsumerFactory ConsumerFactory;
 		protected readonly Pipe.Middleware.Middleware ResponsePipe;
 		private readonly ILog _logger = LogProvider.For<ResponseConsumeMiddleware>();
@@ -59,13 +59,13 @@ namespace RawRabbit.Operations.Request.Middleware
 			{
 				consumer = await ConsumerFactory.GetConfiguredConsumerAsync(respondCfg.Consume, token: token);
 			}
+
 			var responses = AllResponses.GetOrAdd(consumer, c =>
 				{
 					var pendings = new ConcurrentDictionary<string, TaskCompletionSource<BasicDeliverEventArgs>>();
 					c.OnMessage((sender, args) =>
 					{
-						TaskCompletionSource<BasicDeliverEventArgs> tsc;
-						if (!pendings.TryGetValue(args.BasicProperties.CorrelationId, out tsc))
+						if (!pendings.TryRemove(args.BasicProperties.CorrelationId, out var tsc))
 							return;
 						tsc.TrySetResult(args);
 					});
