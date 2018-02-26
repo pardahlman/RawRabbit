@@ -9,6 +9,7 @@
     <PackageTags>rabbitmq;rawrabbit;protobuf</PackageTags>
     <PackageIconUrl>http://pardahlman.se/raw/icon.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/pardahlman/RawRabbit</PackageProjectUrl>
+    <Description>Serialize messages with Protobuf in RawRabbit</Description>
   </PropertyGroup>
 
   <ItemGroup>

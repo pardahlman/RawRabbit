@@ -9,6 +9,7 @@
     <PackageTags>rabbitmq;rawrabbit;zeroformatter</PackageTags>
     <PackageIconUrl>http://pardahlman.se/raw/icon.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/pardahlman/RawRabbit</PackageProjectUrl>
+    <Description>Serialize messages with ZeroFormatter in RawRabbit</Description>
   </PropertyGroup>
 
   <ItemGroup>
