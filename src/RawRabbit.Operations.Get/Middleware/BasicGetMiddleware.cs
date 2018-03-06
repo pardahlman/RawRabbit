@@ -23,7 +23,7 @@ namespace RawRabbit.Operations.Get.Middleware
 
 		public BasicGetMiddleware(BasicGetOptions options = null)
 		{
-			ChannelFunc = options?.ChannelFunc ?? (context => context.GetChannel());
+			ChannelFunc = options?.ChannelFunc ?? (context => context.GetTransientChannel());
 			QueueNameFunc = options?.QueueNameFunc ?? (context => context.GetGetConfiguration()?.QueueName);
 			AutoAckFunc = options?.AutoAckFunc ?? (context => context.GetGetConfiguration()?.AutoAck ?? false);
 			PostExecutionAction = options?.PostExecutionAction;
