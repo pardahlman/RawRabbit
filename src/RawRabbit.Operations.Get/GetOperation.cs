@@ -19,7 +19,7 @@ namespace RawRabbit
 			.Use<BasicGetMiddleware>()
 			.Use<AckableResultMiddleware>(new AckableResultOptions
 			{
-				DeliveryTagFunc = context => context.GetBasicGetResult().DeliveryTag,
+				DeliveryTagFunc = context => context.GetBasicGetResult()?.DeliveryTag ?? 0,
 				ContentFunc = context => context.GetBasicGetResult()
 			});
 
