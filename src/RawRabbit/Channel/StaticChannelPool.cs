@@ -46,36 +46,49 @@ namespace RawRabbit.Channel
 
 			if (!Monitor.TryEnter(_workLock))
 			{
+				_logger.Debug("Unable to aquire work lock for service channels.");
 				return;
 			}
 
-			_logger.Debug("Starting serving channels.");
-			do
+			try
 			{
-				_current = _current?.Next ?? Pool.First;
-				if (_current == null)
+				_logger.Debug("Starting serving channels.");
+				do
 				{
-					_logger.Debug("Unable to server channels. Pool empty.");
-					Monitor.Exit(_workLock);
-					return;
-				}
-				if (_current.Value.IsClosed)
-				{
-					Pool.Remove(_current);
-					if (Pool.Count != 0) continue;
-					Monitor.Exit(_workLock);
-					if (Recoverables.Count == 0)
+					_current = _current?.Next ?? Pool.First;
+					if (_current == null)
 					{
-						throw new ChannelAvailabilityException("No open channels in pool and no recoverable channels");
+						_logger.Debug("Unable to server channels. Pool empty.");
+						return;
 					}
-					return;
-				}
-				if(ChannelRequestQueue.TryDequeue(out var cTsc))
-				{
-					cTsc.TrySetResult(_current.Value);
-				}
-			} while (!ChannelRequestQueue.IsEmpty);
-			Monitor.Exit(_workLock);
+					if (_current.Value.IsClosed)
+					{
+						Pool.Remove(_current);
+						if (Pool.Count != 0)
+						{
+							continue;
+						}
+						if (Recoverables.Count == 0)
+						{
+							throw new ChannelAvailabilityException("No open channels in pool and no recoverable channels");
+						}
+						_logger.Info("No open channels in pool, but {recoveryCount} waiting for recovery", Recoverables.Count);
+						return;
+					}
+					if (ChannelRequestQueue.TryDequeue(out var cTsc))
+					{
+						cTsc.TrySetResult(_current.Value);
+					}
+				} while (!ChannelRequestQueue.IsEmpty);
+			}
+			catch (Exception e)
+			{
+				_logger.Info(e, "An unhandled exception occured when serving channels.");
+			}
+			finally
+			{
+				Monitor.Exit(_workLock);
+			}
 		}
 
 		protected virtual int GetActiveChannelCount()
