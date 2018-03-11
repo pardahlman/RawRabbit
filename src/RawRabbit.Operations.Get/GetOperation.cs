@@ -15,7 +15,7 @@ namespace RawRabbit
 	{
 		public static readonly Action<IPipeBuilder> UntypedGetPipe = pipe => pipe
 			.Use<GetConfigurationMiddleware>()
-			.Use<PooledChannelMiddleware>()
+			.Use<ChannelCreationMiddleware>()
 			.Use<BasicGetMiddleware>()
 			.Use<AckableResultMiddleware>(new AckableResultOptions
 			{
