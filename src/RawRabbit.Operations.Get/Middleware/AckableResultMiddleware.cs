@@ -33,7 +33,7 @@ namespace RawRabbit.Operations.Get.Middleware
 		public AckableResultMiddleware(AckableResultOptions<TResult> options = null)
 		{
 			GetResultFunc = options?.ContentFunc;
-			ChannelFunc = options?.ChannelFunc ?? (context => context.GetChannel());
+			ChannelFunc = options?.ChannelFunc ?? (context => context.GetTransientChannel());
 			PostExecutionAction = options?.PostExecutionAction;
 			DeliveryTagFunc = options?.DeliveryTagFunc;
 		}

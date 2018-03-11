@@ -15,11 +15,11 @@ namespace RawRabbit
 	{
 		public static readonly Action<IPipeBuilder> UntypedGetPipe = pipe => pipe
 			.Use<GetConfigurationMiddleware>()
-			.Use<ChannelCreationMiddleware>()
+			.Use<PooledChannelMiddleware>()
 			.Use<BasicGetMiddleware>()
 			.Use<AckableResultMiddleware>(new AckableResultOptions
 			{
-				DeliveryTagFunc = context => context.GetBasicGetResult().DeliveryTag,
+				DeliveryTagFunc = context => context.GetBasicGetResult()?.DeliveryTag ?? 0,
 				ContentFunc = context => context.GetBasicGetResult()
 			});
 

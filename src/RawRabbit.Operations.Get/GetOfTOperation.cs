@@ -16,7 +16,7 @@ namespace RawRabbit
 		public static readonly Action<IPipeBuilder> DeserializedBodyGetPipe = pipe => pipe
 			.Use<GetConfigurationMiddleware>()
 			.Use<ConventionNamingMiddleware>()
-			.Use<ChannelCreationMiddleware>()
+			.Use<PooledChannelMiddleware>()
 			.Use<BasicGetMiddleware>()
 			.Use<BodyDeserializationMiddleware>(new MessageDeserializationOptions
 			{
