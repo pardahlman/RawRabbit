@@ -49,7 +49,7 @@ namespace RawRabbit.DependencyInjection
 				.AddSingleton<IClientPropertyProvider, ClientPropertyProvider>()
 				.AddSingleton<ISerializer>(resolver => new Serialization.JsonSerializer(new Newtonsoft.Json.JsonSerializer
 				{
-					TypeNameAssemblyFormat = FormatterAssemblyStyle.Simple,
+					TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
 					Formatting = Formatting.None,
 					CheckAdditionalContent = true,
 					ContractResolver = new CamelCasePropertyNamesContractResolver(),
