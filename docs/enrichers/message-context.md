@@ -32,7 +32,7 @@ await publisher.PublishAsync(new BasicMessage(), ctx => ctx
     }));
 ```
 
-## Incomming messages
+## Incoming messages
 
 The Subscribe and Response operations each have dedicated enrichers that adds new methods to the bus client for consuming a message with message context
 
@@ -43,7 +43,7 @@ await c.SubscribeAsync<BasicMessage, MessageContext>(async (message, context) =>
 });
 ```
 
-If desired, the message context passed in to the message handler can be replaced by any property found in the pipe.
+If desired, the message context passed into the message handler can be replaced by any property found in the pipe.
 
 ```csharp
 await client.SubscribeAsync<BasicMessage, BasicDeliverEventArgs>(async (msg, args) =>
