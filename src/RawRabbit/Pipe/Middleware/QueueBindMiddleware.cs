@@ -41,7 +41,7 @@ namespace RawRabbit.Pipe.Middleware
 
 		protected virtual Task BindQueueAsync(string queue, string exchange, string routingKey, IPipeContext context, CancellationToken ct)
 		{
-			return TopologyProvider.BindQueueAsync(queue, exchange, routingKey);
+			return TopologyProvider.BindQueueAsync(queue, exchange, routingKey, context.GetConsumeConfiguration()?.Arguments);
 		}
 
 		protected virtual string GetRoutingKey(IPipeContext context)
