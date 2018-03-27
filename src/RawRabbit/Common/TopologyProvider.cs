@@ -81,7 +81,7 @@ namespace RawRabbit.Common
 				return _completed;
 			}
 
-			var bindKey = $"{queue}_{exchange}_{routingKey}";
+			var bindKey = CreateBindKey(queue, exchange, routingKey, arguments);
 			if (_queueBinds.Contains(bindKey))
 			{
 				return _completed;
@@ -175,7 +175,9 @@ namespace RawRabbit.Common
 			var bindKey = $"{queue}_{exchange}_{routingKey}";
 			if (arguments != null && arguments.Count > 0)
 			{
-				bindKey = $"{bindKey}_{string.Join("_", arguments.Select(pair => $"{pair.Key}:{pair.Value}"))}";
+				// order the arguments, for the key to be identical no matter the ordering
+				IOrderedEnumerable<KeyValuePair<string, object>> orderedArguments = arguments.OrderBy(pair => pair.Key);
+				bindKey = $"{bindKey}_{string.Join("_", orderedArguments.Select(pair => $"{pair.Key}:{pair.Value}"))}";
 			}
 			return bindKey;
 		}
