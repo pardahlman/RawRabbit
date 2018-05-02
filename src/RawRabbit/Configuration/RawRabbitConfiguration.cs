@@ -76,6 +76,8 @@ namespace RawRabbit.Configuration
 		public string Password { get; set; }
 		public int Port { get; set; }
 		public List<string> Hostnames { get; set; }
+		// Backwards Compatible, Customize Connection Label
+		public string ClientProvidedName { get; set; } = null;
 		public TimeSpan RecoveryInterval { get; set; }
 
 		public RawRabbitConfiguration()
