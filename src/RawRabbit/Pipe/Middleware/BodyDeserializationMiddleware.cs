@@ -43,7 +43,7 @@ namespace RawRabbit.Pipe.Middleware
 				var msgContentType = GetMessageContentType(context);
 				if (!CanSerializeMessage(msgContentType))
 				{
-					throw new SerializationException($"Registered serializer supports {Serializer.ContentType}, recieved message uses {msgContentType}.");
+					throw new SerializationException($"Registered serializer supports {Serializer.ContentType}, received message uses {msgContentType}.");
 				}
 			}
 			var message = GetMessage(context);
@@ -60,7 +60,7 @@ namespace RawRabbit.Pipe.Middleware
 		{
 			if (string.IsNullOrEmpty(msgContentType))
 			{
-				_logger.Debug("Recieved message has no content type defined. Assuming it can be processed.");
+				_logger.Debug("Received message has no content type defined. Assuming it can be processed.");
 				return true;
 			}
 			return string.Equals(msgContentType, Serializer.ContentType, StringComparison.CurrentCultureIgnoreCase);

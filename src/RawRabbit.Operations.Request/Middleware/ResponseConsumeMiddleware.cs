@@ -15,7 +15,7 @@ namespace RawRabbit.Operations.Request.Middleware
 {
 	public class ResponseConsumerOptions
 	{
-		public Action<IPipeBuilder> ResponseRecieved { get; set; }
+		public Action<IPipeBuilder> ResponseReceived { get; set; }
 		public Func<IPipeContext, ConsumerConfiguration> ResponseConfigFunc { get; set; }
 		public Func<IPipeContext, string> CorrelationIdFunc { get; set; }
 		public Func<IPipeContext, bool> UseDedicatedConsumer { get; set; }
@@ -39,7 +39,7 @@ namespace RawRabbit.Operations.Request.Middleware
 			CorrelationidFunc = options?.CorrelationIdFunc ?? (context => context.GetBasicProperties()?.CorrelationId);
 			DedicatedConsumerFunc = options?.UseDedicatedConsumer ?? (context => context.GetDedicatedResponseConsumer());
 			ConsumerFactory = consumerFactory;
-			ResponsePipe = factory.Create(options.ResponseRecieved);
+			ResponsePipe = factory.Create(options.ResponseReceived);
 		}
 
 		public override async Task InvokeAsync(IPipeContext context, CancellationToken token)
@@ -77,7 +77,7 @@ namespace RawRabbit.Operations.Request.Middleware
 			await Next.InvokeAsync(context, token);
 			token.Register(() => responseTsc.TrySetCanceled());
 			await responseTsc.Task;
-			_logger.Info("Message '{messageId}' for correlatrion '{correlationId}' recieved.", responseTsc.Task.Result.BasicProperties.MessageId, correlationId);
+			_logger.Info("Message '{messageId}' for correlatrion '{correlationId}' received.", responseTsc.Task.Result.BasicProperties.MessageId, correlationId);
 			if (dedicatedConsumer)
 			{
 				_logger.Info("Disposing dedicated consumer on queue {queueName}", respondCfg.Consume.QueueName);
@@ -121,7 +121,7 @@ namespace RawRabbit.Operations.Request.Middleware
 		/// 
 		/// Instruct the Request operation to create a unique consumer for
 		/// the response queue. The consumer will be cancelled once the
-		/// response message is recieved.
+		/// response message is received.
 		/// </summary>
 		public static IRequestContext UseDedicatedResponseConsumer(this IRequestContext context, bool useDedicated = true)
 		{

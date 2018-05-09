@@ -4,7 +4,7 @@
 	{
 		/// <summary>
 		/// Indicates that the queue is a priority queue that honours the <br />
-		/// priority property of a recieved message.
+		/// priority property of a received message.
 		/// </summary>
 		public static readonly string MaxPriority = "x-max-priority";
 

@@ -15,7 +15,7 @@ namespace RawRabbit
 	public static class RespondExtension
 	{
 		public static readonly Action<IPipeBuilder> ConsumePipe = pipe => pipe
-			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.MessageRecieved))
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.MessageReceived))
 			.Use<RespondExceptionMiddleware>(new RespondExceptionOptions { InnerPipe = p => p
 				.Use<BodyDeserializationMiddleware>(new MessageDeserializationOptions
 				{

@@ -18,19 +18,19 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 			using (var subscriber = RawRabbitFactory.CreateTestClient())
 			{
 				/* Setup */
-				var recievedTcs = new TaskCompletionSource<BasicMessage>();
-				await subscriber.SubscribeAsync<BasicMessage>(async recieved =>
+				var receivedTcs = new TaskCompletionSource<BasicMessage>();
+				await subscriber.SubscribeAsync<BasicMessage>(async received =>
 				{
-					recievedTcs.TrySetResult(recieved);
+					receivedTcs.TrySetResult(received);
 				});
 				var message = new BasicMessage { Prop = "Hello, world!" };
 
 				/* Test */
 				await publisher.PublishAsync(message);
-				await recievedTcs.Task;
+				await receivedTcs.Task;
 
 				/* Assert */
-				Assert.Equal(message.Prop, recievedTcs.Task.Result.Prop);
+				Assert.Equal(message.Prop, receivedTcs.Task.Result.Prop);
 			}
 		}
 
@@ -41,20 +41,20 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 			using (var subscriber = RawRabbitFactory.CreateTestClient())
 			{
 				/* Setup */
-				var recievedTcs = new TaskCompletionSource<BasicMessage>();
-				await subscriber.SubscribeAsync<BasicMessage>(async recieved =>
+				var receivedTcs = new TaskCompletionSource<BasicMessage>();
+				await subscriber.SubscribeAsync<BasicMessage>(async received =>
 				{
-					recievedTcs.TrySetResult(recieved);
+					receivedTcs.TrySetResult(received);
 					return new Ack();
 				});
 				var message = new BasicMessage { Prop = "Hello, world!" };
 
 				/* Test */
 				await publisher.PublishAsync(message);
-				await recievedTcs.Task;
+				await receivedTcs.Task;
 
 				/* Assert */
-				Assert.Equal(message.Prop, recievedTcs.Task.Result.Prop);
+				Assert.Equal(message.Prop, receivedTcs.Task.Result.Prop);
 			}
 		}
 
@@ -65,20 +65,20 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 			using (var subscriber = RawRabbitFactory.CreateTestClient())
 			{
 				/* Setup */
-				var recievedTcs = new TaskCompletionSource<BasicMessage>();
-				await subscriber.SubscribeAsync<BasicMessage, MessageContext>(async (recieved, context) =>
+				var receivedTcs = new TaskCompletionSource<BasicMessage>();
+				await subscriber.SubscribeAsync<BasicMessage, MessageContext>(async (received, context) =>
 				{
-					recievedTcs.TrySetResult(recieved);
+					receivedTcs.TrySetResult(received);
 					return new Ack();
 				});
 				var message = new BasicMessage { Prop = "Hello, world!" };
 
 				/* Test */
 				await publisher.PublishAsync(message);
-				await recievedTcs.Task;
+				await receivedTcs.Task;
 
 				/* Assert */
-				Assert.Equal(message.Prop, recievedTcs.Task.Result.Prop);
+				Assert.Equal(message.Prop, receivedTcs.Task.Result.Prop);
 			}
 		}
 
@@ -92,14 +92,14 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 				/* Setup */
 				var firstTsc = new TaskCompletionSource<BasicMessage>();
 				var secondTsc = new TaskCompletionSource<BasicMessage>();
-				await firstSubscriber.SubscribeAsync<BasicMessage>(async recieved =>
+				await firstSubscriber.SubscribeAsync<BasicMessage>(async received =>
 				{
-					firstTsc.TrySetResult(recieved);
+					firstTsc.TrySetResult(received);
 					return new Nack(requeue: false);
 				});
-				await secondSubscriber.SubscribeAsync<BasicMessage>(async recieved =>
+				await secondSubscriber.SubscribeAsync<BasicMessage>(async received =>
 				{
-					secondTsc.TrySetResult(recieved);
+					secondTsc.TrySetResult(received);
 					return new Nack(requeue: false);
 				});
 				var message = new BasicMessage { Prop = "Hello, world!" };
@@ -124,14 +124,14 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 				/* Setup */
 				var firstTsc = new TaskCompletionSource<BasicMessage>();
 				var secondTsc = new TaskCompletionSource<BasicMessage>();
-				await firstSubscriber.SubscribeAsync<BasicMessage, MessageContext>(async (recieved, context) =>
+				await firstSubscriber.SubscribeAsync<BasicMessage, MessageContext>(async (received, context) =>
 				{
-					firstTsc.TrySetResult(recieved);
+					firstTsc.TrySetResult(received);
 					return new Nack(requeue: false);
 				});
-				await secondSubscriber.SubscribeAsync<BasicMessage, MessageContext>(async (recieved, context) =>
+				await secondSubscriber.SubscribeAsync<BasicMessage, MessageContext>(async (received, context) =>
 				{
-					secondTsc.TrySetResult(recieved);
+					secondTsc.TrySetResult(received);
 					return new Nack(requeue: false);
 				});
 				var message = new BasicMessage { Prop = "Hello, world!" };
@@ -156,14 +156,14 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 				/* Setup */
 				var firstTsc = new TaskCompletionSource<BasicMessage>();
 				var secondTsc = new TaskCompletionSource<BasicMessage>();
-				await firstSubscriber.SubscribeAsync<BasicMessage>(async recieved =>
+				await firstSubscriber.SubscribeAsync<BasicMessage>(async received =>
 				{
-					firstTsc.TrySetResult(recieved);
+					firstTsc.TrySetResult(received);
 					return new Nack();
 				});
-				await secondSubscriber.SubscribeAsync<BasicMessage>(async recieved =>
+				await secondSubscriber.SubscribeAsync<BasicMessage>(async received =>
 				{
-					secondTsc.TrySetResult(recieved);
+					secondTsc.TrySetResult(received);
 					return new Ack();
 				});
 				var message = new BasicMessage { Prop = "Hello, world!" };
@@ -188,14 +188,14 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 				/* Setup */
 				var firstTsc = new TaskCompletionSource<BasicMessage>();
 				var secondTsc = new TaskCompletionSource<BasicMessage>();
-				await firstSubscriber.SubscribeAsync<BasicMessage, MessageContext>(async (recieved, context) =>
+				await firstSubscriber.SubscribeAsync<BasicMessage, MessageContext>(async (received, context) =>
 				{
-					firstTsc.TrySetResult(recieved);
+					firstTsc.TrySetResult(received);
 					return new Nack();
 				});
-				await secondSubscriber.SubscribeAsync<BasicMessage, MessageContext>(async (recieved, context) =>
+				await secondSubscriber.SubscribeAsync<BasicMessage, MessageContext>(async (received, context) =>
 				{
-					secondTsc.TrySetResult(recieved);
+					secondTsc.TrySetResult(received);
 					return new Ack();
 				});
 				var message = new BasicMessage { Prop = "Hello, world!" };
@@ -220,14 +220,14 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 				/* Setup */
 				var firstTsc = new TaskCompletionSource<BasicMessage>();
 				var secondTsc = new TaskCompletionSource<BasicMessage>();
-				await firstSubscriber.SubscribeAsync<BasicMessage>(async recieved =>
+				await firstSubscriber.SubscribeAsync<BasicMessage>(async received =>
 				{
-					firstTsc.TrySetResult(recieved);
+					firstTsc.TrySetResult(received);
 					return new Reject();
 				});
-				await secondSubscriber.SubscribeAsync<BasicMessage>(async recieved =>
+				await secondSubscriber.SubscribeAsync<BasicMessage>(async received =>
 				{
-					secondTsc.TrySetResult(recieved);
+					secondTsc.TrySetResult(received);
 					return new Ack();
 				});
 				var message = new BasicMessage { Prop = "Hello, world!" };
@@ -252,14 +252,14 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 				/* Setup */
 				var firstTsc = new TaskCompletionSource<BasicMessage>();
 				var secondTsc = new TaskCompletionSource<BasicMessage>();
-				await firstSubscriber.SubscribeAsync<BasicMessage, MessageContext>(async (recieved, context) =>
+				await firstSubscriber.SubscribeAsync<BasicMessage, MessageContext>(async (received, context) =>
 				{
-					firstTsc.TrySetResult(recieved);
+					firstTsc.TrySetResult(received);
 					return new Reject();
 				});
-				await secondSubscriber.SubscribeAsync<BasicMessage, MessageContext>(async (recieved, context) =>
+				await secondSubscriber.SubscribeAsync<BasicMessage, MessageContext>(async (received, context) =>
 				{
-					secondTsc.TrySetResult(recieved);
+					secondTsc.TrySetResult(received);
 					return new Ack();
 				});
 				var message = new BasicMessage { Prop = "Hello, world!" };
@@ -284,12 +284,12 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 				/* Setup */
 				var firstTsc = new TaskCompletionSource<DateTime>();
 				var secondTsc = new TaskCompletionSource<DateTime>();
-				await firstSubscriber.SubscribeAsync<BasicMessage>(async recieved =>
+				await firstSubscriber.SubscribeAsync<BasicMessage>(async received =>
 				{
 					firstTsc.TrySetResult(DateTime.Now);
 					return Retry.In(TimeSpan.FromSeconds(1));
 				});
-				await secondSubscriber.SubscribeAsync<BasicMessage>(async recieved =>
+				await secondSubscriber.SubscribeAsync<BasicMessage>(async received =>
 				{
 					secondTsc.TrySetResult(DateTime.Now);
 					return new Ack();
@@ -315,12 +315,12 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 				/* Setup */
 				var firstTsc = new TaskCompletionSource<DateTime>();
 				var secondTsc = new TaskCompletionSource<DateTime>();
-				await firstSubscriber.SubscribeAsync<BasicMessage, MessageContext>(async (recieved, context) =>
+				await firstSubscriber.SubscribeAsync<BasicMessage, MessageContext>(async (received, context) =>
 				{
 					firstTsc.TrySetResult(DateTime.Now);
 					return Retry.In(TimeSpan.FromSeconds(1));
 				});
-				await secondSubscriber.SubscribeAsync<BasicMessage, MessageContext>(async (recieved, context) =>
+				await secondSubscriber.SubscribeAsync<BasicMessage, MessageContext>(async (received, context) =>
 				{
 					secondTsc.TrySetResult(DateTime.Now);
 					return new Ack();
@@ -346,18 +346,18 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 				var firstTsc = new TaskCompletionSource<DateTime>();
 				var secondTsc = new TaskCompletionSource<DateTime>();
 				var thirdTsc = new TaskCompletionSource<DateTime>();
-				await subscriber.SubscribeAsync<BasicMessage>(async recieved =>
+				await subscriber.SubscribeAsync<BasicMessage>(async received =>
 				{
-					var recievedAt = DateTime.Now;
-					if (firstTsc.TrySetResult(recievedAt))
+					var receivedAt = DateTime.Now;
+					if (firstTsc.TrySetResult(receivedAt))
 					{
 						return Retry.In(TimeSpan.FromSeconds(1));
 					}
-					if (secondTsc.TrySetResult(recievedAt))
+					if (secondTsc.TrySetResult(receivedAt))
 					{
 						return Retry.In(TimeSpan.FromSeconds(1));
 					}
-					thirdTsc.TrySetResult(recievedAt);
+					thirdTsc.TrySetResult(receivedAt);
 					return new Ack();
 				});
 
@@ -383,26 +383,26 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 				var thirdTsc = new TaskCompletionSource<DateTime>();
 				var forthTsc = new TaskCompletionSource<DateTime>();
 
-				await subscriber.SubscribeAsync<BasicMessage> (async recieved =>
+				await subscriber.SubscribeAsync<BasicMessage> (async received =>
 				{
-					var recievedAt = DateTime.Now;
-					if (firstTsc.TrySetResult(recievedAt))
+					var receivedAt = DateTime.Now;
+					if (firstTsc.TrySetResult(receivedAt))
 					{
 						await Task.Delay(TimeSpan.FromMilliseconds(100));
 						subscriber.PublishAsync(new NamespacedMessages());
 						return Retry.In(TimeSpan.FromSeconds(1));
 					}
-					thirdTsc.TrySetResult(recievedAt);
+					thirdTsc.TrySetResult(receivedAt);
 					return new Ack();
 				});
 				await subscriber.SubscribeAsync<NamespacedMessages>(async second =>
 				{
-					var recievedAt = DateTime.Now;
-					if (secondTsc.TrySetResult(recievedAt))
+					var receivedAt = DateTime.Now;
+					if (secondTsc.TrySetResult(receivedAt))
 						 {
 						return Retry.In(TimeSpan.FromSeconds(1));
 					}
-					forthTsc.TrySetResult(recievedAt);
+					forthTsc.TrySetResult(receivedAt);
 					return new Ack();
 				});
 

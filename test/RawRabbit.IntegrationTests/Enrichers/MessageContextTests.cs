@@ -23,10 +23,10 @@ namespace RawRabbit.IntegrationTests.Enrichers
 			using (var responder = RawRabbitFactory.CreateTestClient())
 			{
 				/* Setup */
-				MessageContext recievedContext = null;
+				MessageContext receivedContext = null;
 				await responder.RespondAsync<BasicRequest, BasicResponse, MessageContext>((request, context) =>
 					{
-						recievedContext = context;
+						receivedContext = context;
 						return Task.FromResult(new BasicResponse());
 					}
 				);
@@ -35,7 +35,7 @@ namespace RawRabbit.IntegrationTests.Enrichers
 				await requester.RequestAsync<BasicRequest, BasicResponse>();
 
 				/* Assert */
-				Assert.NotNull(recievedContext);
+				Assert.NotNull(receivedContext);
 			}
 		}
 

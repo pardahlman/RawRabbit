@@ -10,7 +10,7 @@ namespace RawRabbit.IntegrationTests.Rpc
 	public class RpcTimeoutTests
 	{
 		[Fact]
-		public async Task Should_Throw_Timeout_Exception_If_Response_Is_Not_Recieved()
+		public async Task Should_Throw_Timeout_Exception_If_Response_Is_Not_Received()
 		{
 			using (var requester = RawRabbitFactory.CreateTestClient())
 			{
@@ -54,7 +54,7 @@ namespace RawRabbit.IntegrationTests.Rpc
 		}
 
 		[Fact]
-		public async Task Should_Not_Time_out_If_Response_Is_Recieved()
+		public async Task Should_Not_Time_out_If_Response_Is_Received()
 		{
 			using (var requester = RawRabbitFactory.CreateTestClient())
 			using (var responder = RawRabbitFactory.CreateTestClient())

@@ -2,7 +2,7 @@
 {
 	public enum MessageContextSubscibeStage
 	{
-		MessageRecieved,
+		MessageReceived,
 		MessageDeserialized,
 		MessageContextDeserialized,
 		MessageContextEnhanced,

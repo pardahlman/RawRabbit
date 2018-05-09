@@ -124,6 +124,6 @@ namespace RawRabbit.Pipe.Middleware
 			return type;
 		}
 
-		public override string StageMarker => Pipe.StageMarker.MessageRecieved;
+		public override string StageMarker => Pipe.StageMarker.MessageReceived;
 	}
 }

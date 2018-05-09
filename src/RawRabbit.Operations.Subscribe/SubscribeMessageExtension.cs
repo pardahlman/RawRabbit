@@ -13,7 +13,7 @@ namespace RawRabbit
 	public static class SubscribeMessageExtension
 	{
 		public static readonly Action<IPipeBuilder> ConsumePipe = pipe => pipe
-			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.MessageRecieved))
+			.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.MessageReceived))
 			.Use<SubscriptionExceptionMiddleware>(new SubscriptionExceptionOptions { InnerPipe = p => p
 				.Use<BodyDeserializationMiddleware>()
 				.Use<StageMarkerMiddleware>(StageMarkerOptions.For(StageMarker.MessageDeserialized))

@@ -135,7 +135,7 @@ namespace RawRabbit.Operations.Publish.Middleware
 						}
 						else
 						{
-							_logger.Info("Recieived ack for {deliveryTag}", args.DeliveryTag);
+							_logger.Info("Received ack for {deliveryTag}", args.DeliveryTag);
 							if (!dictionary.TryRemove(args.DeliveryTag, out var tcs))
 							{
 								_logger.Warn("Unable to find ack tcs for {deliveryTag}", args.DeliveryTag);

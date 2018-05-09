@@ -19,9 +19,9 @@ namespace RawRabbit.IntegrationTests.Features
 				{
 					Prop = 7
 				};
-				await subscriber.SubscribeAsync<GenericMessage<int>>(recieved =>
+				await subscriber.SubscribeAsync<GenericMessage<int>>(received =>
 					{
-						doneTsc.TrySetResult(recieved);
+						doneTsc.TrySetResult(received);
 						return Task.FromResult(0);
 					} 
 				);

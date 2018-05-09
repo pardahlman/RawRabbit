@@ -16,13 +16,13 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 			{
 				/* Setup */
 				var message = new BasicMessage {Prop = Guid.NewGuid().ToString()};
-				var recievedTcs = new TaskCompletionSource<BasicMessage>();
+				var receivedTcs = new TaskCompletionSource<BasicMessage>();
 				var sendCts = new CancellationTokenSource();
-				await subscriber.SubscribeAsync<BasicMessage>(recieved =>
+				await subscriber.SubscribeAsync<BasicMessage>(received =>
 				{
-					if (recieved.Prop == message.Prop)
+					if (received.Prop == message.Prop)
 					{
-						recievedTcs.TrySetResult(recieved);
+						receivedTcs.TrySetResult(received);
 					}
 					return Task.FromResult(true);
 				});
@@ -30,10 +30,10 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 				/* Test */
 				sendCts.CancelAfter(TimeSpan.FromTicks(400));
 				var publishTask = publisher.PublishAsync(new BasicMessage(), token: sendCts.Token);
-				recievedTcs.Task.Wait(100);
+				receivedTcs.Task.Wait(100);
 
 				/* Assert */
-				Assert.False(recievedTcs.Task.IsCompleted, "Message was sent, even though execution was cancelled.");
+				Assert.False(receivedTcs.Task.IsCompleted, "Message was sent, even though execution was cancelled.");
 				Assert.True(publishTask.IsCanceled, "The publish task should be cancelled.");
 			}
 		}

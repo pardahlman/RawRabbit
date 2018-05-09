@@ -19,7 +19,7 @@ namespace RawRabbit.Enrichers.GlobalExecutionId
 				// Subscriber
 				.Use<WildcardRoutingKeyMiddleware>()
 
-				// Message Recieved
+				// Message Received
 				.Use<HeaderDeserializationMiddleware>(new HeaderDeserializationOptions
 				{
 					HeaderKeyFunc = c => PropertyHeaders.GlobalExecutionId,

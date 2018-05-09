@@ -16,7 +16,7 @@ namespace RawRabbit.Enrichers.GlobalExecutionId.Middleware
 	{
 		protected Func<IPipeContext, string> ExecutionIdFunc;
 
-		public override string StageMarker => Pipe.StageMarker.MessageRecieved;
+		public override string StageMarker => Pipe.StageMarker.MessageReceived;
 
 		public PersistGlobalExecutionIdMiddleware(PersistGlobalExecutionIdOptions options = null)
 		{
