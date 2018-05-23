@@ -134,7 +134,7 @@ namespace RawRabbit.Enrichers.Attributes.Middleware
 			{
 				config.Queue.AutoDelete= attribute.AutoDelete;
 			}
-			if (attribute.MessageTtl > 0)
+			if (attribute.MessageTtl >= 0)
 			{
 				config.Queue.Arguments.AddOrReplace(QueueArgument.MessageTtl, attribute.MessageTtl);
 			}
