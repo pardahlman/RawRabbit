@@ -12,8 +12,8 @@ namespace RawRabbit.PerformanceTest
 		private IBusClient _busClient;
 		private Task _completedTask;
 		private Message _message;
-		public event EventHandler MessageRecieved;
-		public delegate void MessageRecievedEventHandler(EventHandler e);
+		public event EventHandler MessageReceived;
+		public delegate void MessageReceivedEventHandler(EventHandler e);
 
 		[Setup]
 		public void Setup()
@@ -23,7 +23,7 @@ namespace RawRabbit.PerformanceTest
 			_message = new Message();
 			_busClient.SubscribeAsync<Message>(message =>
 			{
-				MessageRecieved(message, EventArgs.Empty);
+				MessageReceived(message, EventArgs.Empty);
 				return _completedTask;
 			});
 		}
@@ -40,12 +40,12 @@ namespace RawRabbit.PerformanceTest
 		{
 			var msgTsc = new TaskCompletionSource<Message>();
 
-			EventHandler onMessageRecieved = (sender, args) => { msgTsc.TrySetResult(sender as Message); };
-			MessageRecieved += onMessageRecieved;
+			EventHandler onMessageReceived = (sender, args) => { msgTsc.TrySetResult(sender as Message); };
+			MessageReceived += onMessageReceived;
 
 			_busClient.PublishAsync(_message, ctx => ctx.UsePublishAcknowledge(false));
 			await msgTsc.Task;
- 			MessageRecieved -= onMessageRecieved;
+ 			MessageReceived -= onMessageReceived;
 		}
 
 		[Benchmark]
@@ -53,12 +53,12 @@ namespace RawRabbit.PerformanceTest
 		{
 			var msgTsc = new TaskCompletionSource<Message>();
 
-			EventHandler onMessageRecieved = (sender, args) => { msgTsc.TrySetResult(sender as Message); };
-			MessageRecieved += onMessageRecieved;
+			EventHandler onMessageReceived = (sender, args) => { msgTsc.TrySetResult(sender as Message); };
+			MessageReceived += onMessageReceived;
 
 			_busClient.PublishAsync(_message);
 			await msgTsc.Task;
-			MessageRecieved -= onMessageRecieved;
+			MessageReceived -= onMessageReceived;
 		}
 
 		[Benchmark]
@@ -66,15 +66,15 @@ namespace RawRabbit.PerformanceTest
 		{
 			var msgTsc = new TaskCompletionSource<Message>();
 
-			EventHandler onMessageRecieved = (sender, args) => { msgTsc.TrySetResult(sender as Message); };
-			MessageRecieved += onMessageRecieved;
+			EventHandler onMessageReceived = (sender, args) => { msgTsc.TrySetResult(sender as Message); };
+			MessageReceived += onMessageReceived;
 
 			_busClient.PublishAsync(_message, ctx => ctx
 				.UsePublishConfiguration(cfg => cfg
 					.WithProperties(p => p.DeliveryMode = 1))
 			);
 			await msgTsc.Task;
-			MessageRecieved -= onMessageRecieved;
+			MessageReceived -= onMessageReceived;
 		}
 
 		[Benchmark]
@@ -82,15 +82,15 @@ namespace RawRabbit.PerformanceTest
 		{
 			var msgTsc = new TaskCompletionSource<Message>();
 
-			EventHandler onMessageRecieved = (sender, args) => { msgTsc.TrySetResult(sender as Message); };
-			MessageRecieved += onMessageRecieved;
+			EventHandler onMessageReceived = (sender, args) => { msgTsc.TrySetResult(sender as Message); };
+			MessageReceived += onMessageReceived;
 
 			_busClient.PublishAsync(_message, ctx => ctx
 				.UsePublishConfiguration(cfg => cfg
 					.WithProperties(p => p.DeliveryMode = 2))
 			);
 			await msgTsc.Task;
-			MessageRecieved -= onMessageRecieved;
+			MessageReceived -= onMessageReceived;
 		}
 	}
 

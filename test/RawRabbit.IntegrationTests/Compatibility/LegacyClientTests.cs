@@ -35,10 +35,10 @@ namespace RawRabbit.IntegrationTests.Compatibility
 			var subscriber = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient(_legacyConfig);
 			var message = new BasicMessage { Prop = "Hello, world!" };
 			var tsc = new TaskCompletionSource<BasicMessage>();
-			MessageContext recievedContext = null;
+			MessageContext receivedContext = null;
 			var subscription = subscriber.SubscribeAsync<BasicMessage>((msg, context) =>
 			{
-				recievedContext = context;
+				receivedContext = context;
 				tsc.TrySetResult(msg);
 				return Task.FromResult(0);
 			});
@@ -49,7 +49,7 @@ namespace RawRabbit.IntegrationTests.Compatibility
 
 			/* Assert */
 			Assert.Equal(message.Prop, tsc.Task.Result.Prop);
-			Assert.NotNull(recievedContext);
+			Assert.NotNull(receivedContext);
 
 			TestChannel.QueueDelete(subscription.QueueName, false, false);
 			TestChannel.ExchangeDelete("rawrabbit.integrationtests.testmessages", false);
@@ -65,10 +65,10 @@ namespace RawRabbit.IntegrationTests.Compatibility
 			var subscriber = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient(_legacyConfig);
 			var message = new BasicMessage { Prop = "Hello, world!" };
 			var tsc = new TaskCompletionSource<BasicMessage>();
-			MessageContext recievedContext = null;
+			MessageContext receivedContext = null;
 			subscriber.SubscribeAsync<BasicMessage>((msg, context) =>
 			{
-				recievedContext = context;
+				receivedContext = context;
 				tsc.TrySetResult(msg);
 				return Task.FromResult(0);
 			}, cfg => cfg
@@ -95,7 +95,7 @@ namespace RawRabbit.IntegrationTests.Compatibility
 
 			/* Assert */
 			Assert.Equal(message.Prop, tsc.Task.Result.Prop);
-			Assert.NotNull(recievedContext);
+			Assert.NotNull(receivedContext);
 
 			(publisher as IDisposable)?.Dispose();
 			(subscriber as IDisposable)?.Dispose();
@@ -115,10 +115,10 @@ namespace RawRabbit.IntegrationTests.Compatibility
 			var subscriber = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient<TestMessageContext>(_legacyConfig);
 			var message = new BasicMessage { Prop = "Hello, world!" };
 			var tsc = new TaskCompletionSource<BasicMessage>();
-			TestMessageContext recievedContext = null;
+			TestMessageContext receivedContext = null;
 			subscriber.SubscribeAsync<BasicMessage>((msg, context) =>
 			{
-				recievedContext = context;
+				receivedContext = context;
 				tsc.TrySetResult(msg);
 				return Task.FromResult(0);
 			}, cfg => cfg
@@ -145,7 +145,7 @@ namespace RawRabbit.IntegrationTests.Compatibility
 
 			/* Assert */
 			Assert.Equal(message.Prop, tsc.Task.Result.Prop);
-			Assert.Equal(recievedContext.Prop, propValue);
+			Assert.Equal(receivedContext.Prop, propValue);
 
 			(publisher as IDisposable)?.Dispose();
 			(subscriber as IDisposable)?.Dispose();
@@ -157,13 +157,13 @@ namespace RawRabbit.IntegrationTests.Compatibility
 			/* Setup */
 			var requester = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient(_legacyConfig);
 			var responder = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient(_legacyConfig);
-			MessageContext recievedContext = null;
-			BasicRequest recievedRequest = null;
+			MessageContext receivedContext = null;
+			BasicRequest receivedRequest = null;
 			var request = new BasicRequest {Number = 3};
 			var subscription = responder.RespondAsync<BasicRequest, BasicResponse>((req, context) =>
 			{
-				recievedRequest = req;
-				recievedContext = context;
+				receivedRequest = req;
+				receivedContext = context;
 				return Task.FromResult(new BasicResponse());
 			});
 
@@ -171,8 +171,8 @@ namespace RawRabbit.IntegrationTests.Compatibility
 			var response = await requester.RequestAsync<BasicRequest, BasicResponse>(request);
 
 			/* Assert */
-			Assert.Equal(recievedRequest.Number, request.Number);
-			Assert.NotNull(recievedContext);
+			Assert.Equal(receivedRequest.Number, request.Number);
+			Assert.NotNull(receivedContext);
 
 			TestChannel.QueueDelete(subscription.QueueName, false, false);
 			TestChannel.ExchangeDelete("rawrabbit.integrationtests.testmessages", false);
@@ -187,13 +187,13 @@ namespace RawRabbit.IntegrationTests.Compatibility
 			/* Setup */
 			var requester = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient(_legacyConfig);
 			var responder = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient(_legacyConfig);
-			MessageContext recievedContext = null;
-			BasicRequest recievedRequest = null;
+			MessageContext receivedContext = null;
+			BasicRequest receivedRequest = null;
 			var request = new BasicRequest { Number = 3 };
 			var subscription = responder.RespondAsync<BasicRequest, BasicResponse>((req, context) =>
 			{
-				recievedRequest = req;
-				recievedContext = context;
+				receivedRequest = req;
+				receivedContext = context;
 				return Task.FromResult(new BasicResponse());
 			}, cfg => cfg.
 				WithExchange(e => e
@@ -221,8 +221,8 @@ namespace RawRabbit.IntegrationTests.Compatibility
 			);
 
 			/* Assert */
-			Assert.Equal(recievedRequest.Number, request.Number);
-			Assert.NotNull(recievedContext);
+			Assert.Equal(receivedRequest.Number, request.Number);
+			Assert.NotNull(receivedContext);
 			Assert.NotNull(response);
 
 			(requester as IDisposable)?.Dispose();
@@ -242,12 +242,12 @@ namespace RawRabbit.IntegrationTests.Compatibility
 			);
 			var requester = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient(_legacyConfig);
 			var responder = RawRabbit.Compatibility.Legacy.RawRabbitFactory.CreateClient<TestMessageContext>(_legacyConfig);
-			TestMessageContext recievedContext = null;
-			BasicRequest recievedRequest = null;
+			TestMessageContext receivedContext = null;
+			BasicRequest receivedRequest = null;
 			var sub = responder.RespondAsync<BasicRequest, BasicResponse>((req, context) =>
 			{
-				recievedContext = context;
-				recievedRequest = req;
+				receivedContext = context;
+				receivedRequest = req;
 				return Task.FromResult(new BasicResponse());
 			});
 
@@ -255,8 +255,8 @@ namespace RawRabbit.IntegrationTests.Compatibility
 			var response = await requester.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest());
 
 			/* Assert */
-			Assert.Equal(recievedContext.Prop, propValue);
-			Assert.NotNull(recievedRequest);
+			Assert.Equal(receivedContext.Prop, propValue);
+			Assert.NotNull(receivedRequest);
 			Assert.NotNull(response);
 
 			TestChannel.QueueDelete(sub.QueueName, false, false);

@@ -39,13 +39,13 @@ namespace RawRabbit.IntegrationTests.Features
 			await singleton.PublishAsync(secondMsg);
 			await shutdownTask;
 
-			var secondRecieved = await singleton.GetAsync<BasicMessage>(get => get.WithAutoAck());
+			var secondReceived = await singleton.GetAsync<BasicMessage>(get => get.WithAutoAck());
 			await singleton.DeleteQueueAsync<BasicMessage>();
 			await singleton.DeleteExchangeAsync<BasicMessage>();
 			singleton.Dispose();
 
 			Assert.Equal(firstMsg.Prop, firstTsc.Task.Result.Prop);
-			Assert.Equal(secondMsg.Prop, secondRecieved.Content.Prop);
+			Assert.Equal(secondMsg.Prop, secondReceived.Content.Prop);
 		}
 	}
 }

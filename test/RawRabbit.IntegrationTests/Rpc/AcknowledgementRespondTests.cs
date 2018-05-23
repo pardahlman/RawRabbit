@@ -25,10 +25,10 @@ namespace RawRabbit.IntegrationTests.Rpc
 				);
 
 				/* Test */
-				var recieved = await requester.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest());
+				var received = await requester.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest());
 
 				/* Assert */
-				Assert.Equal(recieved.Prop, sent.Prop);
+				Assert.Equal(received.Prop, sent.Prop);
 			}
 		}
 
@@ -48,10 +48,10 @@ namespace RawRabbit.IntegrationTests.Rpc
 				);
 
 				/* Test */
-				var recieved = await requester.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest());
+				var received = await requester.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest());
 
 				/* Assert */
-				Assert.Equal(recieved.Prop, sent.Prop);
+				Assert.Equal(received.Prop, sent.Prop);
 			}
 		}
 
@@ -80,11 +80,11 @@ namespace RawRabbit.IntegrationTests.Rpc
 				);
 
 				/* Test */
-				var recieved = await requester.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest());
+				var received = await requester.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest());
 				await firstTsc.Task;
 				await secondTsc.Task;
 				/* Assert */
-				Assert.Equal(recieved.Prop, sent.Prop);
+				Assert.Equal(received.Prop, sent.Prop);
 			}
 		}
 
@@ -113,11 +113,11 @@ namespace RawRabbit.IntegrationTests.Rpc
 				);
 
 				/* Test */
-				var recieved = await requester.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest());
+				var received = await requester.RequestAsync<BasicRequest, BasicResponse>(new BasicRequest());
 				await firstTsc.Task;
 				await secondTsc.Task;
 				/* Assert */
-				Assert.Equal(recieved.Prop, sent.Prop);
+				Assert.Equal(received.Prop, sent.Prop);
 			}
 		}
 	}

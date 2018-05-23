@@ -24,20 +24,20 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 			using (var subscriber = RawRabbitFactory.CreateTestClient())
 			{
 				/* Setup */
-				var recievedTcs = new TaskCompletionSource<BasicMessage>();
-				await subscriber.SubscribeAsync<BasicMessage>(recieved =>
+				var receivedTcs = new TaskCompletionSource<BasicMessage>();
+				await subscriber.SubscribeAsync<BasicMessage>(received =>
 				{
-					recievedTcs.TrySetResult(recieved);
+					receivedTcs.TrySetResult(received);
 					return Task.FromResult(true);
 				});
 				var message = new BasicMessage {Prop = "Hello, world!"};
 
 				/* Test */
 				await publisher.PublishAsync(message);
-				await recievedTcs.Task;
+				await receivedTcs.Task;
 
 				/* Assert */
-				Assert.Equal(message.Prop, recievedTcs.Task.Result.Prop);
+				Assert.Equal(message.Prop, receivedTcs.Task.Result.Prop);
 			}
 		}
 
@@ -48,10 +48,10 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 			using (var subscriber = RawRabbitFactory.CreateTestClient())
 			{
 				/* Setup */
-				var recievedTcs = new TaskCompletionSource<BasicDeliverEventArgs>();
-				await subscriber.SubscribeAsync<BasicMessage, BasicDeliverEventArgs>((recieved, args) =>
+				var receivedTcs = new TaskCompletionSource<BasicDeliverEventArgs>();
+				await subscriber.SubscribeAsync<BasicMessage, BasicDeliverEventArgs>((received, args) =>
 				{
-					recievedTcs.TrySetResult(args);
+					receivedTcs.TrySetResult(args);
 					return Task.FromResult(true);
 				}, ctx => ctx.UseMessageContext(c => c.GetDeliveryEventArgs()));
 				var message = new BasicMessage { Prop = "Hello, world!" };
@@ -60,10 +60,10 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 				await publisher.PublishAsync(message, ctx => ctx
 					.UsePublishConfiguration(cfg => cfg
 						.WithProperties(props => props.Headers.Add("foo", "bar"))));
-				await recievedTcs.Task;
+				await receivedTcs.Task;
 
 				/* Assert */
-				Assert.True(recievedTcs.Task.Result.BasicProperties.Headers.ContainsKey("foo"));
+				Assert.True(receivedTcs.Task.Result.BasicProperties.Headers.ContainsKey("foo"));
 			}
 		}
 
@@ -74,10 +74,10 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 			using (var subscriber = RawRabbitFactory.CreateTestClient())
 			{
 				/* Setup */
-				var recievedTcs = new TaskCompletionSource<BasicMessage>();
-				await subscriber.SubscribeAsync<BasicMessage>(recieved =>
+				var receivedTcs = new TaskCompletionSource<BasicMessage>();
+				await subscriber.SubscribeAsync<BasicMessage>(received =>
 				{
-					recievedTcs.TrySetResult(recieved);
+					receivedTcs.TrySetResult(received);
 					return Task.FromResult(true);
 				}, ctx => ctx
 					.UseSubscribeConfiguration(cfg => cfg
@@ -90,10 +90,10 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 
 				/* Test */
 				await publisher.PublishAsync(message, ctx => ctx.UsePublishConfiguration(cfg => cfg.OnExchange("custom_exchange")));
-				await recievedTcs.Task;
+				await receivedTcs.Task;
 
 				/* Assert */
-				Assert.Equal(message.Prop, recievedTcs.Task.Result.Prop);
+				Assert.Equal(message.Prop, receivedTcs.Task.Result.Prop);
 			}
 		}
 
@@ -104,10 +104,10 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 			using (var subscriber = RawRabbitFactory.CreateTestClient())
 			{
 				/* Setup */
-				var recievedTcs = new TaskCompletionSource<BasicMessage>();
-				await subscriber.SubscribeAsync<BasicMessage>(recieved =>
+				var receivedTcs = new TaskCompletionSource<BasicMessage>();
+				await subscriber.SubscribeAsync<BasicMessage>(received =>
 				{
-					recievedTcs.TrySetResult(recieved);
+					receivedTcs.TrySetResult(received);
 					return Task.FromResult(true);
 				}, ctx => ctx
 					.UseSubscribeConfiguration(cfg => cfg
@@ -133,10 +133,10 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 						.OnExchange("custom_exchange")
 						.WithRoutingKey("custom_key")
 				));
-				await recievedTcs.Task;
+				await receivedTcs.Task;
 
 				/* Assert */
-				Assert.Equal(message.Prop, recievedTcs.Task.Result.Prop);
+				Assert.Equal(message.Prop, receivedTcs.Task.Result.Prop);
 			}
 		}
 

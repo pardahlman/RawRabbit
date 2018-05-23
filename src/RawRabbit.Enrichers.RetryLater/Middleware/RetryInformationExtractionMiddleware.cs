@@ -17,7 +17,7 @@ namespace RawRabbit.Middleware
 	{
 		private readonly IRetryInformationProvider _retryProvider;
 		protected Func<IPipeContext, BasicDeliverEventArgs> DeliveryArgsFunc;
-		public override string StageMarker => Pipe.StageMarker.MessageRecieved;
+		public override string StageMarker => Pipe.StageMarker.MessageReceived;
 
 		public RetryInformationExtractionMiddleware(IRetryInformationProvider retryProvider, RetryInformationExtractionOptions options = null)
 		{

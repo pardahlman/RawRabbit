@@ -27,7 +27,7 @@ namespace RawRabbit.AspNet.Sample.Controllers
 		[Route("api/values")]
 		public async Task<IActionResult> GetAsync()
 		{
-			_logger.LogDebug("Recieved Value Request.");
+			_logger.LogDebug("Received Value Request.");
 			var valueSequence = _busClient.ExecuteSequence(s => s
 				.PublishAsync(new ValuesRequested
 					{
@@ -48,7 +48,7 @@ namespace RawRabbit.AspNet.Sample.Controllers
 			}
 			catch (Exception e)
 			{
-				return StatusCode((int)HttpStatusCode.InternalServerError, $"No response recieved. Is the Console App started? \n\nException: {e}");
+				return StatusCode((int)HttpStatusCode.InternalServerError, $"No response received. Is the Console App started? \n\nException: {e}");
 			}
 
 			_logger.LogInformation("Successfully created {valueCount} values", valueSequence.Task.Result.Values.Count);

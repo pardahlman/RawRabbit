@@ -17,7 +17,7 @@ namespace RawRabbit.IntegrationTests.MessageSequence
 	public class MessageSequenceTests
 	{
 		[Fact]
-		public async Task Should_Create_Simple_Chain_Of_One_Send_And_Final_Recieve()
+		public async Task Should_Create_Simple_Chain_Of_One_Send_And_Final_Receive()
 		{	
 			/* Setup */
 			using (var client = RawRabbitFactory.CreateTestClient(new RawRabbitOptions
@@ -40,7 +40,7 @@ namespace RawRabbit.IntegrationTests.MessageSequence
 				await chain.Task;
 
 				/* Assert */
-				Assert.True(true, "Recieved Response");
+				Assert.True(true, "Received Response");
 			}
 		}
 
@@ -80,7 +80,7 @@ namespace RawRabbit.IntegrationTests.MessageSequence
 
 				/* Assert */
 				Assert.NotNull(secondTcs.Task.Result);
-				Assert.True(true, "Recieved Response");
+				Assert.True(true, "Received Response");
 			}
 		}
 
@@ -175,7 +175,7 @@ namespace RawRabbit.IntegrationTests.MessageSequence
 
 				/* Assert */
 				Assert.NotNull(secondTcs.Task.Result);
-				Assert.True(true, "Recieved Response");
+				Assert.True(true, "Received Response");
 			}
 		}
 

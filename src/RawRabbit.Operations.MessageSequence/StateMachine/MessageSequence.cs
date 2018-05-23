@@ -110,7 +110,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 				.Configure(SequenceState.Active)
 				.InternalTransitionAsync(trigger, async (message, transition) =>
 				{
-					_logger.Debug("Recieved message of type {messageType} for sequence {sequenceId}.", transition.Trigger.Name, Model.Id);
+					_logger.Debug("Received message of type {messageType} for sequence {sequenceId}.", transition.Trigger.Name, Model.Id);
 					var matchFound = false;
 					do
 					{
@@ -124,7 +124,7 @@ namespace RawRabbit.Operations.MessageSequence.StateMachine
 						{
 							if (step.Optional)
 							{
-								_logger.Info("The step for {optionalMessageType} is optional. Skipping, as recieved message is of type {currentMessageType}.", step.Type.Name, typeof(TMessage).Name);
+								_logger.Info("The step for {optionalMessageType} is optional. Skipping, as received message is of type {currentMessageType}.", step.Type.Name, typeof(TMessage).Name);
 								Model.Skipped.Add(new ExecutionResult
 								{
 									Type = step.Type,

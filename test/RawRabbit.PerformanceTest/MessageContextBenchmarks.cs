@@ -13,8 +13,8 @@ namespace RawRabbit.PerformanceTest
 		private MessageA _messageA;
 		private IBusClient _withContext;
 		private MessageB _messageB;
-		public event EventHandler MessageRecieved;
-		public delegate void MessageRecievedEventHandler(EventHandler e);
+		public event EventHandler MessageReceived;
+		public delegate void MessageReceivedEventHandler(EventHandler e);
 
 		[Setup]
 		public void Setup()
@@ -29,12 +29,12 @@ namespace RawRabbit.PerformanceTest
 			_messageB = new MessageB();
 			_withoutContext.SubscribeAsync<MessageA>(message =>
 			{
-				MessageRecieved(message, EventArgs.Empty);
+				MessageReceived(message, EventArgs.Empty);
 				return _completedTask;
 			});
 			_withContext.SubscribeAsync<MessageB, MessageContext>((message, context) =>
 			{
-				MessageRecieved(message, EventArgs.Empty);
+				MessageReceived(message, EventArgs.Empty);
 				return _completedTask;
 			});
 		}
@@ -53,12 +53,12 @@ namespace RawRabbit.PerformanceTest
 		{
 			var msgTsc = new TaskCompletionSource<Message>();
 
-			EventHandler onMessageRecieved = (sender, args) => { msgTsc.TrySetResult(sender as Message); };
-			MessageRecieved += onMessageRecieved;
+			EventHandler onMessageReceived = (sender, args) => { msgTsc.TrySetResult(sender as Message); };
+			MessageReceived += onMessageReceived;
 
 			_withContext.PublishAsync(_messageB);
 			await msgTsc.Task;
-			MessageRecieved -= onMessageRecieved;
+			MessageReceived -= onMessageReceived;
 		}
 
 		[Benchmark]
@@ -66,12 +66,12 @@ namespace RawRabbit.PerformanceTest
 		{
 			var msgTsc = new TaskCompletionSource<Message>();
 
-			EventHandler onMessageRecieved = (sender, args) => { msgTsc.TrySetResult(sender as Message); };
-			MessageRecieved += onMessageRecieved;
+			EventHandler onMessageReceived = (sender, args) => { msgTsc.TrySetResult(sender as Message); };
+			MessageReceived += onMessageReceived;
 
 			_withoutContext.PublishAsync(_messageA);
 			await msgTsc.Task;
-			MessageRecieved -= onMessageRecieved;
+			MessageReceived -= onMessageReceived;
 		}
 
 

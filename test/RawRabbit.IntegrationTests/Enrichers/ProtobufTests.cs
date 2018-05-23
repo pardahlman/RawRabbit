@@ -11,7 +11,7 @@ namespace RawRabbit.IntegrationTests.Enrichers
 	public class ProtobufTests
 	{
 		[Fact]
-		public async Task Should_Deliver_And_Recieve_Messages_Serialized_With_Protobuf()
+		public async Task Should_Deliver_And_Reiieve_Messages_Serialized_With_Protobuf()
 		{
 			using (var client = RawRabbitFactory.CreateTestClient(new RawRabbitOptions{ Plugins = p => p.UseProtobuf() }))
 			{
@@ -48,10 +48,10 @@ namespace RawRabbit.IntegrationTests.Enrichers
 				await client.RespondAsync<ProtoRequest, ProtoResponse>(request => Task.FromResult(response));
 
 				/* Test */
-				var recieved = await client.RequestAsync<ProtoRequest, ProtoResponse>(new ProtoRequest());
+				var received = await client.RequestAsync<ProtoRequest, ProtoResponse>(new ProtoRequest());
 
 				/* Assert */
-				Assert.Equal(recieved.Id, response.Id);
+				Assert.Equal(received.Id, response.Id);
 			}
 		}
 

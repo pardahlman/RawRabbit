@@ -12,8 +12,8 @@ namespace RawRabbit.PerformanceTest
 		private IBusClient _busClient;
 		private Request _request;
 		private Respond _respond;
-		public event EventHandler MessageRecieved;
-		public delegate void MessageRecievedEventHandler(EventHandler e);
+		public event EventHandler MessageReceived;
+		public delegate void MessageReceivedEventHandler(EventHandler e);
 
 		[Setup]
 		public void Setup()

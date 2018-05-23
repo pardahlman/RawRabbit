@@ -41,7 +41,7 @@ namespace RawRabbit
 				.Use<RequestTimeoutMiddleware>()
 				.Use<ResponseConsumeMiddleware>(new ResponseConsumerOptions
 				{
-					ResponseRecieved = p => p
+					ResponseReceived = p => p
 						.Use<ResponderExceptionMiddleware>()
 						.Use<BodyDeserializationMiddleware>(new MessageDeserializationOptions
 						{

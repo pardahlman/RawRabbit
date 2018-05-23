@@ -15,10 +15,10 @@ namespace RawRabbit.IntegrationTests.Enrichers
 			using (var subscriber = RawRabbitFactory.CreateTestClient())
 			{
 				/* Setup */
-				var recievedTcs = new TaskCompletionSource<AttributedMessage>();
-				await subscriber.SubscribeAsync<AttributedMessage>(recieved =>
+				var receivedTcs = new TaskCompletionSource<AttributedMessage>();
+				await subscriber.SubscribeAsync<AttributedMessage>(received =>
 				{
-					recievedTcs.TrySetResult(recieved);
+					receivedTcs.TrySetResult(received);
 					return Task.FromResult(true);
 				}, ctx => ctx
 					.UseSubscribeConfiguration(cfg => cfg
@@ -31,7 +31,7 @@ namespace RawRabbit.IntegrationTests.Enrichers
 
 				/* Test */
 				await publisher.PublishAsync(new AttributedMessage());
-				await recievedTcs.Task;
+				await receivedTcs.Task;
 
 				/* Assert */
 				Assert.True(true, "Routing successful");
@@ -45,10 +45,10 @@ namespace RawRabbit.IntegrationTests.Enrichers
 			using (var publisher = RawRabbitFactory.CreateTestClient())
 			{
 				/* Setup */
-				var recievedTcs = new TaskCompletionSource<AttributedMessage>();
-				await subscriber.SubscribeAsync<AttributedMessage>(recieved =>
+				var receivedTcs = new TaskCompletionSource<AttributedMessage>();
+				await subscriber.SubscribeAsync<AttributedMessage>(received =>
 				{
-					recievedTcs.TrySetResult(recieved);
+					receivedTcs.TrySetResult(received);
 					return Task.FromResult(true);
 				});
 
@@ -60,7 +60,7 @@ namespace RawRabbit.IntegrationTests.Enrichers
 								.WithType(ExchangeType.Topic))
 							.WithRoutingKey("my_key")
 				));
-				await recievedTcs.Task;
+				await receivedTcs.Task;
 
 				/* Assert */
 				Assert.True(true, "Routing successful");
@@ -78,10 +78,10 @@ namespace RawRabbit.IntegrationTests.Enrichers
 			using (var responder = RawRabbitFactory.CreateTestClient())
 			{
 				/* Setup */
-				var recievedTcs = new TaskCompletionSource<AttributedRequest>();
-				await responder.RespondAsync<AttributedRequest, AttributedResponse>(recieved =>
+				var receivedTcs = new TaskCompletionSource<AttributedRequest>();
+				await responder.RespondAsync<AttributedRequest, AttributedResponse>(received =>
 				{
-					recievedTcs.TrySetResult(recieved);
+					receivedTcs.TrySetResult(received);
 					return Task.FromResult(new AttributedResponse());
 				}, ctx => ctx.UseRespondConfiguration(cfg => cfg
 					.Consume(c => c
@@ -93,7 +93,7 @@ namespace RawRabbit.IntegrationTests.Enrichers
 
 				/* Test */
 				await requester.RequestAsync<AttributedRequest, AttributedResponse>(new AttributedRequest());
-				await recievedTcs.Task;
+				await receivedTcs.Task;
 
 				/* Assert */
 				Assert.True(true, "Routing successful");
@@ -107,10 +107,10 @@ namespace RawRabbit.IntegrationTests.Enrichers
 			using (var requester = RawRabbitFactory.CreateTestClient())
 			{
 				/* Setup */
-				var recievedTcs = new TaskCompletionSource<AttributedRequest>();
-				await responder.RespondAsync<AttributedRequest, AttributedResponse>(recieved =>
+				var receivedTcs = new TaskCompletionSource<AttributedRequest>();
+				await responder.RespondAsync<AttributedRequest, AttributedResponse>(received =>
 				{
-					recievedTcs.TrySetResult(recieved);
+					receivedTcs.TrySetResult(received);
 					return Task.FromResult(new AttributedResponse());
 				});
 
@@ -124,7 +124,7 @@ namespace RawRabbit.IntegrationTests.Enrichers
 							.WithRoutingKey("my_request_key")
 					)
 				));
-				await recievedTcs.Task;
+				await receivedTcs.Task;
 
 				/* Assert */
 				Assert.True(true, "Routing successful");
@@ -138,16 +138,16 @@ namespace RawRabbit.IntegrationTests.Enrichers
 			using (var requester = RawRabbitFactory.CreateTestClient(new RawRabbitOptions { Plugins = plugin => plugin.UseAttributeRouting() }))
 			{
 				/* Setup */
-				var recievedTcs = new TaskCompletionSource<AttributedRequest>();
-				await responder.RespondAsync<AttributedRequest, AttributedResponse>(recieved =>
+				var receivedTcs = new TaskCompletionSource<AttributedRequest>();
+				await responder.RespondAsync<AttributedRequest, AttributedResponse>(received =>
 				{
-					recievedTcs.TrySetResult(recieved);
+					receivedTcs.TrySetResult(received);
 					return Task.FromResult(new AttributedResponse());
 				});
 
 				/* Test */
 				await requester.RequestAsync<AttributedRequest, AttributedResponse>(new AttributedRequest());
-				await recievedTcs.Task;
+				await receivedTcs.Task;
 
 				/* Assert */
 				Assert.True(true, "Routing successful");
@@ -161,16 +161,16 @@ namespace RawRabbit.IntegrationTests.Enrichers
 			using (var subscriber = RawRabbitFactory.CreateTestClient(new RawRabbitOptions { Plugins = plugin => plugin.UseAttributeRouting() }))
 			{
 				/* Setup */
-				var recievedTcs = new TaskCompletionSource<AttributedMessage>();
-				await subscriber.SubscribeAsync<AttributedMessage>(recieved =>
+				var receivedTcs = new TaskCompletionSource<AttributedMessage>();
+				await subscriber.SubscribeAsync<AttributedMessage>(received =>
 				{
-					recievedTcs.TrySetResult(recieved);
+					receivedTcs.TrySetResult(received);
 					return Task.FromResult(new AttributedResponse());
 				});
 
 				/* Test */
 				await publisher.PublishAsync(new AttributedMessage());
-				await recievedTcs.Task;
+				await receivedTcs.Task;
 
 				/* Assert */
 				Assert.True(true, "Routing successful");

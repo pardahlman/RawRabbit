@@ -14,16 +14,16 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 			using (var subscriber = RawRabbitFactory.CreateTestClient())
 			{
 				/* Setup */
-				var recievedCount = 0;
+				var receivedCount = 0;
 				const int sendCount = 2000;
 				var publishTasks = new Task[sendCount];
-				var recievedTcs = new TaskCompletionSource<int>();
-				await subscriber.SubscribeAsync<BasicMessage>(recieved =>
+				var receivedTcs = new TaskCompletionSource<int>();
+				await subscriber.SubscribeAsync<BasicMessage>(received =>
 				{
-					Interlocked.Increment(ref recievedCount);
-					if (recievedCount == sendCount)
+					Interlocked.Increment(ref receivedCount);
+					if (receivedCount == sendCount)
 					{
-						recievedTcs.TrySetResult(recievedCount);
+						receivedTcs.TrySetResult(receivedCount);
 					}
 					return Task.FromResult(true);
 				});
@@ -34,9 +34,9 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 					publishTasks[i] = publisher.PublishAsync(new BasicMessage());
 				}
 				Task.WaitAll(publishTasks);
-				await recievedTcs.Task;
+				await receivedTcs.Task;
 				/* Assert */
-				Assert.Equal(recievedTcs.Task.Result, sendCount);
+				Assert.Equal(receivedTcs.Task.Result, sendCount);
 			}
 		}
 
@@ -49,7 +49,7 @@ namespace RawRabbit.IntegrationTests.PublishAndSubscribe
 				/* Setup */
 				const int sendCount = 2000;
 				var publishTasks = new Task[sendCount];
-				await responder.RespondAsync<BasicRequest, BasicResponse>(recieved =>
+				await responder.RespondAsync<BasicRequest, BasicResponse>(received =>
 					Task.FromResult(new BasicResponse())
 				);
 
