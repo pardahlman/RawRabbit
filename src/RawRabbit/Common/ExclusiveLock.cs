@@ -70,7 +70,10 @@ namespace RawRabbit.Common
 			{
 				await func(obj);
 			}
-			catch (Exception) { }
+			catch (Exception e)
+			{
+				_logger.ErrorException("Exception when performing exclusive executeasync", e);
+			}
 			finally
 			{
 				semaphore.Release();
