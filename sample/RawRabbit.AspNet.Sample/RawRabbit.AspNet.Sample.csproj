@@ -17,6 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\RawRabbit.DependencyInjection.ServiceCollection\RawRabbit.DependencyInjection.ServiceCollection.csproj" />
     <ProjectReference Include="..\..\src\RawRabbit.Enrichers.HttpContext\RawRabbit.Enrichers.HttpContext.csproj" />
+    <ProjectReference Include="..\..\src\RawRabbit.Enrichers.Stackify\RawRabbit.Enrichers.Stackify.csproj" />
     <ProjectReference Include="..\..\src\RawRabbit\RawRabbit.csproj" />
     <ProjectReference Include="..\..\src\RawRabbit.Enrichers.MessageContext\RawRabbit.Enrichers.MessageContext.csproj" />
     <ProjectReference Include="..\..\src\RawRabbit.Operations.MessageSequence\RawRabbit.Operations.MessageSequence.csproj" />

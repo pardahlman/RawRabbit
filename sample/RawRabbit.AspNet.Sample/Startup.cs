@@ -42,6 +42,7 @@ namespace RawRabbit.AspNet.Sample
 					{
 						ClientConfiguration = GetRawRabbitConfiguration(),
 						Plugins = p => p
+							.UseStackify()
 							.UseStateMachine()
 							.UseGlobalExecutionId()
 							.UseHttpContext()
