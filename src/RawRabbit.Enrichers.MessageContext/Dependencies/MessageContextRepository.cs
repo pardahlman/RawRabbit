@@ -15,7 +15,7 @@ namespace RawRabbit.Enrichers.MessageContext.Dependencies
 	public class MessageContextRepository : IMessageContextRepository
 	{
 
-#if NETSTANDARD1_5
+#if NETSTANDARD1_5 || NETSTANDARD2_0
 		private readonly AsyncLocal<object> _msgContext;
 #elif NET451
 		private const string MessageContext = "RawRabbit:MessageContext";
@@ -23,13 +23,13 @@ namespace RawRabbit.Enrichers.MessageContext.Dependencies
 
 		public MessageContextRepository()
 		{
-#if NETSTANDARD1_5
+#if NETSTANDARD1_5 || NETSTANDARD2_0
 			_msgContext = new AsyncLocal<object>();
 #endif
 		}
 		public object Get()
 		{
-#if NETSTANDARD1_5
+#if NETSTANDARD1_5 || NETSTANDARD2_0
 			return _msgContext?.Value;
 #elif NET451
 			return CallContext.LogicalGetData(MessageContext) as object;
@@ -38,7 +38,7 @@ namespace RawRabbit.Enrichers.MessageContext.Dependencies
 
 		public void Set(object context)
 		{
-#if NETSTANDARD1_5
+#if NETSTANDARD1_5 || NETSTANDARD2_0
 			_msgContext.Value = context;
 #elif NET451
 			CallContext.LogicalSetData(MessageContext, context);

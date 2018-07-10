@@ -1,11 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<Import Project="..\..\Debug.Props" />
 
   <PropertyGroup>
     <Description>Enricher RawRabbit with a Retry Later capabilities</Description>
     <AssemblyTitle>RawRabbit.Enrichers.RetryLater</AssemblyTitle>
     <VersionPrefix>2.0.0</VersionPrefix>
     <Authors>pardahlman</Authors>
-    <TargetFrameworks>netstandard1.5;net451</TargetFrameworks>
+    <TargetFrameworks>netstandard1.5;netstandard2.0;net451</TargetFrameworks>
     <AssemblyName>RawRabbit.Enrichers.RetryLater</AssemblyName>
     <PackageId>RawRabbit.Enrichers.RetryLater</PackageId>
     <PackageTags>rabbitmq;rawrabbit;enrichers;retry-later</PackageTags>
@@ -15,10 +16,6 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <RootNamespace>RawRabbit</RootNamespace>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard1.5|AnyCPU'">
-    <DefineConstants>TRACE;DEBUG;NETSTANDARD1_5</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

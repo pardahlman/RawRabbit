@@ -1,11 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+	<Import Project="..\..\Debug.Props" />
 
   <PropertyGroup>
     <Description>Bus Client that is API compatible with 1.x.</Description>
     <AssemblyTitle>RawRabbit.Compatibility.Legacy</AssemblyTitle>
     <Version>2.0.0-alpha</Version>
     <Authors>pardahlman</Authors>
-    <TargetFrameworks>netstandard1.5;net451</TargetFrameworks>
+    <TargetFrameworks>netstandard1.5;netstandard2.0;net451</TargetFrameworks>
     <AssemblyName>RawRabbit.Compatibility.Legacy</AssemblyName>
     <PackageId>RawRabbit.Compatibility.Legacy</PackageId>
     <PackageTags>rabbitmq;rawrabbit;compatibility</PackageTags>

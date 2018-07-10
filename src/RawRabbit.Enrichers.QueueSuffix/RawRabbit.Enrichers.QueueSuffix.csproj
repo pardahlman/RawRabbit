@@ -1,11 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+	<Import Project="..\..\Debug.Props" />
 
   <PropertyGroup>
     <Description>Suffix the Queue Name with application name, host name or a string of your choice.</Description>
     <AssemblyTitle>RawRabbit.Enrichers.QueueSuffix</AssemblyTitle>
     <VersionPrefix>2.0.0</VersionPrefix>
     <Authors>pardahlman</Authors>
-    <TargetFrameworks>netstandard1.5;net451</TargetFrameworks>
+    <TargetFrameworks>netstandard1.5;netstandard2.0;net451</TargetFrameworks>
     <AssemblyName>RawRabbit.Enrichers.QueueSuffix</AssemblyName>
     <PackageId>RawRabbit.Enrichers.QueueSuffix</PackageId>
     <PackageTags>rabbitmq;rawrabbit;queuesuffix</PackageTags>
@@ -14,10 +15,6 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard1.5|AnyCPU'">
-    <DefineConstants>TRACE;DEBUG;NETSTANDARD1_5;LIBLOG_PORTABLE</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

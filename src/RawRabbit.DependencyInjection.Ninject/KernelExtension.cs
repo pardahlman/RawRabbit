@@ -5,7 +5,7 @@ namespace RawRabbit.DependencyInjection.Ninject
 {
 	public static class KernelExtension
 	{
-#if NETSTANDARD1_5
+#if NETSTANDARD1_5 || NETSTANDARD2_0
 		public static IKernelConfiguration RegisterRawRabbit(this IKernelConfiguration config, RawRabbitOptions options = null)
 		{
 			if (options != null)

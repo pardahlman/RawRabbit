@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+	<Import Project="..\..\Debug.Props" />
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.5;net451</TargetFrameworks>
+    <TargetFrameworks>netstandard1.5;netstandard2.0;net451</TargetFrameworks>
     <VersionPrefix>2.0.0</VersionPrefix>
     <Description>This package contains operations for bind/unbind queues, declaring exchanges/queues and more.</Description>
     <PackageProjectUrl>https://github.com/pardahlman/RawRabbit</PackageProjectUrl>
@@ -12,10 +13,6 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <RepositoryUrl>https://github.com/pardahlman/RawRabbit</RepositoryUrl>
     <PackageTags>rabbitmq;rawrabbit;operation;tools</PackageTags>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard1.5|AnyCPU'">
-    <DefineConstants>TRACE;DEBUG;NETSTANDARD1_5;LIBLOG_PORTABLE</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

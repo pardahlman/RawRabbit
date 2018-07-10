@@ -1,11 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+	<Import Project="..\..\Debug.Props" />
 
   <PropertyGroup>
     <Description>Exception handling and retry policies with Polly.</Description>
     <AssemblyTitle>RawRabbit.Enrichers.Polly</AssemblyTitle>
     <VersionPrefix>2.0.0</VersionPrefix>
     <Authors>pardahlman</Authors>
-    <TargetFrameworks>netstandard1.5;net451</TargetFrameworks>
+    <TargetFrameworks>netstandard1.5;netstandard2.0;net451</TargetFrameworks>
     <AssemblyName>RawRabbit.Enrichers.Polly</AssemblyName>
     <PackageId>RawRabbit.Enrichers.Polly</PackageId>
     <PackageTags>rabbitmq;rawrabbit;policy;polly</PackageTags>
@@ -16,16 +17,12 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard1.5|AnyCPU'">
-    <DefineConstants>TRACE;DEBUG;NETSTANDARD1_5;LIBLOG_PORTABLE</DefineConstants>
-  </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\RawRabbit\RawRabbit.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Polly" Version="5.3.1" />
+    <PackageReference Include="Polly" Version="5.*" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">

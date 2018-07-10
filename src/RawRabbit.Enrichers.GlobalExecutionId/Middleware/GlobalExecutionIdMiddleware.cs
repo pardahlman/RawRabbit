@@ -23,7 +23,7 @@ namespace RawRabbit.Enrichers.GlobalExecutionId.Middleware
 		protected Func<IPipeContext, string> IdFunc;
 		protected Action<IPipeContext, string> PersistAction;
 
-#if NETSTANDARD1_5
+#if NETSTANDARD1_5 || NETSTANDARD2_0
 		protected static readonly AsyncLocal<string> ExecutionId = new AsyncLocal<string>();
 #elif NET451
 		protected const string GlobalExecutionId = "RawRabbit:GlobalExecutionId";
@@ -67,7 +67,7 @@ namespace RawRabbit.Enrichers.GlobalExecutionId.Middleware
 		protected virtual string GetExecutionIdFromProcess()
 		{
 			string executionId = null;
-#if NETSTANDARD1_5
+#if NETSTANDARD1_5 || NETSTANDARD2_0
 			executionId = ExecutionId?.Value;
 #elif NET451
 			executionId = CallContext.LogicalGetData(GlobalExecutionId) as string;
@@ -87,7 +87,7 @@ namespace RawRabbit.Enrichers.GlobalExecutionId.Middleware
 
 		protected virtual void SaveIdInProcess(string executionId)
 		{
-#if NETSTANDARD1_5
+#if NETSTANDARD1_5 || NETSTANDARD2_0
 			ExecutionId.Value = executionId;
 #elif NET451
 			CallContext.LogicalSetData(GlobalExecutionId, executionId);

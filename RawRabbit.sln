@@ -7,6 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{7FCF8D3B-BA5
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DAAF8928-DAFA-47A7-8E43-FD20590CCF6E}"
 	ProjectSection(SolutionItems) = preProject
+		Debug.Props = Debug.Props
 		NuGet.Config = NuGet.Config
 	EndProjectSection
 EndProject

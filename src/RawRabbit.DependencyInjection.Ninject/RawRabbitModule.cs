@@ -9,7 +9,7 @@ namespace RawRabbit.DependencyInjection.Ninject
 	{
 		public override void Load()
 		{
-#if NETSTANDARD1_5
+#if NETSTANDARD1_5 || NETSTANDARD2_0
 			KernelConfiguration
 				.Bind<IDependencyResolver>()
 				.ToMethod(context => new NinjectAdapter(context));

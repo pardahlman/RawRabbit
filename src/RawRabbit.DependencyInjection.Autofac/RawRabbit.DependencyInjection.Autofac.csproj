@@ -1,11 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+	<Import Project="..\..\Debug.Props" />
 
   <PropertyGroup>
     <Description>Wire up RawRabbit with Autfac!</Description>
     <AssemblyTitle>RawRabbit.DependencyInjection.Autofac</AssemblyTitle>
     <VersionPrefix>2.0.0</VersionPrefix>
     <Authors>par.dahlman</Authors>
-    <TargetFrameworks>netstandard1.5;net451</TargetFrameworks>
+    <TargetFrameworks>netstandard1.5;netstandard2.0;net451</TargetFrameworks>
     <AssemblyName>RawRabbit.DependencyInjection.Autofac</AssemblyName>
     <PackageId>RawRabbit.DependencyInjection.Autofac</PackageId>
     <PackageTags>rabbitmq;rawrabbit;autofac;ioc</PackageTags>
@@ -19,16 +20,12 @@
     <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard1.5|AnyCPU'">
-    <DefineConstants>TRACE;DEBUG;NETSTANDARD1_5;LIBLOG_PORTABLE</DefineConstants>
-  </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\RawRabbit\RawRabbit.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="4.1.0" />
+    <PackageReference Include="Autofac" Version="4.*" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">
