@@ -74,7 +74,7 @@ await client.SubscribeAsync<BasicMessage>(async msg =>
 });
 ```
 
-In addition to the basic acknowledgements, RawRabbit also suppoert delayed retries
+In addition to the basic acknowledgements, RawRabbit also support delayed retries
 
 ```csharp
 var client = RawRabbitFactory.CreateSingleton();
