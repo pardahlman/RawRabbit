@@ -9,21 +9,6 @@ namespace RawRabbit.DependencyInjection.Ninject
 	{
 		public override void Load()
 		{
-#if NETSTANDARD1_5
-			KernelConfiguration
-				.Bind<IDependencyResolver>()
-				.ToMethod(context => new NinjectAdapter(context));
-
-			KernelConfiguration
-				.Bind<IInstanceFactory>()
-				.ToMethod(context => RawRabbitFactory.CreateInstanceFactory(context.Kernel.Get<RawRabbitOptions>()))
-				.InSingletonScope();
-
-			KernelConfiguration
-				.Bind<IBusClient>()
-				.ToMethod(context => context.Kernel.Get<IInstanceFactory>().Create());
-#endif
-#if NET451
 			Kernel
 				.Bind<IDependencyResolver>()
 				.ToMethod(context => new NinjectAdapter(context));
@@ -36,7 +21,6 @@ namespace RawRabbit.DependencyInjection.Ninject
 			Kernel
 				.Bind<IBusClient>()
 				.ToMethod(context => context.Kernel.Get<IInstanceFactory>().Create());
-#endif
 		}
 	}
 }
