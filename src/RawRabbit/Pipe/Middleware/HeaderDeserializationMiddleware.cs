@@ -74,7 +74,7 @@ namespace RawRabbit.Pipe.Middleware
 				_logger.Debug("DeliveryEventArgs not found.");
 				return null;
 			}
-			if (!args.BasicProperties.Headers.ContainsKey(headerKey))
+			if (args.BasicProperties.Headers == null || !args.BasicProperties.Headers.ContainsKey(headerKey))
 			{
 				_logger.Info("BasicProperties Header does not contain {headerKey}", headerKey);
 				return null;
