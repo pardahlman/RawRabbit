@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Runtime.Serialization.Formatters;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using RabbitMQ.Client;
@@ -52,7 +51,7 @@ namespace RawRabbit.DependencyInjection
 					TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
 					Formatting = Formatting.None,
 					CheckAdditionalContent = true,
-					ContractResolver = new CamelCasePropertyNamesContractResolver(),
+					ContractResolver = new DefaultContractResolver { NamingStrategy = new CamelCaseNamingStrategy() },
 					ObjectCreationHandling = ObjectCreationHandling.Auto,
 					DefaultValueHandling = DefaultValueHandling.Ignore,
 					TypeNameHandling = TypeNameHandling.Auto,
