@@ -77,7 +77,7 @@ namespace RawRabbit.Operations.Request.Middleware
 			await Next.InvokeAsync(context, token);
 			token.Register(() => responseTsc.TrySetCanceled());
 			await responseTsc.Task;
-			_logger.Info("Message '{messageId}' for correlatrion '{correlationId}' received.", responseTsc.Task.Result.BasicProperties.MessageId, correlationId);
+			_logger.Info("Message '{messageId}' for correlation id '{correlationId}' received.", responseTsc.Task.Result.BasicProperties.MessageId, correlationId);
 			if (dedicatedConsumer)
 			{
 				_logger.Info("Disposing dedicated consumer on queue {queueName}", respondCfg.Consume.QueueName);

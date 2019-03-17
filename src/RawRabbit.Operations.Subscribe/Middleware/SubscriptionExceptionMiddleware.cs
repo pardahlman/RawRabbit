@@ -98,7 +98,7 @@ namespace RawRabbit.Operations.Subscribe.Middleware
 			var autoAck = context.GetConsumeConfiguration()?.AutoAck;
 			if (!autoAck.HasValue)
 			{
-				_logger.Debug("Unable to ack original message. Can not determen if AutoAck is configured.");
+				_logger.Debug("Unable to ack original message. Can not determine if AutoAck is configured.");
 				return Task.FromResult(0);
 			}
 			if (autoAck.Value)
