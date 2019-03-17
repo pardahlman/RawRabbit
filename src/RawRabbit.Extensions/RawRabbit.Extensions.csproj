@@ -5,7 +5,7 @@
     <AssemblyTitle>RawRabbit.Extensions</AssemblyTitle>
     <VersionPrefix>1.10.4</VersionPrefix>
     <Authors>par.dahlman</Authors>
-    <TargetFrameworks>netstandard1.5;net451</TargetFrameworks>
+    <TargetFrameworks>netstandard1.5;net451;netstandard2.0</TargetFrameworks>
     <AssemblyName>RawRabbit.Extensions</AssemblyName>
     <PackageId>RawRabbit.Extensions</PackageId>
     <PackageTags>rabbitmq;raw;rawrabbit;extensions</PackageTags>
