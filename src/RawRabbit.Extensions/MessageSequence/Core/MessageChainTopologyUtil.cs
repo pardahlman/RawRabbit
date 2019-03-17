@@ -42,33 +42,33 @@ namespace RawRabbit.Extensions.MessageSequence.Core
 			InitializeConsumer();
 		}
 
-		public Task BindToExchange<TMessage>(Guid globalMessaegId)
+		public Task BindToExchange<TMessage>(Guid globalMessageId)
 		{
-			return BindToExchange(typeof(TMessage), globalMessaegId);
+			return BindToExchange(typeof(TMessage), globalMessageId);
 		}
 
-		public Task BindToExchange(Type messageType, Guid globalMessaegId)
+		public Task BindToExchange(Type messageType, Guid globalMessageId)
 		{
 			var chainConfig = _configEvaluator.GetConfiguration(messageType);
 			return _topologyProvider.BindQueueAsync(
 				_queueConfig,
 				chainConfig.Exchange,
-				$"{chainConfig.RoutingKey}.{globalMessaegId}"
+				$"{chainConfig.RoutingKey}.{globalMessageId}"
 			);
 		}
 
-		public Task UnbindFromExchange<TMessage>(Guid globalMessaegId)
+		public Task UnbindFromExchange<TMessage>(Guid globalMessageId)
 		{
-			return UnbindFromExchange(typeof(TMessage), globalMessaegId);
+			return UnbindFromExchange(typeof(TMessage), globalMessageId);
 		}
 
-		public Task UnbindFromExchange(Type messageType, Guid globalMessaegId)
+		public Task UnbindFromExchange(Type messageType, Guid globalMessageId)
 		{
 			var chainConfig = _configEvaluator.GetConfiguration(messageType);
 			return _topologyProvider.UnbindQueueAsync(
 				_queueConfig,
 				chainConfig.Exchange,
-				$"{chainConfig.RoutingKey}.{globalMessaegId}"
+				$"{chainConfig.RoutingKey}.{globalMessageId}"
 			);
 		}
 
