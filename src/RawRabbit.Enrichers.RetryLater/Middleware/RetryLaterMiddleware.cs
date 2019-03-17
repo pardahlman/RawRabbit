@@ -75,12 +75,12 @@ namespace RawRabbit.Middleware
 					{QueueArgument.MessageTtl, Convert.ToInt32(retryAck.Span.TotalMilliseconds)}
 				}
 			});
-			await TopologyProvider.BindQueueAsync(deadLetterQueueName, deadLeterExchangeName, deliveryArgs.RoutingKey);
+			await TopologyProvider.BindQueueAsync(deadLetterQueueName, deadLeterExchangeName, deliveryArgs.RoutingKey, deliveryArgs.BasicProperties.Headers);
 			using (var publishChannel = await ChannelFactory.CreateChannelAsync(token))
 			{
 				publishChannel.BasicPublish(deadLeterExchangeName, deliveryArgs.RoutingKey, false, deliveryArgs.BasicProperties, deliveryArgs.Body);
 			}
-			await TopologyProvider.UnbindQueueAsync(deadLetterQueueName, deadLeterExchangeName, deliveryArgs.RoutingKey);
+			await TopologyProvider.UnbindQueueAsync(deadLetterQueueName, deadLeterExchangeName, deliveryArgs.RoutingKey, deliveryArgs.BasicProperties.Headers);
 
 			context.Properties.AddOrReplace(PipeKey.MessageAcknowledgement, new Ack());
 			await Next.InvokeAsync(context, token);

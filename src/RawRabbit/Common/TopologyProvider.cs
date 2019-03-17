@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
@@ -15,8 +16,8 @@ namespace RawRabbit.Common
 	{
 		Task DeclareExchangeAsync(ExchangeDeclaration exchange);
 		Task DeclareQueueAsync(QueueDeclaration queue);
-		Task BindQueueAsync(string queue, string exchange, string routingKey);
-		Task UnbindQueueAsync(string queue, string exchange, string routingKey);
+		Task BindQueueAsync(string queue, string exchange, string routingKey, IDictionary<string, object> arguments);
+		Task UnbindQueueAsync(string queue, string exchange, string routingKey, IDictionary<string, object> arguments);
 		bool IsDeclared(ExchangeDeclaration exchange);
 		bool IsDeclared(QueueDeclaration exchange);
 	}
@@ -68,7 +69,7 @@ namespace RawRabbit.Common
 			return scheduled.TaskCompletionSource.Task;
 		}
 
-		public Task BindQueueAsync(string queue, string exchange, string routingKey)
+		public Task BindQueueAsync(string queue, string exchange, string routingKey, IDictionary<string,object> arguments)
 		{
 			if (string.Equals(exchange, string.Empty))
 			{
@@ -80,7 +81,7 @@ namespace RawRabbit.Common
 				return _completed;
 			}
 
-			var bindKey = $"{queue}_{exchange}_{routingKey}";
+			var bindKey = CreateBindKey(queue, exchange, routingKey, arguments);
 			if (_queueBinds.Contains(bindKey))
 			{
 				return _completed;
@@ -89,20 +90,22 @@ namespace RawRabbit.Common
 			{
 				Queue = queue,
 				Exchange = exchange,
-				RoutingKey = routingKey
+				RoutingKey = routingKey,
+				Arguments = arguments
 			};
 			_topologyTasks.Enqueue(scheduled);
 			EnsureWorker();
 			return scheduled.TaskCompletionSource.Task;
 		}
 
-		public Task UnbindQueueAsync(string queue, string exchange, string routingKey)
+		public Task UnbindQueueAsync(string queue, string exchange, string routingKey, IDictionary<string, object> arguments)
 		{
 			var scheduled = new ScheduledUnbindQueueTask
 			{
 				Queue = queue,
 				Exchange = exchange,
-				RoutingKey = routingKey
+				RoutingKey = routingKey,
+				Arguments = arguments
 			};
 			_topologyTasks.Enqueue(scheduled);
 			EnsureWorker();
@@ -121,7 +124,7 @@ namespace RawRabbit.Common
 
 		private void BindQueueToExchange(ScheduledBindQueueTask bind)
 		{
-			var bindKey = $"{bind.Queue}_{bind.Exchange}_{bind.RoutingKey}";
+			string bindKey = CreateBindKey(bind);
 			if (_queueBinds.Contains(bindKey))
 			{
 				return;
@@ -133,8 +136,9 @@ namespace RawRabbit.Common
 			channel.QueueBind(
 				queue: bind.Queue,
 				exchange: bind.Exchange,
-				routingKey: bind.RoutingKey
-				);
+				routingKey: bind.RoutingKey,
+				arguments: bind.Arguments
+			);
 			_queueBinds.Add(bindKey);
 		}
 
@@ -147,13 +151,35 @@ namespace RawRabbit.Common
 				queue: bind.Queue,
 				exchange: bind.Exchange,
 				routingKey: bind.RoutingKey,
-				arguments: null
+				arguments: bind.Arguments
 			);
-			var bindKey = $"{bind.Queue}_{bind.Exchange}_{bind.RoutingKey}";
+			var bindKey = CreateBindKey(bind);
 			if (_queueBinds.Contains(bindKey))
 			{
 				_queueBinds.Remove(bindKey);
 			}
+		}
+		
+		private static string CreateBindKey(ScheduledBindQueueTask bind)
+		{
+			return CreateBindKey(bind.Queue, bind.Exchange, bind.RoutingKey, bind.Arguments);
+		}
+
+		private static string CreateBindKey(ScheduledUnbindQueueTask bind)
+		{
+			return CreateBindKey(bind.Queue, bind.Exchange, bind.RoutingKey, bind.Arguments);
+		}
+
+		private static string CreateBindKey(string queue, string exchange, string routingKey, IDictionary<string, object> arguments)
+		{
+			var bindKey = $"{queue}_{exchange}_{routingKey}";
+			if (arguments != null && arguments.Count > 0)
+			{
+				// order the arguments, for the key to be identical no matter the ordering
+				IOrderedEnumerable<KeyValuePair<string, object>> orderedArguments = arguments.OrderBy(pair => pair.Key);
+				bindKey = $"{bindKey}_{string.Join("_", orderedArguments.Select(pair => $"{pair.Key}:{pair.Value}"))}";
+			}
+			return bindKey;
 		}
 
 		private void DeclareQueue(QueueDeclaration queue)
@@ -331,6 +357,7 @@ namespace RawRabbit.Common
 			public string Exchange { get; set; }
 			public string Queue { get; set; }
 			public string RoutingKey { get; set; }
+			public IDictionary<string,object> Arguments { get; set; }
 		}
 
 		private class ScheduledUnbindQueueTask : ScheduledTopologyTask
@@ -338,6 +365,7 @@ namespace RawRabbit.Common
 			public string Exchange { get; set; }
 			public string Queue { get; set; }
 			public string RoutingKey { get; set; }
+			public IDictionary<string, object> Arguments { get; set; }
 		}
 		#endregion
 	}
