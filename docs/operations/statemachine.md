@@ -18,7 +18,7 @@ services.AddRawRabbit(new RawRabbitOptions
 ```
 
 Then you need to define state machine itself and all it's artifacts:
-## State machine state*
+### State machine state*
 
 public enum State
 	{
@@ -53,7 +53,7 @@ public enum Trigger
 }
 * Note: using enum for States and Triggers is not mandatory. It can be a custom implementation of enumeration if needed. E.g. https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/microservice-ddd-cqrs-patterns/enumeration-classes-over-enum-types
 
-## State machine definition
+### State machine definition
 
 Inherit StateMachineBase<TState, TTrigger, TStateModel>
 
@@ -81,7 +81,7 @@ protected override void ConfigureState(StateMachine<State, Trigger> process)
 		....
 }
 ```
-## Trigger configuration
+### Trigger configuration
 To bind your state machine to the message source you can define a trigger configuration
 ```csharp
 public class ProcessTriggers : TriggerConfigurationCollection
