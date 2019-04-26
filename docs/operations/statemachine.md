@@ -19,16 +19,16 @@ services.AddRawRabbit(new RawRabbitOptions
 
 Then you need to define state machine itself and all it's artifacts:
 ### State machine state*
-
+```csharp
 public enum State
-	{
-		Created,
-		InProgress,
-		Paused,
-		Completed,
-		Aborted
-	}
-
+{
+	Created,
+	InProgress,
+	Paused,
+	Completed,
+	Aborted
+}
+```
 ### State machine state model
 
 Defines state machine instance
