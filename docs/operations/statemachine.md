@@ -43,6 +43,7 @@ public class GenericProcessModel : Model<State>
 ```
 
 ### State machine triggers*
+```csharp
 public enum Trigger
 {
 	Start,
@@ -51,6 +52,7 @@ public enum Trigger
 	Pausing,
 	Resuming
 }
+```
 * Note: using enum for States and Triggers is not mandatory. It can be a custom implementation of enumeration if needed. E.g. https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/microservice-ddd-cqrs-patterns/enumeration-classes-over-enum-types
 
 ### State machine definition
