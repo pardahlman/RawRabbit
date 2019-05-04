@@ -97,7 +97,7 @@ namespace RawRabbit.ErrorHandling
 
 		public virtual Task OnResponseRecievedException(IRawConsumer rawConsumer, IConsumerConfiguration cfg, BasicDeliverEventArgs args, TaskCompletionSource<object> responseTcs, Exception exception)
 		{
-			_logger.LogError($"An exception was thrown when recieving response to messaeg '{args.BasicProperties.MessageId}' with CorrelationId '{args.BasicProperties.CorrelationId}'.", exception);
+			_logger.LogError($"An exception was thrown when recieving response to message '{args.BasicProperties.MessageId}' with CorrelationId '{args.BasicProperties.CorrelationId}'.", exception);
 			responseTcs.TrySetException(exception);
 			return Task.FromResult(true);
 		}

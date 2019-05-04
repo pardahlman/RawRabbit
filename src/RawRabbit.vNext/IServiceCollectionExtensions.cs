@@ -44,6 +44,7 @@ namespace RawRabbit.vNext
 				var builder = new ConfigurationBuilder();
 				config?.Invoke(builder);
 				var mainCfg = RawRabbitConfiguration.Local;
+				mainCfg.Hostnames.Clear();
 				builder.Build().Bind(mainCfg);
 				mainCfg.Hostnames = mainCfg.Hostnames.Distinct(StringComparer.CurrentCultureIgnoreCase).ToList();
 
@@ -55,7 +56,7 @@ namespace RawRabbit.vNext
 			}
 
 			collection
-				.AddSingleton< IConnectionFactory, ConnectionFactory>(provider =>
+				.AddSingleton<IConnectionFactory, ConnectionFactory>(provider =>
 				{
 					var cfg = provider.GetService<RawRabbitConfiguration>();
 					return new ConnectionFactory

@@ -14,6 +14,8 @@ using RawRabbit.Logging;
 
 namespace RawRabbit.Extensions.Client
 {
+	using System.Collections.Generic;
+
 	public static class IServiceCollectionExtension
 	{
 		public static IServiceCollection AddRawRabbitExtensions<TMessageContext>(this IServiceCollection collection) where  TMessageContext : IMessageContext
@@ -66,6 +68,7 @@ namespace RawRabbit.Extensions.Client
 			custom += ioc => ioc.AddSingleton(c =>
 			{
 				var mainCfg = RawRabbitConfiguration.Local;
+				mainCfg.Hostnames.Clear();
 				section.Bind(mainCfg);
 				mainCfg.Hostnames = mainCfg.Hostnames.Distinct(StringComparer.CurrentCultureIgnoreCase).ToList();
 				return mainCfg;
