@@ -10,6 +10,7 @@
 		public static readonly string Context = "message_context";
 		public static readonly string ExceptionHeader = "exception";
 		public static readonly string ExceptionType = "exception_type";
+		public static readonly string ExceptionMessage = "exception_message";
 		public static readonly string ExceptionStackTrace = "exception_stacktrace";
 	}
 }
