@@ -89,6 +89,7 @@ namespace RawRabbit.Operations.Subscribe.Middleware
 			args.BasicProperties.Headers?.TryAdd(PropertyHeaders.Host, Environment.MachineName);
 			args.BasicProperties.Headers?.TryAdd(PropertyHeaders.ExceptionType, exception.GetType().Name);
 			args.BasicProperties.Headers?.TryAdd(PropertyHeaders.ExceptionStackTrace, exception.StackTrace);
+			args.BasicProperties.UserId = context.GetClientConfiguration().Username;
 			channel.BasicPublish(exchange.Name, args.RoutingKey, false, args.BasicProperties, args.Body);
 			return Task.FromResult(0);
 		}

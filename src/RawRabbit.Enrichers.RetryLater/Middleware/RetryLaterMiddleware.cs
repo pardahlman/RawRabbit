@@ -78,6 +78,7 @@ namespace RawRabbit.Middleware
 			await TopologyProvider.BindQueueAsync(deadLetterQueueName, deadLeterExchangeName, deliveryArgs.RoutingKey, deliveryArgs.BasicProperties.Headers);
 			using (var publishChannel = await ChannelFactory.CreateChannelAsync(token))
 			{
+				deliveryArgs.BasicProperties.UserId = context.GetClientConfiguration().Username;
 				publishChannel.BasicPublish(deadLeterExchangeName, deliveryArgs.RoutingKey, false, deliveryArgs.BasicProperties, deliveryArgs.Body);
 			}
 			await TopologyProvider.UnbindQueueAsync(deadLetterQueueName, deadLeterExchangeName, deliveryArgs.RoutingKey, deliveryArgs.BasicProperties.Headers);
