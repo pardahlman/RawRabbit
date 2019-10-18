@@ -36,7 +36,7 @@ await busClient.PublishAsync(message, ctx => ctx
     .UsePublishConfiguration(cfg => cfg
         .OnDeclaredExchange(e => e
             .WithName("my_topic")
-            .WithType(ExchangeType.Topic)
-            .WithRoutingKey("my_key"))
+            .WithType(ExchangeType.Topic))
+        .WithRoutingKey("my_key")
 ));
 ```
