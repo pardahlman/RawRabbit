@@ -1,22 +1,18 @@
-_Looking for documentation of 1.x? [Click here](https://github.com/pardahlman/RawRabbit/tree/stable)_
-# RawRabbit
-
-[![Build Status](https://img.shields.io/appveyor/ci/pardahlman/rawrabbit.svg?style=flat-square)](https://ci.appveyor.com/project/pardahlman/rawrabbit) [![Documentation Status](https://readthedocs.org/projects/rawrabbit/badge/?version=latest&style=flat-square)](http://rawrabbit.readthedocs.org/) [![NuGet](https://img.shields.io/nuget/v/RawRabbit.svg?style=flat-square)](https://www.nuget.org/packages/RawRabbit) [![GitHub release](https://img.shields.io/github/release/pardahlman/rawrabbit.svg?style=flat-square)](https://github.com/pardahlman/rawrabbit/releases/latest)
-[![Slack Status](https://rawrabbit.herokuapp.com/badge.svg)](https://rawrabbit.herokuapp.com)
+# ZyRabbit
 
 ## Quick introduction
-`RawRabbit` is a modern .NET framework for communication over [RabbitMQ](http://rabbitmq.com/). The modular design and middleware oriented architecture makes the client highly customizable while providing sensible default for topology, routing and more. Documentation for version 2.x of the is currently found under [`/docs`](https://github.com/pardahlman/RawRabbit/tree/2.0/docs).
+`ZyRabbit` is a modern .NET framework for communication over [RabbitMQ](http://rabbitmq.com/). The modular design and middleware oriented architecture makes the client highly customizable while providing sensible default for topology, routing and more. Documentation for version 2.x of the is currently found under [`/docs`](https://github.com/zylab-official/ZyRabbit/tree/2.0/docs).
 
 ### Configure, enrich and extend
 
-`RawRabbit` is configured with `RawRabbitOptions`, an options object that makes it possible to register client configuration, plugins as well as override internal services
+`ZyRabbit` is configured with `ZyRabbitOptions`, an options object that makes it possible to register client configuration, plugins as well as override internal services
 
 ```csharp
-var client = RawRabbitFactory.CreateSingleton(new RawRabbitOptions
+var client = ZyRabbitFactory.CreateSingleton(new ZyRabbitOptions
 {
   ClientConfiguration = new ConfigurationBuilder()
     .SetBasePath(Directory.GetCurrentDirectory())
-    .AddJsonFile("rawrabbit.json")
+    .AddJsonFile("zyRabbit.json")
     .Build()
     .Get<RawRabbitConfiguration>(),
   Plugins = p => p
@@ -35,7 +31,7 @@ var client = RawRabbitFactory.CreateSingleton(new RawRabbitOptions
 Set up strongly typed publish/subscribe in just a few lines of code.
 
 ```csharp
-var client = RawRabbitFactory.CreateSingleton();
+var client = ZyRabbitFactory.CreateSingleton();
 await client.SubscribeAsync<BasicMessage>(async msg =>
 {
   Console.WriteLine($"Received: {msg.Prop}.");
@@ -45,10 +41,10 @@ await client.PublishAsync(new BasicMessage { Prop = "Hello, world!"});
 ```
 
 ### Request/Response
-`RawRabbits` request/response (`RPC`) implementation uses the [direct reply-to feature](https://www.rabbitmq.com/direct-reply-to.html) for better performance and lower resource allocation.
+`ZyRabbits` request/response (`RPC`) implementation uses the [direct reply-to feature](https://www.rabbitmq.com/direct-reply-to.html) for better performance and lower resource allocation.
 
 ```csharp
-var client = RawRabbitFactory.CreateSingleton();
+var client = ZyRabbitFactory.CreateSingleton();
 client.RespondAsync<BasicRequest, BasicResponse>(async request =>
 {
   return new BasicResponse();
@@ -62,7 +58,7 @@ var response = await client.RequestAsync<BasicRequest, BasicResponse>();
 Unlike many other clients, `basic.ack`, `basic.nack` and `basic.reject` are first class citizen in the message handler
 
 ```csharp
-var client = RawRabbitFactory.CreateSingleton();
+var client = ZyRabbitFactory.CreateSingleton();
 await client.SubscribeAsync<BasicMessage>(async msg =>
 {
   if(UnableToProcessMessage(msg))
@@ -74,10 +70,10 @@ await client.SubscribeAsync<BasicMessage>(async msg =>
 });
 ```
 
-In addition to the basic acknowledgements, RawRabbit also support delayed retries
+In addition to the basic acknowledgements, ZyRabbit also support delayed retries
 
 ```csharp
-var client = RawRabbitFactory.CreateSingleton();
+var client = ZyRabbitFactory.CreateSingleton();
 await client.SubscribeAsync<BasicMessage>(async msg =>
 {
   try
@@ -94,7 +90,7 @@ await client.SubscribeAsync<BasicMessage>(async msg =>
 
 ### Granular control for each call
 
-Add or change properties in the `IPipeContext` to tailor calls for specific type of messages. This makes it possible to modifly the topology features for calls, publish confirm timeout, consumer concurrency and much more
+Add or change properties in the `IPipeContext` to tailor calls for specific type of messages. This makes it possible to modify the topology features for calls, publish confirm timeout, consumer concurrency and much more
 
 ```csharp
 await subscriber.SubscribeAsync<BasicMessage>(received =>
