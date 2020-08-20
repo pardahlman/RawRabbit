@@ -11,7 +11,7 @@ namespace RawRabbit.Enrichers.Attributes
 
 		public string Name { get; set; }
 		public ExchangeType Type { get; set; }
-		public bool Durable { set { NullableDurability = value; } }
-		public bool AutoDelete { set { NullableAutoDelete = value; } }
+		public bool Durable { get { return NullableDurability.GetValueOrDefault(); } set { NullableDurability = value; } }
+		public bool AutoDelete { get { return NullableAutoDelete.GetValueOrDefault(); } set { NullableAutoDelete = value; } }
 	}
 }
